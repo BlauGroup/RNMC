@@ -81,7 +81,6 @@ TreeSolver::TreeSolver(unsigned long int seed, std::vector<double> initial_prope
             if (tree[i] > 0.0) number_of_active_indices++;
         }
 
-        propensity_sum = 0.0;
 
         int child1, child2;
         for (int parent = propensity_offset - 1; parent >= 0; parent--) {
@@ -90,7 +89,23 @@ TreeSolver::TreeSolver(unsigned long int seed, std::vector<double> initial_prope
             tree[parent] = tree[child1] + tree[child2];
         };
 
-        propensity_sum = tree[0];
 
 };
 
+void TreeSolver::update(Update update) {
+    if (tree[propensity_offset + update.index] > 0.0) number_of_active_indices--;
+    if (update.propensity > 0.0) number_of_active_indices++;
+    tree[propensity_offset + update.index] = update.propensity;
+
+    int parent, sibling;
+    int i = propensity_offset + update.index;
+
+  while (i > 0) {
+    if (i % 2) sibling = i + 1;
+    else sibling = i - 1;
+    parent = (i - 1) / 2;
+    tree[parent] = tree[i] + tree[sibling];
+    i = parent;
+  }
+
+}

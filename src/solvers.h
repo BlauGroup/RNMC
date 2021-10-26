@@ -44,7 +44,6 @@ private:
     int number_of_indices; // for this solver, different to length of tree
     int number_of_active_indices; // an index is active if its propensity is non zero
     int propensity_offset; // index where propensities start as leaves of tree
-    double propensity_sum;
 
 public:
     TreeSolver(unsigned long int seed, std::vector<double> initial_propensities);
