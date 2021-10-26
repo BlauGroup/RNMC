@@ -116,7 +116,6 @@ void TreeSolver::update(Update update) {
         tree[parent] = tree[i] + tree[sibling];
         i = parent;
     }
-
 }
 
 void TreeSolver::update(std::vector<Update> updates) {

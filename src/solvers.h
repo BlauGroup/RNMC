@@ -2,6 +2,17 @@
 #include "sampler.h"
 #include <vector>
 
+/***************************************************************************/
+/* generic solver                                                          */
+/* the solver is the algorithmic backbone of a monte carlo simulation      */
+/* it decides what will occour next.                                       */
+/*                                                                         */
+/* for now, we have the linear solver and a tree solver ported from        */
+/* spparks: https://spparks.sandia.gov/                                    */
+/***************************************************************************/
+
+
+
 struct Update {
     int index;
     double propensity;

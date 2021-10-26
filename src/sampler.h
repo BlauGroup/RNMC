@@ -2,6 +2,11 @@
 #include <gsl/gsl_rng.h>
 #include <utility>
 
+// we are using GSL random number generation because i don't trust
+// random number generation to be consistent across various C++ stdlib
+// implementations, and for the kind of MC simulator we are writing here,
+// we want to be able to run it deterministically for testing purposes.
+
 class Sampler {
 private:
     gsl_rng *internal_rng_state;
