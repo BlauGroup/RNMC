@@ -1,3 +1,4 @@
+#pragma once
 #include <gsl/gsl_rng.h>
 #include <utility>
 
