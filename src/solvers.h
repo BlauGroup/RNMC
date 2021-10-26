@@ -12,6 +12,7 @@ struct Event {
     double dt;
 };
 
+
 class Solver {
 public:
     virtual void update(Update update) = 0;
@@ -20,6 +21,7 @@ public:
     virtual double get_propensity(int index) = 0;
     virtual double get_propensity_sum() = 0;
 };
+
 
 class LinearSolver : Solver {
 private:
@@ -36,6 +38,7 @@ public:
     double get_propensity(int index);
     double get_propensity_sum();
 };
+
 
 class TreeSolver : Solver {
 private:
