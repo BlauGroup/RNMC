@@ -1,6 +1,5 @@
 #include <gsl/gsl_rng.h>
 #include <utility>
-#include <iostream>
 
 class Sampler {
 private:
@@ -25,6 +24,7 @@ public:
     // copy constructor
     Sampler(Sampler &other) = delete;
 
+    // move constructor
     Sampler(Sampler &&other) :
         seed{other.seed},
         internal_rng_state{std::exchange(other.internal_rng_state, nullptr)} {};
@@ -33,18 +33,14 @@ public:
     // copy assignment operator
     Sampler &operator=(Sampler &other) = delete;
 
+    // move assignment operator
     Sampler &operator=(Sampler &&other) {
         seed = other.seed;
+
+        // we move the existing internal_rng_state into other so
+        // it gets freed when other is dropped.
         std::swap(internal_rng_state, other.internal_rng_state);
         return *this;
     };
 
 };
-
-
-int main() {
-
-    Sampler sampler(42);
-
-    std::cout << sampler.generate() << sampler.generate();
-}
