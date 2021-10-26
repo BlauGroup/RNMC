@@ -13,11 +13,12 @@ struct Event {
 };
 
 class Solver {
-    virtual void update(Update update);
-    virtual void update(std::vector<Update> updates);
-    virtual Event event();
-    virtual double get_propensity(int index);
-    virtual double get_propensity_sum();
+public:
+    virtual void update(Update update) = 0;
+    virtual void update(std::vector<Update> updates) = 0;
+    virtual Event event() = 0;
+    virtual double get_propensity(int index) = 0;
+    virtual double get_propensity_sum() = 0;
 };
 
 class LinearSolver : Solver {
@@ -34,7 +35,6 @@ public:
     Event event();
     double get_propensity(int index);
     double get_propensity_sum();
-
 };
 
 class TreeSolver : Solver {
@@ -45,6 +45,10 @@ private:
     int number_of_active_indices; // an index is active if its propensity is non zero
     int propensity_offset; // index where propensities start as leaves of tree
 
+    // walk tree from root to appropriate leaf
+    // value is modified when right branch of tree is traversed
+    int find_solve_tree(double value);
+
 public:
     TreeSolver(unsigned long int seed, std::vector<double> initial_propensities);
     void update(Update update);
@@ -52,5 +56,4 @@ public:
     Event event();
     double get_propensity(int index);
     double get_propensity_sum();
-
 };
