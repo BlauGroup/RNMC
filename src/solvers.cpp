@@ -4,7 +4,9 @@
 
 // LinearSolver implementation
 // LinearSolver can opperate directly on the passed propensities using a move
-LinearSolver::LinearSolver(unsigned long int seed, std::vector<double> initial_propensities) :
+LinearSolver::LinearSolver(
+    unsigned long int seed,
+    std::vector<double> initial_propensities) :
     sampler{Sampler(seed)},
     propensities{initial_propensities} {
         int i;
