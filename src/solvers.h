@@ -28,17 +28,7 @@ private:
     double propensity_sum;
 
 public:
-    LinearSolver(unsigned long int seed, std::vector<double> initial_propensities) :
-        sampler{Sampler(seed)},
-        propensities{initial_propensities} {
-            int i;
-            for (i = 0; i < initial_propensities.size(); i++) {
-                propensity_sum += initial_propensities[i];
-                if (initial_propensities[i] > 0)
-                    number_of_active_indices += 1;
-            }
-        };
-
+    LinearSolver(unsigned long int seed, std::vector<double> initial_propensities);
     void update(Update update);
     void update(std::vector<Update> updates);
     Event event();
@@ -47,12 +37,21 @@ public:
 
 };
 
-/* class TreeSolver : Solver { */
-/* private: */
-/*     Sampler sampler; */
-/*     std::vector<double> tree; // we store the propensities in a binary heap */
-/*     int number_of_indices; // for this solver, different to length of tree */
-/*     int number_of_active_indices; // an index is active if its propensity is non zero */
-/*     int propensity_offset; // index where propensities start as leaves of tree */
-/*     double propensity_sum; */
-/* }; */
+class TreeSolver : Solver {
+private:
+    Sampler sampler;
+    std::vector<double> tree; // we store the propensities in a binary heap
+    int number_of_indices; // for this solver, different to length of tree
+    int number_of_active_indices; // an index is active if its propensity is non zero
+    int propensity_offset; // index where propensities start as leaves of tree
+    double propensity_sum;
+
+public:
+    TreeSolver(unsigned long int seed, std::vector<double> initial_propensities);
+    void update(Update update);
+    void update(std::vector<Update> updates);
+    Event event();
+    double get_propensity(int index);
+    double get_propensity_sum();
+
+};
