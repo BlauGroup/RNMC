@@ -38,6 +38,13 @@ public:
                     number_of_active_indices += 1;
             }
         };
+
+    void update(Update update);
+    void update(std::vector<Update> updates);
+    Event event();
+    double get_propensity(int index);
+    double get_propensity_sum();
+
 };
 
 /* class TreeSolver : Solver { */
