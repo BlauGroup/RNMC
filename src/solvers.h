@@ -21,6 +21,7 @@ struct Update {
 struct Event {
     int index;
     double dt;
+    bool event_occoured;
 };
 
 
