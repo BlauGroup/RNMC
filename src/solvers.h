@@ -3,7 +3,6 @@
 #include <vector>
 
 /***************************************************************************/
-/* generic solver                                                          */
 /* the solver is the algorithmic backbone of a monte carlo simulation      */
 /* it decides what will occour next.                                       */
 /*                                                                         */
