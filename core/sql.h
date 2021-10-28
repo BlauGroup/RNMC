@@ -99,6 +99,9 @@ public:
         };
     };
 
+    // TODO: write a reset method so we can reloop without needing to create
+    // a new object.
+
     SqlReader(SqlConnection &sql_connection_ref) :
 
         sql_connection_ref{sql_connection_ref},
