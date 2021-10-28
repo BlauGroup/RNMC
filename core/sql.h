@@ -152,6 +152,11 @@ public:
     };
 };
 
+template<typename T>
+// T needs sql_statement and setters attributes.
+class SqlWriter {
+};
+
 struct TrajectoriesRow {
     int seed;
     int step;
