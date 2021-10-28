@@ -13,10 +13,10 @@ public:
 
     // method for executing standalone sql statements.
     // for reading and writing data, use SqlReader or SqlWriter classes.
-    void exec(std::string statement) {
+    void exec(std::string sql_statement) {
         sqlite3_exec(
             connection,
-            statement.c_str(),
+            sql_statement.c_str(),
             nullptr,
             nullptr,
             nullptr);
@@ -52,10 +52,11 @@ public:
     };
 };
 
-// Row structs correspond to rows in our sqlite databases.
+// Row structs correspond to rows in a sqlite database.
 // The setters attribute is a static vector of functions which
 // we can call to set the corresponding attributes in the Row struct
-// according to the column numbers (which are used by the sqlite API)
+// according to the column numbers from the sql statement.
+
 struct ReactionRow {
     int reaction_id;
     int number_of_reactants;
@@ -66,6 +67,7 @@ struct ReactionRow {
     int product_2;
     double rate;
 
+    static std::string sql_statement;
 
     static std::vector<
         std::function<
@@ -76,12 +78,15 @@ struct ReactionRow {
                 )>> setters;
 };
 
+std::string sql_statement =
+    "SELECT reaction_id, number_of_reactants, number_of_products, "
+    "reactant_1, reactant_2, product_1, product_2, rate FROM reactions;";
+
 std::vector<std::function<
                 void(
                     ReactionRow&,
                     sqlite3_stmt*,
-                    int)>>
-ReactionRow::setters = {
+                    int)>> ReactionRow::setters = {
 
     [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
         r.reaction_id = sqlite3_column_int(stmt, i);
