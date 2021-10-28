@@ -152,10 +152,56 @@ public:
     };
 };
 
+struct TrajectoriesRow {
+    int seed;
+    int step;
+    int reaction_id;
+    double time;
+
+    static std::string sql_statement;
+
+    static std::vector<
+        std::function<
+            int(
+                TrajectoriesRow&,
+                sqlite3_stmt*,
+                int)>> setters;
+};
+
+std::string TrajectoriesRow::sql_statement = "INSERT INTO trajectories VALUES (?1, ?2, ?3, ?4);";
+
+// recall, in SQL, ?n variables are 1 indexed, which is why all these
+// lambdas have n + 1 in them.
+std::vector<
+    std::function<
+        int(
+            TrajectoriesRow&,
+            sqlite3_stmt*,
+            int)>> TrajectoriesRow::setters = {
+
+    [](TrajectoriesRow& t, sqlite3_stmt* stmt, int n) {
+        return sqlite3_bind_int(stmt, n + 1, t.seed);
+    },
+
+    [](TrajectoriesRow& t, sqlite3_stmt* stmt, int n) {
+        return sqlite3_bind_int(stmt, n + 1, t.step);
+    },
+
+    [](TrajectoriesRow& t, sqlite3_stmt* stmt, int n) {
+        return sqlite3_bind_int(stmt, n + 1, t.reaction_id);
+    },
+
+    [](TrajectoriesRow& t, sqlite3_stmt* stmt, int n) {
+        return sqlite3_bind_double(stmt, n + 1, t.time);
+    }
+};
+
 // Row structs correspond to rows in a sqlite database.
 // The getters attribute is a static vector of functions which
-// we can call to set the corresponding attributes in the Row struct
+// we can call to get the corresponding attributes in the Row struct
 // according to the column numbers from the sql statement.
+
+
 
 struct ReactionRow {
     int reaction_id;
@@ -221,3 +267,4 @@ std::vector<std::function<
         r.rate = sqlite3_column_double(stmt, i);
     }
 };
+
