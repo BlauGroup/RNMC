@@ -66,7 +66,7 @@ public:
 };
 
 template<typename T>
-// T needs sql_statement and setters attributes.
+// T needs sql_statement and getters attributes.
 class SqlReader {
 private:
     sqlite3_stmt *stmt;
@@ -91,8 +91,8 @@ public:
 
             T result;
 
-            for (int i = 0; i < T::setters.size(); i++) {
-                T::setters[i](std::ref(result), stmt, i);
+            for (int i = 0; i < T::getters.size(); i++) {
+                T::getters[i](std::ref(result), stmt, i);
             }
 
             return std::optional<T> (result);
@@ -150,7 +150,7 @@ public:
 };
 
 // Row structs correspond to rows in a sqlite database.
-// The setters attribute is a static vector of functions which
+// The getters attribute is a static vector of functions which
 // we can call to set the corresponding attributes in the Row struct
 // according to the column numbers from the sql statement.
 
@@ -172,7 +172,7 @@ struct ReactionRow {
                 ReactionRow&,
                 sqlite3_stmt*,
                 int
-                )>> setters;
+                )>> getters;
 
 };
 
@@ -184,7 +184,7 @@ std::vector<std::function<
                 void(
                     ReactionRow&,
                     sqlite3_stmt*,
-                    int)>> ReactionRow::setters = {
+                    int)>> ReactionRow::getters = {
 
     [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
         r.reaction_id = sqlite3_column_int(stmt, i);
