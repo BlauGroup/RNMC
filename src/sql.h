@@ -1,6 +1,8 @@
 #include <sqlite3.h>
 #include <string>
 #include <utility>
+#include <vector>
+#include <functional>
 
 
 class SqlConnection {
@@ -50,20 +52,66 @@ public:
     };
 };
 
-// sqlite3_column template. generic case is not defined.
-// Fallback definitions follow for specific types.
-
-template<typename T>
-T sqlite3_column(sqlite3_stmt *stmt, int col);
-
-template<>
-int sqlite3_column<int>(sqlite3_stmt *stmt, int col) {
-    return sqlite3_column_int(stmt, col);
-}
-
-template<>
-double sqlite3_column<double>(sqlite3_stmt *stmt, int col) {
-    return sqlite3_column_double(stmt, col);
-}
+// Row structs correspond to rows in our sqlite databases.
+// The setters attribute is a static vector of functions which
+// we can call to set the corresponding attributes in the Row struct
+// according to the column numbers (which are used by the sqlite API)
+struct ReactionRow {
+    int reaction_id;
+    int number_of_reactants;
+    int number_of_products;
+    int reactant_1;
+    int reactant_2;
+    int product_1;
+    int product_2;
+    double rate;
 
 
+    static std::vector<
+        std::function<
+            void(
+                ReactionRow&,
+                sqlite3_stmt*,
+                int
+                )>> setters;
+};
+
+std::vector<std::function<
+                void(
+                    ReactionRow&,
+                    sqlite3_stmt*,
+                    int)>>
+ReactionRow::setters = {
+
+    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
+        r.reaction_id = sqlite3_column_int(stmt, i);
+    },
+
+    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
+        r.number_of_reactants = sqlite3_column_int(stmt, i);
+    },
+
+    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
+        r.number_of_products = sqlite3_column_int(stmt, i);
+    },
+
+    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
+        r.reactant_1 = sqlite3_column_int(stmt, i);
+    },
+
+    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
+        r.reactant_2 = sqlite3_column_int(stmt, i);
+    },
+
+    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
+        r.product_1 = sqlite3_column_int(stmt, i);
+    },
+
+    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
+        r.product_2 = sqlite3_column_int(stmt, i);
+    },
+
+    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
+        r.rate = sqlite3_column_double(stmt, i);
+    }
+};
