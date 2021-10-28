@@ -3,6 +3,7 @@
 #include <utility>
 #include <vector>
 #include <functional>
+#include <optional>
 
 
 class SqlConnection {
@@ -52,32 +53,37 @@ public:
 };
 
 template<typename T>
-// T needs sql_statement, setters, nothing and empty attributes.
+// T needs sql_statement and setters attributes.
 class SqlReader {
 private:
     sqlite3_stmt *stmt;
     SqlConnection &sql_connection_ref;
+    bool done;
 public:
     // important that readers and writers have a reference to
     // the database connection. This is because it is an error
     // to close a connection before all statements have been
     // finalized.
 
-    T next() {
-        int rc = sqlite3_step(stmt);
+    std::optional<T> next() {
+        if (done) return std::optional<T> ();
+        else {
 
-        if (rc != SQLITE_OK) {
-            return T::empty;
-        }
+            int rc = sqlite3_step(stmt);
 
-        T result;
-        result.nothing = false;
+            if (rc == SQLITE_DONE) {
+                done = true;
+                return std::optional<T> ();
+            }
 
-        for (int i = 0; i < T::setters.size(); i++) {
-            T::setters[i](*result, sql_connection_ref.connection, i);
-        }
+            T result;
 
-        return result;
+            for (int i = 0; i < T::setters.size(); i++) {
+                T::setters[i](std::ref(result), stmt, i);
+            }
+
+            return std::optional<T> (result);
+        };
     };
 
     SqlReader(SqlConnection &sql_connection_ref) :
@@ -85,7 +91,9 @@ public:
         // TODO: deal with error handling
         // not a huge issue as every sql statement is hard coded
         // into a Row type.
-        sql_connection_ref{sql_connection_ref} {
+        sql_connection_ref{sql_connection_ref},
+        done{false}
+        {
             int rc = sqlite3_prepare_v2(
                 sql_connection_ref.connection,
                 T::sql_statement.c_str(),
@@ -127,7 +135,6 @@ public:
 // according to the column numbers from the sql statement.
 
 struct ReactionRow {
-    bool nothing;
     int reaction_id;
     int number_of_reactants;
     int number_of_products;
@@ -147,21 +154,9 @@ struct ReactionRow {
                 int
                 )>> setters;
 
-    static ReactionRow empty;
 };
 
-ReactionRow empty = ReactionRow {
-    .nothing = true,
-    .reaction_id = -1,
-    .number_of_reactants = -1,
-    .number_of_products = -1,
-    .reactant_1 = -1,
-    .reactant_2 = -1,
-    .product_1 = -1,
-    .product_2 = -1,
-    .rate = -1.0};
-
-std::string sql_statement =
+std::string ReactionRow::sql_statement =
     "SELECT reaction_id, number_of_reactants, number_of_products, "
     "reactant_1, reactant_2, product_1, product_2, rate FROM reactions;";
 

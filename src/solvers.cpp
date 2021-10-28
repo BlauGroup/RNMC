@@ -34,10 +34,10 @@ void LinearSolver::update(std::vector<Update> updates) {
     }
 };
 
-Event LinearSolver::event() {
+std::optional<Event> LinearSolver::event() {
     if (number_of_active_indices == 0) {
         propensity_sum = 0.0;
-        return Event {.index = -1, .dt = 0, .event_occoured = false};
+        return std::optional<Event>();
     }
 
     double r1 = sampler.generate();
@@ -54,9 +54,9 @@ Event LinearSolver::event() {
 
     double dt = - std::log(r2) / propensity_sum;
     if (m < propensities.size())
-        return Event {.index = m, .dt = dt, .event_occoured = true};
+        return std::optional<Event> (Event {.index = m, .dt = dt});
     else
-        return Event {.index = m - 1, .dt = dt, .event_occoured = true};
+        return std::optional<Event> (Event {.index = m - 1, .dt = dt});
 }
 
 double LinearSolver::get_propensity(int index) {
@@ -142,13 +142,13 @@ int TreeSolver::find_solve_tree(double value) {
     return i - propensity_offset;
 }
 
-Event TreeSolver::event() {
+std::optional<Event> TreeSolver::event() {
     int m;
     double r1,r2, dt;
 
 
     if (number_of_active_indices == 0) {
-        return Event {.index = -1, .dt = 0.0, .event_occoured = false};
+        return std::optional<Event>();
     }
 
 
@@ -160,7 +160,7 @@ Event TreeSolver::event() {
     m = find_solve_tree(value);
     dt = - log(r2) / tree[0];
 
-    return Event {.index = m, .dt = dt, .event_occoured = true};
+    return std::optional<Event>(Event {.index = m, .dt = dt});
 
 }
 

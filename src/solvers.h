@@ -1,6 +1,7 @@
 #pragma once
 #include "sampler.h"
 #include <vector>
+#include <optional>
 
 /***************************************************************************/
 /* the solver is the algorithmic backbone of a monte carlo simulation      */
@@ -20,7 +21,6 @@ struct Update {
 struct Event {
     int index;
     double dt;
-    bool event_occoured;
 };
 
 
@@ -28,7 +28,7 @@ class Solver {
 public:
     virtual void update(Update update) = 0;
     virtual void update(std::vector<Update> updates) = 0;
-    virtual Event event() = 0;
+    virtual std::optional<Event> event() = 0;
     virtual double get_propensity(int index) = 0;
     virtual double get_propensity_sum() = 0;
 };
@@ -45,7 +45,7 @@ public:
     LinearSolver(unsigned long int seed, std::vector<double> initial_propensities);
     void update(Update update);
     void update(std::vector<Update> updates);
-    Event event();
+    std::optional<Event> event();
     double get_propensity(int index);
     double get_propensity_sum();
 };
@@ -67,7 +67,7 @@ public:
     TreeSolver(unsigned long int seed, std::vector<double> initial_propensities);
     void update(Update update);
     void update(std::vector<Update> updates);
-    Event event();
+    std::optional<Event> event();
     double get_propensity(int index);
     double get_propensity_sum();
 };
