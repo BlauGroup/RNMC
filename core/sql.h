@@ -101,9 +101,6 @@ public:
 
     SqlReader(SqlConnection &sql_connection_ref) :
 
-        // TODO: deal with error handling
-        // not a huge issue as every sql statement is hard coded
-        // into a Row type.
         sql_connection_ref{sql_connection_ref},
         done{false}
         {
