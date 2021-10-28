@@ -4,6 +4,7 @@
 #include <vector>
 #include <functional>
 #include <optional>
+#include <iostream>
 
 
 class SqlConnection {
@@ -24,7 +25,19 @@ public:
 
     SqlConnection(std::string database_file_path) :
         database_file_path{database_file_path} {
-            sqlite3_open(database_file_path.c_str(), &connection);
+            int rc = sqlite3_open_v2(
+                database_file_path.c_str(),
+                &connection,
+                SQLITE_OPEN_READWRITE,
+                nullptr
+                );
+
+            if (rc != SQLITE_OK) {
+                std::cerr << "sqlite: "
+                          << sqlite3_errmsg(connection)
+                          << '\n';
+                std::abort();
+            }
     };
 
     ~SqlConnection() {
@@ -101,6 +114,16 @@ public:
                 &stmt,
                 nullptr
                 );
+
+            if (rc != SQLITE_OK) {
+                std::cerr << "sqlite: "
+                          << sqlite3_errmsg(sql_connection_ref.connection)
+                          << '\n';
+
+                std::abort();
+            }
+
+
     };
 
     ~SqlReader() {
