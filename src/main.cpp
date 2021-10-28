@@ -28,4 +28,7 @@ int main() {
 
         }
     }
+
+
+    SqlConnection sql_connection("./rn.sqlite");
 }

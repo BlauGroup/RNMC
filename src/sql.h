@@ -6,9 +6,8 @@
 
 
 class SqlConnection {
-private:
-    sqlite3 *connection;
 public:
+    sqlite3 *connection;
     std::string database_file_path;
 
     // method for executing standalone sql statements.
@@ -52,12 +51,83 @@ public:
     };
 };
 
+template<typename T>
+// T needs sql_statement, setters, nothing and empty attributes.
+class SqlReader {
+private:
+    sqlite3_stmt *stmt;
+    SqlConnection &sql_connection_ref;
+public:
+    // important that readers and writers have a reference to
+    // the database connection. This is because it is an error
+    // to close a connection before all statements have been
+    // finalized.
+
+    T next() {
+        int rc = sqlite3_step(stmt);
+
+        if (rc != SQLITE_OK) {
+            return T::empty;
+        }
+
+        T result;
+        result.nothing = false;
+
+        for (int i = 0; i < T::setters.size(); i++) {
+            T::setters[i](*result, sql_connection_ref.connection, i);
+        }
+
+        return result;
+    };
+
+    SqlReader(SqlConnection &sql_connection_ref) :
+
+        // TODO: deal with error handling
+        // not a huge issue as every sql statement is hard coded
+        // into a Row type.
+        sql_connection_ref{sql_connection_ref} {
+            int rc = sqlite3_prepare_v2(
+                sql_connection_ref.connection,
+                T::sql_statement.c_str(),
+                -1,
+                &stmt,
+                nullptr
+                );
+    };
+
+    ~SqlReader() {
+        sqlite3_finalize(stmt);
+    }
+
+    // no copy constructor
+    // don't have access to sqlite internals so can't copy sqlite statements
+    SqlReader(SqlReader &other) = delete;
+
+    // move constructor
+    SqlReader(SqlReader &&other) :
+        sqlite3_stmt{std::exchange(other.stmt, nullptr)},
+        sql_connection_ref{other.sql_connection_ref} {
+    };
+
+    // no copy assigment
+    // don't have access to sqlite internals so can't copy sqlite statements
+    SqlReader &operator=(SqlReader &other) = delete;
+
+    // move assignment
+    SqlReader &operator=(SqlReader &&other) {
+        std::swap(stmt, other.stmt);
+        std::swap(sql_connection_ref, other.sql_connection_ref);
+        return *this;
+    };
+};
+
 // Row structs correspond to rows in a sqlite database.
 // The setters attribute is a static vector of functions which
 // we can call to set the corresponding attributes in the Row struct
 // according to the column numbers from the sql statement.
 
 struct ReactionRow {
+    bool nothing;
     int reaction_id;
     int number_of_reactants;
     int number_of_products;
@@ -76,7 +146,20 @@ struct ReactionRow {
                 sqlite3_stmt*,
                 int
                 )>> setters;
+
+    static ReactionRow empty;
 };
+
+ReactionRow empty = ReactionRow {
+    .nothing = true,
+    .reaction_id = -1,
+    .number_of_reactants = -1,
+    .number_of_products = -1,
+    .reactant_1 = -1,
+    .reactant_2 = -1,
+    .product_1 = -1,
+    .product_2 = -1,
+    .rate = -1.0};
 
 std::string sql_statement =
     "SELECT reaction_id, number_of_reactants, number_of_products, "
