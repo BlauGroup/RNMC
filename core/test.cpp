@@ -29,7 +29,7 @@ int main() {
         }
     }
 
-    SqlConnection sql_connection("./rn.sqlite");
+    SqlConnection sql_connection("../rn.sqlite");
     SqlReader<ReactionRow> reaction_reader(std::ref(sql_connection));
 
     while(true) {

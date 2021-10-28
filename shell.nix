@@ -2,12 +2,17 @@ with (import <nixpkgs> {});
 
 mkShell rec {
   buildInputs = [ gcc
+                  clang
                   gsl
                   sqlite
+                  sqlitebrowser
                   gdb
                   valgrind
-                  clang
                 ];
+
+
+  # set CPATH for running emacs
+  # CPATH=$CLANGD_PATH emacs
 
   CLANGD_PATH = builtins.concatStringsSep ":" [
 
