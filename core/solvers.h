@@ -2,14 +2,12 @@
 #include "sampler.h"
 #include <vector>
 #include <optional>
+#include <cmath>
 
-/***************************************************************************/
-/* the solver is the algorithmic backbone of a monte carlo simulation      */
-/* it decides what will occour next.                                       */
-/*                                                                         */
-/* for now, we have the linear solver and a tree solver ported from        */
-/* spparks: https://spparks.sandia.gov/                                    */
-/***************************************************************************/
+// the solver is the algorithmic backbone of a monte carlo simulation
+// it decides what will occour next.  for now, we have the linear
+// solver and a tree solver ported from spparks:
+// https://spparks.sandia.gov/
 
 
 
@@ -71,3 +69,5 @@ public:
     double get_propensity(int index);
     double get_propensity_sum();
 };
+
+

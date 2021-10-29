@@ -5,9 +5,9 @@
 
 int main() {
     // TODO: make this into a test which passes or fails
-    std::vector<double> initial_propensities{0.1, 0.1, 0.2, 0.1, 0.4};
-    TreeSolver tree_solver(42, initial_propensities);
-    LinearSolver linear_solver(42, std::move(initial_propensities));
+    std::vector<double> initial_propensities {0.1, 0.1, 0.2, 0.1, 0.4};
+    TreeSolver tree_solver (42, initial_propensities);
+    LinearSolver linear_solver (42, std::move(initial_propensities));
 
     for (int i = 0; i < 100000; i++) {
         Event linear_event = linear_solver.event().value();

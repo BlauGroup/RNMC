@@ -7,8 +7,82 @@
 #include <optional>
 #include <iostream>
 
-// IO API used in all the simulators.
-// light wrapper around sqlite.
+// IO API used in all the simulators.  light wrapper around sqlite.
+// key concept is row structs Row structs correspond to rows in a
+// sqlite database.  The getters attribute is a static vector of
+// functions which we can call to get the corresponding attributes in
+// the Row struct The setters attribute is a static vector of
+// functions which we can call to set the corresponding attributes in
+// the Row struct according to the column numbers from the sql
+// statement.  recall, in SQL, ?n variables are 1 indexed, which is
+// why all these lambdas have n + 1 in them. Here are some examples.
+
+// struct ExampleSelectRow {
+//     int a;
+//     double b;
+
+//     static std::string sql_statement;
+
+//     static std::vector<
+//         std::function<
+//             void(
+//                 ExampleSelectRow&,
+//                 sqlite3_stmt*,
+//                 int
+//                 )>> getters;
+// };
+
+// std::string ExampleSelectRow::sql_statement = "SELECT a, b FROM foo;";
+
+// std::vector<std::function<
+//                 void(
+//                     ExampleSelectRow&,
+//                     sqlite3_stmt*,
+//                     int)>> ExampleSelectRow::getters = {
+
+//     [](ExampleSelectRow &r, sqlite3_stmt *stmt, int i) {
+//         r.a = sqlite3_column_int(stmt, i);
+//     },
+
+//     [](ExampleSelectRow &r, sqlite3_stmt *stmt, int i) {
+//         r.b = sqlite3_column_double(stmt, i);
+//     }
+// };
+
+// struct ExampleInsertRow {
+//     int a;
+//     double b;
+
+//     static std::string sql_statement;
+
+//     static std::vector<
+//         std::function<
+//             int(
+//                 ExampleInsertRow&,
+//                 sqlite3_stmt*,
+//                 int)>> setters;
+// };
+
+// std::string ExampleInsertRow::sql_statement =
+//     "INSERT INTO trajectories VALUES (?1, ?2);";
+
+// std::vector<
+//     std::function<
+//         int(
+//             ExampleInsertRow&,
+//             sqlite3_stmt*,
+//             int)>> ExampleInsertRow::setters = {
+
+//     [](ExampleInsertRow& r, sqlite3_stmt* stmt, int n) {
+//         return sqlite3_bind_int(stmt, n + 1, r.a);
+//     },
+
+//     [](ExampleInsertRow& r, sqlite3_stmt* stmt, int n) {
+//         return sqlite3_bind_double(stmt, n + 1, r.b);
+//     }
+// };
+
+
 
 class SqlConnection {
 public:
@@ -53,8 +127,8 @@ public:
 
     // move constructor
     SqlConnection(SqlConnection &&other) :
-        connection(std::exchange(other.connection, nullptr)),
-        database_file_path(std::move(other.database_file_path)) {};
+        connection (std::exchange(other.connection, nullptr)),
+        database_file_path (std::move(other.database_file_path)) {};
 
     // no copy assignment because we don't have access to internal state
     // of a sql connection.
@@ -164,7 +238,7 @@ private:
 
 public:
     SqlWriter(SqlConnection &sql_connection) :
-        sql_connection{sql_connection}
+        sql_connection (sql_connection)
         {
             int rc = sqlite3_prepare_v2(
                 sql_connection.connection,
@@ -203,8 +277,8 @@ public:
 
     // move constructor
     SqlWriter(SqlWriter &&other) :
-        sqlite3_stmt{std::exchange(other.stmt, nullptr)},
-        sql_connection{other.sql_connection} {};
+        sqlite3_stmt (std::exchange(other.stmt, nullptr)),
+        sql_connection(other.sql_connection) {};
 
     // no copy assigment
     // don't have access to sqlite internals so can't copy sqlite statements
@@ -219,79 +293,3 @@ public:
 
 
 };
-
-// Row structs correspond to rows in a sqlite database.
-// The getters attribute is a static vector of functions which
-// we can call to get the corresponding attributes in the Row struct
-// The setters attribute is a static vector of functions which
-// we can call to set the corresponding attributes in the Row struct
-// according to the column numbers from the sql statement.
-// recall, in SQL, ?n variables are 1 indexed, which is why all these
-// lambdas have n + 1 in them.
-
-
-struct ExampleSelectRow {
-    int a;
-    double b;
-
-    static std::string sql_statement;
-
-    static std::vector<
-        std::function<
-            void(
-                ExampleSelectRow&,
-                sqlite3_stmt*,
-                int
-                )>> getters;
-};
-
-std::string ExampleSelectRow::sql_statement = "SELECT a, b FROM foo";
-
-std::vector<std::function<
-                void(
-                    ExampleSelectRow&,
-                    sqlite3_stmt*,
-                    int)>> ExampleSelectRow::getters = {
-
-    [](ExampleSelectRow &r, sqlite3_stmt *stmt, int i) {
-        r.a = sqlite3_column_int(stmt, i);
-    },
-
-    [](ExampleSelectRow &r, sqlite3_stmt *stmt, int i) {
-        r.b = sqlite3_column_double(stmt, i);
-    }
-};
-
-struct ExampleInsertRow {
-    int a;
-    double b;
-
-    static std::string sql_statement;
-
-    static std::vector<
-        std::function<
-            int(
-                ExampleInsertRow&,
-                sqlite3_stmt*,
-                int)>> setters;
-};
-
-std::string ExampleInsertRow::sql_statement =
-    "INSERT INTO trajectories VALUES (?1, ?2);";
-
-std::vector<
-    std::function<
-        int(
-            ExampleInsertRow&,
-            sqlite3_stmt*,
-            int)>> ExampleInsertRow::setters = {
-
-    [](ExampleInsertRow& r, sqlite3_stmt* stmt, int n) {
-        return sqlite3_bind_int(stmt, n + 1, r.a);
-    },
-
-    [](ExampleInsertRow& r, sqlite3_stmt* stmt, int n) {
-        return sqlite3_bind_double(stmt, n + 1, r.b);
-    }
-};
-

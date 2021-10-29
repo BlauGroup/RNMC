@@ -1,16 +1,14 @@
 #include "solvers.h"
-#include <cmath>
-
 
 // LinearSolver implementation
 // LinearSolver can opperate directly on the passed propensities using a move
 LinearSolver::LinearSolver(
     unsigned long int seed,
     std::vector<double> initial_propensities) :
-    sampler{Sampler(seed)},
-    propensities{initial_propensities},
-    number_of_active_indices{0},
-    propensity_sum{0.0} {
+    sampler (Sampler(seed)),
+    propensities (initial_propensities),
+    number_of_active_indices (0),
+    propensity_sum (0.0) {
         int i;
         for (i = 0; i < initial_propensities.size(); i++) {
             propensity_sum += initial_propensities[i];
@@ -73,8 +71,8 @@ double LinearSolver::get_propensity_sum() {
 TreeSolver::TreeSolver(
     unsigned long int seed,
     std::vector<double> initial_propensities) :
-    sampler{Sampler(seed)},
-    number_of_active_indices{0} {
+    sampler (Sampler(seed)),
+    number_of_active_indices (0) {
         int m = 0; // tree depth
         int pow2 = 1; // power of 2 >= numberOfReactions
         number_of_indices = initial_propensities.size();

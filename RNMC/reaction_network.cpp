@@ -7,14 +7,11 @@ ReactionNetwork::ReactionNetwork(
      int dependency_threshold) {
 
     SqlReader<MetadataRow> metadata_reader (reaction_network_database);
+    MetadataRow metadata_row = metadata_reader.next().value();
+
+    reactions.resize(metadata_row.number_of_reactions);
 
 };
-
-
-
-
-
-
 
 
 
