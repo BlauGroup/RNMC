@@ -25,9 +25,9 @@ struct DependentsNode {
     int number_of_occurrences; // number of times the reaction has occoured.
 
     DependentsNode() :
-    dependents(std::optional<std::vector<int>>()),
-    mutex(std::mutex()),
-    number_of_occurrences(0) {};
+    dependents (std::optional<std::vector<int>>()),
+    mutex (std::mutex()),
+    number_of_occurrences (0) {};
 };
 
 struct ReactionNetwork {
