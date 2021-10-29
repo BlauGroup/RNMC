@@ -70,7 +70,7 @@ template<typename T>
 class SqlReader {
 private:
     sqlite3_stmt *stmt;
-    SqlConnection &sql_connection_ref;
+    SqlConnection &sql_connection;
     bool done;
 public:
     // important that readers and writers have a reference to
@@ -102,13 +102,13 @@ public:
     // TODO: write a reset method so we can reloop without needing to create
     // a new object.
 
-    SqlReader(SqlConnection &sql_connection_ref) :
+    SqlReader(SqlConnection &sql_connection) :
 
-        sql_connection_ref{sql_connection_ref},
+        sql_connection{sql_connection},
         done{false}
         {
             int rc = sqlite3_prepare_v2(
-                sql_connection_ref.connection,
+                sql_connection.connection,
                 T::sql_statement.c_str(),
                 -1,
                 &stmt,
@@ -117,13 +117,11 @@ public:
 
             if (rc != SQLITE_OK) {
                 std::cerr << "sqlite: "
-                          << sqlite3_errmsg(sql_connection_ref.connection)
+                          << sqlite3_errmsg(sql_connection.connection)
                           << '\n';
 
                 std::abort();
             }
-
-
     };
 
     ~SqlReader() {
@@ -137,7 +135,9 @@ public:
     // move constructor
     SqlReader(SqlReader &&other) :
         sqlite3_stmt{std::exchange(other.stmt, nullptr)},
-        sql_connection_ref{other.sql_connection_ref} {
+        sql_connection{other.sql_connection},
+        done{other.done}
+        {
     };
 
     // no copy assigment
@@ -147,7 +147,8 @@ public:
     // move assignment
     SqlReader &operator=(SqlReader &&other) {
         std::swap(stmt, other.stmt);
-        std::swap(sql_connection_ref, other.sql_connection_ref);
+        std::swap(sql_connection, other.sql_connection);
+        done = other.done;
         return *this;
     };
 };
@@ -155,6 +156,66 @@ public:
 template<typename T>
 // T needs sql_statement and setters attributes.
 class SqlWriter {
+private:
+    sqlite3_stmt *stmt;
+    SqlConnection &sql_connection;
+
+public:
+    SqlWriter(SqlConnection &sql_connection) :
+        sql_connection{sql_connection}
+        {
+            int rc = sqlite3_prepare_v2(
+                sql_connection.connection,
+                T::sql_statement.c_str(),
+                -1,
+                &stmt,
+                nullptr
+                );
+
+            if (rc != SQLITE_OK) {
+                std::cerr << "sqlite: "
+                          << sqlite3_errmsg(sql_connection.connection)
+                          << '\n';
+
+                std::abort();
+            }
+        };
+
+    ~SqlWriter() {
+        sqlite3_finalize(stmt);
+    }
+
+    void insert(T row) {
+        sqlite3_reset(stmt);
+        for (int i = 0; i < T::setters.size(); i++) {
+            T::setters[i](row, stmt, i);
+        }
+
+        // TODO: error handling
+        int rc = sqlite3_step(stmt);
+    };
+
+    // no copy constructor
+    // don't have access to sqlite internals so can't copy sqlite statements
+    SqlWriter(SqlWriter &other) = delete;
+
+    // move constructor
+    SqlWriter(SqlWriter &&other) :
+        sqlite3_stmt{std::exchange(other.stmt, nullptr)},
+        sql_connection{other.sql_connection} {};
+
+    // no copy assigment
+    // don't have access to sqlite internals so can't copy sqlite statements
+    SqlWriter &operator=(SqlWriter &other) = delete;
+
+    // move assignment
+    SqlWriter &operator=(SqlWriter &&other) {
+        std::swap(stmt, other.stmt);
+        std::swap(sql_connection, other.sql_connection);
+        return *this;
+    };
+
+
 };
 
 struct TrajectoriesRow {
