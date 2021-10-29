@@ -1,5 +1,10 @@
 #include "sql_types.h"
 
+// it is important that these all appear in their own
+// compilation unit and not the header. Having them in the
+// header will cause different compilation units to have their
+// own definitions which will confuse the linker.
+
 std::string MetadataRow::sql_statement =
     "SELECT number_of_species, number_of_reactions FROM metadata;";
 
