@@ -58,4 +58,3 @@ struct TrajectoriesRow {
                 sqlite3_stmt*,
                 int)>> setters;
 };
-
