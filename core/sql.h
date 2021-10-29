@@ -27,7 +27,7 @@ public:
     };
 
     SqlConnection(std::string database_file_path) :
-        database_file_path{database_file_path} {
+        database_file_path (database_file_path) {
             int rc = sqlite3_open_v2(
                 database_file_path.c_str(),
                 &connection,
@@ -53,8 +53,8 @@ public:
 
     // move constructor
     SqlConnection(SqlConnection &&other) :
-        connection{std::exchange(other.connection, nullptr)},
-        database_file_path{std::move(other.database_file_path)} {};
+        connection(std::exchange(other.connection, nullptr)),
+        database_file_path(std::move(other.database_file_path)) {};
 
     // no copy assignment because we don't have access to internal state
     // of a sql connection.
@@ -107,9 +107,8 @@ public:
 
     SqlReader(SqlConnection &sql_connection) :
 
-        sql_connection{sql_connection},
-        done{false}
-        {
+        sql_connection (sql_connection),
+        done (false) {
             int rc = sqlite3_prepare_v2(
                 sql_connection.connection,
                 T::sql_statement.c_str(),
@@ -137,9 +136,9 @@ public:
 
     // move constructor
     SqlReader(SqlReader &&other) :
-        sqlite3_stmt{std::exchange(other.stmt, nullptr)},
-        sql_connection{other.sql_connection},
-        done{other.done}
+        sqlite3_stmt (std::exchange(other.stmt, nullptr)),
+        sql_connection (other.sql_connection),
+        done (other.done)
         {
     };
 

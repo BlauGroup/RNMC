@@ -5,6 +5,44 @@
 #include <functional>
 
 
+struct MetadataRow {
+    int number_of_species;
+    int number_of_reactions;
+
+    static std::string sql_statement;
+
+    static std::vector<
+        std::function<
+            void(
+                MetadataRow&,
+                sqlite3_stmt*,
+                int
+                )>> getters;
+
+};
+
+std::string MetadataRow::sql_statement =
+    "SELECT number_of_species, number_of_reactions FROM metadata;";
+
+std::vector<
+    std::function<
+        void(
+            MetadataRow&,
+            sqlite3_stmt*,
+            int
+            )>> MetadataRow::getters = {
+
+    [](MetadataRow &r, sqlite3_stmt *stmt, int i) {
+        r.number_of_species = sqlite3_column_int(stmt, i);
+    },
+
+    [](MetadataRow &r, sqlite3_stmt *stmt, int i) {
+        r.number_of_reactions = sqlite3_column_int(stmt, i);
+    },
+};
+
+
+
 struct ReactionRow {
     int reaction_id;
     int number_of_reactants;
@@ -112,5 +150,3 @@ std::vector<
         return sqlite3_bind_double(stmt, n + 1, t.time);
     }
 };
-
-
