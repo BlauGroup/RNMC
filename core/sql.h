@@ -7,6 +7,8 @@
 #include <optional>
 #include <iostream>
 
+// IO API used in all the simulators.
+// light wrapper around sqlite.
 
 class SqlConnection {
 public:
@@ -222,6 +224,8 @@ public:
 // Row structs correspond to rows in a sqlite database.
 // The getters attribute is a static vector of functions which
 // we can call to get the corresponding attributes in the Row struct
+// The setters attribute is a static vector of functions which
+// we can call to set the corresponding attributes in the Row struct
 // according to the column numbers from the sql statement.
 // recall, in SQL, ?n variables are 1 indexed, which is why all these
 // lambdas have n + 1 in them.
