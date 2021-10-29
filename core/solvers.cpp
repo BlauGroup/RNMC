@@ -84,7 +84,7 @@ TreeSolver::TreeSolver(
 
         int number_of_tree_nodes = 2 * pow2 - 1;
         propensity_offset = pow2 - 1;
-        tree = std::vector<double> (number_of_tree_nodes, 0.0);
+        tree.resize(number_of_tree_nodes, 0.0);
 
         for (int i = propensity_offset;
              i < propensity_offset + number_of_indices;
