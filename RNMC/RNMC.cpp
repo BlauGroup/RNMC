@@ -12,6 +12,6 @@ int main() {
         std::ref(initial_state_database),
         1);
 
-    std::cout << "sup";
+    std::cout << reaction_network.reactions.size() << '\n';
 
 }

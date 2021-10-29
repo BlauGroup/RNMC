@@ -9,6 +9,9 @@ ReactionNetwork::ReactionNetwork(
     SqlReader<MetadataRow> metadata_reader (reaction_network_database);
     MetadataRow metadata_row = metadata_reader.next().value();
 
+    // vectors are default initialized to empty.
+    // it is "cleaner" to resize the default vector than to
+    // drop it and reinitialize a new vector.
     reactions.resize(metadata_row.number_of_reactions);
 
 };
