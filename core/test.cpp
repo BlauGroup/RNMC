@@ -1,5 +1,4 @@
 #include "solvers.h"
-#include "sql.h"
 #include <iostream>
 
 
@@ -29,19 +28,4 @@ int main() {
 
         }
     }
-
-    // SqlConnection sql_connection("./rn.sqlite");
-    // SqlReader<ReactionRow> reaction_reader(std::ref(sql_connection));
-
-    // while(true) {
-    //     std::optional<ReactionRow> maybe_reaction_row = reaction_reader.next();
-    //     if (maybe_reaction_row) {
-    //         ReactionRow reaction_row = maybe_reaction_row.value();
-    //         std::cout << reaction_row.reaction_id << '\n';
-    //     }
-    //     else {
-    //         break;
-    //     }
-    // }
-
 }
