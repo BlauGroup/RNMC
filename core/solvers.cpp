@@ -4,7 +4,7 @@
 // LinearSolver can opperate directly on the passed propensities using a move
 LinearSolver::LinearSolver(
     unsigned long int seed,
-    std::vector<double> initial_propensities) :
+    std::vector<double> &&initial_propensities) :
     sampler (Sampler(seed)),
     propensities (initial_propensities),
     number_of_active_indices (0),
@@ -70,7 +70,7 @@ double LinearSolver::get_propensity_sum() {
 // TreeSolver always copies the initial propensities into a new array.
 TreeSolver::TreeSolver(
     unsigned long int seed,
-    std::vector<double> initial_propensities) :
+    std::vector<double> &initial_propensities) :
     sampler (Sampler(seed)),
     number_of_active_indices (0) {
         int m = 0; // tree depth

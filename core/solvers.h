@@ -40,7 +40,9 @@ private:
     double propensity_sum;
 
 public:
-    LinearSolver(unsigned long int seed, std::vector<double> initial_propensities);
+    // linear solver moves initial_propensities vector into the object
+    // since it can use it unmodified as its propensity buffer
+    LinearSolver(unsigned long int seed, std::vector<double> &&initial_propensities);
     void update(Update update);
     void update(std::vector<Update> updates);
     std::optional<Event> event();
@@ -62,7 +64,9 @@ private:
     int find_solve_tree(double value);
 
 public:
-    TreeSolver(unsigned long int seed, std::vector<double> initial_propensities);
+    // tree solver is constructed using a reference because it ends up
+    // forming the tail end of a larger vector
+    TreeSolver(unsigned long int seed, std::vector<double> &initial_propensities);
     void update(Update update);
     void update(std::vector<Update> updates);
     std::optional<Event> event();
