@@ -6,7 +6,7 @@ LinearSolver::LinearSolver(
     unsigned long int seed,
     std::vector<double> &&initial_propensities) :
     sampler (Sampler(seed)),
-    propensities (initial_propensities),
+    propensities (std::move(initial_propensities)),
     number_of_active_indices (0),
     propensity_sum (0.0) {
         int i;
