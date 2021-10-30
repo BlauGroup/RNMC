@@ -6,6 +6,9 @@ LinearSolver::LinearSolver(
     unsigned long int seed,
     std::vector<double> &&initial_propensities) :
     sampler (Sampler(seed)),
+    // if this move isn't here, the semantics is that initial
+    // propensities gets moved into a stack variable for the function
+    // call and that stack variable is copied into the object.
     propensities (std::move(initial_propensities)),
     number_of_active_indices (0),
     propensity_sum (0.0) {
