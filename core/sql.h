@@ -164,8 +164,10 @@ public:
     // TODO: write a reset method so we can reloop without needing to
     // create a new object
     std::optional<T> next() {
-        if (done) return std::optional<T> ();
-        else {
+        if (done) {
+            return std::optional<T> ();
+
+        } else {
 
             int rc = statement.step();
 

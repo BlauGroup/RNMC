@@ -30,6 +30,15 @@ void ReactionSql::action(ReactionSql &r, sqlite3_stmt *stmt) {
         r.rate = sqlite3_column_double(stmt, 7);
 };
 
+std::string InitialStateSql::sql_statement =
+    "SELECT species_id, count FROM initial_state;";
+
+void InitialStateSql::action(InitialStateSql &r, sqlite3_stmt *stmt) {
+    r.species_id = sqlite3_column_int(stmt, 0);
+    r.count = sqlite3_column_int(stmt, 1);
+}
+
+
 std::string TrajectoriesSql::sql_statement =
     "INSERT INTO trajectories VALUES (?1, ?2, ?3, ?4);";
 
@@ -48,6 +57,5 @@ void FactorsSql::action (FactorsSql &r, sqlite3_stmt *stmt) {
     r.factor_zero = sqlite3_column_double(stmt, 0);
     r.factor_two = sqlite3_column_double(stmt, 1);
     r.factor_duplicate = sqlite3_column_double(stmt, 2);
-
 };
 

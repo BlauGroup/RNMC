@@ -25,6 +25,13 @@ struct ReactionSql {
     static void action(ReactionSql &r, sqlite3_stmt *stmt);
 };
 
+struct InitialStateSql {
+    int species_id;
+    int count;
+    static std::string sql_statement;
+    static void action(InitialStateSql &r, sqlite3_stmt *stmt);
+};
+
 struct TrajectoriesSql {
     int seed;
     int step;

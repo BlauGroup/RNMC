@@ -51,7 +51,7 @@ struct ReactionNetwork {
         SqlConnection &initial_state_database,
         int dependency_threshold);
 
-    DependentsNode &get_dependency_node(int reaction_index);
+    std::vector<int> &get_dependency_node(int reaction_index);
     void compute_dependency_node(int reaction_index);
 
     double compute_propensity(
