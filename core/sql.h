@@ -151,9 +151,9 @@ template <typename T>
 class SqlReader {
 private:
     bool done;
+    SqlStatement<T> &statement;
 
 public:
-    SqlStatement<T> &statement;
 
     SqlReader(SqlStatement<T> &statement) :
         statement (statement),
