@@ -7,9 +7,9 @@ ReactionNetwork::ReactionNetwork(
      int dependency_threshold) {
 
     // collecting reaction network metadata
-    SqlStatement<MetadataRow> metadata_statement (reaction_network_database);
-    SqlReader<MetadataRow> metadata_reader (std::ref(metadata_statement));
-    MetadataRow metadata_row = metadata_reader.next().value();
+    SqlStatement<MetadataSql> metadata_statement (reaction_network_database);
+    SqlReader<MetadataSql> metadata_reader (std::ref(metadata_statement));
+    MetadataSql metadata_row = metadata_reader.next().value();
 
     // vectors are default initialized to empty.
     // it is "cleaner" to resize the default vector than to
@@ -19,8 +19,8 @@ ReactionNetwork::ReactionNetwork(
     // setting reaction network factors
 
 
-    SqlStatement<ReactionRow> reaction_statement (reaction_network_database);
-    SqlReader<ReactionRow> reaction_reader(std::ref(reaction_statement));
+    SqlStatement<ReactionSql> reaction_statement (reaction_network_database);
+    SqlReader<ReactionSql> reaction_reader(std::ref(reaction_statement));
 
 
     // setting reactions attribute
@@ -30,10 +30,10 @@ ReactionNetwork::ReactionNetwork(
         // number_of_reactions are all the same
         int reaction_id;
 
-        std::optional<ReactionRow> maybe_reaction_row = reaction_reader.next();
+        std::optional<ReactionSql> maybe_reaction_row = reaction_reader.next();
 
         if (maybe_reaction_row) {
-            ReactionRow reaction_row = maybe_reaction_row.value();
+            ReactionSql reaction_row = maybe_reaction_row.value();
             uint8_t number_of_reactants = reaction_row.number_of_reactants;
             uint8_t number_of_products = reaction_row.number_of_products;
             reaction_id = reaction_row.reaction_id;

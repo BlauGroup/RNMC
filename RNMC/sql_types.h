@@ -5,14 +5,14 @@
 #include <functional>
 #include "../core/sql.h"
 
-struct MetadataRow {
+struct MetadataSql {
     int number_of_species;
     int number_of_reactions;
     static std::string sql_statement;
-    static void action(MetadataRow &r, sqlite3_stmt *stmt);
+    static void action(MetadataSql &r, sqlite3_stmt *stmt);
 };
 
-struct ReactionRow {
+struct ReactionSql {
     int reaction_id;
     int number_of_reactants;
     int number_of_products;
@@ -22,23 +22,23 @@ struct ReactionRow {
     int product_2;
     double rate;
     static std::string sql_statement;
-    static void action(ReactionRow &r, sqlite3_stmt *stmt);
+    static void action(ReactionSql &r, sqlite3_stmt *stmt);
 };
 
-struct TrajectoriesRow {
+struct TrajectoriesSql {
     int seed;
     int step;
     int reaction_id;
     double time;
     static std::string sql_statement;
-    static void action(TrajectoriesRow &r, sqlite3_stmt *stmt);
+    static void action(TrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
 
-struct FactorsRow {
+struct FactorsSql {
     double factor_zero;
     double factor_two;
     double factor_duplicate;
     static std::string sql_statement;
-    static void action(FactorsRow &r, sqlite3_stmt *stmt);
+    static void action(FactorsSql &r, sqlite3_stmt *stmt);
 };
