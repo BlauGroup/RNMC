@@ -3,22 +3,13 @@
 #include <vector>
 #include <string>
 #include <functional>
-
+#include "../core/sql.h"
 
 struct MetadataRow {
     int number_of_species;
     int number_of_reactions;
-
     static std::string sql_statement;
-
-    static std::vector<
-        std::function<
-            void(
-                MetadataRow&,
-                sqlite3_stmt*,
-                int
-                )>> getters;
-
+    static void action(MetadataRow &r, sqlite3_stmt *stmt);
 };
 
 struct ReactionRow {
@@ -30,17 +21,8 @@ struct ReactionRow {
     int product_1;
     int product_2;
     double rate;
-
     static std::string sql_statement;
-
-    static std::vector<
-        std::function<
-            void(
-                ReactionRow&,
-                sqlite3_stmt*,
-                int
-                )>> getters;
-
+    static void action(ReactionRow &r, sqlite3_stmt *stmt);
 };
 
 struct TrajectoriesRow {
@@ -48,15 +30,8 @@ struct TrajectoriesRow {
     int step;
     int reaction_id;
     double time;
-
     static std::string sql_statement;
-
-    static std::vector<
-        std::function<
-            int(
-                TrajectoriesRow&,
-                sqlite3_stmt*,
-                int)>> setters;
+    static void action(TrajectoriesRow &r, sqlite3_stmt *stmt);
 };
 
 
@@ -64,17 +39,6 @@ struct FactorsRow {
     double factor_zero;
     double factor_two;
     double factor_duplicate;
-
     static std::string sql_statement;
-
-
-    static std::vector<
-        std::function<
-            void(
-                FactorsRow&,
-                sqlite3_stmt*,
-                int
-                )>> getters;
-
-
+    static void action(FactorsRow &r, sqlite3_stmt *stmt);
 };

@@ -8,116 +8,46 @@
 std::string MetadataRow::sql_statement =
     "SELECT number_of_species, number_of_reactions FROM metadata;";
 
-std::vector<
-    std::function<
-        void(
-            MetadataRow&,
-            sqlite3_stmt*,
-            int
-            )>> MetadataRow::getters = {
-
-    [](MetadataRow &r, sqlite3_stmt *stmt, int i) {
-        r.number_of_species = sqlite3_column_int(stmt, i);
-    },
-
-    [](MetadataRow &r, sqlite3_stmt *stmt, int i) {
-        r.number_of_reactions = sqlite3_column_int(stmt, i);
-    },
+void MetadataRow::action(MetadataRow &r, sqlite3_stmt *stmt) {
+        r.number_of_species = sqlite3_column_int(stmt, 0);
+        r.number_of_reactions = sqlite3_column_int(stmt, 1);
 };
+
 
 std::string ReactionRow::sql_statement =
     "SELECT reaction_id, number_of_reactants, number_of_products, "
     "reactant_1, reactant_2, product_1, product_2, rate FROM reactions;";
 
-std::vector<std::function<
-                void(
-                    ReactionRow&,
-                    sqlite3_stmt*,
-                    int)>> ReactionRow::getters = {
 
-    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
-        r.reaction_id = sqlite3_column_int(stmt, i);
-    },
-
-    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
-        r.number_of_reactants = sqlite3_column_int(stmt, i);
-    },
-
-    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
-        r.number_of_products = sqlite3_column_int(stmt, i);
-    },
-
-    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
-        r.reactant_1 = sqlite3_column_int(stmt, i);
-    },
-
-    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
-        r.reactant_2 = sqlite3_column_int(stmt, i);
-    },
-
-    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
-        r.product_1 = sqlite3_column_int(stmt, i);
-    },
-
-    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
-        r.product_2 = sqlite3_column_int(stmt, i);
-    },
-
-    [](ReactionRow &r, sqlite3_stmt *stmt, int i) {
-        r.rate = sqlite3_column_double(stmt, i);
-    }
+void ReactionRow::action(ReactionRow &r, sqlite3_stmt *stmt) {
+        r.reaction_id = sqlite3_column_int(stmt, 0);
+        r.number_of_reactants = sqlite3_column_int(stmt, 1);
+        r.number_of_products = sqlite3_column_int(stmt, 2);
+        r.reactant_1 = sqlite3_column_int(stmt, 3);
+        r.reactant_2 = sqlite3_column_int(stmt, 4);
+        r.product_1 = sqlite3_column_int(stmt, 5);
+        r.product_2 = sqlite3_column_int(stmt, 6);
+        r.rate = sqlite3_column_double(stmt, 7);
 };
 
 std::string TrajectoriesRow::sql_statement =
     "INSERT INTO trajectories VALUES (?1, ?2, ?3, ?4);";
 
-std::vector<
-    std::function<
-        int(
-            TrajectoriesRow&,
-            sqlite3_stmt*,
-            int)>> TrajectoriesRow::setters = {
-
-    [](TrajectoriesRow& t, sqlite3_stmt* stmt, int n) {
-        return sqlite3_bind_int(stmt, n + 1, t.seed);
-    },
-
-    [](TrajectoriesRow& t, sqlite3_stmt* stmt, int n) {
-        return sqlite3_bind_int(stmt, n + 1, t.step);
-    },
-
-    [](TrajectoriesRow& t, sqlite3_stmt* stmt, int n) {
-        return sqlite3_bind_int(stmt, n + 1, t.reaction_id);
-    },
-
-    [](TrajectoriesRow& t, sqlite3_stmt* stmt, int n) {
-        return sqlite3_bind_double(stmt, n + 1, t.time);
-    }
+void TrajectoriesRow::action (TrajectoriesRow& t, sqlite3_stmt* stmt) {
+    sqlite3_bind_int(stmt, 1, t.seed);
+    sqlite3_bind_int(stmt, 2, t.step);
+    sqlite3_bind_int(stmt, 3, t.reaction_id);
+    sqlite3_bind_double(stmt, 4, t.time);
 };
 
 std::string FactorsRow::sql_statement =
     "SELECT factor_zero, factor_two, factor_duplicate FROM factors";
 
 
-std::vector<
-    std::function<
-        void(
-            FactorsRow&,
-            sqlite3_stmt*,
-            int
-            )>> FactorsRow::getters = {
-
-    [](FactorsRow &r, sqlite3_stmt *stmt, int i) {
-        r.factor_zero = sqlite3_column_double(stmt, i);
-    },
-
-    [](FactorsRow &r, sqlite3_stmt *stmt, int i) {
-        r.factor_two = sqlite3_column_double(stmt, i);
-    },
-
-    [](FactorsRow &r, sqlite3_stmt *stmt, int i) {
-        r.factor_duplicate = sqlite3_column_double(stmt, i);
-    },
+void FactorsRow::action (FactorsRow &r, sqlite3_stmt *stmt) {
+    r.factor_zero = sqlite3_column_double(stmt, 1);
+    r.factor_two = sqlite3_column_double(stmt, 2);
+    r.factor_duplicate = sqlite3_column_double(stmt, 3);
 
 };
 

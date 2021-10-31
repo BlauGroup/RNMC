@@ -7,7 +7,8 @@ ReactionNetwork::ReactionNetwork(
      int dependency_threshold) {
 
     // collecting reaction network metadata
-    SqlReader<MetadataRow> metadata_reader (reaction_network_database);
+    SqlStatement<MetadataRow> metadata_statement (reaction_network_database);
+    SqlReader<MetadataRow> metadata_reader (std::ref(metadata_statement));
     MetadataRow metadata_row = metadata_reader.next().value();
 
     // vectors are default initialized to empty.
@@ -18,7 +19,8 @@ ReactionNetwork::ReactionNetwork(
     // setting reaction network factors
 
 
-    SqlReader<ReactionRow> reaction_reader(std::ref(reaction_network_database));
+    SqlStatement<ReactionRow> reaction_statement (reaction_network_database);
+    SqlReader<ReactionRow> reaction_reader(std::ref(reaction_statement));
 
 
     // setting reactions attribute
