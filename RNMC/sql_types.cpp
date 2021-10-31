@@ -45,9 +45,9 @@ std::string FactorsRow::sql_statement =
 
 
 void FactorsRow::action (FactorsRow &r, sqlite3_stmt *stmt) {
-    r.factor_zero = sqlite3_column_double(stmt, 1);
-    r.factor_two = sqlite3_column_double(stmt, 2);
-    r.factor_duplicate = sqlite3_column_double(stmt, 3);
+    r.factor_zero = sqlite3_column_double(stmt, 0);
+    r.factor_two = sqlite3_column_double(stmt, 1);
+    r.factor_duplicate = sqlite3_column_double(stmt, 2);
 
 };
 
