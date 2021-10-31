@@ -66,12 +66,20 @@ public:
 };
 
 
-
-struct RowExample {
+struct RowExampleSelect {
     int foo;
     double bar;
     static std::string sql_statement;
-    static void action(RowExample &r, sqlite3_stmt *stmt);
+    static void action(RowExampleSelect &r, sqlite3_stmt *stmt);
+};
+
+
+
+struct RowExampleInsert {
+    int foo;
+    double bar;
+    static std::string sql_statement;
+    static void action(RowExampleInsert &r, sqlite3_stmt *stmt);
 };
 
 
