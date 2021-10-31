@@ -58,3 +58,23 @@ struct TrajectoriesRow {
                 sqlite3_stmt*,
                 int)>> setters;
 };
+
+
+struct FactorsRow {
+    double factor_zero;
+    double factor_two;
+    double factor_duplicate;
+
+    static std::string sql_statement;
+
+
+    static std::vector<
+        std::function<
+            void(
+                FactorsRow&,
+                sqlite3_stmt*,
+                int
+                )>> getters;
+
+
+};

@@ -6,6 +6,7 @@ ReactionNetwork::ReactionNetwork(
      SqlConnection &initial_state_database,
      int dependency_threshold) {
 
+    // collecting reaction network metadata
     SqlReader<MetadataRow> metadata_reader (reaction_network_database);
     MetadataRow metadata_row = metadata_reader.next().value();
 
@@ -14,19 +15,49 @@ ReactionNetwork::ReactionNetwork(
     // drop it and reinitialize a new vector.
     reactions.resize(metadata_row.number_of_reactions);
 
-    // SqlConnection sql_connection("./rn.sqlite");
-    // SqlReader<ReactionRow> reaction_reader(std::ref(sql_connection));
+    // setting reaction network factors
 
-    // while(true) {
-    //     std::optional<ReactionRow> maybe_reaction_row = reaction_reader.next();
-    //     if (maybe_reaction_row) {
-    //         ReactionRow reaction_row = maybe_reaction_row.value();
-    //         std::cout << reaction_row.reaction_id << '\n';
-    //     }
-    //     else {
-    //         break;
-    //     }
-    // }
+
+    SqlReader<ReactionRow> reaction_reader(std::ref(reaction_network_database));
+
+
+    // setting reactions attribute
+    while(true) {
+        // variable is lifted so we can do a sanity check. Make sure
+        // size of reactions vector, last reaction_id and metadata
+        // number_of_reactions are all the same
+        int reaction_id;
+
+        std::optional<ReactionRow> maybe_reaction_row = reaction_reader.next();
+
+        if (maybe_reaction_row) {
+            ReactionRow reaction_row = maybe_reaction_row.value();
+            uint8_t number_of_reactants = reaction_row.number_of_reactants;
+            uint8_t number_of_products = reaction_row.number_of_products;
+            reaction_id = reaction_row.reaction_id;
+
+
+            Reaction reaction = {
+                .number_of_reactants = number_of_reactants,
+                .number_of_products = number_of_products,
+                .reactants = { reaction_row.reactant_1, reaction_row.reactant_2 },
+                .products = { reaction_row.product_1, reaction_row.product_2},
+                .rate = reaction_row.rate
+            };
+
+            reactions[reaction_id] = reaction;
+        }
+
+        else {
+            // sanity check
+            if ( metadata_row.number_of_reactions != reaction_id + 1 ||
+                 metadata_row.number_of_reactions != reactions.size() ) {
+                std::cerr << "reaction loading failed";
+                std::abort();
+            }
+            break;
+        }
+    }
 
 };
 

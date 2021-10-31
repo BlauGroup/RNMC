@@ -94,3 +94,30 @@ std::vector<
         return sqlite3_bind_double(stmt, n + 1, t.time);
     }
 };
+
+std::string FactorsRow::sql_statement =
+    "SELECT factor_zero, factor_two, factor_duplicate FROM factors";
+
+
+std::vector<
+    std::function<
+        void(
+            FactorsRow&,
+            sqlite3_stmt*,
+            int
+            )>> FactorsRow::getters = {
+
+    [](FactorsRow &r, sqlite3_stmt *stmt, int i) {
+        r.factor_zero = sqlite3_column_double(stmt, i);
+    },
+
+    [](FactorsRow &r, sqlite3_stmt *stmt, int i) {
+        r.factor_two = sqlite3_column_double(stmt, i);
+    },
+
+    [](FactorsRow &r, sqlite3_stmt *stmt, int i) {
+        r.factor_duplicate = sqlite3_column_double(stmt, i);
+    },
+
+};
+
