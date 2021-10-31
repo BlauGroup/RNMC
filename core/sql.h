@@ -23,12 +23,12 @@ public:
             nullptr);
     };
 
-    SqlConnection(std::string database_file_path) :
+    SqlConnection(std::string database_file_path, int sql_flag) :
         database_file_path (database_file_path) {
             int rc = sqlite3_open_v2(
                 database_file_path.c_str(),
                 &connection,
-                SQLITE_OPEN_READWRITE,
+                sql_flag,
                 nullptr
                 );
 
