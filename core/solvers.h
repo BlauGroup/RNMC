@@ -9,8 +9,6 @@
 // solver and a tree solver ported from spparks:
 // https://spparks.sandia.gov/
 
-
-
 struct Update {
     int index;
     double propensity;
@@ -21,18 +19,7 @@ struct Event {
     double dt;
 };
 
-
-class Solver {
-public:
-    virtual void update(Update update) = 0;
-    virtual void update(std::vector<Update> updates) = 0;
-    virtual std::optional<Event> event() = 0;
-    virtual double get_propensity(int index) = 0;
-    virtual double get_propensity_sum() = 0;
-};
-
-
-class LinearSolver : Solver {
+class LinearSolver {
 private:
     Sampler sampler;
     std::vector<double> propensities;
@@ -40,9 +27,11 @@ private:
     double propensity_sum;
 
 public:
-    // linear solver moves initial_propensities vector into the object
-    // since it can use it unmodified as its propensity buffer
+    // for linear solver we can moves initial_propensities vector into the object
+    // and use it as the propensity buffer. For compatibility with other solvers,
+    // we also implementation initialization by copying from a reference
     LinearSolver(unsigned long int seed, std::vector<double> &&initial_propensities);
+    LinearSolver(unsigned long int seed, std::vector<double> &initial_propensities);
     void update(Update update);
     void update(std::vector<Update> updates);
     std::optional<Event> event();
@@ -51,7 +40,7 @@ public:
 };
 
 
-class TreeSolver : Solver {
+class TreeSolver {
 private:
     Sampler sampler;
     std::vector<double> tree; // we store the propensities in a binary heap

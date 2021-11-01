@@ -5,7 +5,7 @@
 
 int main(int argc, char **argv) {
     // TODO: make this into a test which passes or fails
-    std::vector<double> initial_propensities (100000, argc / 10);
+    std::vector<double> initial_propensities (100000, (1.0 + argc) / 10.0);
     TreeSolver tree_solver (42, std::ref(initial_propensities));
     LinearSolver linear_solver (42, std::move(initial_propensities));
 
