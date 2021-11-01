@@ -16,10 +16,12 @@ struct Simulation {
     int step; // number of reactions which have occoured
     Solver solver;
     std::vector<HistoryElement> history;
-    int step_cutoff;
+
 
     Simulation(ReactionNetwork &reaction_network,
                unsigned long int seed,
+
+               // step cutoff gets used here to set the history length
                int step_cutoff) :
         reaction_network (reaction_network),
         seed (seed),
@@ -27,13 +29,12 @@ struct Simulation {
         time (0.0),
         step (0),
         solver (seed, reaction_network.initial_propensities),
-        history (step_cutoff + 1),
-        step_cutoff(step_cutoff)
+        history (step_cutoff + 1)
         {};
 
 
     bool execute_step();
-    void execute_steps();
+    void execute_steps(int step_cutoff);
 };
 
 
@@ -117,7 +118,7 @@ bool Simulation<Solver>::execute_step() {
 };
 
 template <typename Solver>
-void Simulation<Solver>::execute_steps() {
+void Simulation<Solver>::execute_steps(int step_cutoff) {
     while(execute_step()) {
         if (step > step_cutoff)
             break;

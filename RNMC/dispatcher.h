@@ -45,3 +45,24 @@ struct HistoryQueue {
 
 };
 
+
+template <typename Solver>
+struct SimulatorPayload {
+    ReactionNetwork &reaction_network;
+    HistoryQueue &history_queue;
+    SeedQueue &seed_queue;
+    int step_cutoff;
+
+    SimulatorPayload(
+        ReactionNetwork &reaction_network,
+        HistoryQueue &history_queue,
+        SeedQueue &seed_queue,
+        int step_cutoff) :
+
+            reaction_network (reaction_network),
+            history_queue (history_queue),
+            seed_queue (seed_queue),
+            step_cutoff (step_cutoff) {};
+
+    void run_simulator();
+};

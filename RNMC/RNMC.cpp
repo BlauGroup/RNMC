@@ -14,7 +14,9 @@ int main() {
 
     Simulation<LinearSolver> simulation (reaction_network, 42, 200);
 
-    simulation.execute_steps();
+    simulation.execute_steps(200);
+
+    std::cout << simulation.history.size() << '\n';
 
     HistoryQueue history_queue;
 
