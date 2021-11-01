@@ -11,8 +11,11 @@ int main() {
     ReactionNetwork reaction_network (
         std::ref(reaction_network_database),
         std::ref(initial_state_database),
-        1);
+        0);
 
-    std::cout << reaction_network.reactions.size() << '\n';
+    std::vector<int> &l = reaction_network.get_dependency_node(0);
 
+    for (int i : l) {
+        std::cout << i << '\n';
+    }
 }

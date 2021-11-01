@@ -4,9 +4,9 @@
 ReactionNetwork::ReactionNetwork(
      SqlConnection &reaction_network_database,
      SqlConnection &initial_state_database,
-     int dependency_threshold) {
+     int dependency_threshold) :
 
-    dependency_threshold = 1;
+    dependency_threshold( dependency_threshold ) {
 
     // collecting reaction network metadata
     SqlStatement<MetadataSql> metadata_statement (reaction_network_database);
@@ -14,6 +14,13 @@ ReactionNetwork::ReactionNetwork(
 
     // TODO: make sure this isn't nothing
     MetadataSql metadata_row = metadata_reader.next().value();
+
+
+    // can't resize dependency graph because mutexes are not copyable
+    dependency_graph =
+        std::vector<DependentsNode> (metadata_row.number_of_reactions);
+
+
 
     // setting reaction network factors
     SqlStatement<FactorsSql> factors_statement (initial_state_database);
@@ -163,13 +170,7 @@ void ReactionNetwork::compute_dependency_node(int reaction_index) {
         current_reaction++;
     }
 
-    // TODO: check that this move actually happens as it should
-    // the three points in dependents should be zerod out and moved
-    // into the dependency graph
     node.dependents = std::optional (std::move(dependents));
-
-
-
 };
 
 double ReactionNetwork::compute_propensity(
