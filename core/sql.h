@@ -7,6 +7,32 @@
 #include <optional>
 #include <iostream>
 
+// DESIGN
+// the sqlite C API has two kinds of resources: connections and
+// statements we store connections in the class SqlConnection we store
+// statements in the class SqlStatement which is parameterized over a
+// SqlType. Two example SqlTypes are shown below. They consist of a
+// bunch of attributes, a static sql_statement and a static
+// action. The action is the C code required to link the attributes to
+// the sql statement.
+
+struct ExampleSelectSql {
+    int foo;
+    double bar;
+    static std::string sql_statement;
+    static void action(ExampleSelectSql &r, sqlite3_stmt *stmt);
+};
+
+
+struct ExampleInsertSql {
+    int foo;
+    double bar;
+    static std::string sql_statement;
+    static void action(ExampleInsertSql &r, sqlite3_stmt *stmt);
+};
+
+
+
 class SqlConnection {
 public:
     sqlite3 *connection;
@@ -65,22 +91,6 @@ public:
     };
 };
 
-
-struct ExampleSelectSql {
-    int foo;
-    double bar;
-    static std::string sql_statement;
-    static void action(ExampleSelectSql &r, sqlite3_stmt *stmt);
-};
-
-
-
-struct ExampleInsertSql {
-    int foo;
-    double bar;
-    static std::string sql_statement;
-    static void action(ExampleInsertSql &r, sqlite3_stmt *stmt);
-};
 
 
 template <typename T>

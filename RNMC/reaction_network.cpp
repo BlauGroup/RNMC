@@ -91,6 +91,12 @@ ReactionNetwork::ReactionNetwork(
         std::cerr << "reaction loading failed";
         std::abort();
     }
+
+    // computing initial propensities
+    initial_propensities.resize(metadata_row.number_of_reactions);
+    for (int i = 0; i < initial_propensities.size(); i++) {
+        initial_propensities[i] = compute_propensity(std::ref(initial_state), i);
+    }
 };
 
 
