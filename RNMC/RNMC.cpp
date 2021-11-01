@@ -1,4 +1,5 @@
 #include "reaction_network.h"
+#include "simulation.h"
 #include <sqlite3.h>
 
 int main() {
@@ -18,4 +19,6 @@ int main() {
     for (int i : l) {
         std::cout << i << '\n';
     }
+
+    Simulation<LinearSolver> simulation(std::ref(reaction_network), 42, 200);
 }

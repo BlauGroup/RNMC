@@ -29,7 +29,7 @@ private:
 public:
     // for linear solver we can moves initial_propensities vector into the object
     // and use it as the propensity buffer. For compatibility with other solvers,
-    // we also implementation initialization by copying from a reference
+    // we also implement initialization by copying from a reference
     LinearSolver(unsigned long int seed, std::vector<double> &&initial_propensities);
     LinearSolver(unsigned long int seed, std::vector<double> &initial_propensities);
     void update(Update update);

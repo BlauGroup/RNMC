@@ -28,18 +28,12 @@ LinearSolver::LinearSolver(
     number_of_active_indices (0),
     propensity_sum (0.0) {
 
-        propensities.resize(initial_propensities.size());
-        for (int i = 0; i < propensities.size(); i++) {
-            propensities[i] = initial_propensities[i];
-        }
-
         for (int i = 0; i < propensities.size(); i++) {
             propensity_sum += propensities[i];
             if (propensities[i] > 0)
                 number_of_active_indices += 1;
         }
     };
-
 
 
 void LinearSolver::update(Update update) {
