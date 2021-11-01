@@ -1,5 +1,4 @@
 #pragma once
-
 #include "reaction_network.h"
 #include "../core/solvers.h"
 
@@ -17,6 +16,7 @@ struct Simulation {
     int step; // number of reactions which have occoured
     Solver solver;
     std::vector<HistoryElement> history;
+    int step_cutoff;
 
     Simulation(ReactionNetwork &reaction_network,
                unsigned long int seed,
@@ -27,14 +27,13 @@ struct Simulation {
         time (0.0),
         step (0),
         solver (seed, reaction_network.initial_propensities),
-        history (step_cutoff)
+        history (step_cutoff),
+        step_cutoff(step_cutoff)
         {};
 
 
     bool execute_step();
-    void run_for(int step_cutoff);
-    bool check_state_positivity();
-
+    void execute_steps();
 };
 
 
@@ -118,12 +117,9 @@ bool Simulation<Solver>::execute_step() {
 };
 
 template <typename Solver>
-void Simulation<Solver>::run_for(int step_cutoff) {
-
+void Simulation<Solver>::execute_steps() {
+    while(execute_step()) {
+        if (step > step_cutoff)
+            break;
+    }
 };
-
-template <typename Solver>
-bool Simulation<Solver>::check_state_positivity() {
-
-};
-

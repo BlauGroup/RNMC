@@ -9,7 +9,7 @@
 
 // DESIGN
 // the sqlite C API has two kinds of resources: connections and
-// statements we store connections in the class SqlConnection we store
+// statements. We store connections in the class SqlConnection. We store
 // statements in the class SqlStatement which is parameterized over a
 // SqlType. Two example SqlTypes are shown below. They consist of a
 // bunch of attributes, a static sql_statement and a static
@@ -31,7 +31,17 @@ struct ExampleInsertSql {
     static void action(ExampleInsertSql &r, sqlite3_stmt *stmt);
 };
 
+std::string ExampleSelectSql::sql_statement = "SELECT foo, bar FROM table;";
+void ExampleSelectSql::action(ExampleSelectSql &r, sqlite3_stmt *stmt) {
+    r.foo = sqlite3_column_int(stmt, 0);
+    r.bar = sqlite3_column_double(stmt, 1);
+}
 
+std::string ExampleInsertSql::sql_statement = "INSERT INTO table VALUES (?1, ?2);";
+void ExampleInsertSql::action(ExampleInsertSql &r, sqlite3_stmt *stmt) {
+    sqlite3_bind_int(stmt, 1, r.foo);
+    sqlite3_bind_double(stmt, 2, r.bar);
+}
 
 class SqlConnection {
 public:

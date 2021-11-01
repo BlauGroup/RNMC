@@ -1,6 +1,4 @@
-#include "reaction_network.h"
 #include "simulation.h"
-#include <sqlite3.h>
 
 int main() {
     SqlConnection reaction_network_database (
