@@ -14,11 +14,13 @@ int main() {
         std::ref(initial_state_database),
         0);
 
-    std::vector<int> &l = reaction_network.get_dependency_node(0);
+    std::vector<int> &l = reaction_network.get_dependency_node(0).value();
 
     for (int i : l) {
         std::cout << i << '\n';
     }
 
     Simulation<LinearSolver> simulation(std::ref(reaction_network), 42, 200);
+
+    simulation.execute_step();
 }
