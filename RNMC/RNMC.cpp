@@ -1,4 +1,4 @@
-#include "simulation.h"
+#include "dispatcher.h"
 
 int main() {
     SqlConnection reaction_network_database (
@@ -12,7 +12,12 @@ int main() {
         initial_state_database,
         0);
 
-    Simulation<LinearSolver> simulation(reaction_network, 42, 200);
+    Simulation<LinearSolver> simulation (reaction_network, 42, 200);
 
     simulation.execute_steps();
+
+    HistoryQueue history_queue;
+
+    history_queue.insert_history(std::move(simulation.history));
+    std::vector<HistoryElement> history = history_queue.get_history();
 }
