@@ -27,7 +27,7 @@ struct Simulation {
         time (0.0),
         step (0),
         solver (seed, reaction_network.initial_propensities),
-        history (step_cutoff),
+        history (step_cutoff + 1),
         step_cutoff(step_cutoff)
         {};
 

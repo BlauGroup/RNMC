@@ -1,9 +1,7 @@
 #pragma once
 #include <sqlite3.h>
 #include <string>
-#include <utility>
 #include <vector>
-#include <functional>
 #include <optional>
 #include <iostream>
 
@@ -197,7 +195,7 @@ public:
             }
 
             T result;
-            statement.action(std::ref(result));
+            statement.action(result);
 
             return std::optional<T> (result);
         }
@@ -218,7 +216,7 @@ public:
 
     void insert(T row) {
         statement.reset();
-        statement.action(std::ref(row));
+        statement.action(row);
         int rc = statement.step();
 
         // TODO: error handling

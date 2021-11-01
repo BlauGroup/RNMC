@@ -1,8 +1,6 @@
 #pragma once
 #include <sqlite3.h>
-#include <vector>
 #include <string>
-#include <functional>
 
 struct MetadataSql {
     int number_of_species;

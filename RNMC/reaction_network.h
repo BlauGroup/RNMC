@@ -71,7 +71,7 @@ ReactionNetwork::ReactionNetwork(
 
     // collecting reaction network metadata
     SqlStatement<MetadataSql> metadata_statement (reaction_network_database);
-    SqlReader<MetadataSql> metadata_reader (std::ref(metadata_statement));
+    SqlReader<MetadataSql> metadata_reader (metadata_statement);
 
     // TODO: make sure this isn't nothing
     MetadataSql metadata_row = metadata_reader.next().value();
@@ -85,7 +85,7 @@ ReactionNetwork::ReactionNetwork(
 
     // setting reaction network factors
     SqlStatement<FactorsSql> factors_statement (initial_state_database);
-    SqlReader<FactorsSql> factors_reader (std::ref(factors_statement));
+    SqlReader<FactorsSql> factors_reader (factors_statement);
 
     // TODO: make sure this isn't nothing
     FactorsSql factors_row = factors_reader.next().value();
@@ -97,8 +97,7 @@ ReactionNetwork::ReactionNetwork(
     initial_state.resize(metadata_row.number_of_species);
 
     SqlStatement<InitialStateSql> initial_state_statement (initial_state_database);
-    SqlReader<InitialStateSql> initial_state_reader(
-        std::ref(initial_state_statement));
+    SqlReader<InitialStateSql> initial_state_reader (initial_state_statement);
 
     int species_id;
     while(std::optional<InitialStateSql> maybe_initial_state_row =
@@ -116,7 +115,7 @@ ReactionNetwork::ReactionNetwork(
     reactions.resize(metadata_row.number_of_reactions);
 
     SqlStatement<ReactionSql> reaction_statement (reaction_network_database);
-    SqlReader<ReactionSql> reaction_reader(std::ref(reaction_statement));
+    SqlReader<ReactionSql> reaction_reader (reaction_statement);
 
 
     // reaction_id is lifted so we can do a sanity check after the
@@ -156,7 +155,7 @@ ReactionNetwork::ReactionNetwork(
     // computing initial propensities
     initial_propensities.resize(metadata_row.number_of_reactions);
     for (int i = 0; i < initial_propensities.size(); i++) {
-        initial_propensities[i] = compute_propensity(std::ref(initial_state), i);
+        initial_propensities[i] = compute_propensity(initial_state, i);
     }
 };
 
@@ -164,7 +163,7 @@ ReactionNetwork::ReactionNetwork(
 std::optional<std::vector<int>> &ReactionNetwork::get_dependency_node(
     int reaction_index) {
 
-    DependentsNode &node = std::ref(dependency_graph[reaction_index]);
+    DependentsNode &node = dependency_graph[reaction_index];
 
     std::lock_guard(node.mutex);
 
@@ -175,13 +174,13 @@ std::optional<std::vector<int>> &ReactionNetwork::get_dependency_node(
 
     node.number_of_occurrences++;
 
-    return std::ref(node.dependents);
+    return node.dependents;
 };
 
 
 void ReactionNetwork::compute_dependency_node(int reaction_index) {
 
-    DependentsNode &node = std::ref(dependency_graph[reaction_index]);
+    DependentsNode &node = dependency_graph[reaction_index];
 
     int number_of_dependents_count = 0;
     int j; // reaction index
@@ -244,7 +243,7 @@ double ReactionNetwork::compute_propensity(
     std::vector<int> &state,
     int reaction_index) {
 
-    Reaction &reaction = std::ref(reactions[reaction_index]);
+    Reaction &reaction = reactions[reaction_index];
 
     double p;
     // zero reactants
