@@ -180,17 +180,16 @@ void Dispatcher<Solver>::run_dispatcher() {
         } else {
             // checking if we have finished
             bool flag = false;
-            for (int i = 0; i < number_of_threads; i++) {
+            for (int i = 0; i < number_of_threads; i++)
                 flag = flag || running[i];
-            }
 
             if (! flag) {
                 // the only way you get here is if the simulation queue is empty
                 // and all of the workers have finished.
 
-                for (int i = 0; i < number_of_threads; i++) {
+                for (int i = 0; i < number_of_threads; i++)
                     threads[i].join();
-                }
+
                 break;
             }
         }
