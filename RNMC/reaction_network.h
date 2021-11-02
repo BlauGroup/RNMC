@@ -198,7 +198,7 @@ void ReactionNetwork::compute_dependency_node(int reaction_index) {
 
             for (n = 0; n < reactions[reaction_index].number_of_products; n++) {
                 if (reactions[j].reactants[l] ==
-                    reactions[reaction_index].reactants[n])
+                    reactions[reaction_index].products[n])
                     flag = true;
             }
         }

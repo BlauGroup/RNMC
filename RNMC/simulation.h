@@ -41,9 +41,9 @@ struct Simulation {
 
 template <typename Solver>
 bool Simulation<Solver>::check_state_positivity() {
-    for (int i = 0; i < reaction_network.reactions.size(); i++) {
+    for (int i = 0; i < state.size(); i++) {
     if (state[i] < 0) {
-        std::cerr << "negative state encountered!!!\n";
+        std::cerr << "negative state encountered: index = " << i << "\n";
       return false;
     }
   }
@@ -132,7 +132,7 @@ bool Simulation<Solver>::execute_step() {
 template <typename Solver>
 void Simulation<Solver>::execute_steps(int step_cutoff) {
     while(execute_step()) {
-        check_state_positivity();
+        // check_state_positivity();
         if (step > step_cutoff)
             break;
     }
