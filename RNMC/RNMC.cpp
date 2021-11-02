@@ -1,29 +1,23 @@
 #include "dispatcher.h"
 
 int main() {
-    SqlConnection reaction_network_database (
-        "./test_materials/RNMC/rn.sqlite", SQLITE_OPEN_READWRITE);
+    std::string reaction_network_database_file = "./test_materials/RNMC/rn.sqlite";
+    std::string initial_state_database_file =
+        "./test_materials/RNMC/initial_state.sqlite";
 
-    SqlConnection initial_state_database (
-        "./test_materials/RNMC/initial_state.sqlite", SQLITE_OPEN_READWRITE);
-
-    ReactionNetwork reaction_network (
-        reaction_network_database,
-        initial_state_database,
+    Dispatcher<LinearSolver> dispatcher (
+        reaction_network_database_file,
+        initial_state_database_file,
+        1000,
+        1000,
+        8,
+        200,
         0);
 
-    unsigned long int base_seed = 1000;
-    unsigned long int number_of_seeds = 1000;
-    HistoryQueue history_queue;
-    SeedQueue seed_queue (number_of_seeds, base_seed);
+    dispatcher.run_dispatcher();
+
+    std::cout << dispatcher.threads.size();
 
 
-    SimulatorPayload<LinearSolver> payload (
-        reaction_network,
-        history_queue,
-        seed_queue,
-        200);
-
-    payload.run_simulator();
 
 }

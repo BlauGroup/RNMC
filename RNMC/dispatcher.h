@@ -30,19 +30,23 @@ struct SeedQueue {
     }
 };
 
+struct History {
+    std::vector<HistoryElement> history_elements;
+    unsigned long int seed;
+};
 
 struct HistoryQueue {
-    std::queue<std::vector<HistoryElement>> histories;
+    std::queue<History> histories;
     std::mutex mutex;
 
-    void insert_history(std::vector<HistoryElement> &&history) {
+    void insert_history(History &&history) {
         std::lock_guard<std::mutex> lock (mutex);
         histories.push(std::move(history));
     }
 
-    std::vector<HistoryElement> get_history() {
+    History get_history() {
         std::lock_guard<std::mutex> lock (mutex);
-        std::vector<HistoryElement> result = std::move(histories.front());
+        History result = std::move(histories.front());
         histories.pop();
         return result;
     };
@@ -88,7 +92,7 @@ struct SimulatorPayload {
     }
 };
 
-
+template <typename Solver>
 struct Dispatcher {
     SqlConnection reaction_database;
     SqlConnection initial_state_database;
@@ -98,8 +102,11 @@ struct Dispatcher {
     HistoryQueue history_queue;
     SeedQueue seed_queue;
     std::vector<std::thread> threads;
-    std::vector<bool> running;
+
+    // std::vector<bool> is jacked.
+    std::deque<bool> running;
     int step_cutoff;
+    int number_of_threads;
 
     Dispatcher(
         std::string reaction_database_file,
@@ -127,7 +134,36 @@ struct Dispatcher {
         // don't want to start threads in the constructor.
         threads (),
         running (number_of_threads, true),
-        step_cutoff (step_cutoff)
+        step_cutoff (step_cutoff),
+        number_of_threads (number_of_threads)
         {};
+
+    void run_dispatcher();
+    void record_simulation_history(
+        std::vector<HistoryElement> history,
+        int seed);
 };
 
+
+
+template <typename Solver>
+void Dispatcher<Solver>::run_dispatcher() {
+
+    threads.resize(number_of_threads);
+    for (int i = 0; i < number_of_threads; i++) {
+        threads[i] = std::thread (
+            [](SimulatorPayload<Solver> payload) {payload.run_simulator();},
+            SimulatorPayload<Solver> (
+                reaction_network,
+                history_queue,
+                seed_queue,
+                step_cutoff,
+                running[i])
+            );
+    }
+
+    while(true) {
+        std::cout << history_queue.histories.size() << '\n';
+    }
+
+};
