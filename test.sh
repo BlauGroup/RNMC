@@ -2,7 +2,7 @@ Red="\033[0;31m"          # Red
 Green="\033[0;32m"        # Green
 Color_Off="\033[0m"       # Text Reset
 
-RNMC_TEST_DIR="./test_materials/RNMC/initial_state"
+RNMC_TEST_DIR="./test_materials/RNMC"
 
 cp $RNMC_TEST_DIR/initial_state.sqlite $RNMC_TEST_DIR/initial_state_copy.sqlite
 
