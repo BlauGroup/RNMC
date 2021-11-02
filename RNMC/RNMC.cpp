@@ -12,14 +12,18 @@ int main() {
         initial_state_database,
         0);
 
-    Simulation<LinearSolver> simulation (reaction_network, 42, 200);
-
-    simulation.execute_steps(200);
-
-    std::cout << simulation.history.size() << '\n';
-
+    unsigned long int base_seed = 1000;
+    unsigned long int number_of_seeds = 1000;
     HistoryQueue history_queue;
+    SeedQueue seed_queue (number_of_seeds, base_seed);
 
-    history_queue.insert_history(std::move(simulation.history));
-    std::vector<HistoryElement> history = history_queue.get_history();
+
+    SimulatorPayload<LinearSolver> payload (
+        reaction_network,
+        history_queue,
+        seed_queue,
+        200);
+
+    payload.run_simulator();
+
 }

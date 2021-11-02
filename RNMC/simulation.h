@@ -22,6 +22,7 @@ struct Simulation {
                unsigned long int seed,
 
                // step cutoff gets used here to set the history length
+               // we don't actually store it in the Simulation object
                int step_cutoff) :
         reaction_network (reaction_network),
         seed (seed),
