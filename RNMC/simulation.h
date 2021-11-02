@@ -43,7 +43,8 @@ template <typename Solver>
 bool Simulation<Solver>::check_state_positivity() {
     for (int i = 0; i < state.size(); i++) {
     if (state[i] < 0) {
-        std::cerr << "negative state encountered: index = " << i << "\n";
+        std::cerr << time_stamp()
+                  << "negative state encountered: index = " << i << "\n";
       return false;
     }
   }

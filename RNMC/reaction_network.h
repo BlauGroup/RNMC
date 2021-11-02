@@ -148,7 +148,7 @@ ReactionNetwork::ReactionNetwork(
     if ( metadata_row.number_of_reactions != reaction_id + 1 ||
          metadata_row.number_of_reactions != reactions.size() ) {
         // TODO: improve logging
-        std::cerr << "reaction loading failed\n";
+        std::cerr << time_stamp() <<  "reaction loading failed\n";
         std::abort();
     }
 

@@ -176,6 +176,14 @@ void Dispatcher<Solver>::run_dispatcher() {
 
     for (int i = 0; i < number_of_threads; i++) threads[i].join();
 
+    initial_state_database.exec(
+        "DELETE FROM trajectories WHERE rowid NOT IN"
+        "(SELECT MIN(rowid) FROM trajectories GROUP BY seed, step);");
+
+    std::cerr << time_stamp()
+              << "removing duplicate trajectories...\n";
+
+
 };
 
 template <typename Solver>
@@ -193,4 +201,9 @@ void Dispatcher<Solver>::record_simulation_history(HistoryPacket history_packet)
             });
     }
     initial_state_database.exec("COMMIT;");
+
+    std::cerr << time_stamp()
+              << "wrote trajectory "
+              << history_packet.seed
+              << " to database\n";
 };

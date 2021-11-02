@@ -4,6 +4,7 @@
 #include <vector>
 #include <optional>
 #include <iostream>
+#include <iomanip>
 
 // DESIGN
 // the sqlite C API has two kinds of resources: connections and
@@ -13,6 +14,11 @@
 // bunch of attributes, a static sql_statement and a static
 // action. The action is the C code required to link the attributes to
 // the sql statement.
+
+auto time_stamp() {
+    auto time = std::time(nullptr);
+    return std::put_time(std::localtime(&time), "[%T] ");
+};
 
 struct ExampleSelectSql {
     int foo;
@@ -67,7 +73,8 @@ public:
                 );
 
             if (rc != SQLITE_OK) {
-                std::cerr << "sqlite: "
+                std::cerr << time_stamp()
+                          << "sqlite: "
                           << sqlite3_errmsg(connection)
                           << '\n';
                 std::abort();
@@ -130,7 +137,8 @@ public:
                 );
 
             if (rc != SQLITE_OK) {
-                std::cerr << "sqlite: "
+                std::cerr << time_stamp()
+                          << "sqlite: "
                           << sqlite3_errmsg(sql_connection.connection)
                           << '\n';
 

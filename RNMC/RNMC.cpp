@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 
     }
 
-    Dispatcher<LinearSolver> dispatcher (
+    Dispatcher<TreeSolver> dispatcher (
         reaction_database,
         initial_state_database,
         number_of_simulations,
