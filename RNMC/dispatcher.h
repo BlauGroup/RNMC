@@ -30,25 +30,30 @@ struct SeedQueue {
     }
 };
 
-struct History {
-    std::vector<HistoryElement> history_elements;
+struct HistoryPacket {
+    std::vector<HistoryElement> history;
     unsigned long int seed;
 };
 
 struct HistoryQueue {
-    std::queue<History> histories;
+    std::queue<HistoryPacket> history_packets;
     std::mutex mutex;
 
-    void insert_history(History &&history) {
+    void insert_history(HistoryPacket &&history_packet) {
         std::lock_guard<std::mutex> lock (mutex);
-        histories.push(std::move(history));
+        history_packets.push(std::move(history_packet));
     }
 
-    History get_history() {
+    std::optional<HistoryPacket> get_history() {
         std::lock_guard<std::mutex> lock (mutex);
-        History result = std::move(histories.front());
-        histories.pop();
-        return result;
+
+        if (history_packets.empty()) {
+            return std::optional<HistoryPacket> ();
+        } else {
+        HistoryPacket result = std::move(history_packets.front());
+        history_packets.pop();
+        return std::optional<HistoryPacket> (std::move(result));
+        }
     };
 
 };
@@ -84,7 +89,11 @@ struct SimulatorPayload {
             unsigned long int seed = maybe_seed.value();
             Simulation<Solver> simulation (reaction_network, seed, step_cutoff);
             simulation.execute_steps(step_cutoff);
-            history_queue.insert_history(std::move(simulation.history));
+            history_queue.insert_history(
+                std::move(
+                    HistoryPacket {
+                        .seed = seed,
+                        .history = simulation.history}));
         }
 
         running = false;
@@ -139,9 +148,7 @@ struct Dispatcher {
         {};
 
     void run_dispatcher();
-    void record_simulation_history(
-        std::vector<HistoryElement> history,
-        int seed);
+    void record_simulation_history(HistoryPacket history_packet);
 };
 
 
@@ -160,10 +167,45 @@ void Dispatcher<Solver>::run_dispatcher() {
                 step_cutoff,
                 running[i])
             );
+
     }
 
-    while(true) {
-        std::cout << history_queue.histories.size() << '\n';
-    }
+    while (true) {
 
+        if (std::optional<HistoryPacket>
+            maybe_history_packet = history_queue.get_history()) {
+
+            HistoryPacket history_packet = maybe_history_packet.value();
+            record_simulation_history(std::move(history_packet));
+        } else {
+            // checking if we have finished
+            bool flag = false;
+            for (int i = 0; i < number_of_threads; i++) {
+                flag = flag || running[i];
+            }
+
+            if (! flag)
+                // the only way you get here is if the simulation queue is empty
+                // and all of the workers have finished.
+                break;
+        }
+
+    };
+
+};
+
+template <typename Solver>
+void Dispatcher<Solver>::record_simulation_history(HistoryPacket history_packet) {
+    initial_state_database.exec("BEGIN");
+    for (int i = 0; i < history_packet.history.size(); i++) {
+        trajectories_writer.insert(
+
+            TrajectoriesSql {
+                .seed = (int) history_packet.seed,
+                .step = i,
+                .reaction_id = history_packet.history[i].reaction,
+                .time = history_packet.history[i].time
+            });
+    }
+    initial_state_database.exec("COMMIT;");
 };

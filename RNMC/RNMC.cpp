@@ -16,7 +16,6 @@ int main() {
 
     dispatcher.run_dispatcher();
 
-    std::cout << dispatcher.threads.size();
 
 
 
