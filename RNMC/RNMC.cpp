@@ -5,12 +5,12 @@ int main() {
     std::string initial_state_database_file =
         "./test_materials/RNMC/initial_state.sqlite";
 
-    Dispatcher<LinearSolver> dispatcher (
+    Dispatcher<TreeSolver> dispatcher (
         reaction_network_database_file,
         initial_state_database_file,
+        1,
         1000,
-        1000,
-        8,
+        1,
         200,
         1);
 
