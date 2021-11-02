@@ -174,8 +174,8 @@ private:
 public:
 
     SqlReader(SqlStatement<T> &statement) :
-        statement (statement),
-        done (false)
+        done (false),
+        statement (statement)
         {};
 
 
@@ -217,7 +217,7 @@ public:
     void insert(T row) {
         statement.reset();
         statement.action(row);
-        int rc = statement.step();
+        statement.step();
 
         // TODO: error handling
     };

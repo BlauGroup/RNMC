@@ -32,8 +32,9 @@ public:
 
     // move constructor
     Sampler(Sampler &&other) :
-        seed (other.seed),
-        internal_rng_state (std::exchange(other.internal_rng_state, nullptr)) {};
+        internal_rng_state (std::exchange(other.internal_rng_state, nullptr)),
+        seed (other.seed)
+        {};
 
     // since we don't have access to gsl internal state, can't write
     // copy assignment operator

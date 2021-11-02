@@ -96,8 +96,8 @@ bool Simulation<Solver>::execute_step() {
             // relevent section of dependency graph has been computed
             std::vector<int> &dependents = maybe_dependents.value();
 
-            for (int m = 0; m < dependents.size(); m++) {
-                int reaction_index = dependents[m];
+            for (unsigned long int m = 0; m < dependents.size(); m++) {
+                unsigned long int reaction_index = dependents[m];
                 double new_propensity = reaction_network.compute_propensity(
                     state,
                     reaction_index);
@@ -109,7 +109,7 @@ bool Simulation<Solver>::execute_step() {
             }
         } else {
             // relevent section of dependency graph has not been computed
-            for (int reaction_index = 0;
+            for (unsigned long int reaction_index = 0;
                  reaction_index < reaction_network.reactions.size();
                  reaction_index++) {
 

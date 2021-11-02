@@ -122,7 +122,7 @@ ReactionNetwork::ReactionNetwork(
     // loop.  Make sure size of reactions vector, last reaction_id and
     // metadata number_of_reactions are all the same
 
-    int reaction_id;
+    unsigned long int reaction_id;
 
     while(std::optional<ReactionSql> maybe_reaction_row = reaction_reader.next()) {
 
@@ -154,7 +154,7 @@ ReactionNetwork::ReactionNetwork(
 
     // computing initial propensities
     initial_propensities.resize(metadata_row.number_of_reactions);
-    for (int i = 0; i < initial_propensities.size(); i++) {
+    for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
         initial_propensities[i] = compute_propensity(initial_state, i);
     }
 };
@@ -183,7 +183,7 @@ void ReactionNetwork::compute_dependency_node(int reaction_index) {
     DependentsNode &node = dependency_graph[reaction_index];
 
     int number_of_dependents_count = 0;
-    int j; // reaction index
+    unsigned long int j; // reaction index
     int l, m, n; // reactant and product indices
 
     for (j = 0; j < reactions.size(); j++) {

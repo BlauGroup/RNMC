@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-int main(int argc, char **argv) {
+int main() {
     // TODO: make this into a test which passes or fails
     std::vector<double> initial_propensities = {0.1, 0.2, 0.3, 0.1, 0.1};
     TreeSolver tree_solver (42, initial_propensities);

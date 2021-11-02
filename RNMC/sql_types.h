@@ -3,14 +3,14 @@
 #include <string>
 
 struct MetadataSql {
-    int number_of_species;
-    int number_of_reactions;
+    unsigned long int number_of_species;
+    unsigned long int number_of_reactions;
     static std::string sql_statement;
     static void action(MetadataSql &r, sqlite3_stmt *stmt);
 };
 
 struct ReactionSql {
-    int reaction_id;
+    unsigned long int reaction_id;
     int number_of_reactants;
     int number_of_products;
     int reactant_1;

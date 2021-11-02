@@ -10,12 +10,12 @@
 // https://spparks.sandia.gov/
 
 struct Update {
-    int index;
+    unsigned long int index;
     double propensity;
 };
 
 struct Event {
-    int index;
+    unsigned long int index;
     double dt;
 };
 
@@ -77,8 +77,7 @@ LinearSolver::LinearSolver(
     propensities (std::move(initial_propensities)),
     number_of_active_indices (0),
     propensity_sum (0.0) {
-        int i;
-        for (i = 0; i < propensities.size(); i++) {
+        for (unsigned long i = 0; i < propensities.size(); i++) {
             propensity_sum += propensities[i];
             if (propensities[i] > 0)
                 number_of_active_indices += 1;
@@ -93,7 +92,7 @@ LinearSolver::LinearSolver(
     number_of_active_indices (0),
     propensity_sum (0.0) {
 
-        for (int i = 0; i < propensities.size(); i++) {
+        for (unsigned long i = 0; i < propensities.size(); i++) {
             propensity_sum += propensities[i];
             if (propensities[i] > 0)
                 number_of_active_indices += 1;
@@ -127,7 +126,7 @@ std::optional<Event> LinearSolver::event() {
     double fraction = propensity_sum * r1;
     double partial = 0.0;
 
-    int m;
+    unsigned long m;
 
     for (m = 0; m < propensities.size(); m++) {
         partial += propensities[m];
@@ -225,7 +224,7 @@ int TreeSolver::find_solve_tree(double value) {
 }
 
 std::optional<Event> TreeSolver::event() {
-    int m;
+    unsigned long int m;
     double r1,r2, dt;
 
 
