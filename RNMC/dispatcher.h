@@ -180,6 +180,7 @@ void Dispatcher<Solver>::run_dispatcher() {
 
 template <typename Solver>
 void Dispatcher<Solver>::record_simulation_history(HistoryPacket history_packet) {
+    // TODO: break into subtransactions for super long simulations
     initial_state_database.exec("BEGIN");
     for (int i = 0; i < history_packet.history.size(); i++) {
         trajectories_writer.insert(

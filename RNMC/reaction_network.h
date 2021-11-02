@@ -165,7 +165,7 @@ std::optional<std::vector<int>> &ReactionNetwork::get_dependency_node(
 
     DependentsNode &node = dependency_graph[reaction_index];
 
-    std::lock_guard(node.mutex);
+    std::lock_guard lock (node.mutex);
 
     if (! node.dependents &&
         node.number_of_occurrences >= dependency_threshold ) {
