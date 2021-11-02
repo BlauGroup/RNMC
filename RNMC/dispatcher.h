@@ -184,7 +184,7 @@ void Dispatcher<Solver>::run_dispatcher() {
                 flag = flag || running[i];
             }
 
-            if (! flag)
+            if (! flag) {
                 // the only way you get here is if the simulation queue is empty
                 // and all of the workers have finished.
 
@@ -192,9 +192,9 @@ void Dispatcher<Solver>::run_dispatcher() {
                     threads[i].join();
                 }
                 break;
+            }
         }
-
-    };
+    }
 
 };
 
