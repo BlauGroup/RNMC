@@ -187,6 +187,10 @@ void Dispatcher<Solver>::run_dispatcher() {
             if (! flag)
                 // the only way you get here is if the simulation queue is empty
                 // and all of the workers have finished.
+
+                for (int i = 0; i < number_of_threads; i++) {
+                    threads[i].join();
+                }
                 break;
         }
 
