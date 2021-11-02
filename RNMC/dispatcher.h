@@ -46,13 +46,13 @@ struct HistoryQueue {
 
     std::optional<HistoryPacket> get_history() {
         std::lock_guard<std::mutex> lock (mutex);
-
         if (history_packets.empty()) {
             return std::optional<HistoryPacket> ();
         } else {
-        HistoryPacket result = std::move(history_packets.front());
-        history_packets.pop();
-        return std::optional<HistoryPacket> (std::move(result));
+            HistoryPacket result = std::move(history_packets.front());
+            history_packets.pop();
+            return std::optional<HistoryPacket> (std::move(result));
+
         }
     };
 
@@ -65,21 +65,18 @@ struct SimulatorPayload {
     HistoryQueue &history_queue;
     SeedQueue &seed_queue;
     int step_cutoff;
-    bool &running;
 
     SimulatorPayload(
         ReactionNetwork &reaction_network,
         HistoryQueue &history_queue,
         SeedQueue &seed_queue,
-        int step_cutoff,
-        bool &running
+        int step_cutoff
         ) :
 
             reaction_network (reaction_network),
             history_queue (history_queue),
             seed_queue (seed_queue),
-            step_cutoff (step_cutoff),
-            running (running) {};
+            step_cutoff (step_cutoff) {};
 
     void run_simulator() {
 
@@ -93,11 +90,8 @@ struct SimulatorPayload {
                 std::move(
                     HistoryPacket {
                         .seed = seed,
-                        .history = simulation.history}));
+                        .history = std::move(simulation.history)}));
         }
-
-        running = false;
-
     }
 };
 
@@ -111,10 +105,8 @@ struct Dispatcher {
     HistoryQueue history_queue;
     SeedQueue seed_queue;
     std::vector<std::thread> threads;
-
-    // std::vector<bool> is jacked.
-    std::deque<bool> running;
     int step_cutoff;
+    int number_of_simulations;
     int number_of_threads;
 
     Dispatcher(
@@ -142,8 +134,8 @@ struct Dispatcher {
 
         // don't want to start threads in the constructor.
         threads (),
-        running (number_of_threads, true),
         step_cutoff (step_cutoff),
+        number_of_simulations (number_of_simulations),
         number_of_threads (number_of_threads)
         {};
 
@@ -164,34 +156,25 @@ void Dispatcher<Solver>::run_dispatcher() {
                 reaction_network,
                 history_queue,
                 seed_queue,
-                step_cutoff,
-                running[i])
+                step_cutoff)
             );
 
     }
 
-    while (true) {
+    int trajectories_written = 0;
+    while (trajectories_written < number_of_simulations) {
 
-        if (std::optional<HistoryPacket>
-            maybe_history_packet = history_queue.get_history()) {
+        std::optional<HistoryPacket>
+            maybe_history_packet = history_queue.get_history();
 
-            HistoryPacket history_packet = maybe_history_packet.value();
+        if (maybe_history_packet) {
+            HistoryPacket history_packet = std::move(maybe_history_packet.value());
             record_simulation_history(std::move(history_packet));
-        } else {
-            // checking if we have finished
-            bool flag = false;
-            for (int i = 0; i < number_of_threads; i++) flag = flag || running[i];
-
-            if (! flag) {
-                // the only way you get here is if the simulation queue is empty
-                // and all of the workers have finished.
-
-                for (int i = 0; i < number_of_threads; i++) threads[i].join();
-
-                break;
-            }
-        }
+            trajectories_written += 1;
+        };
     }
+
+    for (int i = 0; i < number_of_threads; i++) threads[i].join();
 
 };
 
