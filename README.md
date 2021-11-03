@@ -24,7 +24,7 @@ cd sqlite-amalgamation-3360000
 gcc -o libsqlite3.so -shared -fPIC sqlite3.c -lpthread -ldl
 ```
 
-in which case `RNMC` can be built like this:
+in which case, the simulators can be built like this:
 
 ```
 export CPATH=$HOME/sqlite-amalgamation-3360000:$CPATH
@@ -41,7 +41,7 @@ Run the tests using `test.sh` from the root directory of the repository.
 GMC is run as follows:
 
 ```
-RNMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --gc_interval=10 --gc_threshold=1
+GMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --gc_interval=10 --gc_threshold=1
 ```
 
 - `reaction_database`: a sqlite database containing the reaction network and metadata.
