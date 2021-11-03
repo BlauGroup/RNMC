@@ -39,7 +39,7 @@ struct HistoryQueue {
     std::queue<HistoryPacket> history_packets;
     std::mutex mutex;
 
-    void insert_history(HistoryPacket &&history_packet) {
+    void insert_history(HistoryPacket history_packet) {
         std::lock_guard<std::mutex> lock (mutex);
         history_packets.push(std::move(history_packet));
     }
