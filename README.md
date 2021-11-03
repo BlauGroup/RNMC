@@ -41,7 +41,7 @@ Run the tests using `test.sh` from the root directory of the repository.
 GMC is run as follows:
 
 ```
-GMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --gc_interval=10 --gc_threshold=1
+GMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --dependency_threshold=1
 ```
 
 - `reaction_database`: a sqlite database containing the reaction network and metadata.
