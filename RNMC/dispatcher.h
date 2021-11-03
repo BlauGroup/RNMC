@@ -47,7 +47,8 @@ struct HistoryQueue {
     // you need to use gdb to check that you haven't accidently introduced extra
     // allocations and frees (i.e the vector allocated by the simulation thread
     // points to exactly the same memory as the vector which is used to write to the
-    // initial state database).
+    // initial state database, and every time a move is supposed to happen, the old
+    // reference is actually zerod out).
     std::queue<HistoryPacket> history_packets;
     std::mutex mutex;
 
