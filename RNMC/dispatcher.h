@@ -36,19 +36,21 @@ struct HistoryPacket {
 };
 
 struct HistoryQueue {
-    // the flow of trajectory histories from the simulator threads to the
-    // dispatcher is subtle and important. The vector of histories is allocated
-    // by the simulator. Once the simulation is finished, it is moved into the
-    // history queue. Then the dispatcher moves it out of the history queue, writes
-    // it into the initial state database and then frees it. Without all the
-    // carefully placed std::move calls, there will be a lot of unnecessary allocations
-    // and frees. In typical C++ fashion, this is made significantly more complex
-    // by the subtle move semantics of std::optional. If you are going to change this code,
-    // you need to use gdb to check that you haven't accidently introduced extra
-    // allocations and frees (i.e the vector allocated by the simulation thread
-    // points to exactly the same memory as the vector which is used to write to the
-    // initial state database, and every time a move is supposed to happen, the old
-    // reference is actually zerod out).
+    // the flow of trajectory histories from the simulator threads to
+    // the dispatcher is subtle and important. The vector of histories
+    // is allocated by the simulator. Once the simulation is finished,
+    // it is moved into the history queue. Then the dispatcher moves
+    // it out of the history queue, writes it into the initial state
+    // database and then frees it. Without all the carefully placed
+    // std::move calls, there will be a lot of unnecessary allocations
+    // and frees. In typical C++ fashion, this is made significantly
+    // more complex by the subtle move semantics of std::optional. If
+    // you are going to change this code, you need to use gdb to check
+    // that you haven't accidently introduced extra allocations and
+    // frees (i.e the vector allocated by the simulation thread points
+    // to exactly the same memory as the vector which is used to write
+    // to the initial state database, and every time a move is
+    // supposed to happen, the old reference is actually zerod out).
     std::queue<HistoryPacket> history_packets;
     std::mutex mutex;
 
