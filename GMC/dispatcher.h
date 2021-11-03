@@ -104,8 +104,9 @@ struct SimulatorPayload {
             history_queue.insert_history(
                 std::move(
                     HistoryPacket {
-                        .seed = seed,
-                        .history = std::move(simulation.history)}));
+                        .history = std::move(simulation.history),
+                        .seed = seed
+                        }));
         }
     }
 };

@@ -34,13 +34,13 @@ int main(int argc, char **argv) {
     int c;
     int option_index = 0;
 
-    char *reaction_database;
-    char *initial_state_database;
-    int number_of_simulations;
-    int base_seed;
-    int thread_count;
-    int step_cutoff;
-    int dependency_threshold;
+    char *reaction_database = nullptr;
+    char *initial_state_database = nullptr;
+    int number_of_simulations = 0;
+    int base_seed = 0;
+    int thread_count = 0;
+    int step_cutoff = 0;
+    int dependency_threshold = 0;
 
     while ((c = getopt_long_only(
                 argc, argv, "",
@@ -55,6 +55,7 @@ int main(int argc, char **argv) {
 
         case 2:
             initial_state_database = optarg;
+            break;
 
         case 3:
             number_of_simulations = atoi(optarg);

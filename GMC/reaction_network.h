@@ -122,7 +122,7 @@ ReactionNetwork::ReactionNetwork(
     // loop.  Make sure size of reactions vector, last reaction_id and
     // metadata number_of_reactions are all the same
 
-    unsigned long int reaction_id;
+    unsigned long int reaction_id = 0;
 
     while(std::optional<ReactionSql> maybe_reaction_row = reaction_reader.next()) {
 
