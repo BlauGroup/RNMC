@@ -36,7 +36,7 @@ CC=g++ ./build.sh
 
 Run the tests using `test.sh` from the root directory of the repository.
 
-### Running GMC
+## Running GMC
 
 GMC is run as follows:
 

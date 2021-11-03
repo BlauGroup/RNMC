@@ -13,7 +13,8 @@ sql='SELECT seed, step, reaction_id FROM trajectories ORDER BY seed ASC, step AS
 sqlite3 $GMC_TEST_DIR/initial_state_with_trajectories.sqlite "${sql}" > $GMC_TEST_DIR/trajectories
 sqlite3 $GMC_TEST_DIR/initial_state_copy.sqlite "${sql}" > $GMC_TEST_DIR/copy_trajectories
 
-if  cmp $GMC_TEST_DIR/trajectories $GMC_TEST_DIR/copy_trajectories > /dev/null; then
+if  cmp $GMC_TEST_DIR/trajectories $GMC_TEST_DIR/copy_trajectories > /dev/null
+then
     echo -e "${Green} passed: no difference in trajectories ${Color_Off}"
     RC=0
 else
