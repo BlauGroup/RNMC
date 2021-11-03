@@ -45,7 +45,9 @@ struct HistoryQueue {
     // and frees. In typical C++ fashion, this is made significantly more complex
     // by the subtle move semantics of std::optional. If you are going to change this code,
     // you need to use gdb to check that you haven't accidently introduced extra
-    // allocations and frees.
+    // allocations and frees (i.e the vector allocated by the simulation thread
+    // points to exactly the same memory as the vector which is used to write to the
+    // initial state database).
     std::queue<HistoryPacket> history_packets;
     std::mutex mutex;
 
