@@ -204,7 +204,8 @@ void Dispatcher<Solver>::run_dispatcher() {
 
 template <typename Solver>
 void Dispatcher<Solver>::record_simulation_history(HistoryPacket history_packet) {
-    // TODO: break into subtransactions for super long simulations
+    int count = 0;
+    constexpr int transaction_size = 20000;
     initial_state_database.exec("BEGIN");
     for (unsigned long int i = 0; i < history_packet.history.size(); i++) {
         trajectories_writer.insert(
@@ -215,6 +216,12 @@ void Dispatcher<Solver>::record_simulation_history(HistoryPacket history_packet)
                 .reaction_id = history_packet.history[i].reaction,
                 .time = history_packet.history[i].time
             });
+        count++;
+        if (count % transaction_size == 0) {
+            initial_state_database.exec("COMMIT;");
+            initial_state_database.exec("BEGIN");
+
+        }
     }
     initial_state_database.exec("COMMIT;");
 
