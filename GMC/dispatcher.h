@@ -101,6 +101,10 @@ struct SimulatorPayload {
             unsigned long int seed = maybe_seed.value();
             Simulation<Solver> simulation (reaction_network, seed, step_cutoff);
             simulation.execute_steps(step_cutoff);
+
+            // Calling resize() with a smaller size has no effect on the capacity of a vector.
+            // It will not free memory.
+            simulation.history.resize(simulation.step);
             history_queue.insert_history(
                 std::move(
                     HistoryPacket {
