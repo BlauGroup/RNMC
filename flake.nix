@@ -6,7 +6,6 @@
   outputs = { self, nixpkgs }: {
 
     defaultPackage.x86_64-linux =
-      # Notice the reference to nixpkgs here.
       with import nixpkgs { system = "x86_64-linux"; };
       stdenv.mkDerivation {
         name = "RNMC";
@@ -25,6 +24,25 @@
 
         buildPhase = "CC=clang++ ./build.sh";
         installPhase = "mkdir -p $out/bin; mv ./build/* $out/bin";
+
+        # environment for CLANGD
+        # CPATH=$CLANGD_PATH emacs
+        CLANGD_PATH = builtins.concatStringsSep ":" [
+
+          # C++ stdlib headers
+          "${gcc-unwrapped}/include/c++/10.3.0"
+          "${gcc-unwrapped}/include/c++/10.3.0/x86_64-unknown-linux-gnu"
+
+          # libc headers
+          "${glibc.dev}/include"
+
+          # compiler specific headers
+          "${clang}/resource-root/include"
+
+          "${sqlite.dev}/include"
+          "${gsl}/include"
+        ];
+
       };
 
   };
