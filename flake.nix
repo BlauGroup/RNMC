@@ -5,11 +5,9 @@
 
   outputs = { self, nixpkgs }: {
 
-    defaultPackage.x86_64-linux =
+    devShell.x86_64-linux =
       with import nixpkgs { system = "x86_64-linux"; };
-      stdenv.mkDerivation {
-        name = "RNMC";
-        src = self;
+      mkShell {
 
         buildInputs = [
           gcc
@@ -20,10 +18,6 @@
           gdb
           valgrind
         ];
-
-
-        buildPhase = "CC=clang++ ./build.sh";
-        installPhase = "mkdir -p $out/bin; mv ./build/* $out/bin";
 
         # environment for CLANGD
         # CPATH=$CLANGD_PATH emacs
@@ -42,6 +36,25 @@
           "${sqlite.dev}/include"
           "${gsl}/include"
         ];
+
+
+      };
+
+    defaultPackage.x86_64-linux =
+      with import nixpkgs { system = "x86_64-linux"; };
+      stdenv.mkDerivation {
+        name = "RNMC";
+        src = self;
+
+        buildInputs = [
+          clang
+          gsl
+          sqlite
+        ];
+
+
+        buildPhase = "CC=clang++ ./build.sh";
+        installPhase = "mkdir -p $out/bin; mv ./build/* $out/bin";
 
       };
 
