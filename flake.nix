@@ -64,6 +64,7 @@
 
       in {
         x86_64-linux = genericDefaultPackage "x86_64-linux";
+        x86_64-darwin = genericDefaultPackage "x86_64-darwin";
       };
   };
 }
