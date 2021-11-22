@@ -36,8 +36,6 @@
           "${sqlite.dev}/include"
           "${gsl}/include"
         ];
-
-
       };
 
     defaultPackage =
