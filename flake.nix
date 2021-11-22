@@ -40,23 +40,30 @@
 
       };
 
-    defaultPackage.x86_64-linux =
-      with import nixpkgs { system = "x86_64-linux"; };
-      stdenv.mkDerivation {
-        name = "RNMC";
-        src = self;
+    defaultPackage =
+      # RNMC is so simple that the build derivation looks exactly the same on
+      # all platforms.
+      let genericDefaultPackage = systemString:
+            with import nixpkgs { system = systemString; };
+            stdenv.mkDerivation {
+              name = "RNMC";
+              src = self;
 
-        buildInputs = [
-          clang
-          gsl
-          sqlite
-        ];
+              buildInputs = [
+                clang
+                gsl
+                sqlite
+              ];
 
 
-        buildPhase = "CC=clang++ ./build.sh";
-        installPhase = "mkdir -p $out/bin; mv ./build/* $out/bin";
+              buildPhase = "CC=clang++ ./build.sh";
+              installPhase = "mkdir -p $out/bin; mv ./build/* $out/bin";
 
+            };
+
+
+      in {
+        x86_64-linux = genericDefaultPackage "x86_64-linux";
       };
-
   };
 }
