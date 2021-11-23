@@ -1,4 +1,4 @@
-# RNMC
+<img src="./logo.png">
 
 Reaction Network Monte Carlo (RNMC) is a colleciton of programs for Monte Carlo simulation of chemical systems heavily inspired by [SPPARKS](https://spparks.sandia.gov/). It currently consists of the following simulators:
 
