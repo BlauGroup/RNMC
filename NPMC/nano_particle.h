@@ -14,12 +14,12 @@ struct NanoParticle {
     std::vector<Site> sites;
 
     NanoParticle(
-        SqlConnection *nano_particle_database,
-        SqlConnection *initial_state_database);
+        SqlConnection &nano_particle_database,
+        SqlConnection &initial_state_database);
 };
 
 
 NanoParticle::NanoParticle(
-    SqlConnection *nano_particle_database,
-    SqlConnection *initial_state_database) {
+    SqlConnection &nano_particle_database,
+    SqlConnection &initial_state_database) {
 };
