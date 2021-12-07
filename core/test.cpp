@@ -24,8 +24,9 @@ int main() {
                       << tree_event.index
                       << ", dt = "
                       << tree_event.dt << '\n';
-            break;
 
+            return 1;
         }
     }
+    return 0;
 }
