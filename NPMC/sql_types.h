@@ -57,7 +57,7 @@ struct InteractionSql {
 std::string InteractionSql::sql_statement =
     "SELECT interaction_id, species_id_1, species_id_2, "
     "left_state_1, left_state_2, right_state_1, right_state_2, "
-    "rate FROM intearctions;";
+    "rate FROM interactions;";
 
 void InteractionSql::action(InteractionSql &r, sqlite3_stmt *stmt) {
     r.interaction_id = sqlite3_column_int(stmt, 0);
