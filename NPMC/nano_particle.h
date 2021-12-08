@@ -35,6 +35,10 @@ struct NanoParticle {
     // maps interaction index to interaction data
     std::vector<Interaction> interactions;
 
+    double one_site_interaction_factor;
+    double two_site_interaction_factor;
+    double spatial_decay_radius;
+
     // constructor
     NanoParticle(
         SqlConnection &nano_particle_database,
@@ -47,17 +51,18 @@ NanoParticle::NanoParticle(
     SqlConnection &initial_state_database) {
 
     // sql statements
-
     SqlStatement<SpeciesSql> species_statement(nano_particle_database);
     SqlStatement<SiteSql> site_statement(nano_particle_database);
     SqlStatement<InteractionSql> interactions_statement(nano_particle_database);
     SqlStatement<MetadataSql> metadata_statement(nano_particle_database);
+    SqlStatement<FactorsSql> factors_statement(initial_state_database);
 
     // sql readers
     SqlReader<SpeciesSql> species_reader(species_statement);
     SqlReader<SiteSql> site_reader(site_statement);
     SqlReader<InteractionSql> interactions_reader(interactions_statement);
     SqlReader<MetadataSql> metadata_reader(metadata_statement);
+    SqlReader<FactorsSql> factors_reader(factors_statement);
 
     // extracting metadata
     std::optional<MetadataSql> maybe_metadata_row =
@@ -71,6 +76,25 @@ NanoParticle::NanoParticle(
     }
 
     MetadataSql metadata_row = maybe_metadata_row.value();
+
+
+    // extracting factors
+    std::optional<FactorsSql> maybe_factor_row =
+        factors_reader.next();
+
+    if (! maybe_factor_row.has_value()) {
+        std::cerr << time_stamp()
+                  << "no factor row\n";
+
+        std::abort();
+    }
+
+    FactorsSql factor_row = maybe_factor_row.value();
+
+    one_site_interaction_factor = factor_row.one_site_interaction_factor;
+    two_site_interaction_factor = factor_row.two_site_interaction_factor;
+    spatial_decay_radius = factor_row.spatial_decay_radius;
+
 
     // initializing degrees of freedom
     degrees_of_freedom.resize(metadata_row.number_of_species);

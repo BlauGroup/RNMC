@@ -2,7 +2,7 @@
 #include "nano_particle.h"
 #include <functional>
 
-int main(int argc, char **argv) {
+int main() {
 
 
     SqlConnection nanoparticle_database (
