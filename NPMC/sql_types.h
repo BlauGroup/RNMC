@@ -2,17 +2,17 @@
 #include <sqlite3.h>
 #include <string>
 
-struct SpecieSql {
+struct SpeciesSql {
     int species_id;
     int degrees_of_freedom;
     static std::string sql_statement;
-    static void action(SpecieSql &r, sqlite3_stmt *stmt);
+    static void action(SpeciesSql &r, sqlite3_stmt *stmt);
 };
 
-std::string SpecieSql::sql_statement =
+std::string SpeciesSql::sql_statement =
     "SELECT species_id, degrees_of_freedom FROM species;";
 
-void SpecieSql::action(SpecieSql &r, sqlite3_stmt *stmt) {
+void SpeciesSql::action(SpeciesSql &r, sqlite3_stmt *stmt) {
     r.species_id = sqlite3_column_int(stmt, 0);
     r.degrees_of_freedom = sqlite3_column_int(stmt, 1);
 };

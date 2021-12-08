@@ -73,8 +73,16 @@ ReactionNetwork::ReactionNetwork(
     SqlStatement<MetadataSql> metadata_statement (reaction_network_database);
     SqlReader<MetadataSql> metadata_reader (metadata_statement);
 
-    // TODO: make sure this isn't nothing
-    MetadataSql metadata_row = metadata_reader.next().value();
+    std::optional<MetadataSql> maybe_metadata_row = metadata_reader.next();
+
+    if (! maybe_metadata_row.has_value()) {
+        std::cerr << time_stamp()
+                  << "no metadata row\n";
+
+        std::abort();
+    }
+
+    MetadataSql metadata_row = maybe_metadata_row.value();
 
 
     // can't resize dependency graph because mutexes are not copyable
