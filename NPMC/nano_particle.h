@@ -120,6 +120,4 @@ NanoParticle::NanoParticle(
             .rate            = interaction_row.rate
         };
     }
-
-
-};
+}
