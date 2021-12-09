@@ -48,6 +48,11 @@ struct NanoParticle {
     // maps interaction index to interaction data
     std::vector<Interaction> interactions;
 
+    // initial state of the simulations.
+    // initial_state[i] is a local degree of freedom
+    // from the species at site i.
+    std::vector<int> initial_state;
+
     double one_site_interaction_factor;
     double two_site_interaction_factor;
     double spatial_decay_radius;
@@ -71,6 +76,7 @@ NanoParticle::NanoParticle(
     SqlStatement<InteractionSql> interactions_statement(nano_particle_database);
     SqlStatement<MetadataSql> metadata_statement(nano_particle_database);
     SqlStatement<FactorsSql> factors_statement(initial_state_database);
+    SqlStatement<InitialStateSql> initial_state_statement(initial_state_database);
 
     // sql readers
     SqlReader<SpeciesSql> species_reader(species_statement);
@@ -78,6 +84,7 @@ NanoParticle::NanoParticle(
     SqlReader<InteractionSql> interactions_reader(interactions_statement);
     SqlReader<MetadataSql> metadata_reader(metadata_statement);
     SqlReader<FactorsSql> factors_reader(factors_statement);
+    SqlReader<InitialStateSql> initial_state_reader(initial_state_statement);
 
     // extracting metadata
     std::optional<MetadataSql> maybe_metadata_row =
@@ -160,6 +167,15 @@ NanoParticle::NanoParticle(
             .right_state_2   = interaction_row.right_state_2,
             .rate            = interaction_row.rate
         };
+    }
+
+    // initialize initial_state
+    initial_state.resize(metadata_row.number_of_sites);
+
+    while(std::optional<InitialStateSql> maybe_initial_state_row =
+          initial_state_reader.next()) {
+        InitialStateSql initial_state_row = maybe_initial_state_row.value();
+        initial_state[initial_state_row.site_id] = initial_state_row.degree_of_freedom;
     }
 
     compute_site_neighbors();

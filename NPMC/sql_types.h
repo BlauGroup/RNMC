@@ -107,3 +107,20 @@ void FactorsSql::action(FactorsSql &r, sqlite3_stmt *stmt) {
     r.two_site_interaction_factor = sqlite3_column_double(stmt, 1);
     r.spatial_decay_radius = sqlite3_column_double(stmt, 2);
 }
+
+struct InitialStateSql {
+    int site_id;
+    int degree_of_freedom;
+    static std::string sql_statement;
+    static void action(InitialStateSql &r, sqlite3_stmt *stmt);
+};
+
+std::string InitialStateSql::sql_statement =
+    "SELECT site_id, degree_of_freedom FROM initial_state;";
+
+
+void InitialStateSql::action(InitialStateSql &r, sqlite3_stmt *stmt) {
+    r.site_id = sqlite3_column_int(stmt, 0);
+    r.degree_of_freedom = sqlite3_column_int(stmt, 1);
+}
+
