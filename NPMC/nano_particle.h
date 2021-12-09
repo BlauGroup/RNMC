@@ -34,6 +34,17 @@ struct Interaction {
     double rate;
 };
 
+// For this nano particle simulator, a reaction consists
+// of upto two sites and the interaction id.
+// if it is an internal interaction, site_id_2 will be -1
+// In a reaction, the sites must be within the interaction radius bound.
+
+struct Reaction {
+    int site_id_1;
+    int site_id_2;
+    int interaction_id;
+};
+
 struct NanoParticle {
     // maps a species index to the number of degrees of freedom
     std::vector<int> degrees_of_freedom;
@@ -53,9 +64,13 @@ struct NanoParticle {
     // from the species at site i.
     std::vector<int> initial_state;
 
+
+    // list mapping reaction_ids to reactions
+    std::vector<Reaction> reactions;
+
     double one_site_interaction_factor;
     double two_site_interaction_factor;
-    double spatial_decay_radius;
+    double interaction_radius_bound;
 
     // constructor
     NanoParticle(
@@ -115,7 +130,7 @@ NanoParticle::NanoParticle(
 
     one_site_interaction_factor = factor_row.one_site_interaction_factor;
     two_site_interaction_factor = factor_row.two_site_interaction_factor;
-    spatial_decay_radius = factor_row.spatial_decay_radius;
+    interaction_radius_bound = factor_row.interaction_radius_bound;
 
 
     // initializing degrees of freedom
@@ -189,7 +204,7 @@ void NanoParticle::compute_site_neighbors() {
     // overall, or do you do a bunch of individual allocations. Since we run this once
     // at the start and want the mem footprint to be as small as possible, we
     // go for the second option.
-    double threshold = spatial_decay_radius * spatial_decay_radius;
+    double threshold = interaction_radius_bound * interaction_radius_bound;
 
     std::vector<unsigned int> buffer (sites.size());
 

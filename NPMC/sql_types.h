@@ -93,19 +93,19 @@ void MetadataSql::action(MetadataSql &r, sqlite3_stmt *stmt) {
 struct FactorsSql {
     double one_site_interaction_factor;
     double two_site_interaction_factor;
-    double spatial_decay_radius;
+    double interaction_radius_bound;
     static std::string sql_statement;
     static void action(FactorsSql &r, sqlite3_stmt *stmt);
 };
 
 std::string FactorsSql::sql_statement =
     "SELECT one_site_interaction_factor, two_site_interaction_factor, "
-    "spatial_decay_radius FROM factors;";
+    "interaction_radius_bound FROM factors;";
 
 void FactorsSql::action(FactorsSql &r, sqlite3_stmt *stmt) {
     r.one_site_interaction_factor = sqlite3_column_double(stmt, 0);
     r.two_site_interaction_factor = sqlite3_column_double(stmt, 1);
-    r.spatial_decay_radius = sqlite3_column_double(stmt, 2);
+    r.interaction_radius_bound = sqlite3_column_double(stmt, 2);
 }
 
 struct InitialStateSql {
