@@ -78,6 +78,7 @@ struct NanoParticle {
         SqlConnection &initial_state_database);
 
     void compute_site_neighbors();
+    void compute_reactions();
 };
 
 
@@ -194,6 +195,7 @@ NanoParticle::NanoParticle(
     }
 
     compute_site_neighbors();
+    compute_reactions();
 
 }
 
@@ -231,4 +233,104 @@ void NanoParticle::compute_site_neighbors() {
             }
         }
     }
+}
+
+void NanoParticle::compute_reactions() {
+    int reaction_count = 0;
+
+    // counting one site interactions
+    for ( unsigned int site_id = 0;
+          site_id < sites.size();
+          site_id++) {
+        for ( unsigned int interaction_id = 0;
+              interaction_id < interactions.size();
+              interaction_id++) {
+            int species_id = sites[site_id].species_id;
+            if ((interactions[interaction_id].number_of_sites == 1) &&
+                (species_id == interactions[interaction_id].species_id_1)) {
+                reaction_count += 1;
+            }
+        }
+    }
+
+    // counting two site interactions
+    for ( unsigned int site_id_1 = 0;
+          site_id_1 < sites.size();
+          site_id_1++) {
+        for ( unsigned int site_id_2 = 0;
+              site_id_2 < site_neighbors[site_id_1].size();
+              site_id_2++) {
+            for ( unsigned int interaction_id = 0;
+                  interaction_id < interactions.size();
+                  interaction_id++) {
+
+                int species_id_1 = sites[site_id_1].species_id;
+                int species_id_2 = sites[site_id_2].species_id;
+
+                if ((interactions[interaction_id].number_of_sites == 2) &&
+                    (interactions[interaction_id].species_id_1 == species_id_1) &&
+                    (interactions[interaction_id].species_id_2 == species_id_2)) {
+
+                    reaction_count += 1;
+                }
+            }
+        }
+    }
+
+    reactions.resize(reaction_count);
+
+
+    reaction_count = 0;
+
+    // setting one site reactions
+    for ( unsigned int site_id = 0;
+          site_id < sites.size();
+          site_id++) {
+        for ( unsigned int interaction_id = 0;
+              interaction_id < interactions.size();
+              interaction_id++) {
+            int species_id = sites[site_id].species_id;
+            if ((interactions[interaction_id].number_of_sites == 1) &&
+                (species_id == interactions[interaction_id].species_id_1)) {
+
+                reactions[reaction_count] = {
+                    .site_id_1 = (int) site_id,
+                    .site_id_2 = -1,
+                    .interaction_id = (int )interaction_id
+                };
+                reaction_count += 1;
+            }
+        }
+    }
+
+    // setting two site interactions
+    for ( unsigned int site_id_1 = 0;
+          site_id_1 < sites.size();
+          site_id_1++) {
+        for ( unsigned int site_id_2 = 0;
+              site_id_2 < site_neighbors[site_id_1].size();
+              site_id_2++) {
+            for ( unsigned int interaction_id = 0;
+                  interaction_id < interactions.size();
+                  interaction_id++) {
+
+                int species_id_1 = sites[site_id_1].species_id;
+                int species_id_2 = sites[site_id_2].species_id;
+
+                if ((interactions[interaction_id].number_of_sites == 2) &&
+                    (interactions[interaction_id].species_id_1 == species_id_1) &&
+                    (interactions[interaction_id].species_id_2 == species_id_2)) {
+
+                    reactions[reaction_count] = {
+                        .site_id_1 = (int) site_id_1,
+                        .site_id_2 = (int) site_id_2,
+                        .interaction_id = (int )interaction_id
+                    };
+                    reaction_count += 1;
+                }
+            }
+        }
+    }
+
+
 }
