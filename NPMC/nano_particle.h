@@ -161,11 +161,14 @@ NanoParticle::NanoParticle(
             .rate            = interaction_row.rate
         };
     }
+
+    compute_site_neighbors();
+
 }
 
 void NanoParticle::compute_site_neighbors() {
-    // compute the sites which are within spatial decay radius
-    // of all sites. For this kind of computation, there is always a trade off.
+    // For all sites, compute the sites which are within spatial decay radius
+    // For this kind of computation, there is always a trade off.
     // do you allocate all the arrays in one chunk, which means allocating more mem
     // overall, or do you do a bunch of individual allocations. Since we run this once
     // at the start and want the mem footprint to be as small as possible, we
@@ -196,6 +199,5 @@ void NanoParticle::compute_site_neighbors() {
                 count += 1;
             }
         }
-
     }
 }
