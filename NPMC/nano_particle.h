@@ -9,9 +9,18 @@ struct Site {
     double x;
     double y;
     double z;
-    int species_id;
+    unsigned int species_id;
 };
 
+double site_distance_squared(Site s1, Site s2) {
+    double x_diff = s1.x - s2.x;
+    double y_diff = s1.y - s2.y;
+    double z_diff = s1.z - s2.z;
+
+    return ( x_diff * x_diff +
+             y_diff * y_diff +
+             z_diff * z_diff );
+}
 
 struct Interaction {
     // either 1 site or two site interaction
@@ -32,6 +41,10 @@ struct NanoParticle {
     // maps site index to site data
     std::vector<Site> sites;
 
+    // maps a site index to the indices of its neighbors
+    // within the spatial decay radius
+    std::vector<std::vector<int>> site_neighbors;
+
     // maps interaction index to interaction data
     std::vector<Interaction> interactions;
 
@@ -43,6 +56,8 @@ struct NanoParticle {
     NanoParticle(
         SqlConnection &nano_particle_database,
         SqlConnection &initial_state_database);
+
+    void compute_site_neighbors();
 };
 
 
@@ -108,6 +123,8 @@ NanoParticle::NanoParticle(
 
     // initializing sites
     sites.resize(metadata_row.number_of_sites);
+    site_neighbors.resize(metadata_row.number_of_sites);
+
     while(std::optional<SiteSql> maybe_site_row =
           site_reader.next()) {
 
@@ -143,5 +160,40 @@ NanoParticle::NanoParticle(
             .right_state_2   = interaction_row.right_state_2,
             .rate            = interaction_row.rate
         };
+    }
+}
+
+void NanoParticle::compute_site_neighbors() {
+    // compute the sites which are within spatial decay radius
+    // of all sites.
+    double threshold = spatial_decay_radius * spatial_decay_radius;
+
+    std::vector<unsigned int> buffer (sites.size());
+
+    for (unsigned int i = 0; i < sites.size(); i++) {
+
+        int count = 0;
+
+        for (unsigned int j = 0; j < sites.size(); j++) {
+            if (site_distance_squared(sites[i], sites[j]) < threshold) {
+                buffer[j] = true;
+                count += 1;
+            }
+            else {
+                buffer[j] = false;
+            }
+        }
+
+        site_neighbors[i].resize(count);
+
+        count = 0;
+
+        for (unsigned int j = 0; j < sites.size(); j++) {
+            if (buffer[j]) {
+                site_neighbors[i][count] = j;
+                count += 1;
+            }
+        }
+
     }
 }

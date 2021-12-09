@@ -23,7 +23,7 @@ struct SiteSql {
     double x;
     double y;
     double z;
-    int species_id;
+    unsigned int species_id;
     static std::string sql_statement;
     static void action(SiteSql &r, sqlite3_stmt *stmt);
 };
