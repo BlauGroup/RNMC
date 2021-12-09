@@ -9,7 +9,7 @@ struct Site {
     double x;
     double y;
     double z;
-    unsigned int species_id;
+    int species_id;
 };
 
 double site_distance_squared(Site s1, Site s2) {
@@ -156,7 +156,7 @@ NanoParticle::NanoParticle(
             .x = site_row.x,
             .y = site_row.y,
             .z = site_row.z,
-            .species_id = site_row.species_id };
+            .species_id = (int) site_row.species_id };
     }
 
 
@@ -208,7 +208,7 @@ void NanoParticle::compute_site_neighbors() {
     // go for the second option.
     double threshold = interaction_radius_bound * interaction_radius_bound;
 
-    std::vector<unsigned int> buffer (sites.size());
+    std::vector<int> buffer (sites.size());
 
     for (unsigned int i = 0; i < sites.size(); i++) {
 
