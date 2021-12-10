@@ -85,7 +85,7 @@ struct NanoParticle {
     // TODO: implement me
     double compute_propensity(
         std::vector<int> &state,
-        int reaction_index);
+        int reaction_id);
 
 
 };
@@ -243,15 +243,15 @@ std::vector<std::vector<int>> NanoParticle::compute_site_neighbors() {
 }
 
 void NanoParticle::compute_reactions() {
-    // compute all possible reactions and a mapping of site IDs to the
+    // compute all possible reactions and a mapping of site ids to the
     // reaction ids involving a site. Since we expect the number of distinct interactions
     // to be quite small, the number of reactions involving two fixed sites is quite small.
     // this means that we don't loose much by indexing dependency by site id rather than
     // reaction id, as the intersection will be small.
+    int reaction_count = 0;
     std::vector<std::vector<int>> site_neighbors = compute_site_neighbors();
     std::vector<int> site_reaction_dependency_counter;
     site_reaction_dependency_counter.resize(sites.size());
-    int reaction_count = 0;
 
     // counting one site interactions
     for ( unsigned int site_id = 0;
@@ -295,14 +295,15 @@ void NanoParticle::compute_reactions() {
         }
     }
 
+    // reseting reaction_count and site_reaction_dependency_count
+    // and resizing the entries in site_reaction_dependency
+    reaction_count = 0;
+
     reactions.resize(reaction_count);
     for (unsigned int i = 0; i < site_reaction_dependency.size(); i++) {
         site_reaction_dependency[i].resize(site_reaction_dependency_counter[i]);
         site_reaction_dependency_counter[i] = 0;
     }
-
-
-    reaction_count = 0;
 
     // setting one site reactions
     for ( unsigned int site_id = 0;
