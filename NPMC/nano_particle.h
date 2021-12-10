@@ -195,12 +195,6 @@ NanoParticle::NanoParticle(
 }
 
 std::vector<std::vector<int>> NanoParticle::compute_site_neighbors() {
-    // For all sites, compute the sites which are within spatial decay radius
-    // For this kind of computation, there is always a trade off.
-    // do you allocate all the arrays in one chunk, which means allocating more mem
-    // overall, or do you do a bunch of individual allocations. Since we run this once
-    // at the start and want the mem footprint to be as small as possible, we
-    // go for the second option.
     double threshold = interaction_radius_bound * interaction_radius_bound;
     std::vector<std::vector<int>> site_neighbors;
     site_neighbors.resize(sites.size());
