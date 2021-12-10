@@ -2,7 +2,7 @@
 #include "../core/sql.h"
 #include "sql_types.h"
 #include <vector>
-
+#include <cmath>
 
 struct Site {
     double x;
@@ -82,7 +82,6 @@ struct NanoParticle {
 
     void compute_reactions();
 
-    // TODO: implement me
     double compute_propensity(
         std::vector<int> &state,
         int reaction_id);
@@ -295,11 +294,12 @@ void NanoParticle::compute_reactions() {
         }
     }
 
+
+    reactions.resize(reaction_count);
+
     // reseting reaction_count and site_reaction_dependency_count
     // and resizing the entries in site_reaction_dependency
     reaction_count = 0;
-
-    reactions.resize(reaction_count);
     for (unsigned int i = 0; i < site_reaction_dependency.size(); i++) {
         site_reaction_dependency[i].resize(site_reaction_dependency_counter[i]);
         site_reaction_dependency_counter[i] = 0;
@@ -368,3 +368,52 @@ void NanoParticle::compute_reactions() {
         }
     }
 }
+
+
+double NanoParticle::compute_propensity(
+    std::vector<int> &state,
+    int reaction_id) {
+
+    Interaction interaction = interactions[reactions[reaction_id].interaction_id];
+
+    if ( interaction.number_of_sites == 1) {
+        // internal interaction
+        int site_id = reactions[reaction_id].site_id_1;
+        if (interaction.left_state_1 == state[site_id]) {
+            return (
+                interaction.rate *
+                one_site_interaction_factor);
+        }
+        else {
+            return 0;
+        }
+
+
+    }
+    else {
+        // two site interaction
+        int site_id_1 = reactions[reaction_id].site_id_1;
+        int site_id_2 = reactions[reaction_id].site_id_2;
+
+        if ( (interaction.left_state_1 == state[site_id_1]) &&
+             (interaction.left_state_2 == state[site_id_2]) ) {
+            Site site_1 = sites[site_id_1];
+            Site site_2 = sites[site_id_2];
+            double distance = std::sqrt(site_distance_squared(site_1, site_2));
+
+            // by the way we constructed the reactions, diff will always be >= 0
+            double distance_factor = 1 - ( distance / interaction_radius_bound );
+            return (
+                interaction.rate *
+                distance_factor *
+                two_site_interaction_factor);
+
+
+        }
+        else {
+            return 0;
+        }
+
+    }
+}
+
