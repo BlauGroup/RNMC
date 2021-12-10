@@ -4,7 +4,6 @@
 #include <vector>
 
 
-
 struct Site {
     double x;
     double y;
@@ -52,10 +51,6 @@ struct NanoParticle {
     // maps site index to site data
     std::vector<Site> sites;
 
-    // maps a site index to the indices of its neighbors
-    // within the spatial decay radius
-    std::vector<std::vector<int>> site_neighbors;
-
     // maps interaction index to interaction data
     std::vector<Interaction> interactions;
 
@@ -63,7 +58,6 @@ struct NanoParticle {
     // initial_state[i] is a local degree of freedom
     // from the species at site i.
     std::vector<int> initial_state;
-
 
     // list mapping reaction_ids to reactions
     std::vector<Reaction> reactions;
@@ -77,7 +71,10 @@ struct NanoParticle {
         SqlConnection &nano_particle_database,
         SqlConnection &initial_state_database);
 
-    void compute_site_neighbors();
+    // maps a site index to the indices of its neighbors
+    // within the spatial decay radius
+    std::vector<std::vector<int>> compute_site_neighbors();
+
     void compute_reactions();
 };
 
@@ -146,7 +143,6 @@ NanoParticle::NanoParticle(
 
     // initializing sites
     sites.resize(metadata_row.number_of_sites);
-    site_neighbors.resize(metadata_row.number_of_sites);
 
     while(std::optional<SiteSql> maybe_site_row =
           site_reader.next()) {
@@ -194,12 +190,11 @@ NanoParticle::NanoParticle(
         initial_state[initial_state_row.site_id] = initial_state_row.degree_of_freedom;
     }
 
-    compute_site_neighbors();
     compute_reactions();
 
 }
 
-void NanoParticle::compute_site_neighbors() {
+std::vector<std::vector<int>> NanoParticle::compute_site_neighbors() {
     // For all sites, compute the sites which are within spatial decay radius
     // For this kind of computation, there is always a trade off.
     // do you allocate all the arrays in one chunk, which means allocating more mem
@@ -207,6 +202,8 @@ void NanoParticle::compute_site_neighbors() {
     // at the start and want the mem footprint to be as small as possible, we
     // go for the second option.
     double threshold = interaction_radius_bound * interaction_radius_bound;
+    std::vector<std::vector<int>> site_neighbors;
+    site_neighbors.resize(sites.size());
 
     std::vector<int> buffer (sites.size());
 
@@ -233,9 +230,13 @@ void NanoParticle::compute_site_neighbors() {
             }
         }
     }
+
+    return site_neighbors;
 }
 
 void NanoParticle::compute_reactions() {
+
+    std::vector<std::vector<int>> site_neighbors = compute_site_neighbors();
     int reaction_count = 0;
 
     // counting one site interactions
@@ -324,13 +325,11 @@ void NanoParticle::compute_reactions() {
                     reactions[reaction_count] = {
                         .site_id_1 = (int) site_id_1,
                         .site_id_2 = (int) site_id_2,
-                        .interaction_id = (int )interaction_id
+                        .interaction_id = (int) interaction_id
                     };
                     reaction_count += 1;
                 }
             }
         }
     }
-
-
 }
