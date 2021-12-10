@@ -62,6 +62,8 @@ struct NanoParticle {
     // from the species at site i.
     std::vector<int> initial_state;
 
+    std::vector<double> initial_propensities;
+
     // list mapping reaction_ids to reactions
     std::vector<Reaction> reactions;
 
@@ -79,6 +81,13 @@ struct NanoParticle {
     std::vector<std::vector<int>> compute_site_neighbors();
 
     void compute_reactions();
+
+    // TODO: implement me
+    double compute_propensity(
+        std::vector<int> &state,
+        int reaction_index);
+
+
 };
 
 
@@ -195,6 +204,7 @@ NanoParticle::NanoParticle(
     }
 
     compute_reactions();
+    initial_propensities.resize(reactions.size());
 
 }
 
