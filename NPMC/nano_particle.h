@@ -3,6 +3,7 @@
 #include "sql_types.h"
 #include <vector>
 #include <cmath>
+#include <functional>
 
 struct Site {
     double x;
@@ -204,6 +205,11 @@ NanoParticle::NanoParticle(
 
     compute_reactions();
     initial_propensities.resize(reactions.size());
+
+    // initializing initial_propensities
+    for (unsigned int reaction_id = 0; reaction_id < reactions.size(); reaction_id++) {
+        initial_propensities[reaction_id] = compute_propensity(std::ref(initial_state), reaction_id);
+    }
 
 }
 
@@ -413,7 +419,5 @@ double NanoParticle::compute_propensity(
         else {
             return 0;
         }
-
     }
 }
-
