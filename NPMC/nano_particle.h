@@ -229,21 +229,28 @@ std::vector<std::vector<int>> NanoParticle::compute_site_neighbors() {
 }
 
 void NanoParticle::compute_reactions() {
-
+    // compute all possible reactions and a mapping of site IDs to the
+    // reaction ids involving a site. Since we expect the number of distinct interactions
+    // to be quite small, the number of reactions involving two fixed sites is quite small.
+    // this means that we don't loose much by indexing dependency by site id rather than
+    // reaction id, as the intersection will be small.
     std::vector<std::vector<int>> site_neighbors = compute_site_neighbors();
+    std::vector<int> site_reaction_dependency_counter;
+    site_reaction_dependency_counter.resize(sites.size());
     int reaction_count = 0;
 
     // counting one site interactions
     for ( unsigned int site_id = 0;
           site_id < sites.size();
-          site_id++) {
+          site_id++ ) {
         for ( unsigned int interaction_id = 0;
               interaction_id < interactions.size();
-              interaction_id++) {
+              interaction_id++ ) {
             int species_id = sites[site_id].species_id;
             if ((interactions[interaction_id].number_of_sites == 1) &&
                 (species_id == interactions[interaction_id].species_id_1)) {
                 reaction_count += 1;
+                site_reaction_dependency_counter[site_id] += 1;
             }
         }
     }
@@ -267,6 +274,8 @@ void NanoParticle::compute_reactions() {
                     (interactions[interaction_id].species_id_2 == species_id_2)) {
 
                     reaction_count += 1;
+                    site_reaction_dependency_counter[site_id_1] += 1;
+                    site_reaction_dependency_counter[site_id_2] += 1;
                 }
             }
         }
@@ -291,7 +300,7 @@ void NanoParticle::compute_reactions() {
                 reactions[reaction_count] = {
                     .site_id_1 = (int) site_id,
                     .site_id_2 = -1,
-                    .interaction_id = (int )interaction_id
+                    .interaction_id = (int) interaction_id
                 };
                 reaction_count += 1;
             }
