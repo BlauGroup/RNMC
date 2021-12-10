@@ -51,6 +51,9 @@ struct NanoParticle {
     // maps site index to site data
     std::vector<Site> sites;
 
+    // maps site ids to reaction ids involving the site.
+    std::vector<std::vector<int>> site_reaction_dependency;
+
     // maps interaction index to interaction data
     std::vector<Interaction> interactions;
 
@@ -143,6 +146,7 @@ NanoParticle::NanoParticle(
 
     // initializing sites
     sites.resize(metadata_row.number_of_sites);
+    site_reaction_dependency.resize(metadata_row.number_of_sites);
 
     while(std::optional<SiteSql> maybe_site_row =
           site_reader.next()) {
@@ -282,6 +286,10 @@ void NanoParticle::compute_reactions() {
     }
 
     reactions.resize(reaction_count);
+    for (unsigned int i = 0; i < site_reaction_dependency.size(); i++) {
+        site_reaction_dependency[i].resize(site_reaction_dependency_counter[i]);
+        site_reaction_dependency_counter[i] = 0;
+    }
 
 
     reaction_count = 0;
@@ -302,7 +310,12 @@ void NanoParticle::compute_reactions() {
                     .site_id_2 = -1,
                     .interaction_id = (int) interaction_id
                 };
+                site_reaction_dependency[site_id][
+                    site_reaction_dependency_counter[site_id]] = reaction_count;
+
                 reaction_count += 1;
+                site_reaction_dependency_counter[site_id] += 1;
+
             }
         }
     }
@@ -330,7 +343,15 @@ void NanoParticle::compute_reactions() {
                         .site_id_2 = (int) site_id_2,
                         .interaction_id = (int) interaction_id
                     };
+                    site_reaction_dependency[site_id_1][
+                        site_reaction_dependency_counter[site_id_1]] = reaction_count;
+                    site_reaction_dependency[site_id_2][
+                        site_reaction_dependency_counter[site_id_2]] = reaction_count;
+
                     reaction_count += 1;
+                    site_reaction_dependency_counter[site_id_1] += 1;
+                    site_reaction_dependency_counter[site_id_2] += 1;
+
                 }
             }
         }
