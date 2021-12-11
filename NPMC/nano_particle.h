@@ -282,6 +282,7 @@ void NanoParticle::compute_reactions() {
               j++) {
 
             unsigned int site_id_2 = site_neighbors[site_id_1][j];
+
             for ( unsigned int interaction_id = 0;
                   interaction_id < interactions.size();
                   interaction_id++) {
@@ -347,6 +348,7 @@ void NanoParticle::compute_reactions() {
               j++) {
 
             unsigned int site_id_2 = site_neighbors[site_id_1][j];
+
             for ( unsigned int interaction_id = 0;
                   interaction_id < interactions.size();
                   interaction_id++) {
