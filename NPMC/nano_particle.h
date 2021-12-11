@@ -87,7 +87,6 @@ struct NanoParticle {
         std::vector<int> &state,
         int reaction_id);
 
-
 };
 
 
@@ -278,9 +277,11 @@ void NanoParticle::compute_reactions() {
     for ( unsigned int site_id_1 = 0;
           site_id_1 < sites.size();
           site_id_1++) {
-        for ( unsigned int site_id_2 = 0;
-              site_id_2 < site_neighbors[site_id_1].size();
-              site_id_2++) {
+        for ( unsigned int j = 0;
+              j < site_neighbors[site_id_1].size();
+              j++) {
+
+            unsigned int site_id_2 = site_neighbors[site_id_1][j];
             for ( unsigned int interaction_id = 0;
                   interaction_id < interactions.size();
                   interaction_id++) {
@@ -341,9 +342,11 @@ void NanoParticle::compute_reactions() {
     for ( unsigned int site_id_1 = 0;
           site_id_1 < sites.size();
           site_id_1++) {
-        for ( unsigned int site_id_2 = 0;
-              site_id_2 < site_neighbors[site_id_1].size();
-              site_id_2++) {
+        for ( unsigned int j = 0;
+              j < site_neighbors[site_id_1].size();
+              j++) {
+
+            unsigned int site_id_2 = site_neighbors[site_id_1][j];
             for ( unsigned int interaction_id = 0;
                   interaction_id < interactions.size();
                   interaction_id++) {
@@ -360,8 +363,10 @@ void NanoParticle::compute_reactions() {
                         .site_id_2 = (int) site_id_2,
                         .interaction_id = (int) interaction_id
                     };
+
                     site_reaction_dependency[site_id_1][
                         site_reaction_dependency_counter[site_id_1]] = reaction_count;
+
                     site_reaction_dependency[site_id_2][
                         site_reaction_dependency_counter[site_id_2]] = reaction_count;
 
@@ -406,6 +411,7 @@ double NanoParticle::compute_propensity(
             Site site_1 = sites[site_id_1];
             Site site_2 = sites[site_id_2];
             double distance = std::sqrt(site_distance_squared(site_1, site_2));
+
 
             // by the way we constructed the reactions, diff will always be >= 0
             double distance_factor = 1 - ( distance / interaction_radius_bound );

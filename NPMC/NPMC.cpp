@@ -23,4 +23,6 @@ int main() {
         std::ref(nano_particle),
         42,
         1000);
+
+    simulation.execute_steps(1000);
 }
