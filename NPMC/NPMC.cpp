@@ -1,5 +1,6 @@
 #include "../core/sql.h"
-#include "nano_particle.h"
+#include "../core/solvers.h"
+#include "simulation.h"
 #include <functional>
 
 int main() {
@@ -17,4 +18,9 @@ int main() {
         std::ref(nanoparticle_database),
         std::ref(initial_state_database));
 
+
+    Simulation<TreeSolver> simulation (
+        std::ref(nano_particle),
+        42,
+        1000);
 }

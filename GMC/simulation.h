@@ -1,6 +1,7 @@
 #pragma once
 #include "reaction_network.h"
 #include "../core/solvers.h"
+#include <functional>
 
 struct HistoryElement {
     int reaction; // reaction which fired
@@ -29,7 +30,7 @@ struct Simulation {
         state (reaction_network.initial_state),
         time (0.0),
         step (0),
-        solver (seed, reaction_network.initial_propensities),
+        solver (seed, std::ref(reaction_network.initial_propensities)),
         history (step_cutoff + 1)
         {};
 
