@@ -1,7 +1,8 @@
 #pragma once
 #include <mutex>
 #include <thread>
-#include "simulation.h"
+#include "reaction_network.h"
+#include "../core/simulation.h"
 #include "../core/queues.h"
 
 struct GMCHistoryPacket {
@@ -13,13 +14,13 @@ struct GMCHistoryPacket {
 
 template <typename Solver, typename Model>
 struct SimulatorPayload {
-    ReactionNetwork &reaction_network;
+    ReactionNetwork<Solver> &reaction_network;
     HistoryQueue<GMCHistoryPacket> &history_queue;
     SeedQueue &seed_queue;
     int step_cutoff;
 
     SimulatorPayload(
-        ReactionNetwork &reaction_network,
+        ReactionNetwork<Solver> &reaction_network,
         HistoryQueue<GMCHistoryPacket> &history_queue,
         SeedQueue &seed_queue,
         int step_cutoff
@@ -56,7 +57,7 @@ template <typename Solver, typename Model>
 struct Dispatcher {
     SqlConnection reaction_database;
     SqlConnection initial_state_database;
-    ReactionNetwork reaction_network;
+    ReactionNetwork<Solver> reaction_network;
     SqlStatement<TrajectoriesSql> trajectories_stmt;
     SqlWriter<TrajectoriesSql> trajectories_writer;
     HistoryQueue<GMCHistoryPacket> history_queue;

@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
 
     }
 
-    Dispatcher<TreeSolver, ReactionNetwork>
+    Dispatcher<TreeSolver, ReactionNetwork<TreeSolver>>
         dispatcher (
         reaction_database,
         initial_state_database,

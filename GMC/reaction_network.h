@@ -33,7 +33,7 @@ struct DependentsNode {
 };
 
 
-
+template <typename Solver>
 struct ReactionNetwork {
 
     std::vector<Reaction> reactions; // list of reactions
@@ -66,9 +66,16 @@ struct ReactionNetwork {
         std::vector<int> &state,
         int reaction_index);
 
+    void update_propensities(
+        Solver &solver,
+        std::vector<int> &state,
+        int next_reaction
+        );
+
 };
 
-ReactionNetwork::ReactionNetwork(
+template <typename Solver>
+ReactionNetwork<Solver>::ReactionNetwork(
      SqlConnection &reaction_network_database,
      SqlConnection &initial_state_database,
      int dependency_threshold) :
@@ -173,8 +180,8 @@ ReactionNetwork::ReactionNetwork(
     }
 };
 
-
-std::optional<std::vector<int>> &ReactionNetwork::get_dependency_node(
+template <typename Solver>
+std::optional<std::vector<int>> &ReactionNetwork<Solver>::get_dependency_node(
     int reaction_index) {
 
     DependentsNode &node = dependency_graph[reaction_index];
@@ -191,8 +198,8 @@ std::optional<std::vector<int>> &ReactionNetwork::get_dependency_node(
     return node.dependents;
 };
 
-
-void ReactionNetwork::compute_dependency_node(int reaction_index) {
+template <typename Solver>
+void ReactionNetwork<Solver>::compute_dependency_node(int reaction_index) {
 
     DependentsNode &node = dependency_graph[reaction_index];
 
@@ -253,7 +260,8 @@ void ReactionNetwork::compute_dependency_node(int reaction_index) {
     node.dependents = std::optional (std::move(dependents));
 };
 
-double ReactionNetwork::compute_propensity(
+template <typename Solver>
+double ReactionNetwork<Solver>::compute_propensity(
     std::vector<int> &state,
     int reaction_index) {
 
@@ -289,7 +297,8 @@ double ReactionNetwork::compute_propensity(
 
 };
 
-void ReactionNetwork::update_state(
+template <typename Solver>
+void ReactionNetwork<Solver>::update_state(
     std::vector<int> &state,
     int reaction_index) {
 
@@ -308,9 +317,8 @@ void ReactionNetwork::update_state(
 }
 
 
-template <typename Solver, typename Model>
-void update_propensities(
-    Model &model,
+template <typename Solver>
+void ReactionNetwork<Solver>::update_propensities(
     Solver &solver,
     std::vector<int> &state,
     int next_reaction
@@ -319,7 +327,7 @@ void update_propensities(
 
 
     std::optional<std::vector<int>> &maybe_dependents =
-        model.get_dependency_node(next_reaction);
+        get_dependency_node(next_reaction);
 
     if (maybe_dependents) {
         // relevent section of dependency graph has been computed
@@ -327,7 +335,7 @@ void update_propensities(
 
         for (unsigned long int m = 0; m < dependents.size(); m++) {
             unsigned long int reaction_index = dependents[m];
-            double new_propensity = model.compute_propensity(
+            double new_propensity = compute_propensity(
                 state,
                 reaction_index);
 
@@ -339,10 +347,10 @@ void update_propensities(
     } else {
         // relevent section of dependency graph has not been computed
         for (unsigned long int reaction_index = 0;
-             reaction_index < model.reactions.size();
+             reaction_index < reactions.size();
              reaction_index++) {
 
-            double new_propensity = model.compute_propensity(
+            double new_propensity = compute_propensity(
                 state,
                 reaction_index);
 
@@ -353,5 +361,4 @@ void update_propensities(
         }
 
     }
-
 }

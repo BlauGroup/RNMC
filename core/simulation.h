@@ -1,6 +1,5 @@
 #pragma once
-#include "reaction_network.h"
-#include "../core/solvers.h"
+#include "solvers.h"
 #include <functional>
 
 
@@ -70,8 +69,7 @@ bool Simulation<Solver, Model>::execute_step() {
 
 
         // update propensities
-        update_propensities<Solver, Model>(
-            std::ref(model),
+        model.update_propensities(
             std::ref(solver),
             std::ref(state),
             next_reaction);
