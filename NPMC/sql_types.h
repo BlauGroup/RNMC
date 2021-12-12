@@ -124,3 +124,26 @@ void InitialStateSql::action(InitialStateSql &r, sqlite3_stmt *stmt) {
     r.degree_of_freedom = sqlite3_column_int(stmt, 1);
 }
 
+
+struct TrajectoriesSql {
+    int seed;
+    int step;
+    double time;
+    int site_id_1;
+    int site_id_2;
+    int interaction_id;
+    static std::string sql_statement;
+    static void action(TrajectoriesSql &r, sqlite3_stmt *stmt);
+};
+
+std::string TrajectoriesSql::sql_statement =
+    "INSERT INTO trajectories VALUES (?1,?2,?3,?4,?5,?6);";
+
+void TrajectoriesSql::action(TrajectoriesSql &r, sqlite3_stmt *stmt) {
+    sqlite3_bind_int(stmt, 1, r.seed);
+    sqlite3_bind_int(stmt, 2, r.step);
+    sqlite3_bind_double(stmt, 3, r.time);
+    sqlite3_bind_int(stmt, 4, r.site_id_1);
+    sqlite3_bind_int(stmt, 5, r.site_id_2);
+    sqlite3_bind_int(stmt, 6, r.interaction_id);
+}

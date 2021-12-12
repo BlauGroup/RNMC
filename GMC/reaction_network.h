@@ -33,16 +33,20 @@ struct DependentsNode {
     number_of_occurrences (0) {};
 };
 
+// parameters passed to the ReactionNetwork constructor
+// by the dispatcher which are model specific
 struct ReactionNetworkParameters {
     int dependency_threshold;
 };
 
+
+// Model types need to be parameterized over the Solver type so
+// that propensity updating can be implemented as a method.
 template <typename Solver>
 struct ReactionNetwork {
     std::vector<Reaction> reactions; // list of reactions
     std::vector<int> initial_state; // initial state for all the simulations
     std::vector<double> initial_propensities; // initial propensities for all the reactions
-
     double factor_zero; // rate modifer for reactions with zero reactants
     double factor_two; // rate modifier for reactions with two reactants
     double factor_duplicate; // rate modifier for reactions of form A + A -> ...
@@ -75,6 +79,8 @@ struct ReactionNetwork {
         int next_reaction
         );
 
+    // convert a history element as found a simulation to history
+    // to a SQL type.
     TrajectoriesSql history_element_to_sql(
         int seed,
         int step,

@@ -60,7 +60,7 @@ template <
     typename TrajectoriesSql>
 
 struct Dispatcher {
-    SqlConnection reaction_database;
+    SqlConnection model_database;
     SqlConnection initial_state_database;
     Model model;
     SqlStatement<TrajectoriesSql> trajectories_stmt;
@@ -73,21 +73,21 @@ struct Dispatcher {
     int number_of_threads;
 
     Dispatcher(
-        std::string reaction_database_file,
+        std::string model_database_file,
         std::string initial_state_database_file,
         unsigned long int number_of_simulations,
         unsigned long int base_seed,
         int number_of_threads,
         int step_cutoff,
         Parameters parameters) :
-        reaction_database (
-            reaction_database_file,
+        model_database (
+            model_database_file,
             SQLITE_OPEN_READWRITE),
         initial_state_database (
             initial_state_database_file,
             SQLITE_OPEN_READWRITE),
         model (
-            reaction_database,
+            model_database,
             initial_state_database,
             parameters),
         trajectories_stmt (initial_state_database),

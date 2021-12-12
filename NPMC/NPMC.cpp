@@ -1,28 +1,30 @@
-#include "../core/sql.h"
-#include "../core/solvers.h"
-#include "simulation.h"
-#include <functional>
+#include "../core/dispatcher.h"
+#include "sql_types.h"
+#include "nano_particle.h"
+
 
 int main() {
 
+    NanoParticleParameters parameters = {};
 
-    SqlConnection nanoparticle_database (
-        "./test_materials/NPMC/np.sqlite",
-        SQLITE_OPEN_READONLY);
+    Dispatcher<
+        TreeSolver,
+        NanoParticle<TreeSolver>,
+        NanoParticleParameters,
+        TrajectoriesSql
+        >
 
-    SqlConnection initial_state_database (
-        "./test_materials/NPMC/initial_state.sqlite",
-        SQLITE_OPEN_READWRITE);
+        dispatcher (
+            "./test_materials/NPMC/np.sqlite",
+            "./test_materials/NPMC/initial_state.sqlite",
+            1000,
+            1000,
+            8,
+            2000,
+            parameters
+            );
 
-    NanoParticle nano_particle (
-        std::ref(nanoparticle_database),
-        std::ref(initial_state_database));
+    dispatcher.run_dispatcher();
+    exit(EXIT_SUCCESS);
 
-
-    Simulation<TreeSolver> simulation (
-        std::ref(nano_particle),
-        42,
-        1000);
-
-    simulation.execute_steps(1000);
 }
