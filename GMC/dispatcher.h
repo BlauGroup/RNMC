@@ -1,5 +1,4 @@
 #pragma once
-#include <queue>
 #include <mutex>
 #include <thread>
 #include "simulation.h"
@@ -12,7 +11,7 @@ struct GMCHistoryPacket {
 
 
 
-template <typename Solver>
+template <typename Solver, typename Model>
 struct SimulatorPayload {
     ReactionNetwork &reaction_network;
     HistoryQueue<GMCHistoryPacket> &history_queue;
@@ -37,7 +36,7 @@ struct SimulatorPayload {
                seed_queue.get_seed()) {
 
             unsigned long int seed = maybe_seed.value();
-            Simulation<Solver> simulation (reaction_network, seed, step_cutoff);
+            Simulation<Solver, Model> simulation (reaction_network, seed, step_cutoff);
             simulation.execute_steps(step_cutoff);
 
             // Calling resize() with a smaller size has no effect on the capacity of a vector.
@@ -53,7 +52,7 @@ struct SimulatorPayload {
     }
 };
 
-template <typename Solver>
+template <typename Solver, typename Model>
 struct Dispatcher {
     SqlConnection reaction_database;
     SqlConnection initial_state_database;
@@ -103,14 +102,14 @@ struct Dispatcher {
 
 
 
-template <typename Solver>
-void Dispatcher<Solver>::run_dispatcher() {
+template <typename Solver, typename Model>
+void Dispatcher<Solver, Model>::run_dispatcher() {
 
     threads.resize(number_of_threads);
     for (int i = 0; i < number_of_threads; i++) {
         threads[i] = std::thread (
-            [](SimulatorPayload<Solver> payload) {payload.run_simulator();},
-            SimulatorPayload<Solver> (
+            [](SimulatorPayload<Solver, Model> payload) {payload.run_simulator();},
+            SimulatorPayload<Solver, Model> (
                 reaction_network,
                 history_queue,
                 seed_queue,
@@ -144,8 +143,8 @@ void Dispatcher<Solver>::run_dispatcher() {
 
 };
 
-template <typename Solver>
-void Dispatcher<Solver>::record_simulation_history(GMCHistoryPacket history_packet) {
+template <typename Solver, typename Model>
+void Dispatcher<Solver, Model>::record_simulation_history(GMCHistoryPacket history_packet) {
     int count = 0;
     constexpr int transaction_size = 20000;
     initial_state_database.exec("BEGIN");
@@ -155,7 +154,7 @@ void Dispatcher<Solver>::record_simulation_history(GMCHistoryPacket history_pack
             TrajectoriesSql {
                 .seed = (int) history_packet.seed,
                 .step = (int) i,
-                .reaction_id = history_packet.history[i].reaction,
+                .reaction_id = history_packet.history[i].reaction_id,
                 .time = history_packet.history[i].time
             });
         count++;

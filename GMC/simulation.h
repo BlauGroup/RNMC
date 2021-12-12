@@ -3,14 +3,15 @@
 #include "../core/solvers.h"
 #include <functional>
 
+
 struct HistoryElement {
-    int reaction; // reaction which fired
+    int reaction_id; // reaction which fired
     double time;  // time after reaction has occoured.
 };
 
-template <typename Solver>
+template <typename Solver, typename Model>
 struct Simulation {
-    ReactionNetwork &reaction_network;
+    Model &model;
     unsigned long int seed;
     std::vector<int> state;
     double time;
@@ -19,42 +20,29 @@ struct Simulation {
     std::vector<HistoryElement> history;
 
 
-    Simulation(ReactionNetwork &reaction_network,
+    Simulation(Model &model,
                unsigned long int seed,
 
                // step cutoff gets used here to set the history length
                // we don't actually store it in the Simulation object
                int step_cutoff) :
-        reaction_network (reaction_network),
+        model (model),
         seed (seed),
-        state (reaction_network.initial_state),
+        state (model.initial_state),
         time (0.0),
         step (0),
-        solver (seed, std::ref(reaction_network.initial_propensities)),
+        solver (seed, std::ref(model.initial_propensities)),
         history (step_cutoff + 1)
         {};
 
 
     bool execute_step();
     void execute_steps(int step_cutoff);
-    bool check_state_positivity();
-};
-
-template <typename Solver>
-bool Simulation<Solver>::check_state_positivity() {
-    for (int i = 0; i < state.size(); i++) {
-    if (state[i] < 0) {
-        std::cerr << time_stamp()
-                  << "negative state encountered: index = " << i << "\n";
-      return false;
-    }
-  }
-  return true;
 };
 
 
-template <typename Solver>
-bool Simulation<Solver>::execute_step() {
+template <typename Solver, typename Model>
+bool Simulation<Solver, Model>::execute_step() {
     std::optional<Event> maybe_event = solver.event();
 
     if (! maybe_event) {
@@ -71,70 +59,30 @@ bool Simulation<Solver>::execute_step() {
 
         // record what happened
         history[step] = HistoryElement {
-            .reaction = next_reaction,
+            .reaction_id = next_reaction,
             .time = time};
 
         // increment step
         step++;
 
         // update state
-        for (int m = 0;
-             m < reaction_network.reactions[next_reaction].number_of_reactants;
-             m++) {
-            state[reaction_network.reactions[next_reaction].reactants[m]]--;
-        }
+        model.update_state(std::ref(state), next_reaction);
 
-        for (int m = 0;
-             m < reaction_network.reactions[next_reaction].number_of_products;
-             m++) {
-            state[reaction_network.reactions[next_reaction].products[m]]++;
-        }
 
         // update propensities
-        std::optional<std::vector<int>> &maybe_dependents =
-            reaction_network.get_dependency_node(next_reaction);
-
-        if (maybe_dependents) {
-            // relevent section of dependency graph has been computed
-            std::vector<int> &dependents = maybe_dependents.value();
-
-            for (unsigned long int m = 0; m < dependents.size(); m++) {
-                unsigned long int reaction_index = dependents[m];
-                double new_propensity = reaction_network.compute_propensity(
-                    state,
-                    reaction_index);
-
-                solver.update(Update {
-                        .index = reaction_index,
-                        .propensity = new_propensity});
-
-            }
-        } else {
-            // relevent section of dependency graph has not been computed
-            for (unsigned long int reaction_index = 0;
-                 reaction_index < reaction_network.reactions.size();
-                 reaction_index++) {
-
-                double new_propensity = reaction_network.compute_propensity(
-                    state,
-                    reaction_index);
-
-                solver.update(Update {
-                        .index = reaction_index,
-                        .propensity = new_propensity});
-
-            }
-
-        }
+        update_propensities<Solver, Model>(
+            std::ref(model),
+            std::ref(solver),
+            std::ref(state),
+            next_reaction);
 
         return true;
     }
 };
 
-template <typename Solver>
-void Simulation<Solver>::execute_steps(int step_cutoff) {
+template <typename Solver, typename Model>
+void Simulation<Solver, Model>::execute_steps(int step_cutoff) {
     while(execute_step()) {
-        // check_state_positivity();
         if (step > step_cutoff)
             break;
     }

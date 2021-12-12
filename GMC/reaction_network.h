@@ -5,6 +5,7 @@
 #include <mutex>
 #include "../core/sql.h"
 #include "sql_types.h"
+#include "../core/solvers.h"
 
 struct Reaction {
     // we assume that each reaction has zero, one or two reactants
@@ -30,6 +31,8 @@ struct DependentsNode {
     mutex (std::mutex()),
     number_of_occurrences (0) {};
 };
+
+
 
 struct ReactionNetwork {
 
@@ -59,6 +62,9 @@ struct ReactionNetwork {
         std::vector<int> &state,
         int reaction_index);
 
+    void update_state(
+        std::vector<int> &state,
+        int reaction_index);
 
 };
 
@@ -282,3 +288,70 @@ double ReactionNetwork::compute_propensity(
     return p;
 
 };
+
+void ReactionNetwork::update_state(
+    std::vector<int> &state,
+    int reaction_index) {
+
+    for (int m = 0;
+         m < reactions[reaction_index].number_of_reactants;
+         m++) {
+        state[reactions[reaction_index].reactants[m]]--;
+    }
+
+    for (int m = 0;
+         m < reactions[reaction_index].number_of_products;
+         m++) {
+        state[reactions[reaction_index].products[m]]++;
+    }
+
+}
+
+
+template <typename Solver, typename Model>
+void update_propensities(
+    Model &model,
+    Solver &solver,
+    std::vector<int> &state,
+    int next_reaction
+    ) {
+
+
+
+    std::optional<std::vector<int>> &maybe_dependents =
+        model.get_dependency_node(next_reaction);
+
+    if (maybe_dependents) {
+        // relevent section of dependency graph has been computed
+        std::vector<int> &dependents = maybe_dependents.value();
+
+        for (unsigned long int m = 0; m < dependents.size(); m++) {
+            unsigned long int reaction_index = dependents[m];
+            double new_propensity = model.compute_propensity(
+                state,
+                reaction_index);
+
+            solver.update(Update {
+                    .index = reaction_index,
+                    .propensity = new_propensity});
+
+        }
+    } else {
+        // relevent section of dependency graph has not been computed
+        for (unsigned long int reaction_index = 0;
+             reaction_index < model.reactions.size();
+             reaction_index++) {
+
+            double new_propensity = model.compute_propensity(
+                state,
+                reaction_index);
+
+            solver.update(Update {
+                    .index = reaction_index,
+                    .propensity = new_propensity});
+
+        }
+
+    }
+
+}
