@@ -1,7 +1,7 @@
+#include <getopt.h>
 #include "../core/dispatcher.h"
 #include "sql_types.h"
 #include "reaction_network.h"
-#include <getopt.h>
 
 void print_usage() {
     std::cout << "Usage: specify the following options\n"
