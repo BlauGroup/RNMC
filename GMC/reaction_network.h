@@ -6,6 +6,7 @@
 #include "../core/sql.h"
 #include "sql_types.h"
 #include "../core/solvers.h"
+#include "../core/simulation.h"
 
 struct Reaction {
     // we assume that each reaction has zero, one or two reactants
@@ -32,10 +33,16 @@ struct DependentsNode {
     number_of_occurrences (0) {};
 };
 
+struct ReactionNetworkParameters {
+    int dependency_threshold;
+};
 
-template <typename Solver>
+template <
+    typename Solver,
+    typename Parameters,
+    typename TrajectoriesSql
+    >
 struct ReactionNetwork {
-
     std::vector<Reaction> reactions; // list of reactions
     std::vector<int> initial_state; // initial state for all the simulations
     std::vector<double> initial_propensities; // initial propensities for all the reactions
@@ -53,7 +60,7 @@ struct ReactionNetwork {
     ReactionNetwork(
         SqlConnection &reaction_network_database,
         SqlConnection &initial_state_database,
-        int dependency_threshold);
+        Parameters parameters);
 
     std::optional<std::vector<int>> &get_dependency_node(int reaction_index);
     void compute_dependency_node(int reaction_index);
@@ -72,15 +79,20 @@ struct ReactionNetwork {
         int next_reaction
         );
 
+    TrajectoriesSql history_element_to_sql(
+        int seed,
+        int step,
+        HistoryElement history_element);
+
 };
 
-template <typename Solver>
-ReactionNetwork<Solver>::ReactionNetwork(
+template <typename Solver, typename Parameters, typename TrajectoriesSql>
+ReactionNetwork<Solver, Parameters, TrajectoriesSql>::ReactionNetwork(
      SqlConnection &reaction_network_database,
      SqlConnection &initial_state_database,
-     int dependency_threshold) :
+     Parameters parameters) :
 
-    dependency_threshold( dependency_threshold ) {
+    dependency_threshold( parameters.dependency_threshold ) {
 
     // collecting reaction network metadata
     SqlStatement<MetadataSql> metadata_statement (reaction_network_database);
@@ -180,8 +192,8 @@ ReactionNetwork<Solver>::ReactionNetwork(
     }
 };
 
-template <typename Solver>
-std::optional<std::vector<int>> &ReactionNetwork<Solver>::get_dependency_node(
+template <typename Solver, typename Parameters, typename TrajectoriesSql>
+std::optional<std::vector<int>> &ReactionNetwork<Solver, Parameters, TrajectoriesSql>::get_dependency_node(
     int reaction_index) {
 
     DependentsNode &node = dependency_graph[reaction_index];
@@ -198,8 +210,8 @@ std::optional<std::vector<int>> &ReactionNetwork<Solver>::get_dependency_node(
     return node.dependents;
 };
 
-template <typename Solver>
-void ReactionNetwork<Solver>::compute_dependency_node(int reaction_index) {
+template <typename Solver, typename Parameters, typename TrajectoriesSql>
+void ReactionNetwork<Solver, Parameters, TrajectoriesSql>::compute_dependency_node(int reaction_index) {
 
     DependentsNode &node = dependency_graph[reaction_index];
 
@@ -260,8 +272,8 @@ void ReactionNetwork<Solver>::compute_dependency_node(int reaction_index) {
     node.dependents = std::optional (std::move(dependents));
 };
 
-template <typename Solver>
-double ReactionNetwork<Solver>::compute_propensity(
+template <typename Solver, typename Parameters, typename TrajectoriesSql>
+double ReactionNetwork<Solver, Parameters, TrajectoriesSql>::compute_propensity(
     std::vector<int> &state,
     int reaction_index) {
 
@@ -297,8 +309,8 @@ double ReactionNetwork<Solver>::compute_propensity(
 
 };
 
-template <typename Solver>
-void ReactionNetwork<Solver>::update_state(
+template <typename Solver, typename Parameters, typename TrajectoriesSql>
+void ReactionNetwork<Solver, Parameters, TrajectoriesSql>::update_state(
     std::vector<int> &state,
     int reaction_index) {
 
@@ -317,8 +329,8 @@ void ReactionNetwork<Solver>::update_state(
 }
 
 
-template <typename Solver>
-void ReactionNetwork<Solver>::update_propensities(
+template <typename Solver, typename Parameters, typename TrajectoriesSql>
+void ReactionNetwork<Solver, Parameters, TrajectoriesSql>::update_propensities(
     Solver &solver,
     std::vector<int> &state,
     int next_reaction
@@ -361,4 +373,19 @@ void ReactionNetwork<Solver>::update_propensities(
         }
 
     }
+}
+
+
+
+template <typename Solver, typename Parameters, typename TrajectoriesSql>
+TrajectoriesSql ReactionNetwork<Solver, Parameters, TrajectoriesSql>::history_element_to_sql(
+    int seed,
+    int step,
+    HistoryElement history_element) {
+    return TrajectoriesSql {
+        .seed = seed,
+        .step = step,
+        .reaction_id = history_element.reaction_id,
+        .time = history_element.time
+    };
 }

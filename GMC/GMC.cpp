@@ -1,4 +1,6 @@
-#include "dispatcher.h"
+#include "../core/dispatcher.h"
+#include "sql_types.h"
+#include "reaction_network.h"
 #include <getopt.h>
 
 void print_usage() {
@@ -87,7 +89,19 @@ int main(int argc, char **argv) {
 
     }
 
-    Dispatcher<TreeSolver, ReactionNetwork<TreeSolver>>
+    ReactionNetworkParameters parameters = {
+        .dependency_threshold = dependency_threshold };
+
+    Dispatcher<
+        TreeSolver,
+        ReactionNetwork<TreeSolver,
+                        ReactionNetworkParameters,
+                        TrajectoriesSql
+                        >,
+        ReactionNetworkParameters,
+        TrajectoriesSql
+        >
+
         dispatcher (
         reaction_database,
         initial_state_database,
@@ -95,7 +109,7 @@ int main(int argc, char **argv) {
         base_seed,
         thread_count,
         step_cutoff,
-        dependency_threshold
+        parameters
         );
 
     dispatcher.run_dispatcher();
