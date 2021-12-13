@@ -35,7 +35,7 @@
               gcc
               clang
               gsl
-              sqlite
+              (sqlite.override { interactive = true; })
               sqlitebrowser
               gdb
               valgrind
