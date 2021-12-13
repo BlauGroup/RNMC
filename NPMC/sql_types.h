@@ -43,6 +43,7 @@ void SiteSql::action(SiteSql &r, sqlite3_stmt *stmt) {
 
 struct InteractionSql {
     int interaction_id;
+    int number_of_sites;
     int species_id_1;
     int species_id_2;
     int left_state_1;
@@ -55,19 +56,20 @@ struct InteractionSql {
 };
 
 std::string InteractionSql::sql_statement =
-    "SELECT interaction_id, species_id_1, species_id_2, "
+    "SELECT interaction_id, number_of_sites, species_id_1, species_id_2, "
     "left_state_1, left_state_2, right_state_1, right_state_2, "
     "rate FROM interactions;";
 
 void InteractionSql::action(InteractionSql &r, sqlite3_stmt *stmt) {
     r.interaction_id = sqlite3_column_int(stmt, 0);
-    r.species_id_1 = sqlite3_column_int(stmt, 1);
-    r.species_id_2 = sqlite3_column_int(stmt, 2);
-    r.left_state_1 = sqlite3_column_int(stmt, 3);
-    r.left_state_2 = sqlite3_column_int(stmt, 4);
-    r.right_state_1 = sqlite3_column_int(stmt, 5);
-    r.right_state_2 = sqlite3_column_int(stmt, 6);
-    r.rate = sqlite3_column_double(stmt, 7);
+    r.number_of_sites = sqlite3_column_int(stmt, 1);
+    r.species_id_1 = sqlite3_column_int(stmt, 2);
+    r.species_id_2 = sqlite3_column_int(stmt, 3);
+    r.left_state_1 = sqlite3_column_int(stmt, 4);
+    r.left_state_2 = sqlite3_column_int(stmt, 5);
+    r.right_state_1 = sqlite3_column_int(stmt, 6);
+    r.right_state_2 = sqlite3_column_int(stmt, 7);
+    r.rate = sqlite3_column_double(stmt, 8);
 }
 
 
