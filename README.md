@@ -55,7 +55,7 @@ GMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite 
 
 ### The Reaction Network Database
 
-There should be 2 tables in the reaction network database:
+There are 2 tables in the reaction network database:
 ```
     CREATE TABLE metadata (
             number_of_species   INTEGER NOT NULL,
