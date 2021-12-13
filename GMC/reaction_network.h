@@ -40,9 +40,6 @@ struct ReactionNetworkParameters {
 };
 
 
-// Model types need to be parameterized over the Solver type so
-// that propensity updating can be implemented as a method.
-template <typename Solver>
 struct ReactionNetwork {
     std::vector<Reaction> reactions; // list of reactions
     std::vector<int> initial_state; // initial state for all the simulations
@@ -74,7 +71,7 @@ struct ReactionNetwork {
         int reaction_index);
 
     void update_propensities(
-        Solver &solver,
+        std::function<void(Update update)> update_function,
         std::vector<int> &state,
         int next_reaction
         );
@@ -88,8 +85,7 @@ struct ReactionNetwork {
 
 };
 
-template <typename Solver>
-ReactionNetwork<Solver>::ReactionNetwork(
+ReactionNetwork::ReactionNetwork(
      SqlConnection &reaction_network_database,
      SqlConnection &initial_state_database,
      ReactionNetworkParameters parameters) :
@@ -194,8 +190,7 @@ ReactionNetwork<Solver>::ReactionNetwork(
     }
 };
 
-template <typename Solver>
-std::optional<std::vector<int>> &ReactionNetwork<Solver>::get_dependency_node(
+std::optional<std::vector<int>> &ReactionNetwork::get_dependency_node(
     int reaction_index) {
 
     DependentsNode &node = dependency_graph[reaction_index];
@@ -212,8 +207,7 @@ std::optional<std::vector<int>> &ReactionNetwork<Solver>::get_dependency_node(
     return node.dependents;
 };
 
-template <typename Solver>
-void ReactionNetwork<Solver>::compute_dependency_node(int reaction_index) {
+void ReactionNetwork::compute_dependency_node(int reaction_index) {
 
     DependentsNode &node = dependency_graph[reaction_index];
 
@@ -274,8 +268,7 @@ void ReactionNetwork<Solver>::compute_dependency_node(int reaction_index) {
     node.dependents = std::optional (std::move(dependents));
 };
 
-template <typename Solver>
-double ReactionNetwork<Solver>::compute_propensity(
+double ReactionNetwork::compute_propensity(
     std::vector<int> &state,
     int reaction_index) {
 
@@ -311,8 +304,7 @@ double ReactionNetwork<Solver>::compute_propensity(
 
 };
 
-template <typename Solver>
-void ReactionNetwork<Solver>::update_state(
+void ReactionNetwork::update_state(
     std::vector<int> &state,
     int reaction_index) {
 
@@ -331,9 +323,8 @@ void ReactionNetwork<Solver>::update_state(
 }
 
 
-template <typename Solver>
-void ReactionNetwork<Solver>::update_propensities(
-    Solver &solver,
+void ReactionNetwork::update_propensities(
+    std::function<void(Update update)> update_function,
     std::vector<int> &state,
     int next_reaction
     ) {
@@ -353,7 +344,7 @@ void ReactionNetwork<Solver>::update_propensities(
                 state,
                 reaction_index);
 
-            solver.update(Update {
+            update_function(Update {
                     .index = reaction_index,
                     .propensity = new_propensity});
 
@@ -368,7 +359,7 @@ void ReactionNetwork<Solver>::update_propensities(
                 state,
                 reaction_index);
 
-            solver.update(Update {
+            update_function(Update {
                     .index = reaction_index,
                     .propensity = new_propensity});
 
@@ -379,8 +370,7 @@ void ReactionNetwork<Solver>::update_propensities(
 
 
 
-template <typename Solver>
-TrajectoriesSql ReactionNetwork<Solver>::history_element_to_sql(
+TrajectoriesSql ReactionNetwork::history_element_to_sql(
     int seed,
     int step,
     HistoryElement history_element) {

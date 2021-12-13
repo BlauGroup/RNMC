@@ -9,7 +9,7 @@ int main() {
 
     Dispatcher<
         TreeSolver,
-        NanoParticle<TreeSolver>,
+        NanoParticle,
         NanoParticleParameters,
         TrajectoriesSql
         >

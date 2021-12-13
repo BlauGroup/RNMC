@@ -48,7 +48,6 @@ struct Reaction {
 
 struct NanoParticleParameters {};
 
-template <typename Solver>
 struct NanoParticle {
     // maps a species index to the number of degrees of freedom
     std::vector<int> degrees_of_freedom;
@@ -98,7 +97,7 @@ struct NanoParticle {
         int reaction_id);
 
     void update_propensities(
-        Solver &solver,
+        std::function<void(Update update)> update_function,
         std::vector<int> &state,
         int next_reaction_id
         );
@@ -114,8 +113,7 @@ struct NanoParticle {
 
 };
 
-template <typename Solver>
-NanoParticle<Solver>::NanoParticle(
+NanoParticle::NanoParticle(
     SqlConnection &nano_particle_database,
     SqlConnection &initial_state_database,
     NanoParticleParameters parameters
@@ -238,8 +236,7 @@ NanoParticle<Solver>::NanoParticle(
     }
 
 }
-template <typename Solver>
-std::vector<std::vector<int>> NanoParticle<Solver>::compute_site_neighbors() {
+std::vector<std::vector<int>> NanoParticle::compute_site_neighbors() {
     double threshold = interaction_radius_bound * interaction_radius_bound;
     std::vector<std::vector<int>> site_neighbors;
     site_neighbors.resize(sites.size());
@@ -273,8 +270,7 @@ std::vector<std::vector<int>> NanoParticle<Solver>::compute_site_neighbors() {
     return site_neighbors;
 }
 
-template <typename Solver>
-void NanoParticle<Solver>::compute_reactions() {
+void NanoParticle::compute_reactions() {
     // compute all possible reactions and a mapping of site ids to the
     // reaction ids involving a site. Since we expect the number of distinct interactions
     // to be quite small, the number of reactions involving two fixed sites is quite small.
@@ -410,8 +406,7 @@ void NanoParticle<Solver>::compute_reactions() {
     }
 }
 
-template <typename Solver>
-double NanoParticle<Solver>::compute_propensity(
+double NanoParticle::compute_propensity(
     std::vector<int> &state,
     int reaction_id) {
 
@@ -459,8 +454,7 @@ double NanoParticle<Solver>::compute_propensity(
 }
 
 
-template <typename Solver>
-void NanoParticle<Solver>::update_state(
+void NanoParticle::update_state(
     std::vector<int> &state,
     int reaction_id) {
     Reaction reaction = reactions[reaction_id];
@@ -477,9 +471,8 @@ void NanoParticle<Solver>::update_state(
 }
 
 
-template <typename Solver>
-void NanoParticle<Solver>::update_propensities(
-    Solver &solver,
+void NanoParticle::update_propensities(
+    std::function<void(Update update)> update_function,
     std::vector<int> &state,
     int next_reaction_id
     ) {
@@ -495,7 +488,7 @@ void NanoParticle<Solver>::update_propensities(
         double new_propensity = compute_propensity(std::ref(state), reaction_id);
 
 
-        solver.update( Update {
+        update_function( Update {
                 .index = (unsigned long int) reaction_id,
                 .propensity = new_propensity});
     }
@@ -507,7 +500,7 @@ void NanoParticle<Solver>::update_propensities(
             int reaction_id = site_reaction_dependency[reaction.site_id_2][i];
             double new_propensity = compute_propensity(std::ref(state), reaction_id);
 
-            solver.update( Update {
+            update_function( Update {
                     .index = (unsigned long int) reaction_id,
                     .propensity = new_propensity});
         }
@@ -516,8 +509,7 @@ void NanoParticle<Solver>::update_propensities(
 
 }
 
-template <typename Solver>
-TrajectoriesSql NanoParticle<Solver>::history_element_to_sql(
+TrajectoriesSql NanoParticle::history_element_to_sql(
     int seed,
     int step,
     HistoryElement history_element) {

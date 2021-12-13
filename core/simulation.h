@@ -17,6 +17,7 @@ struct Simulation {
     int step; // number of reactions which have occoured
     Solver solver;
     std::vector<HistoryElement> history;
+    std::function<void(Update)> update_function;
 
 
     Simulation(Model &model,
@@ -31,7 +32,8 @@ struct Simulation {
         time (0.0),
         step (0),
         solver (seed, std::ref(model.initial_propensities)),
-        history (step_cutoff + 1)
+        history (step_cutoff + 1),
+        update_function ([&] (Update update) {solver.update(update);})
         {};
 
 
@@ -70,7 +72,7 @@ bool Simulation<Solver, Model>::execute_step() {
 
         // update propensities
         model.update_propensities(
-            std::ref(solver),
+            update_function,
             std::ref(state),
             next_reaction);
 

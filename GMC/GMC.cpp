@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
 
     Dispatcher<
         TreeSolver,
-        ReactionNetwork<TreeSolver>,
+        ReactionNetwork,
         ReactionNetworkParameters,
         TrajectoriesSql
         >
