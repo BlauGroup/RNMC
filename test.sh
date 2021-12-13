@@ -75,10 +75,9 @@ function check_result {
 }
 
 
-
-test_gmc
-check_result
 test_core
+check_result
+test_gmc
 check_result
 test_npmc
 check_result
