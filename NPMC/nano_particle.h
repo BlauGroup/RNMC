@@ -297,12 +297,12 @@ void NanoParticle::compute_reactions() {
                   interaction_id < interactions.size();
                   interaction_id++) {
 
-                int species_id_1 = sites[site_id_0].species_id;
-                int species_id_2 = sites[site_id_1].species_id;
+                int species_id_0 = sites[site_id_0].species_id;
+                int species_id_1 = sites[site_id_1].species_id;
 
                 if ((interactions[interaction_id].number_of_sites == 2) &&
-                    (interactions[interaction_id].species_id[0] == species_id_1) &&
-                    (interactions[interaction_id].species_id[1] == species_id_2)) {
+                    (interactions[interaction_id].species_id[0] == species_id_0) &&
+                    (interactions[interaction_id].species_id[1] == species_id_1)) {
 
                     reaction_count += 1;
                     site_reaction_dependency_counter[site_id_0] += 1;
@@ -362,12 +362,12 @@ void NanoParticle::compute_reactions() {
                   interaction_id < interactions.size();
                   interaction_id++) {
 
-                int species_id_1 = sites[site_id_0].species_id;
-                int species_id_2 = sites[site_id_1].species_id;
+                int species_id_0 = sites[site_id_0].species_id;
+                int species_id_1 = sites[site_id_1].species_id;
 
                 if ((interactions[interaction_id].number_of_sites == 2) &&
-                    (interactions[interaction_id].species_id[0] == species_id_1) &&
-                    (interactions[interaction_id].species_id[1] == species_id_2)) {
+                    (interactions[interaction_id].species_id[0] == species_id_0) &&
+                    (interactions[interaction_id].species_id[1] == species_id_1)) {
 
                     reactions[reaction_count] = {
                         .site_id = { (int) site_id_0, (int) site_id_1 },
@@ -383,7 +383,6 @@ void NanoParticle::compute_reactions() {
                     reaction_count += 1;
                     site_reaction_dependency_counter[site_id_0] += 1;
                     site_reaction_dependency_counter[site_id_1] += 1;
-
                 }
             }
         }
@@ -417,9 +416,9 @@ double NanoParticle::compute_propensity(
 
         if ( (interaction.left_state[0] == state[site_id_0]) &&
              (interaction.left_state[1] == state[site_id_1]) ) {
-            Site site_1 = sites[site_id_0];
-            Site site_2 = sites[site_id_1];
-            double distance = std::sqrt(site_distance_squared(site_1, site_2));
+            Site site_0 = sites[site_id_0];
+            Site site_1 = sites[site_id_1];
+            double distance = std::sqrt(site_distance_squared(site_0, site_1));
 
 
             // by the way we constructed the reactions, diff will always be >= 0
