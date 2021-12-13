@@ -79,7 +79,7 @@ struct NanoParticle {
     NanoParticle(
         SqlConnection &nano_particle_database,
         SqlConnection &initial_state_database,
-        NanoParticleParameters parameters
+        NanoParticleParameters
         );
 
     // maps a site index to the indices of its neighbors
@@ -116,7 +116,7 @@ struct NanoParticle {
 NanoParticle::NanoParticle(
     SqlConnection &nano_particle_database,
     SqlConnection &initial_state_database,
-    NanoParticleParameters parameters
+    NanoParticleParameters
     ) {
 
     // sql statements
