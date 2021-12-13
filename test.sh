@@ -19,7 +19,7 @@ function test_gmc {
 
     cp $GMC_TEST_DIR/initial_state.sqlite $GMC_TEST_DIR/initial_state_copy.sqlite
 
-    ./build/GMC --reaction_database=$GMC_TEST_DIR/rn.sqlite --initial_state_database=$GMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 --dependency_threshold=1
+    ./build/GMC --reaction_database=$GMC_TEST_DIR/rn.sqlite --initial_state_database=$GMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 --dependency_threshold=1 &> /dev/null
 
     sql='SELECT seed, step, reaction_id FROM trajectories ORDER BY seed ASC, step ASC;'
 
@@ -28,10 +28,10 @@ function test_gmc {
 
     if  cmp $GMC_TEST_DIR/trajectories $GMC_TEST_DIR/copy_trajectories > /dev/null
     then
-        echo -e "${Green} passed: no difference in trajectories ${Color_Off}"
+        echo -e "${Green} passed: no difference in GMC trajectories ${Color_Off}"
         RC=0
     else
-        echo -e "${Red} failed: difference in trajectories ${Color_Off}"
+        echo -e "${Red} failed: difference in GMC trajectories ${Color_Off}"
         RC=1
     fi
 
@@ -39,6 +39,32 @@ function test_gmc {
     rm $GMC_TEST_DIR/trajectories
     rm $GMC_TEST_DIR/copy_trajectories
 
+}
+
+function test_npmc {
+    NPMC_TEST_DIR="./test_materials/NPMC"
+
+    cp $NPMC_TEST_DIR/initial_state.sqlite $NPMC_TEST_DIR/initial_state_copy.sqlite
+
+    ./build/NPMC --nano_particle_database=$NPMC_TEST_DIR/np.sqlite --initial_state_database=$NPMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 &> /dev/null
+
+    sql='SELECT seed, step, site_id_1, site_id_2, interaction_id FROM trajectories ORDER BY seed ASC, step ASC;'
+
+    sqlite3 $NPMC_TEST_DIR/initial_state_with_trajectories.sqlite "${sql}" > $NPMC_TEST_DIR/trajectories
+    sqlite3 $NPMC_TEST_DIR/initial_state_copy.sqlite "${sql}" > $NPMC_TEST_DIR/copy_trajectories
+
+    if  cmp $NPMC_TEST_DIR/trajectories $NPMC_TEST_DIR/copy_trajectories > /dev/null
+    then
+        echo -e "${Green} passed: no difference in NPMC trajectories ${Color_Off}"
+        RC=0
+    else
+        echo -e "${Red} failed: difference in NPMC trajectories ${Color_Off}"
+        RC=1
+    fi
+
+    rm $NPMC_TEST_DIR/initial_state_copy.sqlite
+    rm $NPMC_TEST_DIR/trajectories
+    rm $NPMC_TEST_DIR/copy_trajectories
 }
 
 function check_result {
@@ -53,6 +79,8 @@ function check_result {
 test_gmc
 check_result
 test_core
+check_result
+test_npmc
 check_result
 
 exit $RC
