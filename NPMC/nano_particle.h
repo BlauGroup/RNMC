@@ -40,6 +40,7 @@ struct Interaction {
 struct Reaction {
     int site_id[2];
     int interaction_id;
+    double distance;
 };
 
 struct NanoParticleParameters {};
@@ -336,7 +337,8 @@ void NanoParticle::compute_reactions() {
 
                 reactions[reaction_count] = {
                     .site_id = { (int) site_id, -1},
-                    .interaction_id = (int) interaction_id
+                    .interaction_id = (int) interaction_id,
+                    .distance = 0
                 };
                 site_reaction_dependency[site_id][
                     site_reaction_dependency_counter[site_id]] = reaction_count;
@@ -362,8 +364,11 @@ void NanoParticle::compute_reactions() {
                   interaction_id < interactions.size();
                   interaction_id++) {
 
-                int species_id_0 = sites[site_id_0].species_id;
-                int species_id_1 = sites[site_id_1].species_id;
+                Site site_0 = sites[site_id_0];
+                Site site_1 = sites[site_id_1];
+                int species_id_0 = site_0.species_id;
+                int species_id_1 = site_1.species_id;
+
 
                 if ((interactions[interaction_id].number_of_sites == 2) &&
                     (interactions[interaction_id].species_id[0] == species_id_0) &&
@@ -371,7 +376,9 @@ void NanoParticle::compute_reactions() {
 
                     reactions[reaction_count] = {
                         .site_id = { (int) site_id_0, (int) site_id_1 },
-                        .interaction_id = (int) interaction_id
+                        .interaction_id = (int) interaction_id,
+                        .distance = std::sqrt(site_distance_squared(site_0, site_1))
+
                     };
 
                     site_reaction_dependency[site_id_0][
@@ -416,10 +423,9 @@ double NanoParticle::compute_propensity(
 
         if ( (interaction.left_state[0] == state[site_id_0]) &&
              (interaction.left_state[1] == state[site_id_1]) ) {
-            Site site_0 = sites[site_id_0];
-            Site site_1 = sites[site_id_1];
-            double distance = std::sqrt(site_distance_squared(site_0, site_1));
 
+            // TODO: add distance as an attribute to the reaction struct
+            double distance = reactions[reaction_id].distance;
 
             // by the way we constructed the reactions, diff will always be >= 0
             double distance_factor = 1 - ( distance / interaction_radius_bound );
@@ -445,12 +451,9 @@ void NanoParticle::update_state(
     Interaction interaction = interactions[
         reaction.interaction_id];
 
-    state[reaction.site_id[0]] = interaction.right_state[0];
-
-    if (interaction.number_of_sites == 2) {
-        state[reaction.site_id[1]] = interaction.right_state[1];
+    for (int k = 0; k < interaction.number_of_sites; k++) {
+        state[reaction.site_id[k]] = interaction.right_state[k];
     }
-
 }
 
 
@@ -463,34 +466,21 @@ void NanoParticle::update_propensities(
     Interaction interaction = interactions[
         reaction.interaction_id];
 
-
-    for ( unsigned int i = 0;
-          i < site_reaction_dependency[reaction.site_id[0]].size();
-          i++ ) {
-        int reaction_id = site_reaction_dependency[reaction.site_id[0]][i];
-        double new_propensity = compute_propensity(std::ref(state), reaction_id);
-
-
-        update_function( Update {
-                .index = (unsigned long int) reaction_id,
-                .propensity = new_propensity});
-    }
-
-    if (interaction.number_of_sites == 2) {
+    for ( int k = 0; k < interaction.number_of_sites; k++) {
         for ( unsigned int i = 0;
-              i < site_reaction_dependency[reaction.site_id[1]].size();
+              i < site_reaction_dependency[reaction.site_id[k]].size();
               i++ ) {
-            int reaction_id = site_reaction_dependency[reaction.site_id[1]][i];
+            int reaction_id = site_reaction_dependency[reaction.site_id[k]][i];
             double new_propensity = compute_propensity(std::ref(state), reaction_id);
+
 
             update_function( Update {
                     .index = (unsigned long int) reaction_id,
                     .propensity = new_propensity});
         }
-
     }
-
 }
+
 
 TrajectoriesSql NanoParticle::history_element_to_sql(
     int seed,
