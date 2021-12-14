@@ -138,6 +138,7 @@ CREATE TABLE sites (
 ```
 CREATE TABLE interactions (
     interaction_id      INTEGER NOT NULL PRIMARY KEY,
+    number_of_sites     INTEGER NOT NULL,
     species_id_1        INTEGER NOT NULL,
     species_id_2        INTEGER NOT NULL,
     left_state_1        INTEGER NOT NULL,
