@@ -1,7 +1,7 @@
 <img src="./logo.png">
 
 Reaction Network Monte Carlo (RNMC) is a collection of programs for Monte Carlo simulation of statistical mechanical systems heavily inspired by [SPPARKS](https://spparks.sandia.gov/). RNMC is designed to run large numbers of simulations of a fixed system in parallel. The project currently consists of three parts:
-- `core` : Core code shared by all simulators, for example IO, threading logic and model indipendent simulation logic.
+- `core` : Core code shared by all simulators, for example IO, threading logic and model independent simulation logic.
 - `GMC` : Implementation of Gillespie's next reaction simulator. GMC is able to run simulations of reaction networks with hundreds of millions of reactions, even when the number of species is small.
 - `NPMC` : A 3D statistical field theory simulator which supports one and two site interactions. Useful for simulating nano particles.
 
@@ -64,7 +64,6 @@ There are 2 tables in the reaction network database:
             number_of_reactions INTEGER NOT NULL
     );
 ```
-the factors can be used to modify rates of reactions which have zero or two reactants, or have duplicate reactants.
 
 ```
     CREATE TABLE reactions (
@@ -79,7 +78,7 @@ the factors can be used to modify rates of reactions which have zero or two reac
     );
 
 ```
-There are 3 tables in the initial state database:
+There are 3 tables in the initial state database. The factors can be used to modify rates of reactions which have zero or two reactants, or have duplicate reactants.
 ```
     CREATE TABLE trajectories (
             seed         INTEGER NOT NULL,
