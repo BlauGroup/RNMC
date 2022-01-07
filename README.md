@@ -1,9 +1,10 @@
 <img src="./logo.png">
 
-Reaction Network Monte Carlo (RNMC) is a colleciton of programs for Monte Carlo simulation of chemical systems heavily inspired by [SPPARKS](https://spparks.sandia.gov/). RNMC is designed to run large numbers of simulations of a fixed system in parallel. The project currently consists of three parts:
+Reaction Network Monte Carlo (RNMC) is a colleciton of programs for Monte Carlo simulation of statistical mechanical systems heavily inspired by [SPPARKS](https://spparks.sandia.gov/). RNMC is designed to run large numbers of simulations of a fixed system in parallel. The project currently consists of three parts:
 - `core` : Core code shared by all simulators, for example IO, threading logic and model indipendent simulation logic.
 - `GMC` : Implementation of Gillespie's next reaction simulator. GMC is able to run simulations of reaction networks with hundreds of millions of reactions, even when the number of species is small.
 - `NPMC` : A 3D statistical field theory simulator which supports one and two site interactions. Useful for simulating nano particles.
+See [this](https://doi.org/10.26434/chemrxiv-2021-c2gp3) paper for an example of the kind of work being done with RNMC.
 
 ### Dependencies
 
