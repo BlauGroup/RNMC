@@ -72,6 +72,8 @@ struct NanoParticle {
     double two_site_interaction_factor;
     double interaction_radius_bound;
 
+    std::function<double(double)> distance_factor_function;
+
     // constructor
     NanoParticle(
         SqlConnection &nano_particle_database,
@@ -170,6 +172,23 @@ NanoParticle::NanoParticle(
     one_site_interaction_factor = factor_row.one_site_interaction_factor;
     two_site_interaction_factor = factor_row.two_site_interaction_factor;
     interaction_radius_bound = factor_row.interaction_radius_bound;
+
+    if ( factor_row.distance_factor_type == "linear" ) {
+        distance_factor_function = [=](double distance) {
+            return 1 - ( distance / interaction_radius_bound ); };
+
+    } else if ( factor_row.distance_factor_type == "inverse_cubic" ) {
+        distance_factor_function = [](double distance) {
+            return  1 / ( distance * distance * distance); };
+
+    } else {
+        std::cerr << time_stamp()
+                  << "unexpected distance_factor_type: "
+                  << factor_row.distance_factor_type << '\n';
+
+       std::abort();
+
+    }
 
 
     // initializing degrees of freedom
@@ -436,7 +455,7 @@ double NanoParticle::compute_propensity(
             double distance = reactions[reaction_id].distance;
 
             // by the way we constructed the reactions, diff will always be >= 0
-            double distance_factor = 1 - ( distance / interaction_radius_bound );
+            double distance_factor = distance_factor_function(distance);
             return (
                 interaction.rate *
                 distance_factor *
