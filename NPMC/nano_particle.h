@@ -184,7 +184,8 @@ NanoParticle::NanoParticle(
     } else {
         std::cerr << time_stamp()
                   << "unexpected distance_factor_type: "
-                  << factor_row.distance_factor_type << '\n';
+                  << factor_row.distance_factor_type << '\n'
+                  << "expecting linear or inverse_cubic" << '\n';
 
        std::abort();
 
