@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <functional>
+// #include <csignal>
 
 struct Site {
     double x;
@@ -179,7 +180,7 @@ NanoParticle::NanoParticle(
 
     } else if ( factor_row.distance_factor_type == "inverse_cubic" ) {
         distance_factor_function = [](double distance) {
-            return  1 / ( distance * distance * distance); };
+            return  1 / ( pow(distance,6)); };
 
     } else {
         std::cerr << time_stamp()
@@ -457,6 +458,7 @@ double NanoParticle::compute_propensity(
 
             // by the way we constructed the reactions, diff will always be >= 0
             double distance_factor = distance_factor_function(distance);
+
             return (
                 interaction.rate *
                 distance_factor *
