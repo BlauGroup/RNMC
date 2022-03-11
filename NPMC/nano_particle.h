@@ -263,7 +263,8 @@ std::vector<std::vector<int>> NanoParticle::compute_site_neighbors() {
 
         int count = 0;
         for (unsigned int j = 0; j < sites.size(); j++) {
-            if (site_distance_squared(sites[i], sites[j]) < threshold) {
+            if ( i != j && // neighbors need to be distinct
+                 site_distance_squared(sites[i], sites[j]) < threshold ) {
                 buffer[j] = true;
                 count += 1;
             }
