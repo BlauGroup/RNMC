@@ -1,6 +1,8 @@
 #pragma once
 #include "solvers.h"
 #include <functional>
+#include <iostream>
+#include "sql.h"
 
 
 struct HistoryElement {
@@ -75,6 +77,10 @@ bool Simulation<Solver, Model>::execute_step() {
             update_function,
             std::ref(state),
             next_reaction);
+
+
+        if ( step % 10000 == 0 )
+            std::cout << time_stamp() << "step: " << step << "\n";
 
         return true;
     }
