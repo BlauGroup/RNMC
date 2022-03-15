@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
     NanoParticleParameters parameters = {};
 
     Dispatcher<
-        TreeSolver,
+        LinearSolver,
         NanoParticle,
         NanoParticleParameters,
         TrajectoriesSql

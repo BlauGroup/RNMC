@@ -39,6 +39,7 @@
               sqlitebrowser
               gdb
               valgrind
+              bintools-unwrapped # gprof 
             ];
 
             # environment for CLANGD
