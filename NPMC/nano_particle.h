@@ -30,6 +30,9 @@ struct Interaction {
     int species_id[2];
     int left_state[2];
     int right_state[2];
+
+    // the units of rate depend on number_of_sites. If number_of_sites = 1, then
+    // rate has units 1 / s. If number of sites = 2, then rate has units 1 / s m^6.
     double rate;
 };
 
@@ -38,10 +41,13 @@ struct Interaction {
 // if it is an internal interaction, site_id_2 will be -1
 // In a reaction, the sites must be within the interaction radius bound.
 
+
 struct Reaction {
     int site_id[2];
     int interaction_id;
-    double distance;
+
+    // rate has units 1 / s
+    double rate;
 };
 
 struct NanoParticleParameters {};
@@ -365,11 +371,12 @@ void NanoParticle::compute_reactions() {
             if ((interactions[interaction_id].number_of_sites == 1) &&
                 (species_id == interactions[interaction_id].species_id[0])) {
 
-                reactions[reaction_count] = {
+                reactions[reaction_count] = Reaction {
                     .site_id = { (int) site_id, -1},
                     .interaction_id = (int) interaction_id,
-                    .distance = 0
+                    .rate = interactions[interaction_id].rate
                 };
+
                 site_reaction_dependency[site_id][
                     site_reaction_dependency_counter[site_id]] = reaction_count;
 
@@ -398,16 +405,19 @@ void NanoParticle::compute_reactions() {
                 Site site_1 = sites[site_id_1];
                 int species_id_0 = site_0.species_id;
                 int species_id_1 = site_1.species_id;
+                double distance = std::sqrt(site_distance_squared(site_0, site_1));
+
 
 
                 if ((interactions[interaction_id].number_of_sites == 2) &&
                     (interactions[interaction_id].species_id[0] == species_id_0) &&
                     (interactions[interaction_id].species_id[1] == species_id_1)) {
 
-                    reactions[reaction_count] = {
+                    reactions[reaction_count] = Reaction {
                         .site_id = { (int) site_id_0, (int) site_id_1 },
                         .interaction_id = (int) interaction_id,
-                        .distance = std::sqrt(site_distance_squared(site_0, site_1))
+                        .rate = ( distance_factor_function(distance) *
+                                  interactions[interaction_id].rate)
 
                     };
 
@@ -437,7 +447,7 @@ double NanoParticle::compute_propensity(
         int site_id = reactions[reaction_id].site_id[0];
         if (interaction.left_state[0] == state[site_id]) {
             return (
-                interaction.rate *
+                reactions[reaction_id].rate *
                 one_site_interaction_factor);
         }
         else {
@@ -455,15 +465,9 @@ double NanoParticle::compute_propensity(
              (interaction.left_state[1] == state[site_id_1]) ) {
 
             // TODO: add distance as an attribute to the reaction struct
-            double distance = reactions[reaction_id].distance;
+            double rate = reactions[reaction_id].rate;
 
-            // by the way we constructed the reactions, diff will always be >= 0
-            double distance_factor = distance_factor_function(distance);
-
-            return (
-                interaction.rate *
-                distance_factor *
-                two_site_interaction_factor);
+            return rate * two_site_interaction_factor;
 
 
         }
