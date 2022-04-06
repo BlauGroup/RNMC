@@ -96,6 +96,7 @@ struct FactorsSql {
     double one_site_interaction_factor;
     double two_site_interaction_factor;
     double interaction_radius_bound;
+    double interaction_rate_threshold;
     std::string distance_factor_type;
     static std::string sql_statement;
     static void action(FactorsSql &r, sqlite3_stmt *stmt);
@@ -103,17 +104,18 @@ struct FactorsSql {
 
 std::string FactorsSql::sql_statement =
     "SELECT one_site_interaction_factor, two_site_interaction_factor, "
-    "interaction_radius_bound, distance_factor_type FROM factors;";
+    "interaction_radius_bound, interaction_rate_threshold, distance_factor_type FROM factors;";
 
 void FactorsSql::action(FactorsSql &r, sqlite3_stmt *stmt) {
     r.one_site_interaction_factor = sqlite3_column_double(stmt, 0);
     r.two_site_interaction_factor = sqlite3_column_double(stmt, 1);
     r.interaction_radius_bound = sqlite3_column_double(stmt, 2);
+    r.interaction_rate_threshold = sqlite3_column_double(stmt, 3);
 
     // generally, casting from raw bytes to char is bad, but downstream,
     // we directly check the resulting string against a finite list of
     // accepted strings, so if garbage gets put in, the program will abort.
-    const char *distance_factor_type_raw = (char *) sqlite3_column_text(stmt, 3);
+    const char *distance_factor_type_raw = (char *) sqlite3_column_text(stmt, 4);
     std::string distance_factor_type ( distance_factor_type_raw );
     r.distance_factor_type = std::move(distance_factor_type);
 

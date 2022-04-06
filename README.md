@@ -183,6 +183,7 @@ CREATE TABLE factors (
     one_site_interaction_factor      REAL NOT NULL,
     two_site_interaction_factor      REAL NOT NULL,
     interaction_radius_bound         REAL NOT NULL,
+    interaction_rate_threshold       REAL NOT NULL,
     distance_factor_type             TEXT NOT NULL
 );
 ```
