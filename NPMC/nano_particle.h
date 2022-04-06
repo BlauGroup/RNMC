@@ -78,6 +78,7 @@ struct NanoParticle {
     double one_site_interaction_factor;
     double two_site_interaction_factor;
     double interaction_radius_bound;
+    double interaction_rate_threshold;
 
     std::function<double(double)> distance_factor_function;
 
@@ -175,6 +176,7 @@ NanoParticle::NanoParticle(
     one_site_interaction_factor = factor_row.one_site_interaction_factor;
     two_site_interaction_factor = factor_row.two_site_interaction_factor;
     interaction_radius_bound = factor_row.interaction_radius_bound;
+    interaction_rate_threshold = factor_row.interaction_rate_threshold;
 
     if ( factor_row.distance_factor_type == "linear" ) {
         distance_factor_function = [=](double distance) {
@@ -302,20 +304,19 @@ void NanoParticle::compute_reactions() {
                     int species_id_1 = site_1.species_id;
                     double distance = std::sqrt(site_distance_squared(site_0, site_1));
 
-
-
+                    double rate = distance_factor_function(distance) *
+                              interactions[interaction_id].rate;
                     if ((interaction.number_of_sites == 2) &&
                         (interaction.species_id[0] == species_id_0) &&
                         (interaction.species_id[1] == species_id_1) &&
-                        distance < interaction_radius_bound
+                        (distance < interaction_radius_bound || rate > interaction_rate_threshold)
                         ) {
 
                         reactions.push_back(
                          Reaction {
                              .site_id = { (int) site_id_0, (int) site_id_1 },
                              .interaction_id = (int) interaction_id,
-                             .rate = ( distance_factor_function(distance) *
-                                       interactions[interaction_id].rate)
+                             .rate = rate
                          });
 
                         site_reaction_dependency[site_id_0].push_back(reaction_count);
