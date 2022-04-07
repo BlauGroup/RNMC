@@ -258,8 +258,10 @@ NanoParticle::NanoParticle(
 }
 
 void NanoParticle::compute_reactions() {
-
+    // pre-count number of reactions to reallocate the size of reactions
     int reaction_count = 0;
+    std::vector<int> site_reaction_dependency_counter;
+    site_reaction_dependency_counter.resize(sites.size());
 
     for ( unsigned int site_id = 0; site_id < sites.size(); site_id++ ) {
         for ( unsigned int interaction_id = 0;
@@ -273,15 +275,8 @@ void NanoParticle::compute_reactions() {
             int species_id = site.species_id;
             if ((interaction.number_of_sites == 1) &&
                 (species_id == interaction.species_id[0])) {
-
-                reactions.push_back(
-                    Reaction {
-                        .site_id = { (int) site_id, -1},
-                        .interaction_id = (int) interaction_id,
-                        .rate = interactions[interaction_id].rate});
-
-                site_reaction_dependency[site_id].push_back(reaction_count);
                 reaction_count += 1;
+                site_reaction_dependency_counter[site_id] += 1;
             }
         }
     }
@@ -312,16 +307,93 @@ void NanoParticle::compute_reactions() {
                         (distance < interaction_radius_bound || rate > interaction_rate_threshold)
                         ) {
 
-                        reactions.push_back(
-                         Reaction {
+                         reaction_count += 1;
+                         site_reaction_dependency_counter[site_id_0] += 1;
+                         site_reaction_dependency_counter[site_id_1] += 1;
+
+                    }
+                }
+            }
+        }
+    }
+
+    reactions.resize(reaction_count);
+    // reseting reaction_count and site_reaction_dependency_count
+    // and resizing the entries in site_reaction_dependency
+    reaction_count = 0;
+    for (unsigned int i = 0; i < site_reaction_dependency.size(); i++) {
+        site_reaction_dependency[i].resize(site_reaction_dependency_counter[i]);
+        site_reaction_dependency_counter[i] = 0;
+    }
+
+    for ( unsigned int site_id = 0; site_id < sites.size(); site_id++ ) {
+        for ( unsigned int interaction_id = 0;
+              interaction_id < interactions.size();
+              interaction_id++ ) {
+
+            Site site = sites[site_id];
+            Interaction interaction = interactions[interaction_id];
+
+
+            int species_id = site.species_id;
+            if ((interaction.number_of_sites == 1) &&
+                (species_id == interaction.species_id[0])) {
+
+                reactions[reaction_count] = Reaction {
+                        .site_id = { (int) site_id, -1},
+                        .interaction_id = (int) interaction_id,
+                        .rate = interactions[interaction_id].rate};
+
+                site_reaction_dependency[site_id][
+                    site_reaction_dependency_counter[site_id]] = reaction_count;
+
+                reaction_count += 1;
+                site_reaction_dependency_counter[site_id] += 1;
+            }
+        }
+    }
+
+
+    for ( unsigned int site_id_0 = 0; site_id_0 < sites.size(); site_id_0++ ) {
+        for ( unsigned int site_id_1 = 0; site_id_1 < sites.size(); site_id_1++ ) {
+
+            if ( site_id_0 != site_id_1 ) {
+
+                for ( unsigned int interaction_id = 0;
+                      interaction_id < interactions.size();
+                      interaction_id++ ) {
+                    Site site_0 = sites[site_id_0];
+                    Site site_1 = sites[site_id_1];
+                    Interaction interaction = interactions[interaction_id];
+
+
+                    int species_id_0 = site_0.species_id;
+                    int species_id_1 = site_1.species_id;
+                    double distance = std::sqrt(site_distance_squared(site_0, site_1));
+
+                    double rate = distance_factor_function(distance) *
+                              interactions[interaction_id].rate;
+                    if ((interaction.number_of_sites == 2) &&
+                        (interaction.species_id[0] == species_id_0) &&
+                        (interaction.species_id[1] == species_id_1) &&
+                        (distance < interaction_radius_bound || rate > interaction_rate_threshold)
+                        ) {
+
+                        reactions[reaction_count] = Reaction {
                              .site_id = { (int) site_id_0, (int) site_id_1 },
                              .interaction_id = (int) interaction_id,
                              .rate = rate
-                         });
+                         };
 
-                        site_reaction_dependency[site_id_0].push_back(reaction_count);
-                        site_reaction_dependency[site_id_1].push_back(reaction_count);
+                        site_reaction_dependency[site_id_0][
+                           site_reaction_dependency_counter[site_id_0]] = reaction_count;
+
+                        site_reaction_dependency[site_id_1][
+                           site_reaction_dependency_counter[site_id_1]] = reaction_count;
+
                         reaction_count += 1;
+                        site_reaction_dependency_counter[site_id_0] += 1;
+                        site_reaction_dependency_counter[site_id_1] += 1;
 
                     }
                 }
@@ -427,4 +499,3 @@ TrajectoriesSql NanoParticle::history_element_to_sql(
         .interaction_id = reaction.interaction_id
     };
 }
-
