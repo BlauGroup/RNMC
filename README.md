@@ -44,7 +44,7 @@ Run the tests using `test.sh` from the root directory of the repository.
 GMC is run as follows:
 
 ```
-GMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --dependency_threshold=1
+GMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200
 ```
 
 - `reaction_database`: a sqlite database containing the reaction network and metadata.
@@ -53,7 +53,6 @@ GMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite 
 - `base_seed`: seeds used are `base_seed, base_seed+1, ..., base_seed+number_of_simulations-1`
 - `thread_count`: is how many threads to use.
 - `step_cutoff`: how many steps in each simulation
-- `dependency_threshold`: if simulations run for a long time, the dependency graph can grow quite large. We slow down its growth by only computing the dependency node corresponding to a reaction after it has been seen `dependency_threshold` times. Set to zero if you want to compute dependents on first occurrence.
 
 ### The Reaction Network Database
 

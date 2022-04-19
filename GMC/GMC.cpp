@@ -10,12 +10,11 @@ void print_usage() {
               << "--number_of_simulations\n"
               << "--base_seed\n"
               << "--thread_count\n"
-              << "--step_cutoff\n"
-              << "--dependency_threshold\n";
+              << "--step_cutoff\n";
 }
 
 int main(int argc, char **argv) {
-    if (argc != 8) {
+    if (argc != 7) {
         print_usage();
         exit(EXIT_FAILURE);
     }
@@ -28,7 +27,6 @@ int main(int argc, char **argv) {
         {"base_seed", required_argument, NULL, 4},
         {"thread_count", required_argument, NULL, 5},
         {"step_cutoff", required_argument, NULL, 6},
-        {"dependency_threshold", required_argument, NULL, 7},
         {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };
@@ -42,7 +40,6 @@ int main(int argc, char **argv) {
     int base_seed = 0;
     int thread_count = 0;
     int step_cutoff = 0;
-    int dependency_threshold = 0;
 
     while ((c = getopt_long_only(
                 argc, argv, "",
@@ -75,9 +72,6 @@ int main(int argc, char **argv) {
             step_cutoff = atoi(optarg);
             break;
 
-        case 7:
-            dependency_threshold = atoi(optarg);
-            break;
 
         default:
             // if an unexpected argument is passed, exit
@@ -89,8 +83,7 @@ int main(int argc, char **argv) {
 
     }
 
-    ReactionNetworkParameters parameters = {
-        .dependency_threshold = dependency_threshold };
+    ReactionNetworkParameters parameters;
 
     Dispatcher<
         TreeSolver,
