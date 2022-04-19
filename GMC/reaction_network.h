@@ -167,7 +167,9 @@ ReactionNetwork::ReactionNetwork(
         initial_propensities[i] = compute_propensity(initial_state, i);
     }
 
+    std::cerr << time_stamp() << "computing dependency graph...\n";
     compute_dependents();
+    std::cerr << time_stamp() << "finished computing dependency graph\n";
 };
 
 
