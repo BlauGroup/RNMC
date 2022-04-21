@@ -1,7 +1,7 @@
 #pragma once
 #include "solvers.h"
 #include <functional>
-
+// #include <csignal>
 
 struct HistoryElement {
     int reaction_id; // reaction which fired
@@ -22,23 +22,23 @@ struct Simulation {
 
     Simulation(Model &model,
                unsigned long int seed,
-
-               // step cutoff gets used here to set the history length
-               // we don't actually store it in the Simulation object
-               int step_cutoff) :
+               int history_length) :
         model (model),
         seed (seed),
         state (model.initial_state),
         time (0.0),
         step (0),
         solver (seed, std::ref(model.initial_propensities)),
-        history (step_cutoff + 1),
         update_function ([&] (Update update) {solver.update(update);})
-        {};
+        {
+            history.reserve(history_length);
+        };
 
 
     bool execute_step();
     void execute_steps(int step_cutoff);
+    void execute_time(double time_cutoff);
+
 };
 
 
@@ -59,9 +59,9 @@ bool Simulation<Solver, Model>::execute_step() {
         time += event.dt;
 
         // record what happened
-        history[step] = HistoryElement {
+        history.push_back(HistoryElement {
             .reaction_id = next_reaction,
-            .time = time};
+            .time = time});
 
         // increment step
         step++;
@@ -84,6 +84,14 @@ template <typename Solver, typename Model>
 void Simulation<Solver, Model>::execute_steps(int step_cutoff) {
     while(execute_step()) {
         if (step > step_cutoff)
+            break;
+    }
+};
+
+template <typename Solver, typename Model>
+void Simulation<Solver, Model>::execute_time(double time_cutoff) {
+    while(execute_step()) {
+        if (time > time_cutoff)
             break;
     }
 };

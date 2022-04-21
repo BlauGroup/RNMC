@@ -5,31 +5,47 @@
 #include "simulation.h"
 #include "queues.h"
 
+
+
 struct HistoryPacket {
     std::vector<HistoryElement> history;
     unsigned long int seed;
 };
 
 
+enum TypeOfCutoff {
+    step_termination,
+    time_termination
+};
+
+
+union Cutoff {
+    int step;
+    double time;
+};
 
 template <typename Solver, typename Model>
 struct SimulatorPayload {
     Model &model;
     HistoryQueue<HistoryPacket> &history_queue;
     SeedQueue &seed_queue;
-    int step_cutoff;
+    Cutoff cutoff;
+    TypeOfCutoff type_of_cutoff;
 
     SimulatorPayload(
         Model &model,
         HistoryQueue<HistoryPacket> &history_queue,
         SeedQueue &seed_queue,
-        int step_cutoff
+        Cutoff cutoff,
+        TypeOfCutoff type_of_cutoff
         ) :
 
             model (model),
             history_queue (history_queue),
             seed_queue (seed_queue),
-            step_cutoff (step_cutoff) {};
+            cutoff (cutoff),
+            type_of_cutoff (type_of_cutoff)
+        {};
 
     void run_simulator() {
 
@@ -37,8 +53,27 @@ struct SimulatorPayload {
                seed_queue.get_seed()) {
 
             unsigned long int seed = maybe_seed.value();
-            Simulation<Solver, Model> simulation (model, seed, step_cutoff);
-            simulation.execute_steps(step_cutoff);
+            int history_length;
+
+            if ( type_of_cutoff == step_termination ) {
+                history_length = cutoff.step + 1;
+            } else {
+                history_length = 1;
+            }
+
+
+            Simulation<Solver, Model> simulation (model, seed, history_length);
+
+
+            switch(type_of_cutoff) {
+            case step_termination :
+                simulation.execute_steps(cutoff.step);
+                break;
+            case time_termination :
+                simulation.execute_time(cutoff.time);
+                break;
+            }
+
 
             // Calling resize() with a smaller size has no effect on the capacity of a vector.
             // It will not free memory.
@@ -52,6 +87,8 @@ struct SimulatorPayload {
         }
     }
 };
+
+
 
 template <
     typename Solver,
@@ -68,7 +105,8 @@ struct Dispatcher {
     HistoryQueue<HistoryPacket> history_queue;
     SeedQueue seed_queue;
     std::vector<std::thread> threads;
-    int step_cutoff;
+    Cutoff cutoff;
+    TypeOfCutoff type_of_cutoff;
     int number_of_simulations;
     int number_of_threads;
 
@@ -78,7 +116,8 @@ struct Dispatcher {
         unsigned long int number_of_simulations,
         unsigned long int base_seed,
         int number_of_threads,
-        int step_cutoff,
+        Cutoff cutoff,
+        TypeOfCutoff type_of_cutoff,
         Parameters parameters) :
         model_database (
             model_database_file,
@@ -97,10 +136,12 @@ struct Dispatcher {
 
         // don't want to start threads in the constructor.
         threads (),
-        step_cutoff (step_cutoff),
+        cutoff (cutoff),
+        type_of_cutoff (type_of_cutoff),
         number_of_simulations (number_of_simulations),
         number_of_threads (number_of_threads)
-        {};
+        {
+        };
 
     void run_dispatcher();
     void record_simulation_history(HistoryPacket history_packet);
@@ -124,7 +165,9 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
                 model,
                 history_queue,
                 seed_queue,
-                step_cutoff)
+                cutoff,
+                type_of_cutoff
+                )
             );
 
     }

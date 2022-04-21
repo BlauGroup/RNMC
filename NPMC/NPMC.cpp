@@ -2,6 +2,7 @@
 #include "../core/dispatcher.h"
 #include "sql_types.h"
 #include "nano_particle.h"
+#include <csignal>
 
 void print_usage() {
     std::cout << "Usage: specify the following options\n"
@@ -10,7 +11,7 @@ void print_usage() {
               << "--number_of_simulations\n"
               << "--base_seed\n"
               << "--thread_count\n"
-              << "--step_cutoff\n";
+              << "--step_cutoff|time_cutoff\n";
 }
 
 int main(int argc, char **argv) {
@@ -26,7 +27,8 @@ int main(int argc, char **argv) {
         {"number_of_simulations", required_argument, NULL, 3},
         {"base_seed", required_argument, NULL, 4},
         {"thread_count", required_argument, NULL, 5},
-        {"step_cutoff", required_argument, NULL, 6},
+        {"step_cutoff", optional_argument, NULL, 6},
+        {"time_cutoff", optional_argument, NULL, 7},
         {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };
@@ -39,7 +41,8 @@ int main(int argc, char **argv) {
     int number_of_simulations = 0;
     int base_seed = 0;
     int thread_count = 0;
-    int step_cutoff = 0;
+    TypeOfCutoff type_of_cutoff = step_termination;
+    Cutoff cutoff = { .step = 0 };
 
     while ((c = getopt_long_only(
                 argc, argv, "",
@@ -69,7 +72,13 @@ int main(int argc, char **argv) {
             break;
 
         case 6:
-            step_cutoff = atoi(optarg);
+            cutoff.step = atoi(optarg);
+            type_of_cutoff = step_termination;
+            break;
+
+        case 7:
+            cutoff.time = atof(optarg);
+            type_of_cutoff = time_termination;
             break;
 
         default:
@@ -81,6 +90,7 @@ int main(int argc, char **argv) {
         }
 
     }
+
     NanoParticleParameters parameters = {};
 
     Dispatcher<
@@ -96,7 +106,8 @@ int main(int argc, char **argv) {
             number_of_simulations,
             base_seed,
             thread_count,
-            step_cutoff,
+            cutoff,
+            type_of_cutoff,
             parameters
             );
 
