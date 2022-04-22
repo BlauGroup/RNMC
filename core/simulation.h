@@ -82,7 +82,6 @@ bool Simulation<Solver, Model>::execute_step() {
             });
 
         if ( history.size() == history_chunk_size ) {
-            raise(SIGINT);
             history_queue.insert_history(
                 std::move(
                     HistoryPacket {

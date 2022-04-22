@@ -217,7 +217,6 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::record_simulation_h
     initial_state_database.exec("BEGIN");
 
 
-    raise(SIGINT);
     for (unsigned long int i = 0; i < history_packet.history.size(); i++) {
         trajectories_writer.insert(
             model.history_element_to_sql(
