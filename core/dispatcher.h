@@ -7,7 +7,6 @@
 #include <csignal>
 
 
-constexpr int history_chunk_size = 20000;
 
 enum TypeOfCutoff { step_termination, time_termination };
 
@@ -15,6 +14,15 @@ struct Cutoff {
     union  { int step; double time; } bound;
     TypeOfCutoff type_of_cutoff;
 };
+
+
+// size of history chunks which we write to the DB.
+// if you make this too small, it will force the dispatcher to
+// perform lots of really small DB transactions which is bad.
+// 20000 is a good value. Only change this if you fully understand the
+// performance implications
+
+constexpr int history_chunk_size = 20000;
 
 template <typename Solver, typename Model>
 struct SimulatorPayload {

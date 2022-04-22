@@ -25,7 +25,7 @@ struct Simulation {
     double time;
     int step; // number of reactions which have occoured
     Solver solver;
-    unsigned long int history_length;
+    unsigned long int history_chunk_size;
     std::vector<HistoryElement> history;
     HistoryQueue<HistoryPacket> &history_queue;
     std::function<void(Update)> update_function;
@@ -33,7 +33,7 @@ struct Simulation {
 
     Simulation(Model &model,
                unsigned long int seed,
-               int history_length,
+               int history_chunk_size,
                HistoryQueue<HistoryPacket> &history_queue
         ) :
         model (model),
@@ -42,11 +42,11 @@ struct Simulation {
         time (0.0),
         step (0),
         solver (seed, std::ref(model.initial_propensities)),
-        history_length(history_length),
+        history_chunk_size (history_chunk_size),
         history_queue(history_queue),
         update_function ([&] (Update update) {solver.update(update);})
         {
-            history.reserve(history_length);
+            history.reserve(history_chunk_size);
         };
 
 
@@ -81,7 +81,7 @@ bool Simulation<Solver, Model>::execute_step() {
             .step = step
             });
 
-        if ( history.size() == history_length ) {
+        if ( history.size() == history_chunk_size ) {
             raise(SIGINT);
             history_queue.insert_history(
                 std::move(
@@ -91,7 +91,7 @@ bool Simulation<Solver, Model>::execute_step() {
                         }));
 
             history = std::vector<HistoryElement> ();
-            history.reserve(history_length);
+            history.reserve(history_chunk_size);
         }
 
 
