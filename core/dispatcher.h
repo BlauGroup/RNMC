@@ -12,16 +12,11 @@ struct HistoryPacket {
     unsigned long int seed;
 };
 
+enum TypeOfCutoff { step_termination, time_termination };
 
-enum TypeOfCutoff {
-    step_termination,
-    time_termination
-};
-
-
-union Cutoff {
-    int step;
-    double time;
+struct Cutoff {
+    union  { int step; double time; } bound;
+    TypeOfCutoff type_of_cutoff;
 };
 
 template <typename Solver, typename Model>
@@ -30,21 +25,18 @@ struct SimulatorPayload {
     HistoryQueue<HistoryPacket> &history_queue;
     SeedQueue &seed_queue;
     Cutoff cutoff;
-    TypeOfCutoff type_of_cutoff;
 
     SimulatorPayload(
         Model &model,
         HistoryQueue<HistoryPacket> &history_queue,
         SeedQueue &seed_queue,
-        Cutoff cutoff,
-        TypeOfCutoff type_of_cutoff
+        Cutoff cutoff
         ) :
 
             model (model),
             history_queue (history_queue),
             seed_queue (seed_queue),
-            cutoff (cutoff),
-            type_of_cutoff (type_of_cutoff)
+            cutoff (cutoff)
         {};
 
     void run_simulator() {
@@ -55,8 +47,8 @@ struct SimulatorPayload {
             unsigned long int seed = maybe_seed.value();
             int history_length;
 
-            if ( type_of_cutoff == step_termination ) {
-                history_length = cutoff.step + 1;
+            if ( cutoff.type_of_cutoff == step_termination ) {
+                history_length = cutoff.bound.step + 1;
             } else {
                 history_length = 1;
             }
@@ -65,12 +57,12 @@ struct SimulatorPayload {
             Simulation<Solver, Model> simulation (model, seed, history_length);
 
 
-            switch(type_of_cutoff) {
+            switch(cutoff.type_of_cutoff) {
             case step_termination :
-                simulation.execute_steps(cutoff.step);
+                simulation.execute_steps(cutoff.bound.step);
                 break;
             case time_termination :
-                simulation.execute_time(cutoff.time);
+                simulation.execute_time(cutoff.bound.time);
                 break;
             }
 
@@ -117,7 +109,6 @@ struct Dispatcher {
         unsigned long int base_seed,
         int number_of_threads,
         Cutoff cutoff,
-        TypeOfCutoff type_of_cutoff,
         Parameters parameters) :
         model_database (
             model_database_file,
@@ -137,7 +128,6 @@ struct Dispatcher {
         // don't want to start threads in the constructor.
         threads (),
         cutoff (cutoff),
-        type_of_cutoff (type_of_cutoff),
         number_of_simulations (number_of_simulations),
         number_of_threads (number_of_threads)
         {
@@ -165,8 +155,7 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
                 model,
                 history_queue,
                 seed_queue,
-                cutoff,
-                type_of_cutoff
+                cutoff
                 )
             );
 

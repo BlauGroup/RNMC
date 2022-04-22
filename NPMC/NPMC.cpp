@@ -41,8 +41,13 @@ int main(int argc, char **argv) {
     int number_of_simulations = 0;
     int base_seed = 0;
     int thread_count = 0;
-    TypeOfCutoff type_of_cutoff = step_termination;
-    Cutoff cutoff = { .step = 0 };
+    Cutoff cutoff = {
+        .bound =  { .step =  0 },
+        .type_of_cutoff = step_termination
+    };
+
+
+
 
     while ((c = getopt_long_only(
                 argc, argv, "",
@@ -72,13 +77,13 @@ int main(int argc, char **argv) {
             break;
 
         case 6:
-            cutoff.step = atoi(optarg);
-            type_of_cutoff = step_termination;
+            cutoff.bound.step = atoi(optarg);
+            cutoff.type_of_cutoff = step_termination;
             break;
 
         case 7:
-            cutoff.time = atof(optarg);
-            type_of_cutoff = time_termination;
+            cutoff.bound.time = atof(optarg);
+            cutoff.type_of_cutoff = time_termination;
             break;
 
         default:
@@ -107,7 +112,6 @@ int main(int argc, char **argv) {
             base_seed,
             thread_count,
             cutoff,
-            type_of_cutoff,
             parameters
             );
 
