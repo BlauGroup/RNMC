@@ -4,8 +4,11 @@
 // #include <csignal>
 
 struct HistoryElement {
+
+    unsigned long int seed; // seed
     int reaction_id; // reaction which fired
     double time;  // time after reaction has occoured.
+    int step;
 };
 
 template <typename Solver, typename Model>
@@ -60,8 +63,12 @@ bool Simulation<Solver, Model>::execute_step() {
 
         // record what happened
         history.push_back(HistoryElement {
+            .seed = seed,
             .reaction_id = next_reaction,
-            .time = time});
+            .time = time,
+            .step = step
+
+            });
 
         // increment step
         step++;

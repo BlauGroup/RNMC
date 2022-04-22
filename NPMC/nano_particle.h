@@ -120,10 +120,7 @@ struct NanoParticle {
     // to a SQL type.
     TrajectoriesSql history_element_to_sql(
         int seed,
-        int step,
         HistoryElement history_element);
-
-
 
 };
 
@@ -519,17 +516,15 @@ void NanoParticle::update_propensities(
 
 TrajectoriesSql NanoParticle::history_element_to_sql(
     int seed,
-    int step,
     HistoryElement history_element) {
 
     Reaction reaction = reactions[history_element.reaction_id];
     return TrajectoriesSql {
         .seed = seed,
-        .step = step,
+        .step = history_element.step,
         .time = history_element.time,
         .site_id_1 = reaction.site_id[0],
         .site_id_2 = reaction.site_id[1],
         .interaction_id = reaction.interaction_id
     };
 }
-

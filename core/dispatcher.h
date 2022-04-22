@@ -67,9 +67,6 @@ struct SimulatorPayload {
             }
 
 
-            // Calling resize() with a smaller size has no effect on the capacity of a vector.
-            // It will not free memory.
-            simulation.history.resize(simulation.step);
             history_queue.insert_history(
                 std::move(
                     HistoryPacket {
@@ -200,7 +197,6 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::record_simulation_h
         trajectories_writer.insert(
             model.history_element_to_sql(
                 (int) history_packet.seed,
-                (int) i,
                 history_packet.history[i]));
         count++;
         if (count % transaction_size == 0) {

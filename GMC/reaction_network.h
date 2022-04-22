@@ -63,7 +63,6 @@ struct ReactionNetwork {
     // to a SQL type.
     TrajectoriesSql history_element_to_sql(
         int seed,
-        int step,
         HistoryElement history_element);
 
 };
@@ -290,16 +289,12 @@ void ReactionNetwork::update_propensities(
 }
 
 
-
-
-
 TrajectoriesSql ReactionNetwork::history_element_to_sql(
     int seed,
-    int step,
     HistoryElement history_element) {
     return TrajectoriesSql {
         .seed = seed,
-        .step = step,
+        .step = history_element.step,
         .reaction_id = history_element.reaction_id,
         .time = history_element.time
     };
