@@ -4,13 +4,10 @@
 #include "sql.h"
 #include "simulation.h"
 #include "queues.h"
+#include <csignal>
 
 
-
-struct HistoryPacket {
-    std::vector<HistoryElement> history;
-    unsigned long int seed;
-};
+constexpr int history_chunk_size = 20000;
 
 enum TypeOfCutoff { step_termination, time_termination };
 
@@ -25,18 +22,21 @@ struct SimulatorPayload {
     HistoryQueue<HistoryPacket> &history_queue;
     SeedQueue &seed_queue;
     Cutoff cutoff;
+    std::vector<bool>::iterator running;
 
     SimulatorPayload(
         Model &model,
         HistoryQueue<HistoryPacket> &history_queue,
         SeedQueue &seed_queue,
-        Cutoff cutoff
+        Cutoff cutoff,
+        std::vector<bool>::iterator running
         ) :
 
             model (model),
             history_queue (history_queue),
             seed_queue (seed_queue),
-            cutoff (cutoff)
+            cutoff (cutoff),
+            running (running)
         {};
 
     void run_simulator() {
@@ -45,16 +45,9 @@ struct SimulatorPayload {
                seed_queue.get_seed()) {
 
             unsigned long int seed = maybe_seed.value();
-            int history_length;
-
-            if ( cutoff.type_of_cutoff == step_termination ) {
-                history_length = cutoff.bound.step + 1;
-            } else {
-                history_length = 1;
-            }
 
 
-            Simulation<Solver, Model> simulation (model, seed, history_length);
+            Simulation<Solver, Model> simulation (model, seed, history_chunk_size, history_queue);
 
 
             switch(cutoff.type_of_cutoff) {
@@ -73,7 +66,10 @@ struct SimulatorPayload {
                         .history = std::move(simulation.history),
                         .seed = seed
                         }));
+
         }
+
+        *running = false;
     }
 };
 
@@ -94,6 +90,7 @@ struct Dispatcher {
     HistoryQueue<HistoryPacket> history_queue;
     SeedQueue seed_queue;
     std::vector<std::thread> threads;
+    std::vector<bool> running;
     Cutoff cutoff;
     TypeOfCutoff type_of_cutoff;
     int number_of_simulations;
@@ -124,6 +121,7 @@ struct Dispatcher {
 
         // don't want to start threads in the constructor.
         threads (),
+        running (number_of_threads, false),
         cutoff (cutoff),
         number_of_simulations (number_of_simulations),
         number_of_threads (number_of_threads)
@@ -146,20 +144,38 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
 
     threads.resize(number_of_threads);
     for (int i = 0; i < number_of_threads; i++) {
+        running[i] = true;
         threads[i] = std::thread (
             [](SimulatorPayload<Solver, Model> payload) {payload.run_simulator();},
             SimulatorPayload<Solver, Model> (
                 model,
                 history_queue,
                 seed_queue,
-                cutoff
+                cutoff,
+                running.begin() + i
                 )
             );
 
     }
 
-    int trajectories_written = 0;
-    while (trajectories_written < number_of_simulations) {
+    bool finished = false;
+    while (! finished) {
+
+        if ( history_queue.empty() ) {
+
+            bool all_simulations_finished = true;
+
+            for ( bool flag : running ) {
+                if ( flag ) {
+                    all_simulations_finished = false;
+                    break;
+                }
+            }
+
+            if ( all_simulations_finished )
+                finished = true;
+        }
+
 
         std::optional<HistoryPacket>
             maybe_history_packet = history_queue.get_history();
@@ -167,7 +183,6 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
         if (maybe_history_packet) {
             HistoryPacket history_packet = std::move(maybe_history_packet.value());
             record_simulation_history(std::move(history_packet));
-            trajectories_written += 1;
         };
     }
 
@@ -176,6 +191,7 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
     initial_state_database.exec(
         "DELETE FROM trajectories WHERE rowid NOT IN"
         "(SELECT MIN(rowid) FROM trajectories GROUP BY seed, step);");
+
 
     std::cerr << time_stamp()
               << "removing duplicate trajectories...\n";
@@ -190,25 +206,24 @@ template <
     typename TrajectoriesSql
     >
 void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::record_simulation_history(HistoryPacket history_packet) {
-    int count = 0;
-    constexpr int transaction_size = 20000;
     initial_state_database.exec("BEGIN");
+
+
+    raise(SIGINT);
     for (unsigned long int i = 0; i < history_packet.history.size(); i++) {
         trajectories_writer.insert(
             model.history_element_to_sql(
                 (int) history_packet.seed,
                 history_packet.history[i]));
-        count++;
-        if (count % transaction_size == 0) {
-            initial_state_database.exec("COMMIT;");
-            initial_state_database.exec("BEGIN");
 
-        }
+
     }
     initial_state_database.exec("COMMIT;");
 
     std::cerr << time_stamp()
-              << "wrote trajectory "
+              << "wrote "
+              << history_packet.history.size()
+              << " events from trajectory "
               << history_packet.seed
               << " to database\n";
 };

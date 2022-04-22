@@ -32,6 +32,7 @@ struct SeedQueue {
 };
 
 
+
 template <typename T>
 struct HistoryQueue {
     // the flow of trajectory histories from the simulator threads to
@@ -51,6 +52,11 @@ struct HistoryQueue {
     // supposed to happen, the old reference is actually zerod out).
     std::queue<T> history_packets;
     std::mutex mutex;
+
+    bool empty() {
+        std::lock_guard<std::mutex> lock (mutex);
+        return history_packets.empty();
+    }
 
     void insert_history(T history_packet) {
         std::lock_guard<std::mutex> lock (mutex);

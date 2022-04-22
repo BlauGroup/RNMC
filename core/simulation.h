@@ -1,7 +1,8 @@
 #pragma once
 #include "solvers.h"
+#include "queues.h"
 #include <functional>
-// #include <csignal>
+#include <csignal>
 
 struct HistoryElement {
 
@@ -9,6 +10,11 @@ struct HistoryElement {
     int reaction_id; // reaction which fired
     double time;  // time after reaction has occoured.
     int step;
+};
+
+struct HistoryPacket {
+    std::vector<HistoryElement> history;
+    unsigned long int seed;
 };
 
 template <typename Solver, typename Model>
@@ -19,19 +25,25 @@ struct Simulation {
     double time;
     int step; // number of reactions which have occoured
     Solver solver;
+    unsigned long int history_length;
     std::vector<HistoryElement> history;
+    HistoryQueue<HistoryPacket> &history_queue;
     std::function<void(Update)> update_function;
 
 
     Simulation(Model &model,
                unsigned long int seed,
-               int history_length) :
+               int history_length,
+               HistoryQueue<HistoryPacket> &history_queue
+        ) :
         model (model),
         seed (seed),
         state (model.initial_state),
         time (0.0),
         step (0),
         solver (seed, std::ref(model.initial_propensities)),
+        history_length(history_length),
+        history_queue(history_queue),
         update_function ([&] (Update update) {solver.update(update);})
         {
             history.reserve(history_length);
@@ -67,8 +79,21 @@ bool Simulation<Solver, Model>::execute_step() {
             .reaction_id = next_reaction,
             .time = time,
             .step = step
-
             });
+
+        if ( history.size() == history_length ) {
+            raise(SIGINT);
+            history_queue.insert_history(
+                std::move(
+                    HistoryPacket {
+                        .history = std::move(history),
+                        .seed = seed
+                        }));
+
+            history = std::vector<HistoryElement> ();
+            history.reserve(history_length);
+        }
+
 
         // increment step
         step++;
