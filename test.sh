@@ -48,14 +48,14 @@ function test_npmc {
 
     # to check for leaks with valgrind, you need to use the option --fair-sched=yes
 
-    ./build/NPMC --nano_particle_database=$NPMC_TEST_DIR/np.sqlite --initial_state_database=$NPMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 # &> /dev/null
+    ./build/NPMC --nano_particle_database=$NPMC_TEST_DIR/np.sqlite --initial_state_database=$NPMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 &> /dev/null
 
     sql='SELECT seed, step, site_id_1, site_id_2, interaction_id FROM trajectories ORDER BY seed ASC, step ASC;'
 
     sqlite3 $NPMC_TEST_DIR/initial_state_with_trajectories.sqlite "${sql}" > $NPMC_TEST_DIR/trajectories
     sqlite3 $NPMC_TEST_DIR/initial_state_copy.sqlite "${sql}" > $NPMC_TEST_DIR/copy_trajectories
 
-    if  cmp $NPMC_TEST_DIR/trajectories $NPMC_TEST_DIR/copy_trajectories # > /dev/null
+    if  cmp $NPMC_TEST_DIR/trajectories $NPMC_TEST_DIR/copy_trajectories > /dev/null
     then
         echo -e "${Green} passed: no difference in NPMC trajectories ${Color_Off}"
         RC=0
@@ -64,9 +64,9 @@ function test_npmc {
         RC=1
     fi
 
-    # rm $NPMC_TEST_DIR/initial_state_copy.sqlite
-    # rm $NPMC_TEST_DIR/trajectories
-    # rm $NPMC_TEST_DIR/copy_trajectories
+    rm $NPMC_TEST_DIR/initial_state_copy.sqlite
+    rm $NPMC_TEST_DIR/trajectories
+    rm $NPMC_TEST_DIR/copy_trajectories
 }
 
 function check_result {
