@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
     NanoParticleParameters parameters = {};
 
     Dispatcher<
-        SparseSolver,
+        LinearSolver,
         NanoParticle,
         NanoParticleParameters,
         TrajectoriesSql

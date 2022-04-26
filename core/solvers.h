@@ -26,6 +26,7 @@ private:
     std::vector<double> propensities;
     int number_of_active_indices;
     double propensity_sum;
+    unsigned long int last_non_zero_event;
 
 public:
     // for linear solver we can moves initial_propensities vector into the object
@@ -97,8 +98,11 @@ LinearSolver::LinearSolver(
     propensity_sum (0.0) {
         for (unsigned long i = 0; i < propensities.size(); i++) {
             propensity_sum += propensities[i];
-            if (propensities[i] > 0)
+            if (propensities[i] > 0) {
                 number_of_active_indices += 1;
+                last_non_zero_event = i;
+            }
+
         }
     };
 
@@ -112,8 +116,10 @@ LinearSolver::LinearSolver(
 
         for (unsigned long i = 0; i < propensities.size(); i++) {
             propensity_sum += propensities[i];
-            if (propensities[i] > 0)
+            if (propensities[i] > 0) {
                 number_of_active_indices += 1;
+                last_non_zero_event = i;
+            }
         }
     };
 
@@ -121,7 +127,14 @@ LinearSolver::LinearSolver(
 void LinearSolver::update(Update update) {
 
     if (propensities[update.index] > 0.0) number_of_active_indices--;
-    if (update.propensity > 0.0) number_of_active_indices++;
+
+    if (update.propensity > 0.0) {
+        number_of_active_indices++;
+        if ( update.index > last_non_zero_event )
+            last_non_zero_event = update.index;
+    }
+
+
     propensity_sum -= propensities[update.index];
     propensity_sum += update.propensity;
     propensities[update.index] = update.propensity;
@@ -155,7 +168,7 @@ std::optional<Event> LinearSolver::event() {
     if (m < propensities.size())
         return std::optional<Event> (Event {.index = m, .dt = dt});
     else
-        return std::optional<Event> (Event {.index = m - 1, .dt = dt});
+        return std::optional<Event> (Event {.index = last_non_zero_event, .dt = dt});
 }
 
 double LinearSolver::get_propensity(int index) {
@@ -281,7 +294,6 @@ SparseSolver::SparseSolver(unsigned long int seed, std::vector<double> &initial_
             propensities[i] = initial_propensities[i];
             propensity_sum += initial_propensities[i];
         }
-
     }
 }
 
@@ -325,10 +337,10 @@ std::optional<Event> SparseSolver::event() {
     }
 
     double dt = - std::log(r2) / propensity_sum;
-    if ( std::get<0>(*it) < propensities.size())
+    if ( it != propensities.end() )
         return std::optional<Event> (Event {.index = std::get<0>(*it), .dt = dt});
     else
-        return std::optional<Event> (Event {.index = std::get<0>(*propensities.end()), .dt = dt});
+        return std::optional<Event> (Event {.index = std::get<0>(*propensities.rbegin()), .dt = dt});
 }
 
 
