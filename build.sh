@@ -4,7 +4,7 @@ flags="-fno-rtti -fno-exceptions -std=c++17 -Wall -Wextra -g $(gsl-config --cfla
 
 echo "building test_core"
 $CC $flags ./core/test.cpp -o ./build/test_core
-echo "building GMC"
-$CC $flags ./GMC/GMC.cpp -o ./build/GMC
+#echo "building GMC"
+#$CC $flags ./GMC/GMC.cpp -o ./build/GMC
 echo "building NPMC"
 $CC $flags ./NPMC/NPMC.cpp -o ./build/NPMC

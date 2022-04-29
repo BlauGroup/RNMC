@@ -3,11 +3,20 @@
 #include "queues.h"
 #include <functional>
 #include <csignal>
+//
+// //Include this here for now, but breakout into own file later
+// struct Reaction {
+//     int site_id[2];
+//     Interaction interaction;
+//
+//     // rate has units 1 / s
+//     double rate;
+// };
 
 struct HistoryElement {
 
     unsigned long int seed; // seed
-    int reaction_id; // reaction which fired
+    Reaction reaction; // reaction which fired
     double time;  // time after reaction has occoured.
     int step;
 };
@@ -28,7 +37,9 @@ struct Simulation {
     unsigned long int history_chunk_size;
     std::vector<HistoryElement> history;
     HistoryQueue<HistoryPacket> &history_queue;
-    std::function<void(Update)> update_function;
+    // std::function<void(Update)> update_function;
+    std::vector<Reaction> current_reactions;
+    std::vector<std::vector<int>> site_reaction_dependency;
 
 
     Simulation(Model &model,
@@ -41,10 +52,12 @@ struct Simulation {
         state (model.initial_state),
         time (0.0),
         step (0),
-        solver (seed, std::ref(model.initial_propensities)),
+        solver (seed, std::ref(model.initial_reactions)),
         history_chunk_size (history_chunk_size),
         history_queue(history_queue),
-        update_function ([&] (Update update) {solver.update(update);})
+        // update_function ([&] (Update update) {solver.update(update);}),
+        current_reactions (model.initial_reactions),
+        site_reaction_dependency (model.site_reaction_dependency)
         {
             history.reserve(history_chunk_size);
         };
@@ -68,7 +81,8 @@ bool Simulation<Solver, Model>::execute_step() {
     } else {
         // an event happens
         Event event = maybe_event.value();
-        int next_reaction = event.index;
+        int next_reaction_id = event.index;
+        Reaction next_reaction = current_reactions[next_reaction_id];
 
         // update time
         time += event.dt;
@@ -76,7 +90,7 @@ bool Simulation<Solver, Model>::execute_step() {
         // record what happened
         history.push_back(HistoryElement {
             .seed = seed,
-            .reaction_id = next_reaction,
+            .reaction = next_reaction,
             .time = time,
             .step = step
             });
@@ -100,12 +114,14 @@ bool Simulation<Solver, Model>::execute_step() {
         // update state
         model.update_state(std::ref(state), next_reaction);
 
-
-        // update propensities
-        model.update_propensities(
-            update_function,
-            std::ref(state),
-            next_reaction);
+        // update list of current available reactions
+        model.update_reactions(std::ref(state), std::ref(site_reaction_dependency), std::ref(current_reactions), next_reaction);
+        solver.update();
+        // // update propensities
+        // model.update_propensities(
+        //     update_function,
+        //     std::ref(state),
+        //     next_reaction);
 
         return true;
     }
