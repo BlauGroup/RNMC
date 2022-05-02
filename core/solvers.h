@@ -5,6 +5,7 @@
 #include <cmath>
 #include <map>
 #include <csignal>
+#include <iostream>
 
 // the solver is the algorithmic backbone of a monte carlo simulation
 // it decides what will occour next.  for now, we have the linear
@@ -47,7 +48,6 @@ struct Event {
 class LinearSolver {
 private:
     Sampler sampler;
-    std::vector<Reaction> current_reactions;
     std::vector<double> cumulative_propensities;
     int number_of_active_indices;
     double propensity_sum;
@@ -59,6 +59,7 @@ public:
     // we also implement initialization by copying from a reference
     // LinearSolver(unsigned long int seed, std::vector<double> &&initial_propensities);
     // LinearSolver(unsigned long int seed, std::vector<double> &initial_propensities);
+    std::vector<Reaction> current_reactions;
     LinearSolver(unsigned long int seed, std::vector<Reaction> &current_reactions);
     LinearSolver(unsigned long int seed, std::vector<Reaction> &&current_reactions);
     void update();

@@ -38,7 +38,7 @@ struct Simulation {
     std::vector<HistoryElement> history;
     HistoryQueue<HistoryPacket> &history_queue;
     // std::function<void(Update)> update_function;
-    std::vector<Reaction> current_reactions;
+    // std::vector<Reaction> current_reactions;
     std::vector<std::vector<int>> site_reaction_dependency;
 
 
@@ -56,7 +56,7 @@ struct Simulation {
         history_chunk_size (history_chunk_size),
         history_queue(history_queue),
         // update_function ([&] (Update update) {solver.update(update);}),
-        current_reactions (model.initial_reactions),
+        // current_reactions (model.initial_reactions),
         site_reaction_dependency (model.site_reaction_dependency)
         {
             history.reserve(history_chunk_size);
@@ -82,7 +82,7 @@ bool Simulation<Solver, Model>::execute_step() {
         // an event happens
         Event event = maybe_event.value();
         int next_reaction_id = event.index;
-        Reaction next_reaction = current_reactions[next_reaction_id];
+        Reaction next_reaction = solver.current_reactions[next_reaction_id];
 
         // update time
         time += event.dt;
@@ -115,7 +115,7 @@ bool Simulation<Solver, Model>::execute_step() {
         model.update_state(std::ref(state), next_reaction);
 
         // update list of current available reactions
-        model.update_reactions(std::ref(state), std::ref(site_reaction_dependency), std::ref(current_reactions), next_reaction);
+        model.update_reactions(std::ref(state), std::ref(site_reaction_dependency), std::ref(solver.current_reactions), next_reaction);
         solver.update();
         // // update propensities
         // model.update_propensities(
