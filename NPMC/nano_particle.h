@@ -392,7 +392,7 @@ NanoParticle::NanoParticle(
 void NanoParticle::compute_distance_matrix() {
     distance_matrix.resize(sites.size());
     for (unsigned int i = 0; i < sites.size(); i++) {
-        distance_matrix.resize(sites.size());
+        distance_matrix[i].resize(sites.size());
         for (unsigned int j = 0; j < sites.size(); j++) {
             distance_matrix[i][j] = site_distance_squared(sites[i], sites[j]);
         }
