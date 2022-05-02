@@ -239,7 +239,6 @@ NanoParticle::NanoParticle(
         site_reaction_dependency[i].resize(0);
     }
 
-    int num_species = 0; // Keep track of number of species, so axis 0 and 1 in interaction_map can be resized
     while(std::optional<SiteSql> maybe_site_row =
           site_reader.next()) {
 
@@ -250,14 +249,12 @@ NanoParticle::NanoParticle(
             .z = site_row.z,
             .species_id = (int) site_row.species_id };
 
-          if (num_species < sites[site_row.site_id].species_id) {
-              num_species = sites[site_row.site_id].species_id;
-          }
     }
 
 
     // initialize interactions
     // interactions.resize(metadata_row.number_of_interactions);
+    int num_species = metadata_row.number_of_species
     int interaction_counter = 0;
     int num_states = 0; // Keep track of number of states, so axis 2 and 3 in interaction_map can be resized
     while(std::optional<InteractionSql> maybe_interaction_row =
