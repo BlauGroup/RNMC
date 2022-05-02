@@ -4,6 +4,7 @@
 #include <optional>
 #include <cmath>
 #include <map>
+#include <csignal>
 
 // the solver is the algorithmic backbone of a monte carlo simulation
 // it decides what will occour next.  for now, we have the linear
@@ -131,13 +132,13 @@ LinearSolver::LinearSolver(
     std::vector<Reaction> &current_reactions) :
     sampler (Sampler(seed)),
     current_reactions (current_reactions),
+    cumulative_propensities (current_reactions.size()),
     number_of_active_indices (0),
     propensity_sum (0.0) {
         update();
     };
 
 void LinearSolver::update() {
-    std::vector<double> cumulative_propensities;
     cumulative_propensities.resize(current_reactions.size());
     if (number_of_active_indices > 0) {
         cumulative_propensities[0] = current_reactions[0].rate;
