@@ -254,7 +254,7 @@ NanoParticle::NanoParticle(
 
     // initialize interactions
     // interactions.resize(metadata_row.number_of_interactions);
-    int num_species = metadata_row.number_of_species
+    int num_species = metadata_row.number_of_species;
     int interaction_counter = 0;
     int num_states = 0; // Keep track of number of states, so axis 2 and 3 in interaction_map can be resized
     while(std::optional<InteractionSql> maybe_interaction_row =
