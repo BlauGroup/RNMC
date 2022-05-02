@@ -339,7 +339,7 @@ NanoParticle::NanoParticle(
     // Setup current_state by copying from initial_state
     current_state = initial_state;
     int reaction_count = 0;
-    std::cout << "got tothis point";
+
     // raise(SIGINT);
     for (unsigned int site_id_0 = 0; site_id_0 < sites.size(); site_id_0++) {
         // Add one site interactions

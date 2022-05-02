@@ -95,8 +95,6 @@ int main(int argc, char **argv) {
         }
 
     }
-    std::cout << "got here";
-    // raise(SIGINT);
     NanoParticleParameters parameters = {};
 
     Dispatcher<
