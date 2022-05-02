@@ -286,10 +286,15 @@ NanoParticle::NanoParticle(
         }
 
         if (num_states < interaction_row.left_state_1) {
+            // Keep track of the max number of states
             num_states = interaction_row.left_state_1;
         }
+
+        // Increment the interaction counter
         interaction_counter++;
     }
+    // Increment the state counter, since this value will be off by 1
+    num_states++;
 
     // Resize interaction_maps
     one_site_interactions_map.resize(num_species);
