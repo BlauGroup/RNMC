@@ -3,6 +3,7 @@
 #include "queues.h"
 #include <functional>
 #include <csignal>
+#include <set>
 //
 // //Include this here for now, but breakout into own file later
 // struct Reaction {
@@ -39,7 +40,7 @@ struct Simulation {
     HistoryQueue<HistoryPacket> &history_queue;
     // std::function<void(Update)> update_function;
     // std::vector<Reaction> current_reactions;
-    std::vector<std::vector<int>> site_reaction_dependency;
+    std::vector<std::set<int>> site_reaction_dependency;
 
 
     Simulation(Model &model,
