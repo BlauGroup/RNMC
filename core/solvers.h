@@ -141,6 +141,7 @@ LinearSolver::LinearSolver(
 
 void LinearSolver::update() {
     cumulative_propensities.resize(current_reactions.size());
+    number_of_active_indices = cumulative_propensities.size();
     if (number_of_active_indices > 0) {
         cumulative_propensities[0] = current_reactions[0].rate;
     }
@@ -150,7 +151,6 @@ void LinearSolver::update() {
     }
 
     propensity_sum = cumulative_propensities[cumulative_propensities.size()-1];
-    number_of_active_indices = cumulative_propensities.size();
 };
 
 // void LinearSolver::update(Update update) {
