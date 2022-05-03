@@ -516,6 +516,9 @@ void NanoParticle::update_reactions(
         current_site_reaction_dependency[reaction.site_id[k]].clear();
     }
 
+    // Sort the reactions to be removed in descending order, so that it is unlikely that we move a reaction that is to be removed
+    std::sort(reactions_to_remove.begin(), reactions_to_remove.end());
+
     std::cerr << "There are currently "
               << current_reactions.size()
               << " reactions.\n"
@@ -524,8 +527,19 @@ void NanoParticle::update_reactions(
               << new_reactions.size()
               << " to be added.\n";
 
-    // Sort the reactions to be removed in descending order, so that it is unlikely that we move a reaction that is to be removed
-    std::sort(reactions_to_remove.begin(), reactions_to_remove.end(), std::greater<int>());
+    std::cerr << "Removing: ";
+    for (unsigned int z = 0; z < reactions_to_remove.size(); z++) {
+        std::cerr << reactions_to_remove[z]
+                  << ", ";
+    }
+    std::cerr << "\n";
+
+    // std::cerr << "Adding: ";
+    // for (unsigned int z = 0; z < new_reactions.size(); z++) {
+    //     std::cerr << new_reactions[z].;
+    // }
+    // std::cerr << "\n";
+
 
     // Replace the reactions in current_reactions
     for (unsigned int i = 0; i < new_reactions.size(); i++) {
@@ -534,7 +548,7 @@ void NanoParticle::update_reactions(
             // If the number of new reactions is larger than the number of reactions to remove
             current_reactions.push_back(new_reaction);
             for (int k = 0; k < new_reaction.interaction.number_of_sites; k++) {
-                current_site_reaction_dependency[new_reaction.site_id[k]].push_back(current_reactions.size());
+                current_site_reaction_dependency[new_reaction.site_id[k]].push_back(current_reactions.size()-1);
             }
         } else {
             current_reactions[reactions_to_remove[i]] = new_reaction;
@@ -543,37 +557,91 @@ void NanoParticle::update_reactions(
             }
         }
     }
+    // reactions_to_remove.resize(reactions_to_remove.size() + new_reactions.size() - reactions_to_remove.size());
 
     // If the number of new reactions was smaller than the number of reactions to remove, we need to reassign reactions
     if (new_reactions.size() < reactions_to_remove.size()){
         int n_reactions_to_move = reactions_to_remove.size() - new_reactions.size();
-        for (unsigned int i = new_reactions.size(); i < reactions_to_remove.size(); i++){
-            // take a reaction from the end of the list and put it into the place of the reaction to remove
-            int reaction_index_to_move = current_reactions.size()-i;
-            Reaction reaction_to_move = current_reactions[reaction_index_to_move];
-            current_reactions[reactions_to_remove[i]] = reaction_to_move;
+        int reactions_moved = 0;
+        int reaction_id_to_move = (int) current_reactions.size()-1;
+        while (reactions_moved < n_reactions_to_move) {
+            // Could simplify this by enforcing order in current_site_reaction_dependency or by specifying a range
+            auto result = std::find(reactions_to_remove.rbegin(), reactions_to_remove.rend(), reaction_id_to_move);
+            if (result != reactions_to_remove.rend()){
+                // Reaction to be moved is going to be removed, no point in removing it
+                reaction_id_to_move--;
+            } else {
+                Reaction reaction_to_move = current_reactions[reaction_id_to_move];
+                current_reactions[reactions_to_remove[reactions_moved]] = reaction_to_move;
+                std::cerr << "Moving reaction "
+                          << reaction_id_to_move
+                          << " to "
+                          << reactions_to_remove[reactions_moved]
+                          << "\n";
 
-            // find the reaction that was moved in the site reaction dependency vector and remap it
-            for (int k = 0; k < reaction_to_move.interaction.number_of_sites; k++) {
-                int site_id = reaction_to_move.site_id[k];
-                // This number should always be in the list, else something has gone wrong
-                auto site_reaction_index_search = std::find(current_site_reaction_dependency[site_id].begin(), current_site_reaction_dependency[site_id].end(), reaction_index_to_move);
+                // find the reaction that was moved in the site reaction dependency vector and remap it
+                for (int k = 0; k < reaction_to_move.interaction.number_of_sites; k++) {
+                    int site_id = reaction_to_move.site_id[k];
+                    // This number should always be in the list, else something has gone wrong
+                    auto site_reaction_index_search = std::find(current_site_reaction_dependency[site_id].begin(), current_site_reaction_dependency[site_id].end(), reaction_id_to_move);
 
-                if (site_reaction_index_search != current_site_reaction_dependency[site_id].end()){
-                    int site_reaction_index = site_reaction_index_search - current_site_reaction_dependency[site_id].begin();
-                    current_site_reaction_dependency[site_id][site_reaction_index] = reactions_to_remove[i];
-                } else {
-                  // Throw some sort of error
-                  std::cerr << "Could not find reaction "
-                            << reaction_index_to_move
-                            << " in the site reaction dependency map for site "
-                            << site_id
-                            << "\n";
+                    if (site_reaction_index_search != current_site_reaction_dependency[site_id].end()){
+                        int site_reaction_index = site_reaction_index_search - current_site_reaction_dependency[site_id].begin();
 
-                  raise(SIGINT);
+                        std::cerr << "Remapping reaction "
+                                  << current_site_reaction_dependency[site_id][site_reaction_index]
+                                  << " to "
+                                  << reactions_to_remove[reactions_moved]
+                                  << "\n";
+
+                        current_site_reaction_dependency[site_id][site_reaction_index] = reactions_to_remove[reactions_moved];
+                        reaction_id_to_move--;
+                        reactions_moved++;
+                    } else {
+                      // Throw some sort of error
+                      std::cerr << "Could not find reaction "
+                                << reaction_id_to_move
+                                << " in the site reaction dependency map for site "
+                                << site_id
+                                << "\n";
+
+                      for (unsigned int z = 0; z < current_site_reaction_dependency[site_id].size(); z++) {
+                          std::cerr << current_site_reaction_dependency[site_id][z]
+                                    << ", ";
+                      }
+                      std::cerr << "\n";
+                      raise(SIGINT);
+                    }
                 }
             }
         }
+        // for (unsigned int i = new_reactions.size(); i < reactions_to_remove.size(); i++){
+        //     // take a reaction from the end of the list and put it into the place of the reaction to remove
+        //     int reaction_index_to_move = current_reactions.size()-i;
+        //     Reaction reaction_to_move = current_reactions[reaction_index_to_move];
+        //     current_reactions[reactions_to_remove[i]] = reaction_to_move;
+        //
+        //     // find the reaction that was moved in the site reaction dependency vector and remap it
+        //     for (int k = 0; k < reaction_to_move.interaction.number_of_sites; k++) {
+        //         int site_id = reaction_to_move.site_id[k];
+        //         // This number should always be in the list, else something has gone wrong
+        //         auto site_reaction_index_search = std::find(current_site_reaction_dependency[site_id].begin(), current_site_reaction_dependency[site_id].end(), reaction_index_to_move);
+        //
+        //         if (site_reaction_index_search != current_site_reaction_dependency[site_id].end()){
+        //             int site_reaction_index = site_reaction_index_search - current_site_reaction_dependency[site_id].begin();
+        //             current_site_reaction_dependency[site_id][site_reaction_index] = reactions_to_remove[i];
+        //         } else {
+        //           // Throw some sort of error
+        //           std::cerr << "Could not find reaction "
+        //                     << reaction_index_to_move
+        //                     << " in the site reaction dependency map for site "
+        //                     << site_id
+        //                     << "\n";
+        //
+        //           raise(SIGINT);
+        //         }
+        //     }
+        // }
         current_reactions.resize(current_reactions.size() - n_reactions_to_move);
     }
 }
