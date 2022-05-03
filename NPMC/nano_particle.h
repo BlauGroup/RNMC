@@ -603,14 +603,14 @@ void NanoParticle::update_reactions(
     }
     std::cerr << "\n";
 
-    std::cerr << "Site Dependency map for site 426: ";
-    for (site_reaction_dependency_itr = current_site_reaction_dependency[426].begin();
-         site_reaction_dependency_itr != current_site_reaction_dependency[426].end();
-         site_reaction_dependency_itr++) {
-        std::cerr << *site_reaction_dependency_itr
-                  << ", ";
-    }
-    std::cerr << "\n";
+    // std::cerr << "Site Dependency map for site 426: ";
+    // for (site_reaction_dependency_itr = current_site_reaction_dependency[426].begin();
+    //      site_reaction_dependency_itr != current_site_reaction_dependency[426].end();
+    //      site_reaction_dependency_itr++) {
+    //     std::cerr << *site_reaction_dependency_itr
+    //               << ", ";
+    // }
+    // std::cerr << "\n";
 
     std::cerr << "Num Reactions to remove: " << reactions_to_remove.size() << "\n";
 
