@@ -366,7 +366,7 @@ NanoParticle::NanoParticle(
                 int site_1_species_id = sites[site_id_1].species_id;
                 std::vector<Interaction> available_interactions = two_site_interactions_map[site_0_species_id][site_1_species_id][site_0_state][site_1_state];
                 double distance = distance_matrix[site_id_0][site_id_1];
-                if (distance < interaction_radius_bound) {
+                if (distance <= interaction_radius_bound) {
                     for (unsigned int i = 0; i < available_interactions.size(); i++){
                         Interaction interaction = available_interactions[i];
                         Reaction reaction = Reaction {
