@@ -539,11 +539,11 @@ void NanoParticle::update_reactions(
               // Need to remove this interaction from the second site if this is a two_site interaction
               Reaction reaction_to_remove = current_reactions[reaction_id_to_remove];
               if (reaction_to_remove.interaction.number_of_sites == 2) {
-                  reaction_dependency.erase(reaction_id_to_remove);
-
+                  current_site_reaction_dependency[reaction_to_remove.site_id[1]].erase(reaction_id_to_remove);
               }
 
         }
+
         std::cerr << "\n";
         current_site_reaction_dependency[reaction.site_id[k]].clear();
     }
