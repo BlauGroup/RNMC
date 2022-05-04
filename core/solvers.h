@@ -24,6 +24,10 @@ struct Interaction {
     // rate has units 1 / s. If number of sites = 2, then rate has units 1 / s m^6.
     double rate;
 };
+// For this nano particle simulator, a reaction consists
+// of upto two sites and the interaction id.
+// if it is an internal interaction, site_id_2 will be -1
+// In a reaction, the sites must be within the interaction radius bound.
 
 //Include this here for now, but breakout into own file later
 struct Reaction {
@@ -119,12 +123,13 @@ LinearSolver::LinearSolver(
     unsigned long int seed,
     std::vector<Reaction> &&current_reactions) :
     sampler (Sampler(seed)),
+    cumulative_propensities (current_reactions.size()),
+    number_of_active_indices (0),
+    propensity_sum (0.0), 
     // if this move isn't here, the semantics is that initial
     // propensities gets moved into a stack variable for the function
     // call and that stack variable is copied into the object.
-    current_reactions (std::move(current_reactions)),
-    number_of_active_indices (0),
-    propensity_sum (0.0) {
+    current_reactions (std::move(current_reactions)){
         update();
     };
 //
@@ -132,10 +137,10 @@ LinearSolver::LinearSolver(
     unsigned long int seed,
     std::vector<Reaction> &current_reactions) :
     sampler (Sampler(seed)),
-    current_reactions (current_reactions),
     cumulative_propensities (current_reactions.size()),
     number_of_active_indices (0),
-    propensity_sum (0.0) {
+    propensity_sum (0.0),
+    current_reactions (current_reactions){
         update();
     };
 
