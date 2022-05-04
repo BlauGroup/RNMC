@@ -495,8 +495,6 @@ void NanoParticle::update_reactions(
 
 
               // Need to remove this interaction from the second site if this is a two_site interaction
-              // TODO(recommendation): can make reaction_to_remove a reference to avoid making a copy of the object since you're doing read-only operations on this object within this limited scope
-              //    Reaction* reaction_to_remove_ptr = &current_reactions[reaction_id_to_remove]
               Reaction* reaction_to_remove = &current_reactions[reaction_id_to_remove];
               current_site_reaction_dependency[reaction_to_remove->site_id[0]].erase(reaction_id_to_remove);
               if ((*reaction_to_remove).interaction.number_of_sites == 2) {
@@ -508,24 +506,27 @@ void NanoParticle::update_reactions(
     }
     
 
-    // Replace the reactions in current_reactions
+    // Add the new reactions to the current_reactions vector
     int n_reactions_to_remove = reactions_to_remove.size();
     std::set<int>::iterator reactions_to_remove_itr = reactions_to_remove.begin();
     for (unsigned int i = 0; i < new_reactions.size(); i++) {
         Reaction* new_reaction = &new_reactions[i];
-        if (i >= n_reactions_to_remove) {
-            // TODO: Finish the comment below (more things to add than remove)
-            // If the number of new reactions is larger than the number of reactions to remove
-            current_reactions.push_back(*new_reaction);
-            for (int k = 0; k < (*new_reaction).interaction.number_of_sites; k++) {
-                current_site_reaction_dependency[new_reaction->site_id[k]].insert(current_reactions.size()-1);
-            }
-        } else {
+        if (i < (unsigned) n_reactions_to_remove) {
+            // Assign the new reaction to a index belonging to a reaction to remove.
+            // Since the reaction is going to be deleted anyways, this is safe.
+            // Additionally, this avoids additional copy operations
             current_reactions[*reactions_to_remove_itr] = *new_reaction;
             for (int k = 0; k < (*new_reaction).interaction.number_of_sites; k++) {
                 current_site_reaction_dependency[new_reaction->site_id[k]].insert(*reactions_to_remove_itr);
             }
             reactions_to_remove.erase(reactions_to_remove_itr++);
+        } else {
+            // If the number of new reactions to be added is larger than the number of reactions to remove,
+            // just append the excess reactions to the end of the current_reactions vector
+            current_reactions.push_back(*new_reaction);
+            for (int k = 0; k < (*new_reaction).interaction.number_of_sites; k++) {
+                current_site_reaction_dependency[new_reaction->site_id[k]].insert(current_reactions.size()-1);
+            }
         }
     }
 
