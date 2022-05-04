@@ -5,13 +5,13 @@
 #include <csignal>
 
 void print_usage() {
-    std::cout << "Usage: specify the following options\n"
-              << "--nano_particle_database\n"
-              << "--initial_state_database\n"
-              << "--number_of_simulations\n"
-              << "--base_seed\n"
-              << "--thread_count\n"
-              << "--step_cutoff|time_cutoff\n";
+    std::cout << "Usage: specify the following options" << std::endl
+              << "--nano_particle_database" << std::endl
+              << "--initial_state_database" << std::endl
+              << "--number_of_simulations" << std::endl
+              << "--base_seed" << std::endl
+              << "--thread_count" << std::endl
+              << "--step_cutoff|time_cutoff" << std::endl;
 }
 
 int main(int argc, char **argv) {
