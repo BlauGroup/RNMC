@@ -483,22 +483,23 @@ void NanoParticle::update_reactions(
     std::vector<Reaction> &current_reactions,
     Reaction reaction) {
 
-    std::cerr << "---------\n"
-              << "New "
-              << reaction.interaction.number_of_sites
-              << "-site reaction (involving sites "
-              << reaction.site_id[0]
-              << " and "
-              << reaction.site_id[1]
-              << ") fired: "
-              << reaction.interaction.interaction_id
-              << " - rate = "
-              << reaction.rate
-              << "\n";
+    // std::cerr << "---------\n"
+    //           << "New "
+    //           << reaction.interaction.number_of_sites
+    //           << "-site reaction (involving sites "
+    //           << reaction.site_id[0]
+    //           << " and "
+    //           << reaction.site_id[1]
+    //           << ") fired: "
+    //           << reaction.interaction.interaction_id
+    //           << " - rate = "
+    //           << reaction.rate
+    //           << "\n";
 
     // Compute the new reactions based on the new states
     std::vector<Reaction> new_reactions;
-    for ( int k = 0; k < reaction.interaction.number_of_sites; k++) {
+    for (int k = 0; k < reaction.interaction.number_of_sites; k++) {
+      // TODO(recommendation): Move body of for-loop into separate function, then call the function twice.
         int site_id_0 = reaction.site_id[k];
         int other_site_id;
         if (k == 0) {
@@ -569,7 +570,7 @@ void NanoParticle::update_reactions(
     std::set<int>::iterator site_reaction_dependency_itr;
     std::set<int> reaction_dependency;
 
-    for ( int k = 0; k < reaction.interaction.number_of_sites; k++) {
+    for (int k = 0; k < reaction.interaction.number_of_sites; k++) {
         int site_id = reaction.site_id[k];
         int other_site_id;
         if (k == 0) {
@@ -580,7 +581,7 @@ void NanoParticle::update_reactions(
             // This should never be true, unless there are 3-site interactions, in which case everything should break
             raise(SIGINT);
         }
-        std::cerr << "Adding to the remove list: ";
+        // std::cerr << "Adding to the remove list: ";
         reaction_dependency = current_site_reaction_dependency[site_id];
         for (site_reaction_dependency_itr = reaction_dependency.begin();
              site_reaction_dependency_itr != reaction_dependency.end();
@@ -588,10 +589,12 @@ void NanoParticle::update_reactions(
               int reaction_id_to_remove = *site_reaction_dependency_itr;
               reactions_to_remove.insert(reaction_id_to_remove);
 
-              std::cerr << *site_reaction_dependency_itr
-                        << ", ";
+            //   std::cerr << *site_reaction_dependency_itr
+            //             << ", ";
 
               // Need to remove this interaction from the second site if this is a two_site interaction
+              // TODO(recommendation): can make reaction_to_remove a reference to avoid making a copy of the object since you're doing read-only operations on this object within this limited scope
+              //    Reaction* reaction_to_remove_ptr = &current_reactions[reaction_id_to_remove]
               Reaction reaction_to_remove = current_reactions[reaction_id_to_remove];
               current_site_reaction_dependency[reaction_to_remove.site_id[0]].erase(reaction_id_to_remove);
               if (reaction_to_remove.interaction.number_of_sites == 2) {
@@ -600,68 +603,68 @@ void NanoParticle::update_reactions(
 
         }
 
-        std::cerr << "\n";
-        // current_site_reaction_dependency[reaction.site_id[k]].clear();
+        // std::cerr << "\n";
     }
 
-    std::cerr << "There are currently "
-              << current_reactions.size()
-              << " reactions.\n"
-              << reactions_to_remove.size()
-              << " to be removed, and "
-              << new_reactions.size()
-              << " to be added.\n";
+    // std::cerr << "There are currently "
+    //           << current_reactions.size()
+    //           << " reactions.\n"
+    //           << reactions_to_remove.size()
+    //           << " to be removed, and "
+    //           << new_reactions.size()
+    //           << " to be added.\n";
 
-    std::cerr << "Removing: ";
-    std::set<int>::iterator itr;
-    for (itr = reactions_to_remove.begin(); itr != reactions_to_remove.end(); itr++) {
-        std::cerr << *itr << ", ";
-    }
-    std::cerr << "\n";
+    // std::cerr << "Removing: ";
+    std::set<int>::iterator reactions_to_remove_itr;
+    // for (reactions_to_remove_itr = reactions_to_remove.begin(); 
+    //      reactions_to_remove_itr != reactions_to_remove.end(); 
+    //      reactions_to_remove_itr++) {
+    //     std::cerr << *reactions_to_remove_itr << ", ";
+    // }
+    // std::cerr << "\n";
 
     // Replace the reactions in current_reactions
-    int reactions_replaced = 0;
     int n_reactions_to_remove = reactions_to_remove.size();
-    itr = reactions_to_remove.begin();
-    std::set<int>::iterator temp_itr;
+    reactions_to_remove_itr = reactions_to_remove.begin();
+    // std::set<int>::iterator temp_itr;
     for (unsigned int i = 0; i < new_reactions.size(); i++) {
         Reaction new_reaction = new_reactions[i];
-        if ( i >= n_reactions_to_remove){
+        if (i >= n_reactions_to_remove) {
+            // TODO: Finish the comment below (more things to add than remove)
             // If the number of new reactions is larger than the number of reactions to remove
             current_reactions.push_back(new_reaction);
             for (int k = 0; k < new_reaction.interaction.number_of_sites; k++) {
                 current_site_reaction_dependency[new_reaction.site_id[k]].insert(current_reactions.size()-1);
             }
-            std::cerr << "New interaction "
-                      << current_reactions.size()-1
-                      << ": id "
-                      << new_reaction.interaction.interaction_id
-                      << " sites "
-                      << new_reaction.site_id[0]
-                      << " and "
-                      << new_reaction.site_id[1]
-                      << "\n";
+            // std::cerr << "New interaction "
+            //           << current_reactions.size()-1
+            //           << ": id "
+            //           << new_reaction.interaction.interaction_id
+            //           << " sites "
+            //           << new_reaction.site_id[0]
+            //           << " and "
+            //           << new_reaction.site_id[1]
+            //           << "\n";
         } else {
-            std::cerr << "Replaced interaction "
-                      << *itr
-                      << ": id "
-                      << new_reaction.interaction.interaction_id
-                      << " sites "
-                      << new_reaction.site_id[0]
-                      << " and "
-                      << new_reaction.site_id[1]
-                      << ", previously: id "
-                      << current_reactions[*itr].interaction.interaction_id
-                      << " sites "
-                      << current_reactions[*itr].site_id[0]
-                      << " and "
-                      << current_reactions[*itr].site_id[1]
-                      << ")\n";
-            current_reactions[*itr] = new_reaction;
+            // std::cerr << "Replaced interaction "
+            //           << *reactions_to_remove_itr
+            //           << ": id "
+            //           << new_reaction.interaction.interaction_id
+            //           << " sites "
+            //           << new_reaction.site_id[0]
+            //           << " and "
+            //           << new_reaction.site_id[1]
+            //           << ", previously: id "
+            //           << current_reactions[*reactions_to_remove_itr].interaction.interaction_id
+            //           << " sites "
+            //           << current_reactions[*reactions_to_remove_itr].site_id[0]
+            //           << " and "
+            //           << current_reactions[*reactions_to_remove_itr].site_id[1]
+            //           << ")\n";
+            current_reactions[*reactions_to_remove_itr] = new_reaction;
             for (int k = 0; k < new_reaction.interaction.number_of_sites; k++) {
-                current_site_reaction_dependency[new_reaction.site_id[k]].insert(*itr);
+                current_site_reaction_dependency[new_reaction.site_id[k]].insert(*reactions_to_remove_itr);
             }
-            reactions_replaced++;
 
             // std::cerr << "Reactions_to_removesite reaction dependency for site " << reaction_to_remove.site_id[1] << ":\n";
             // for (temp_itr = current_site_reaction_dependency[reaction_to_remove.site_id[1]].begin();
@@ -670,7 +673,13 @@ void NanoParticle::update_reactions(
             //        std::cerr << *temp_itr << ", ";
             //      }
             // std::cerr << "\n";
-            reactions_to_remove.erase(itr++);
+            
+            
+            // TODO(recommendation): in the case where num_new_reactions < num_reactions_to_remove, 
+            //      the reactions_to_remove_itr iterator will already be pointing to the next Reaction to remove
+            //      so all you need to do is just continue incrementing the position of your reactions_to_remove_itr.
+            //      This way, you can avoid deleting items from an array you are currently traversing...
+            reactions_to_remove.erase(reactions_to_remove_itr++);
 
             // std::cerr << "site reaction dependency for site " << reaction_to_remove.site_id[1] << "after deletion" << ":\n";
             // for (temp_itr = current_site_reaction_dependency[reaction_to_remove.site_id[1]].begin();
@@ -690,81 +699,78 @@ void NanoParticle::update_reactions(
     // }
     // std::cerr << "\n";
 
-    std::cerr << "Site Dependency map for site 41: ";
-    for (site_reaction_dependency_itr = current_site_reaction_dependency[41].begin();
-         site_reaction_dependency_itr != current_site_reaction_dependency[41].end();
-         site_reaction_dependency_itr++) {
-        std::cerr << *site_reaction_dependency_itr
-                  << ", ";
-    }
-    std::cerr << "\n";
+    // std::cerr << "Site Dependency map for site 41: ";
+    // for (site_reaction_dependency_itr = current_site_reaction_dependency[41].begin();
+    //      site_reaction_dependency_itr != current_site_reaction_dependency[41].end();
+    //      site_reaction_dependency_itr++) {
+    //     std::cerr << *site_reaction_dependency_itr
+    //               << ", ";
+    // }
+    // std::cerr << "\n";
 
-    std::cerr << "Num Reactions to remove: " << reactions_to_remove.size() << "\n";
+    // std::cerr << "Num Reactions to remove: " << reactions_to_remove.size() << "\n";
 
-    if (reactions_to_remove.size() > 0){
+    // TODO(recommendation): Just use the reactions_to_remove iterator and continue iterating over the things you need to remove
+    //       until you find the end of the iterator.
+    if (reactions_to_remove.size() > 0) {
         int n_reactions_to_move = reactions_to_remove.size();
         int reactions_moved = 0;
-        int reaction_id_to_move = (int) current_reactions.size()-1;
+        int reaction_idx_to_move = (int) current_reactions.size() - 1;
 
         std::set<int>::iterator reactions_moved_itr = reactions_to_remove.begin();
         while (reactions_moved < n_reactions_to_move) {
-            // Could simplify this by enforcing order in current_site_reaction_dependency or by specifying a range
-            auto result = reactions_to_remove.find(reaction_id_to_move);
+            // TODO: Could simplify this by enforcing order in current_site_reaction_dependency or by specifying a range
+            auto result = reactions_to_remove.find(reaction_idx_to_move);
             if (result != reactions_to_remove.end()){
                 // Reaction to be moved is going to be removed, no point in removing it
-                reaction_id_to_move--;
-            } else if (reaction_id_to_move < *reactions_moved_itr) {
+                reaction_idx_to_move--;
+            } else if (reaction_idx_to_move < *reactions_moved_itr) {
                 break;
             } else {
-                Reaction reaction_to_move = current_reactions[reaction_id_to_move];
-                std::cerr << "Moving reaction "
-                          << reaction_id_to_move
-                          << " to "
-                          << *reactions_moved_itr
-                          << ", previously: id "
-                          << current_reactions[*reactions_moved_itr].interaction.interaction_id
-                          << " sites "
-                          << current_reactions[*reactions_moved_itr].site_id[0]
-                          << " and "
-                          << current_reactions[*reactions_moved_itr].site_id[1]
-                          << "\n";
+                Reaction reaction_to_move = current_reactions[reaction_idx_to_move];
+                // std::cerr << "Moving reaction "
+                //           << reaction_idx_to_move
+                //           << " to "
+                //           << *reactions_moved_itr
+                //           << ", previously: id "
+                //           << current_reactions[*reactions_moved_itr].interaction.interaction_id
+                //           << " sites "
+                //           << current_reactions[*reactions_moved_itr].site_id[0]
+                //           << " and "
+                //           << current_reactions[*reactions_moved_itr].site_id[1]
+                //           << "\n";
                 current_reactions[*reactions_moved_itr] = reaction_to_move;
 
-                // find the reaction that was moved in the site reaction dependency vector and remap it
+                // Find the reaction that was moved in the site reaction dependency vector and remap it
                 for (int k = 0; k < reaction_to_move.interaction.number_of_sites; k++) {
                     int site_id = reaction_to_move.site_id[k];
                     // This number should always be in the list, else something has gone wrong
-                    auto site_reaction_index_search = current_site_reaction_dependency[site_id].find(reaction_id_to_move);
+                    int num_reactions_deleted = current_site_reaction_dependency[site_id].erase(reaction_idx_to_move);
 
-                    if (site_reaction_index_search != current_site_reaction_dependency[site_id].end()){
-                        current_site_reaction_dependency[site_id].erase(reaction_id_to_move);
-                        // int site_reaction_index = site_reaction_index_search - current_site_reaction_dependency[site_id].begin();
-
-                        std::cerr << "Remapping reaction "
-                                  << *site_reaction_index_search
-                                  << " to "
-                                  << *reactions_moved_itr
-                                  << "\n";
+                    if (num_reactions_deleted == 1) {
+                        // std::cerr << "Remapping reaction "
+                        //           << *site_reaction_index_search
+                        //           << " to "
+                        //           << *reactions_moved_itr
+                        //           << "\n";
                         current_site_reaction_dependency[site_id].insert(*reactions_moved_itr);
+                    } else if (num_reactions_deleted == 0) {
+                        std::cerr << "Could not find reaction "
+                                    << reaction_idx_to_move
+                                    << " in the site reaction dependency map for site "
+                                    << site_id
+                                    << "\n";
+                        raise(SIGINT);
                     } else {
-                      // Throw some sort of error
-                      std::cerr << "Could not find reaction "
-                                << reaction_id_to_move
-                                << " in the site reaction dependency map for site "
-                                << site_id
-                                << "\n";
-
-                      for (itr = current_site_reaction_dependency[site_id].begin();
-                           itr != current_site_reaction_dependency[site_id].end();
-                           itr++) {
-                             std::cerr << *itr
-                                       << ", ";
-                      }
-                      std::cerr << "\n";
-                      raise(SIGINT);
+                        std::cerr << "Encountered multiple occurances of "
+                                    << reaction_idx_to_move
+                                    << " in the site reaction dependency map for site "
+                                    << site_id
+                                    << "\n";
+                        raise(SIGINT);
                     }
                 }
-                reaction_id_to_move--;
+                reaction_idx_to_move--;
                 reactions_moved_itr++;
                 reactions_moved++;
             }

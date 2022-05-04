@@ -142,17 +142,17 @@ LinearSolver::LinearSolver(
 void LinearSolver::update() {
     cumulative_propensities.resize(current_reactions.size());
     number_of_active_indices = cumulative_propensities.size();
-    std::cerr << "Propensities are: ";
+    // std::cerr << "Propensities are: ";
     if (number_of_active_indices > 0) {
         cumulative_propensities[0] = current_reactions[0].rate;
-        std::cerr << current_reactions[0].rate << ", ";
+        // std::cerr << current_reactions[0].rate << ", ";
     }
 
     for (unsigned int i = 1; i < current_reactions.size(); i++) {
       cumulative_propensities[i] = cumulative_propensities[i-1] + current_reactions[i].rate;
-      std::cerr << current_reactions[i].rate << ", ";
+    //   std::cerr << current_reactions[i].rate << ", ";
     }
-    std::cerr << "\n";
+    // std::cerr << "\n";
 
     propensity_sum = cumulative_propensities[cumulative_propensities.size()-1];
 };
@@ -195,7 +195,7 @@ std::optional<Event> LinearSolver::event() {
     for ( m = 0; m < current_reactions.size(); m++){
         if (cumulative_propensities[m] > fraction) break;
     }
-    std::cerr << "Propensity sum: " << propensity_sum << "\n";
+    // std::cerr << "Propensity sum: " << propensity_sum << "\n";
 
     double dt = - std::log(r2) / propensity_sum;
     if (m < current_reactions.size())
