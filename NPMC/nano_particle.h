@@ -132,7 +132,7 @@ struct NanoParticle {
     // core.
 
     void update_reactions(
-        std::vector<int> &state,
+        const std::vector<int> &state,
         std::vector<std::set<int>> &current_site_reaction_dependency,
         std::vector<Reaction> &current_reactions,
         Reaction reaction);
@@ -478,7 +478,7 @@ void NanoParticle::update_state(
 }
 
 void NanoParticle::update_reactions(
-    std::vector<int> &state,
+    const std::vector<int> &state,
     std::vector<std::set<int>> &current_site_reaction_dependency,
     std::vector<Reaction> &current_reactions,
     Reaction reaction) {
