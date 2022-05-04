@@ -332,7 +332,7 @@ NanoParticle::NanoParticle(
 
         // Add two site interactions
         for (unsigned int site_id_1 = 0; site_id_1 < sites.size(); site_id_1++) {
-            if (site_id_0 != (int) site_id_1) {
+            if ((unsigned) site_id_0 != site_id_1) {
                 int site_1_state = current_state[site_id_1];
                 int site_1_species_id = sites[site_id_1].species_id;
                 double distance = distance_matrix[site_id_0][site_id_1];
@@ -441,7 +441,7 @@ void NanoParticle::update_reactions(
 
         // Add two site interactions
         for (unsigned int site_id_1 = 0; site_id_1 < sites.size(); site_id_1++) {
-            if (site_id_0 != (int) site_id_1) {
+            if ((unsigned) site_id_0 != site_id_1) {
                 int site_1_state = state[site_id_1];
                 int site_1_species_id = sites[site_id_1].species_id;
 
@@ -462,7 +462,7 @@ void NanoParticle::update_reactions(
                     // This if check is necessary so we don't doubly add reactions.
                     // i.e. if our reaction which fired involves sites 11 and 22, we want to only add 11->22 and 22->11 once.
                     // If this check isn't here, we add 11->22 and 22->11 twice
-                    if (site_id_1 != other_site_id) {
+                    if (site_id_1 != (unsigned) other_site_id) {
                         // Add reactions where site 1 is the donor
                         available_interactions = &two_site_interactions_map[site_1_species_id][site_0_species_id][site_1_state][site_0_state];
                         for (unsigned int i = 0; i < available_interactions->size(); i++){
