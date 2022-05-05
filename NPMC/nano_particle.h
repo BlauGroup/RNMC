@@ -84,17 +84,25 @@ struct NanoParticle {
     // within the spatial decay radius
     std::vector<std::vector<int>> compute_site_neighbors();
 
-    void compute_reactions();
+    void compute_new_reactions(
+        const int site_0_id,
+        const int other_site_id,
+        const int site_0_state,
+        const std::vector<int> &state,
+        std::vector<Reaction> &new_reactions
+    );
+
     void compute_distance_matrix();
-    void find_dependency();
 
     double compute_propensity(
         std::vector<int> &state,
-        Reaction reaction);
+        Reaction reaction
+        );
 
     void update_state(
         std::vector<int> &state,
-        Reaction reaction);
+        Reaction reaction
+        );
 
     // updates are passed directly to the solver, but the model
     // classes don't have a reference to the solver (otherwise,
@@ -106,15 +114,9 @@ struct NanoParticle {
 
     void update_reactions(
         const std::vector<int> &state,
+        Reaction reaction,
         std::vector<std::set<int>> &current_site_reaction_dependency,
-        std::vector<Reaction> &current_reactions,
-        Reaction reaction);
-
-    // void update_propensities(
-    //     std::function<void(Update update)> update_function,
-    //     std::vector<int> &state,
-    //     Reaction reaction
-    //     );
+        std::vector<Reaction> &current_reactions);
 
     // convert a history element as found a simulation to history
     // to a SQL type.
@@ -404,81 +406,85 @@ void NanoParticle::update_state(
     }
 }
 
-void NanoParticle::update_reactions(
+void NanoParticle::compute_new_reactions(
+    const int site_0_id,
+    const int other_site_id,
+    const int site_0_state,
     const std::vector<int> &state,
-    std::vector<std::set<int>> &current_site_reaction_dependency,
-    std::vector<Reaction> &current_reactions,
-    Reaction reaction) {
+    std::vector<Reaction> &new_reactions
+){
+    int site_0_species_id = sites[site_0_id].species_id;
 
-    // Compute the new reactions based on the new states
-    std::vector<Reaction> new_reactions;
-    for (int k = 0; k < reaction.interaction.number_of_sites; k++) {
-      // TODO(recommendation): Move body of for-loop into separate function, then call the function twice.
-        int site_id_0 = reaction.site_id[k];
-        int other_site_id;
-        if (k == 0) {
-            other_site_id = reaction.site_id[1];
-        } else if (k == 1) {
-            other_site_id = reaction.site_id[0];
-        } else {
-            // This should never be true, unless there are 3-site interactions, in which case everything should break
-            raise(SIGINT);
-        }
-        int site_0_state = reaction.interaction.right_state[k];
-        int site_0_species_id = sites[site_id_0].species_id;
+    // Add one site interactions
+    std::vector<Interaction>* available_interactions = &one_site_interactions_map[site_0_species_id][site_0_state];
+    for (unsigned int i = 0; i < available_interactions->size(); i++) {
+        Interaction interaction = (*available_interactions)[i];
+        Reaction new_reaction = Reaction {
+                                .site_id = { (int) site_0_id, -1},
+                                .interaction = interaction,
+                                .rate = interaction.rate * one_site_interaction_factor
+                                };
+        new_reactions.push_back(new_reaction);
+    }
 
-        // Add one site interactions
-        std::vector<Interaction>* available_interactions = &one_site_interactions_map[site_0_species_id][site_0_state];
-        for (unsigned int i = 0; i < available_interactions->size(); i++) {
-            Interaction interaction = (*available_interactions)[i];
-            Reaction new_reaction = Reaction {
-                                    .site_id = { (int) site_id_0, -1},
-                                    .interaction = interaction,
-                                    .rate = interaction.rate * one_site_interaction_factor
-                                    };
-            new_reactions.push_back(new_reaction);
-        }
+    // Add two site interactions
+    for (unsigned int site_1_id = 0; site_1_id < sites.size(); site_1_id++) {
+        if ((unsigned) site_0_id != site_1_id) {
+            int site_1_state = state[site_1_id];
+            int site_1_species_id = sites[site_1_id].species_id;
 
-        // Add two site interactions
-        for (unsigned int site_id_1 = 0; site_id_1 < sites.size(); site_id_1++) {
-            if ((unsigned) site_id_0 != site_id_1) {
-                int site_1_state = state[site_id_1];
-                int site_1_species_id = sites[site_id_1].species_id;
+            const double* distance = &distance_matrix[site_0_id][site_1_id];
+            if (*distance < interaction_radius_bound) {
+                // Add reactions where site 0 is the donor
+                std::vector<Interaction>* available_interactions = &two_site_interactions_map[site_0_species_id][site_1_species_id][site_0_state][site_1_state];
+                for (unsigned int i = 0; i < available_interactions -> size(); i++){
+                    Interaction interaction = (*available_interactions)[i];
+                    Reaction new_reaction = Reaction {
+                                            .site_id = { (int) site_0_id, (int) site_1_id },
+                                            .interaction = interaction,
+                                            .rate = distance_factor_function(*distance) * interaction.rate * two_site_interaction_factor
+                                            };
+                    new_reactions.push_back(new_reaction);
+                }
 
-                const double* distance = &distance_matrix[site_id_0][site_id_1];
-                if (*distance < interaction_radius_bound) {
-                    // Add reactions where site 0 is the donor
-                    std::vector<Interaction>* available_interactions = &two_site_interactions_map[site_0_species_id][site_1_species_id][site_0_state][site_1_state];
-                    for (unsigned int i = 0; i < available_interactions -> size(); i++){
+                // This if check is necessary so we don't doubly add reactions.
+                // i.e. if our reaction which fired involves sites 11 and 22, we want to only add 11->22 and 22->11 once.
+                // If this check isn't here, we add 11->22 and 22->11 twice
+                if (site_1_id != (unsigned) other_site_id) {
+                    // Add reactions where site 1 is the donor
+                    available_interactions = &two_site_interactions_map[site_1_species_id][site_0_species_id][site_1_state][site_0_state];
+                    for (unsigned int i = 0; i < available_interactions->size(); i++){
                         Interaction interaction = (*available_interactions)[i];
                         Reaction new_reaction = Reaction {
-                                                .site_id = { (int) site_id_0, (int) site_id_1 },
+                                                .site_id = { (int) site_1_id, (int) site_0_id },
                                                 .interaction = interaction,
                                                 .rate = distance_factor_function(*distance) * interaction.rate * two_site_interaction_factor
                                                 };
                         new_reactions.push_back(new_reaction);
                     }
-
-                    // This if check is necessary so we don't doubly add reactions.
-                    // i.e. if our reaction which fired involves sites 11 and 22, we want to only add 11->22 and 22->11 once.
-                    // If this check isn't here, we add 11->22 and 22->11 twice
-                    if (site_id_1 != (unsigned) other_site_id) {
-                        // Add reactions where site 1 is the donor
-                        available_interactions = &two_site_interactions_map[site_1_species_id][site_0_species_id][site_1_state][site_0_state];
-                        for (unsigned int i = 0; i < available_interactions->size(); i++){
-                            Interaction interaction = (*available_interactions)[i];
-                            Reaction new_reaction = Reaction {
-                                                    .site_id = { (int) site_id_1, (int) site_id_0 },
-                                                    .interaction = interaction,
-                                                    .rate = distance_factor_function(*distance) * interaction.rate * two_site_interaction_factor
-                                                    };
-                            new_reactions.push_back(new_reaction);
-                        }
-                    }
                 }
             }
         }
     }
+}
+
+void NanoParticle::update_reactions(
+    const std::vector<int> &state,
+    Reaction reaction,
+    std::vector<std::set<int>> &current_site_reaction_dependency,
+    std::vector<Reaction> &current_reactions) {
+
+    // Compute the new reactions based on the new states
+    std::vector<Reaction> new_reactions;
+    const int site_0_id = reaction.site_id[0];
+    const int site_0_state = state[site_0_id];
+    const int site_1_id = reaction.site_id[1];
+    const int site_1_state = state[site_1_id];
+    compute_new_reactions(site_0_id, site_1_id, site_0_state, std::cref(state), std::ref(new_reactions));
+    if (reaction.interaction.number_of_sites == 2) {
+        compute_new_reactions(site_1_id, site_0_id, site_1_state, std::cref(state), std::ref(new_reactions));
+    }
+
     // Find indexes of reactions to be removed
     std::set<int> reactions_to_remove;
     std::set<int>::iterator site_reaction_dependency_itr;
