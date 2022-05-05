@@ -45,6 +45,7 @@ struct NanoParticle {
 
     // Remove this since we don't have concrete reaction_ids
     // maps site ids to reaction ids involving the site.
+    // TODO: Check if performance is better using std::vector<std::set<int>> or std::vector<std::vector<int>>
     std::vector<std::set<int>> site_reaction_dependency;
 
     // maps interaction index to interaction data
@@ -469,10 +470,10 @@ void NanoParticle::compute_new_reactions(
 }
 
 void NanoParticle::update_reactions(
-    const std::vector<int> &state,
+    const std::vector<int>& state,
     Reaction reaction,
-    std::vector<std::set<int>> &current_site_reaction_dependency,
-    std::vector<Reaction> &current_reactions) {
+    std::vector<std::set<int>>& current_site_reaction_dependency,
+    std::vector<Reaction>& current_reactions) {
 
     // Compute the new reactions based on the new states
     std::vector<Reaction> new_reactions;
@@ -487,31 +488,33 @@ void NanoParticle::update_reactions(
 
     // Find indexes of reactions to be removed
     std::set<int> reactions_to_remove;
-    std::set<int>::iterator site_reaction_dependency_itr;
-    std::set<int> reaction_dependency;
-
+    std::set<int>* reaction_dependency;
     for (int k = 0; k < reaction.interaction.number_of_sites; k++) {
         int site_id = reaction.site_id[k];
-        reaction_dependency = current_site_reaction_dependency[site_id];
-        for (site_reaction_dependency_itr = reaction_dependency.begin();
-             site_reaction_dependency_itr != reaction_dependency.end();
-             site_reaction_dependency_itr++) {
-              int reaction_id_to_remove = *site_reaction_dependency_itr;
-              reactions_to_remove.insert(reaction_id_to_remove);
+        reaction_dependency = &current_site_reaction_dependency[site_id];
+        
+        std::vector<std::vector<int>> dependencies_to_process;
+        for (std::set<int>::iterator site_reaction_dependency_itr = reaction_dependency->begin();
+            site_reaction_dependency_itr != reaction_dependency->end();
+            site_reaction_dependency_itr++) {
+            int reaction_id_to_remove = *site_reaction_dependency_itr;
+            // Append this reaction index to a list of reactions to remove
+            reactions_to_remove.insert(reaction_id_to_remove);
 
-
-              // Need to remove this interaction from the second site if this is a two_site interaction
-              Reaction* reaction_to_remove = &current_reactions[reaction_id_to_remove];
-              current_site_reaction_dependency[reaction_to_remove->site_id[0]].erase(reaction_id_to_remove);
-              if ((*reaction_to_remove).interaction.number_of_sites == 2) {
-                  current_site_reaction_dependency[reaction_to_remove->site_id[1]].erase(reaction_id_to_remove);
-              }
-
+            // Need to remove this interaction from the second site if this is a two_site interaction
+            Reaction* reaction_to_remove = &current_reactions[reaction_id_to_remove];
+            dependencies_to_process.push_back({reaction_to_remove->site_id[0], reaction_id_to_remove});
+            if ((*reaction_to_remove).interaction.number_of_sites == 2) {
+                dependencies_to_process.push_back({reaction_to_remove->site_id[1], reaction_id_to_remove});
+            }
         }
 
+        for (unsigned int i = 0; i < dependencies_to_process.size(); i++){
+            std::vector<int>* dependency_to_process = &dependencies_to_process[i];
+            current_site_reaction_dependency[(*dependency_to_process)[0]].erase((*dependency_to_process)[1]);
+        }
     }
     
-
     // Add the new reactions to the current_reactions vector
     int n_reactions_to_remove = reactions_to_remove.size();
     std::set<int>::iterator reactions_to_remove_itr = reactions_to_remove.begin();
@@ -525,7 +528,8 @@ void NanoParticle::update_reactions(
             for (int k = 0; k < (*new_reaction).interaction.number_of_sites; k++) {
                 current_site_reaction_dependency[new_reaction->site_id[k]].insert(*reactions_to_remove_itr);
             }
-            reactions_to_remove.erase(reactions_to_remove_itr++);
+            // reactions_to_remove.erase(reactions_to_remove_itr++);
+            reactions_to_remove_itr++;
         } else {
             // If the number of new reactions to be added is larger than the number of reactions to remove,
             // just append the excess reactions to the end of the current_reactions vector
@@ -536,25 +540,26 @@ void NanoParticle::update_reactions(
         }
     }
 
-    // TODO(recommendation): Just use the reactions_to_remove iterator and continue iterating over the things you need to remove
-    //       until you find the end of the iterator.
-    if (reactions_to_remove.size() > 0) {
-        int n_reactions_to_move = reactions_to_remove.size();
-        int reactions_moved = 0;
-        int reaction_idx_to_move = (int) current_reactions.size() - 1;
+    int net_change_in_num_reactions = new_reactions.size() - reactions_to_remove.size();
+    if (reactions_to_remove_itr != reactions_to_remove.end() && net_change_in_num_reactions < 0){
+        // Don't need to do anything with the reactions_to_remove_itr, since it already points to the
+        // last reaction that has yet to be removed (a result of the last code block)
 
-        std::set<int>::iterator reactions_moved_itr = reactions_to_remove.begin();
-        while (reactions_moved < n_reactions_to_move) {
-            // TODO: Could simplify this by enforcing order in current_site_reaction_dependency or by specifying a range
+        // Create a new variable keeping track of which reaction (within current_reactions) we are checking.
+        // This will start at the end of current_reactions.
+        int reaction_idx_to_move = (int) current_reactions.size() - 1;
+        int reactions_moved = 0;
+        while (reactions_to_remove_itr != reactions_to_remove.end() &&
+               reactions_moved > net_change_in_num_reactions &&
+               reaction_idx_to_move >= *reactions_to_remove_itr) {
+            // Check if the reaction to be moved is in the list of reactions to remove
             auto result = reactions_to_remove.find(reaction_idx_to_move);
-            if (result != reactions_to_remove.end()){
+            if (result != reactions_to_remove.end()) {
                 // Reaction to be moved is going to be removed, no point in removing it
                 reaction_idx_to_move--;
-            } else if (reaction_idx_to_move < *reactions_moved_itr) {
-                break;
             } else {
                 Reaction reaction_to_move = current_reactions[reaction_idx_to_move];
-                current_reactions[*reactions_moved_itr] = reaction_to_move;
+                current_reactions[*reactions_to_remove_itr] = reaction_to_move;
 
                 // Find the reaction that was moved in the site reaction dependency vector and remap it
                 for (int k = 0; k < reaction_to_move.interaction.number_of_sites; k++) {
@@ -563,7 +568,7 @@ void NanoParticle::update_reactions(
                     int num_reactions_deleted = current_site_reaction_dependency[site_id].erase(reaction_idx_to_move);
 
                     if (num_reactions_deleted == 1) {
-                        current_site_reaction_dependency[site_id].insert(*reactions_moved_itr);
+                        current_site_reaction_dependency[site_id].insert(*reactions_to_remove_itr);
                     } else if (num_reactions_deleted == 0) {
                         std::cerr << "Could not find reaction "
                                     << reaction_idx_to_move
@@ -581,12 +586,13 @@ void NanoParticle::update_reactions(
                     }
                 }
                 reaction_idx_to_move--;
-                reactions_moved_itr++;
+                reactions_to_remove_itr++;
                 reactions_moved++;
             }
         }
-        current_reactions.resize(current_reactions.size() - n_reactions_to_move);
+        current_reactions.resize(current_reactions.size() + net_change_in_num_reactions);
     }
+
 }
 
 TrajectoriesSql NanoParticle::history_element_to_sql(
