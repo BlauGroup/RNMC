@@ -116,7 +116,7 @@ bool Simulation<Solver, Model>::execute_step() {
         model.update_state(std::ref(state), next_reaction);
 
         // update list of current available reactions
-        model.update_reactions(std::cref(state), std::ref(site_reaction_dependency), std::ref(solver.current_reactions), next_reaction);
+        model.update_reactions(std::cref(state), next_reaction, std::ref(site_reaction_dependency), std::ref(solver.current_reactions));
         solver.update();
         // // update propensities
         // model.update_propensities(
