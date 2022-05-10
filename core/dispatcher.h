@@ -103,6 +103,7 @@ struct Dispatcher {
     TypeOfCutoff type_of_cutoff;
     int number_of_simulations;
     int number_of_threads;
+    struct sigaction action;
 
     Dispatcher(
         std::string model_database_file,
@@ -140,7 +141,26 @@ struct Dispatcher {
     void record_simulation_history(HistoryPacket history_packet);
 };
 
+void signalHandler(int signum) {
+    
+    write_error_message("received signal " + std::to_string(signum) + "\n");
+    switch (signum) {
+        case 2:
+        case 4:
+        case 6:
+            // A SIGTERM has been issued, handle this gracefully 
+            // by writing current states and trajectories to the db
 
+            write_error_message("SIGTERM received. Terminating NPMC run(s) early.\n");
+            do_shutdown = 1;
+            shutdown_requested = true;
+
+            write_error_message("Writing current states and history queue to the initial_states db\n");
+            break;
+        default: exit(signum);
+    }
+    
+}
 
 template <
     typename Solver,
@@ -149,6 +169,18 @@ template <
     typename TrajectoriesSql>
 
 void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
+
+
+
+    // Create a set of masks containing the SIGTERM.
+    
+    sigset_t mask;
+    sigemptyset (&mask);
+    sigaddset (&mask, SIGCONT);
+    sigaddset (&mask, SIGTERM);
+    
+    // Set the masks so the child threads inherit the sigmask to ignore SIGTERM
+    pthread_sigmask(SIG_BLOCK, &mask, NULL);
 
     threads.resize(number_of_threads);
     for (int i = 0; i < number_of_threads; i++) {
@@ -165,6 +197,13 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
             );
 
     }
+    // Unset the sigmask so that the parent thread resumes catching errors as normal
+    pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
+    
+    action.sa_handler = signalHandler;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+    sigaction(SIGINT, &action, NULL);
 
     bool finished = false;
     while (! finished) {

@@ -14,6 +14,18 @@
 //     double rate;
 // };
 
+namespace {
+  // In the GNUC Library, sig_atomic_t is a typedef for int,
+  // which is atomic on all systems that are supported by the
+  // GNUC Library
+  volatile sig_atomic_t do_shutdown = 0;
+
+  // std::atomic is safe, as long as it is lock-free
+  std::atomic<bool> shutdown_requested = false;
+  static_assert( std::atomic<bool>::is_always_lock_free );
+  // or, at runtime: assert( shutdown_requested.is_lock_free() );
+}
+
 struct HistoryElement {
 
     unsigned long int seed; // seed
@@ -128,18 +140,35 @@ bool Simulation<Solver, Model>::execute_step() {
     }
 };
 
+void write_error_message(std::string s){
+    char char_array[s.length()+1];
+    strcpy(char_array, s.c_str());
+
+    write(STDERR_FILENO, char_array, sizeof(char_array) - 1);
+}
+
 template <typename Solver, typename Model>
 void Simulation<Solver, Model>::execute_steps(int step_cutoff) {
     while(execute_step()) {
-        if (step > step_cutoff)
+        if (step > step_cutoff) {
             break;
+        } else if (do_shutdown || shutdown_requested.load()) {
+            // Handle shutdown request from SIGTERM
+            write_error_message("Received termination request on thread - cleaning up\n");
+            break;
+        }
     }
 };
 
 template <typename Solver, typename Model>
 void Simulation<Solver, Model>::execute_time(double time_cutoff) {
     while(execute_step()) {
-        if (time > time_cutoff)
+        if (time > time_cutoff) {
             break;
+        } else if (do_shutdown || shutdown_requested.load()) {
+            // Handle shutdown request from SIGTERM
+            write_error_message("Received termination request on thread - cleaning up\n");
+            break;
+        }
     }
 };
