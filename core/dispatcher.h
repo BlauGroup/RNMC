@@ -152,6 +152,7 @@ struct Dispatcher {
         state_stmt (initial_state_database),
         state_writer (state_stmt),
         history_queue (),
+        state_history_queue (),
         seed_queue (number_of_simulations, base_seed),
 
         // don't want to start threads in the constructor.
@@ -280,7 +281,8 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql, WriteStateSql, ReadS
         "DELETE FROM trajectories WHERE rowid NOT IN"
         "(SELECT MIN(rowid) FROM trajectories GROUP BY seed, step);");
 
-
+    initial_state_database.close();
+    model_database.close();
     std::cerr << time_stamp()
               << "removing duplicate trajectories...\n";
 
@@ -296,7 +298,7 @@ template <
     typename ReadStateSql
     >
 void Dispatcher<Solver, Model, Parameters, TrajectoriesSql, WriteStateSql, ReadStateSql>::record_simulation_history(HistoryPacket history_packet) {
-    initial_state_database.exec("BEGIN");
+    initial_state_database.exec("BEGIN;");
 
 
     for (unsigned long int i = 0; i < history_packet.history.size(); i++) {
@@ -328,23 +330,16 @@ template <
 void Dispatcher<Solver, Model, Parameters, TrajectoriesSql, WriteStateSql, ReadStateSql>::record_state(StateHistoryPacket state_history_packet) {
 
     // Wipe the database of the states corresponding to this seed. This gets rid of the previously written states
-    std::string delete_statement = "DELETE FROM interupt_state WHERE seed==" + std::to_string(state_history_packet.seed) + ";";
-    std::cerr << "The delete statement is: \"" << delete_statement << "\"" << std::endl;
-    // auto result = initial_state_database.exec('SELECT COUNT(1) from interupt_state');
-    // std::cerr << "There are " << std::to_string(result[0]) << "entries" << std::endl;
     initial_state_database.exec(delete_statement);
     
-    initial_state_database.exec("BEGIN");
+    initial_state_database.exec("BEGIN;");
 
-    std::cerr << "The final states are: ";
     for (unsigned long int i = 0; i < state_history_packet.state.size(); i++) {
-        std::cerr << state_history_packet.state[i].degree_of_freedom << ", ";
         state_writer.insert(
             model.state_history_element_to_sql(
                 (int) state_history_packet.seed,
                 state_history_packet.state[i]));
     }
-    std::cerr << std::endl;
     initial_state_database.exec("COMMIT;");
 
     std::cerr << time_stamp()

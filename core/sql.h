@@ -55,14 +55,26 @@ public:
     // method for executing standalone sql statements.
     // for reading and writing data, use SqlReader or SqlWriter classes.
     void exec(std::string sql_statement) {
-        sqlite3_exec(
+        int rc;
+        char *error_message = 0;
+        
+        rc = sqlite3_exec(
             connection,
             sql_statement.c_str(),
             nullptr,
             nullptr,
-            nullptr);
+            &error_message);
+        if( rc != SQLITE_OK ){
+            char error[200];
+            strcpy(error,"SQL error: ");
+            strcat(error,error_message);
+            std::cerr << error << std::endl;
+        }
     };
 
+    void close() {
+        sqlite3_close(connection);
+    }
     SqlConnection(std::string database_file_path, int sql_flags) :
         database_file_path (database_file_path) {
             int rc = sqlite3_open_v2(
