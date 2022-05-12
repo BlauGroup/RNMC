@@ -95,13 +95,15 @@ int main(int argc, char **argv) {
         }
 
     }
+    
     NanoParticleParameters parameters = {};
-
     Dispatcher<
         LinearSolver,
         NanoParticle,
         NanoParticleParameters,
-        TrajectoriesSql
+        TrajectoriesSql,
+        WriteStateSql,
+        ReadStateSql
         >
 
         dispatcher (

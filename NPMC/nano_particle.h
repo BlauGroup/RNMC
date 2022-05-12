@@ -125,6 +125,9 @@ struct NanoParticle {
         int seed,
         HistoryElement history_element);
 
+    WriteStateSql state_history_element_to_sql(
+        int seed,
+        StateHistoryElement state_history_element);
 };
 
 NanoParticle::NanoParticle(
@@ -607,5 +610,17 @@ TrajectoriesSql NanoParticle::history_element_to_sql(
         .site_id_1 = reaction.site_id[0],
         .site_id_2 = reaction.site_id[1],
         .interaction_id = reaction.interaction.interaction_id
+    };
+}
+
+WriteStateSql NanoParticle::state_history_element_to_sql(
+    int seed,
+    StateHistoryElement state_history_element) {
+    
+
+    return WriteStateSql {
+        .seed = seed,
+        .site_id = static_cast<int>(state_history_element.site_id),
+        .degree_of_freedom = state_history_element.degree_of_freedom
     };
 }

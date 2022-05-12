@@ -15,7 +15,6 @@ struct Cutoff {
     TypeOfCutoff type_of_cutoff;
 };
 
-
 // size of history chunks which we write to the DB.
 // if you make this too small, it will force the dispatcher to
 // perform lots of really small DB transactions which is bad.
@@ -28,6 +27,7 @@ template <typename Solver, typename Model>
 struct SimulatorPayload {
     Model &model;
     HistoryQueue<HistoryPacket> &history_queue;
+    HistoryQueue<StateHistoryPacket> &state_history_queue;
     SeedQueue &seed_queue;
     Cutoff cutoff;
     std::vector<bool>::iterator running;
@@ -35,6 +35,7 @@ struct SimulatorPayload {
     SimulatorPayload(
         Model &model,
         HistoryQueue<HistoryPacket> &history_queue,
+        HistoryQueue<StateHistoryPacket> &state_history_queue,
         SeedQueue &seed_queue,
         Cutoff cutoff,
         std::vector<bool>::iterator running
@@ -42,6 +43,7 @@ struct SimulatorPayload {
 
             model (model),
             history_queue (history_queue),
+            state_history_queue (state_history_queue),
             seed_queue (seed_queue),
             cutoff (cutoff),
             running (running)
@@ -55,7 +57,7 @@ struct SimulatorPayload {
             unsigned long int seed = maybe_seed.value();
 
 
-            Simulation<Solver, Model> simulation (model, seed, history_chunk_size, history_queue);
+            Simulation<Solver, Model> simulation (model, seed, history_chunk_size, history_queue, state_history_queue);
 
 
             switch(cutoff.type_of_cutoff) {
@@ -67,7 +69,24 @@ struct SimulatorPayload {
                 break;
             }
 
+            // Make a vector of StateHistoryElements for the current state
+            std::vector<StateHistoryElement> state_packet;
+            for (unsigned int i = 0; i < model.sites.size(); i++) {
+                state_packet.push_back(StateHistoryElement{
+                    .seed = seed,
+                    .site_id = i,
+                    .degree_of_freedom = simulation.state[i]
+                });
+            }
+            // Construct a history packet from the history elements and add it to the queue
+            state_history_queue.insert_history(
+                std::move(
+                    StateHistoryPacket {
+                        .seed = seed,
+                        .state = state_packet
+                    }));
 
+            // Move the remainder of the history into the queue to be saved
             history_queue.insert_history(
                 std::move(
                     HistoryPacket {
@@ -87,7 +106,9 @@ template <
     typename Solver,
     typename Model,
     typename Parameters,
-    typename TrajectoriesSql>
+    typename TrajectoriesSql,
+    typename WriteStateSql,
+    typename ReadStateSql>
 
 struct Dispatcher {
     SqlConnection model_database;
@@ -95,7 +116,10 @@ struct Dispatcher {
     Model model;
     SqlStatement<TrajectoriesSql> trajectories_stmt;
     SqlWriter<TrajectoriesSql> trajectories_writer;
+    SqlStatement<WriteStateSql> state_stmt;
+    SqlWriter<WriteStateSql> state_writer;
     HistoryQueue<HistoryPacket> history_queue;
+    HistoryQueue<StateHistoryPacket> state_history_queue;
     SeedQueue seed_queue;
     std::vector<std::thread> threads;
     std::vector<bool> running;
@@ -125,6 +149,8 @@ struct Dispatcher {
             parameters),
         trajectories_stmt (initial_state_database),
         trajectories_writer (trajectories_stmt),
+        state_stmt (initial_state_database),
+        state_writer (state_stmt),
         history_queue (),
         seed_queue (number_of_simulations, base_seed),
 
@@ -139,6 +165,7 @@ struct Dispatcher {
 
     void run_dispatcher();
     void record_simulation_history(HistoryPacket history_packet);
+    void record_state(StateHistoryPacket state_history_packet);
 };
 
 void signalHandler(int signum) {
@@ -166,14 +193,19 @@ template <
     typename Solver,
     typename Model,
     typename Parameters,
-    typename TrajectoriesSql>
+    typename TrajectoriesSql,
+    typename WriteStateSql,
+    typename ReadStateSql>
 
-void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
+void Dispatcher<Solver, Model, Parameters, TrajectoriesSql, WriteStateSql, ReadStateSql>::run_dispatcher() {
 
+    // Check if there are existing runs
+        // Check if individual states have been written to the initial_state.sqlite
+
+        // Check if there are any trajectories
 
 
     // Create a set of masks containing the SIGTERM.
-    
     sigset_t mask;
     sigemptyset (&mask);
     sigaddset (&mask, SIGCONT);
@@ -190,6 +222,7 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
             SimulatorPayload<Solver, Model> (
                 model,
                 history_queue,
+                state_history_queue,
                 seed_queue,
                 cutoff,
                 running.begin() + i
@@ -231,6 +264,14 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
             HistoryPacket history_packet = std::move(maybe_history_packet.value());
             record_simulation_history(std::move(history_packet));
         };
+
+        std::optional<StateHistoryPacket>
+            maybe_state_history_packet = state_history_queue.get_history();
+
+        if (maybe_state_history_packet) {
+            StateHistoryPacket state_history_packet = std::move(maybe_state_history_packet.value());
+            record_state(std::move(state_history_packet));
+        };
     }
 
     for (int i = 0; i < number_of_threads; i++) threads[i].join();
@@ -250,9 +291,11 @@ template <
     typename Solver,
     typename Model,
     typename Parameters,
-    typename TrajectoriesSql
+    typename TrajectoriesSql,
+    typename WriteStateSql,
+    typename ReadStateSql
     >
-void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::record_simulation_history(HistoryPacket history_packet) {
+void Dispatcher<Solver, Model, Parameters, TrajectoriesSql, WriteStateSql, ReadStateSql>::record_simulation_history(HistoryPacket history_packet) {
     initial_state_database.exec("BEGIN");
 
 
@@ -271,5 +314,43 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::record_simulation_h
               << history_packet.history.size()
               << " events from trajectory "
               << history_packet.seed
+              << " to database\n";
+};
+
+template <
+    typename Solver,
+    typename Model,
+    typename Parameters,
+    typename TrajectoriesSql,
+    typename WriteStateSql,
+    typename ReadStateSql
+    >
+void Dispatcher<Solver, Model, Parameters, TrajectoriesSql, WriteStateSql, ReadStateSql>::record_state(StateHistoryPacket state_history_packet) {
+
+    // Wipe the database of the states corresponding to this seed. This gets rid of the previously written states
+    std::string delete_statement = "DELETE FROM interupt_state WHERE seed==" + std::to_string(state_history_packet.seed) + ";";
+    std::cerr << "The delete statement is: \"" << delete_statement << "\"" << std::endl;
+    // auto result = initial_state_database.exec('SELECT COUNT(1) from interupt_state');
+    // std::cerr << "There are " << std::to_string(result[0]) << "entries" << std::endl;
+    initial_state_database.exec(delete_statement);
+    
+    initial_state_database.exec("BEGIN");
+
+    std::cerr << "The final states are: ";
+    for (unsigned long int i = 0; i < state_history_packet.state.size(); i++) {
+        std::cerr << state_history_packet.state[i].degree_of_freedom << ", ";
+        state_writer.insert(
+            model.state_history_element_to_sql(
+                (int) state_history_packet.seed,
+                state_history_packet.state[i]));
+    }
+    std::cerr << std::endl;
+    initial_state_database.exec("COMMIT;");
+
+    std::cerr << time_stamp()
+              << "wrote "
+              << state_history_packet.state.size()
+              << " states for trajectory "
+              << state_history_packet.seed
               << " to database\n";
 };

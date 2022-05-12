@@ -159,3 +159,37 @@ void TrajectoriesSql::action(TrajectoriesSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 5, r.site_id_2);
     sqlite3_bind_int(stmt, 6, r.interaction_id);
 }
+
+struct ReadStateSql {
+    int seed;
+    int site_id;
+    int degree_of_freedom;
+    static std::string sql_statement;
+    static void action(ReadStateSql &r, sqlite3_stmt *stmt);
+};
+
+std::string ReadStateSql::sql_statement =
+    "SELECT seed, site_id, degree_of_freedom FROM interupt_state;";
+
+void ReadStateSql::action(ReadStateSql &r, sqlite3_stmt *stmt) {
+    r.seed = sqlite3_column_int(stmt, 0);
+    r.site_id = sqlite3_column_int(stmt, 1);
+    r.degree_of_freedom = sqlite3_column_int(stmt, 2);
+}
+
+struct WriteStateSql {
+    int seed;
+    int site_id;
+    int degree_of_freedom;
+    static std::string sql_statement;
+    static void action(WriteStateSql &r, sqlite3_stmt *stmt);
+};
+
+std::string WriteStateSql::sql_statement =
+    "INSERT INTO interupt_state VALUES (?1,?2,?3);";
+
+void WriteStateSql::action(WriteStateSql &r, sqlite3_stmt *stmt) {
+    sqlite3_bind_int(stmt, 1, r.seed);
+    sqlite3_bind_int(stmt, 2, r.site_id);
+    sqlite3_bind_int(stmt, 3, r.degree_of_freedom);
+}

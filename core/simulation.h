@@ -26,6 +26,17 @@ namespace {
   // or, at runtime: assert( shutdown_requested.is_lock_free() );
 }
 
+struct StateHistoryElement{
+    unsigned long int seed; //seed
+    unsigned int site_id; 
+    int degree_of_freedom; //energy level the site is at
+};
+
+struct StateHistoryPacket {
+    unsigned long int seed; //seed
+    std::vector<StateHistoryElement> state; // current state of the reaction to be written
+};
+
 struct HistoryElement {
 
     unsigned long int seed; // seed
@@ -50,15 +61,15 @@ struct Simulation {
     unsigned long int history_chunk_size;
     std::vector<HistoryElement> history;
     HistoryQueue<HistoryPacket> &history_queue;
-    // std::function<void(Update)> update_function;
-    // std::vector<Reaction> current_reactions;
+    HistoryQueue<StateHistoryPacket> &state_history_queue;
     std::vector<std::set<int>> site_reaction_dependency;
 
 
     Simulation(Model &model,
                unsigned long int seed,
                int history_chunk_size,
-               HistoryQueue<HistoryPacket> &history_queue
+               HistoryQueue<HistoryPacket> &history_queue,
+               HistoryQueue<StateHistoryPacket> &state_history_queue
         ) :
         model (model),
         seed (seed),
@@ -67,7 +78,8 @@ struct Simulation {
         step (0),
         solver (seed, std::ref(model.initial_reactions)),
         history_chunk_size (history_chunk_size),
-        history_queue(history_queue),
+        history_queue (history_queue),
+        state_history_queue (state_history_queue),
         // update_function ([&] (Update update) {solver.update(update);}),
         // current_reactions (model.initial_reactions),
         site_reaction_dependency (model.site_reaction_dependency)
@@ -81,7 +93,6 @@ struct Simulation {
     void execute_time(double time_cutoff);
 
 };
-
 
 template <typename Solver, typename Model>
 bool Simulation<Solver, Model>::execute_step() {
