@@ -326,6 +326,8 @@ template <
 void Dispatcher<Solver, Model, TrajectoriesSql, WriteStateSql, ReadStateSql>::record_state(StateHistoryPacket state_history_packet) {
 
     // Wipe the database of the states corresponding to this seed. This gets rid of the previously written states
+    std::string delete_statement = "DELETE FROM interupt_state WHERE seed = " + std::to_string(state_history_packet.seed) + ";";
+    
     initial_state_database.exec(delete_statement);
     
     initial_state_database.exec("BEGIN;");
