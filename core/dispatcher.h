@@ -56,6 +56,7 @@ struct SimulatorPayload {
 
             unsigned long int seed = maybe_seed.value();
 
+            // Generate the model
 
             Simulation<Solver, Model> simulation (model, seed, history_chunk_size, history_queue, state_history_queue);
 
@@ -105,7 +106,6 @@ struct SimulatorPayload {
 template <
     typename Solver,
     typename Model,
-    typename Parameters,
     typename TrajectoriesSql,
     typename WriteStateSql,
     typename ReadStateSql>
@@ -135,8 +135,7 @@ struct Dispatcher {
         unsigned long int number_of_simulations,
         unsigned long int base_seed,
         int number_of_threads,
-        Cutoff cutoff,
-        Parameters parameters) :
+        Cutoff cutoff) :
         model_database (
             model_database_file,
             SQLITE_OPEN_READWRITE),
@@ -193,12 +192,11 @@ void signalHandler(int signum) {
 template <
     typename Solver,
     typename Model,
-    typename Parameters,
     typename TrajectoriesSql,
     typename WriteStateSql,
     typename ReadStateSql>
 
-void Dispatcher<Solver, Model, Parameters, TrajectoriesSql, WriteStateSql, ReadStateSql>::run_dispatcher() {
+void Dispatcher<Solver, Model, TrajectoriesSql, WriteStateSql, ReadStateSql>::run_dispatcher() {
 
     // Check if there are existing runs
         // Check if individual states have been written to the initial_state.sqlite
@@ -292,12 +290,11 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql, WriteStateSql, ReadS
 template <
     typename Solver,
     typename Model,
-    typename Parameters,
     typename TrajectoriesSql,
     typename WriteStateSql,
     typename ReadStateSql
     >
-void Dispatcher<Solver, Model, Parameters, TrajectoriesSql, WriteStateSql, ReadStateSql>::record_simulation_history(HistoryPacket history_packet) {
+void Dispatcher<Solver, Model, TrajectoriesSql, WriteStateSql, ReadStateSql>::record_simulation_history(HistoryPacket history_packet) {
     initial_state_database.exec("BEGIN;");
 
 
@@ -322,12 +319,11 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql, WriteStateSql, ReadS
 template <
     typename Solver,
     typename Model,
-    typename Parameters,
     typename TrajectoriesSql,
     typename WriteStateSql,
     typename ReadStateSql
     >
-void Dispatcher<Solver, Model, Parameters, TrajectoriesSql, WriteStateSql, ReadStateSql>::record_state(StateHistoryPacket state_history_packet) {
+void Dispatcher<Solver, Model, TrajectoriesSql, WriteStateSql, ReadStateSql>::record_state(StateHistoryPacket state_history_packet) {
 
     // Wipe the database of the states corresponding to this seed. This gets rid of the previously written states
     initial_state_database.exec(delete_statement);

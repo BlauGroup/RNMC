@@ -25,8 +25,6 @@ double site_distance_squared(Site s1, Site s2) {
              z_diff * z_diff );
 }
 
-struct NanoParticleParameters {};
-
 struct NanoParticle {
     // maps a species index to the number of degrees of freedom
     std::vector<int> degrees_of_freedom;
@@ -77,9 +75,7 @@ struct NanoParticle {
     // constructor
     NanoParticle(
         SqlConnection &nano_particle_database,
-        SqlConnection &initial_state_database,
-        NanoParticleParameters
-        );
+        SqlConnection &initial_state_database);
 
     // maps a site index to the indices of its neighbors
     // within the spatial decay radius
@@ -132,8 +128,7 @@ struct NanoParticle {
 
 NanoParticle::NanoParticle(
     SqlConnection &nano_particle_database,
-    SqlConnection &initial_state_database,
-    NanoParticleParameters
+    SqlConnection &initial_state_database
     ) {
 
     // sql statements
