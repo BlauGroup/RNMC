@@ -110,8 +110,7 @@ int main(int argc, char **argv) {
             number_of_simulations,
             base_seed,
             thread_count,
-            cutoff,
-            parameters
+            cutoff
             );
 
     dispatcher.run_dispatcher();

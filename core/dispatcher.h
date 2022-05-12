@@ -144,8 +144,7 @@ struct Dispatcher {
             SQLITE_OPEN_READWRITE),
         model (
             model_database,
-            initial_state_database,
-            parameters),
+            initial_state_database),
         trajectories_stmt (initial_state_database),
         trajectories_writer (trajectories_stmt),
         state_stmt (initial_state_database),
