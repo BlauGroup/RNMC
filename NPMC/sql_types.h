@@ -136,6 +136,28 @@ void InitialStateSql::action(InitialStateSql &r, sqlite3_stmt *stmt) {
     r.degree_of_freedom = sqlite3_column_int(stmt, 1);
 }
 
+struct ReadTrajectoriesSql {
+    int seed;
+    int step;
+    double time;
+    int site_id_1;
+    int site_id_2;
+    int interaction_id;
+    static std::string sql_statement;
+    static void action(ReadTrajectoriesSql &r, sqlite3_stmt *stmt);
+};
+
+std::string ReadTrajectoriesSql::sql_statement =
+    "SELECT seed, step, time, site_id_1, site_id_2, interaction_id FROM trajectories WHERE seed = ?1;";
+
+void ReadTrajectoriesSql::action(ReadTrajectoriesSql &r, sqlite3_stmt *stmt) {
+    sqlite3_bind_int(stmt, 1, r.seed);
+    r.step = sqlite3_column_int(stmt, 2);
+    r.time = sqlite3_column_double(stmt, 3);
+    r.site_id_1 = sqlite3_column_int(stmt, 4);
+    r.site_id_2 = sqlite3_column_int(stmt, 5);
+    r.interaction_id = sqlite3_column_int(stmt, 6);
+}
 
 struct WriteTrajectoriesSql {
     int seed;
