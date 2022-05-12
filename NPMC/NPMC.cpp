@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
     Dispatcher<
         LinearSolver,
         NanoParticle,
-        TrajectoriesSql,
+        WriteTrajectoriesSql,
         WriteStateSql,
         ReadStateSql
         >

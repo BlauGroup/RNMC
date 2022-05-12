@@ -117,7 +117,7 @@ struct NanoParticle {
 
     // convert a history element as found a simulation to history
     // to a SQL type.
-    TrajectoriesSql history_element_to_sql(
+    WriteTrajectoriesSql history_element_to_sql(
         int seed,
         HistoryElement history_element);
 
@@ -593,12 +593,12 @@ void NanoParticle::update_reactions(
 
 }
 
-TrajectoriesSql NanoParticle::history_element_to_sql(
+WriteTrajectoriesSql NanoParticle::history_element_to_sql(
     int seed,
     HistoryElement history_element) {
 
     Reaction reaction = history_element.reaction;
-    return TrajectoriesSql {
+    return WriteTrajectoriesSql {
         .seed = seed,
         .step = history_element.step,
         .time = history_element.time,

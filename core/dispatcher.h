@@ -106,7 +106,7 @@ struct SimulatorPayload {
 template <
     typename Solver,
     typename Model,
-    typename TrajectoriesSql,
+    typename WriteTrajectoriesSql,
     typename WriteStateSql,
     typename ReadStateSql>
 
@@ -114,8 +114,8 @@ struct Dispatcher {
     SqlConnection model_database;
     SqlConnection initial_state_database;
     Model model;
-    SqlStatement<TrajectoriesSql> trajectories_stmt;
-    SqlWriter<TrajectoriesSql> trajectories_writer;
+    SqlStatement<WriteTrajectoriesSql> trajectories_stmt;
+    SqlWriter<WriteTrajectoriesSql> trajectories_writer;
     SqlStatement<WriteStateSql> state_stmt;
     SqlWriter<WriteStateSql> state_writer;
     HistoryQueue<HistoryPacket> history_queue;
@@ -191,11 +191,11 @@ void signalHandler(int signum) {
 template <
     typename Solver,
     typename Model,
-    typename TrajectoriesSql,
+    typename WriteTrajectoriesSql,
     typename WriteStateSql,
     typename ReadStateSql>
 
-void Dispatcher<Solver, Model, TrajectoriesSql, WriteStateSql, ReadStateSql>::run_dispatcher() {
+void Dispatcher<Solver, Model, WriteTrajectoriesSql, WriteStateSql, ReadStateSql>::run_dispatcher() {
 
     // Check if there are existing runs
         // Check if individual states have been written to the initial_state.sqlite
@@ -289,11 +289,11 @@ void Dispatcher<Solver, Model, TrajectoriesSql, WriteStateSql, ReadStateSql>::ru
 template <
     typename Solver,
     typename Model,
-    typename TrajectoriesSql,
+    typename WriteTrajectoriesSql,
     typename WriteStateSql,
     typename ReadStateSql
     >
-void Dispatcher<Solver, Model, TrajectoriesSql, WriteStateSql, ReadStateSql>::record_simulation_history(HistoryPacket history_packet) {
+void Dispatcher<Solver, Model, WriteTrajectoriesSql, WriteStateSql, ReadStateSql>::record_simulation_history(HistoryPacket history_packet) {
     initial_state_database.exec("BEGIN;");
 
 
@@ -318,11 +318,11 @@ void Dispatcher<Solver, Model, TrajectoriesSql, WriteStateSql, ReadStateSql>::re
 template <
     typename Solver,
     typename Model,
-    typename TrajectoriesSql,
+    typename WriteTrajectoriesSql,
     typename WriteStateSql,
     typename ReadStateSql
     >
-void Dispatcher<Solver, Model, TrajectoriesSql, WriteStateSql, ReadStateSql>::record_state(StateHistoryPacket state_history_packet) {
+void Dispatcher<Solver, Model, WriteTrajectoriesSql, WriteStateSql, ReadStateSql>::record_state(StateHistoryPacket state_history_packet) {
 
     // Wipe the database of the states corresponding to this seed. This gets rid of the previously written states
     std::string delete_statement = "DELETE FROM interupt_state WHERE seed = " + std::to_string(state_history_packet.seed) + ";";

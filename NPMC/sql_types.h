@@ -137,7 +137,7 @@ void InitialStateSql::action(InitialStateSql &r, sqlite3_stmt *stmt) {
 }
 
 
-struct TrajectoriesSql {
+struct WriteTrajectoriesSql {
     int seed;
     int step;
     double time;
@@ -145,13 +145,13 @@ struct TrajectoriesSql {
     int site_id_2;
     int interaction_id;
     static std::string sql_statement;
-    static void action(TrajectoriesSql &r, sqlite3_stmt *stmt);
+    static void action(WriteTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
-std::string TrajectoriesSql::sql_statement =
+std::string WriteTrajectoriesSql::sql_statement =
     "INSERT INTO trajectories VALUES (?1,?2,?3,?4,?5,?6);";
 
-void TrajectoriesSql::action(TrajectoriesSql &r, sqlite3_stmt *stmt) {
+void WriteTrajectoriesSql::action(WriteTrajectoriesSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 1, r.seed);
     sqlite3_bind_int(stmt, 2, r.step);
     sqlite3_bind_double(stmt, 3, r.time);
