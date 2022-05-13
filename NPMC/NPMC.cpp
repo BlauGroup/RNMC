@@ -100,8 +100,11 @@ int main(int argc, char **argv) {
         LinearSolver,
         NanoParticle,
         WriteTrajectoriesSql,
+        ReadTrajectoriesSql,
         WriteStateSql,
-        ReadStateSql
+        ReadStateSql,
+        WriteCutoffSql,
+        ReadCutoffSql
         >
 
         dispatcher (

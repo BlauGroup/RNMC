@@ -148,15 +148,15 @@ struct ReadTrajectoriesSql {
 };
 
 std::string ReadTrajectoriesSql::sql_statement =
-    "SELECT seed, step, time, site_id_1, site_id_2, interaction_id FROM trajectories WHERE seed = ?1;";
+    "SELECT seed, step, time, site_id_1, site_id_2, interaction_id FROM trajectories;";
 
 void ReadTrajectoriesSql::action(ReadTrajectoriesSql &r, sqlite3_stmt *stmt) {
-    sqlite3_bind_int(stmt, 1, r.seed);
-    r.step = sqlite3_column_int(stmt, 2);
-    r.time = sqlite3_column_double(stmt, 3);
-    r.site_id_1 = sqlite3_column_int(stmt, 4);
-    r.site_id_2 = sqlite3_column_int(stmt, 5);
-    r.interaction_id = sqlite3_column_int(stmt, 6);
+    r.seed = sqlite3_column_int(stmt, 0);
+    r.step = sqlite3_column_int(stmt, 1);
+    r.time = sqlite3_column_double(stmt, 2);
+    r.site_id_1 = sqlite3_column_int(stmt, 3);
+    r.site_id_2 = sqlite3_column_int(stmt, 4);
+    r.interaction_id = sqlite3_column_int(stmt, 5);
 }
 
 struct WriteTrajectoriesSql {
@@ -214,4 +214,38 @@ void WriteStateSql::action(WriteStateSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 1, r.seed);
     sqlite3_bind_int(stmt, 2, r.site_id);
     sqlite3_bind_int(stmt, 3, r.degree_of_freedom);
+}
+
+struct ReadCutoffSql {
+    int seed;
+    int step;
+    double time;
+    static std::string sql_statement;
+    static void action(ReadCutoffSql &r, sqlite3_stmt *stmt);
+};
+
+std::string ReadCutoffSql::sql_statement =
+    "SELECT seed, step, time FROM interupt_cutoff;";
+
+void ReadCutoffSql::action(ReadCutoffSql &r, sqlite3_stmt *stmt) {
+    r.seed = sqlite3_column_int(stmt, 0);
+    r.step = sqlite3_column_int(stmt, 1);
+    r.time = sqlite3_column_double(stmt, 2);
+}
+
+struct WriteCutoffSql {
+    int seed;
+    int step;
+    double time;
+    static std::string sql_statement;
+    static void action(WriteCutoffSql &r, sqlite3_stmt *stmt);
+};
+
+std::string WriteCutoffSql::sql_statement =
+    "INSERT INTO interupt_cutoff VALUES (?1,?2,?3);";
+
+void WriteCutoffSql::action(WriteCutoffSql &r, sqlite3_stmt *stmt) {
+    sqlite3_bind_int(stmt, 1, r.seed);
+    sqlite3_bind_int(stmt, 2, r.step);
+    sqlite3_bind_double(stmt, 3, r.time);
 }
