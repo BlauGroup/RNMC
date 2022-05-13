@@ -47,6 +47,7 @@ struct NanoParticle {
     std::vector<std::set<int>> site_reaction_dependency;
 
     // maps interaction index to interaction data
+    std::vector<Interaction> all_interactions;
     std::vector<Interaction> one_site_interactions;
     std::vector<Interaction> two_site_interactions;
 
@@ -81,6 +82,11 @@ struct NanoParticle {
     // within the spatial decay radius
     std::vector<std::vector<int>> compute_site_neighbors();
 
+    void compute_reactions(
+        const std::vector<int> &state,
+        std::vector<Reaction> &reactions,    
+        std::vector<std::set<int>> &site_reaction_dependency
+    );
     void compute_new_reactions(
         const int site_0_id,
         const int other_site_id,
@@ -124,6 +130,10 @@ struct NanoParticle {
     WriteStateSql state_history_element_to_sql(
         int seed,
         StateHistoryElement state_history_element);
+
+    WriteCutoffSql cutoff_history_element_to_sql(
+        int seed,
+        CutoffHistoryElement cutoff_history_element);
 };
 
 NanoParticle::NanoParticle(
@@ -237,24 +247,20 @@ NanoParticle::NanoParticle(
 
         InteractionSql interaction_row = maybe_interaction_row.value();
 
-        if (interaction_row.number_of_sites == 1) {
-            one_site_interactions.push_back( Interaction {
+        Interaction interaction = Interaction {
                 .interaction_id  = interaction_counter,
                 .number_of_sites = interaction_row.number_of_sites,
                 .species_id      = { interaction_row.species_id_1, interaction_row.species_id_2},
                 .left_state      = { interaction_row.left_state_1, interaction_row.left_state_2},
                 .right_state     = { interaction_row.right_state_1, interaction_row.right_state_2},
                 .rate            = interaction_row.rate
-            });
+            };
+
+        all_interactions.push_back(interaction);
+        if (interaction_row.number_of_sites == 1) {
+            one_site_interactions.push_back(interaction);
         } else if (interaction_row.number_of_sites == 2) {
-          two_site_interactions.push_back( Interaction {
-              .interaction_id  = interaction_counter,
-              .number_of_sites = interaction_row.number_of_sites,
-              .species_id      = { interaction_row.species_id_1, interaction_row.species_id_2},
-              .left_state      = { interaction_row.left_state_1, interaction_row.left_state_2},
-              .right_state     = { interaction_row.right_state_1, interaction_row.right_state_2},
-              .rate            = interaction_row.rate
-          });
+            two_site_interactions.push_back(interaction);
         }
 
         if (num_states < interaction_row.left_state_1) {
@@ -312,11 +318,18 @@ NanoParticle::NanoParticle(
 
     // Setup current_state by copying from initial_state
     current_state = initial_state;
-    int reaction_count = 0;
+    compute_reactions(current_state, std::ref(initial_reactions), std::ref(site_reaction_dependency));
+}
 
+void NanoParticle::compute_reactions(
+    const std::vector<int> &state,
+    std::vector<Reaction> &reactions,    
+    std::vector<std::set<int>> &site_reaction_dependency) {
+    
+    int reaction_count = 0;
     for (unsigned int site_id_0 = 0; site_id_0 < sites.size(); site_id_0++) {
         // Add one site interactions
-        int site_0_state = current_state[site_id_0];
+        int site_0_state = state[site_id_0];
         int site_0_species_id = sites[site_id_0].species_id;
         std::vector<Interaction>* available_interactions = &one_site_interactions_map[site_0_species_id][site_0_state];
         for (unsigned int i = 0; i < available_interactions->size(); i++) {
@@ -326,7 +339,7 @@ NanoParticle::NanoParticle(
                                 .interaction = interaction,
                                 .rate = interaction.rate * one_site_interaction_factor
                                 };
-            initial_reactions.push_back(reaction);
+            reactions.push_back(reaction);
             site_reaction_dependency[site_id_0].insert(reaction_count);
             reaction_count++;
         }
@@ -334,7 +347,7 @@ NanoParticle::NanoParticle(
         // Add two site interactions
         for (unsigned int site_id_1 = 0; site_id_1 < sites.size(); site_id_1++) {
             if ((unsigned) site_id_0 != site_id_1) {
-                int site_1_state = current_state[site_id_1];
+                int site_1_state = state[site_id_1];
                 int site_1_species_id = sites[site_id_1].species_id;
                 double distance = distance_matrix[site_id_0][site_id_1];
                 if (distance < interaction_radius_bound) {
@@ -347,7 +360,7 @@ NanoParticle::NanoParticle(
                                                 .interaction = interaction,
                                                 .rate = distance_factor_function(distance) * interaction.rate * two_site_interaction_factor
                                                 };
-                        initial_reactions.push_back(reaction);
+                        reactions.push_back(reaction);
                         site_reaction_dependency[site_id_0].insert(reaction_count);
                         site_reaction_dependency[site_id_1].insert(reaction_count);
                         reaction_count++;
@@ -362,7 +375,7 @@ NanoParticle::NanoParticle(
                                                 .interaction = interaction,
                                                 .rate = distance_factor_function(distance) * interaction.rate * two_site_interaction_factor
                                                 };
-                        initial_reactions.push_back(reaction);
+                        reactions.push_back(reaction);
                         site_reaction_dependency[site_id_0].insert(reaction_count);
                         site_reaction_dependency[site_id_1].insert(reaction_count);
                         reaction_count++;
@@ -611,11 +624,20 @@ WriteTrajectoriesSql NanoParticle::history_element_to_sql(
 WriteStateSql NanoParticle::state_history_element_to_sql(
     int seed,
     StateHistoryElement state_history_element) {
-    
 
     return WriteStateSql {
         .seed = seed,
-        .site_id = static_cast<int>(state_history_element.site_id),
+        .site_id = state_history_element.site_id,
         .degree_of_freedom = state_history_element.degree_of_freedom
     };
 }
+
+WriteCutoffSql NanoParticle::cutoff_history_element_to_sql(
+    int seed,
+    CutoffHistoryElement cutoff_history_element) {
+        return WriteCutoffSql {
+            .seed = seed,
+            .step = cutoff_history_element.step,
+            .time = cutoff_history_element.time
+        };
+    }

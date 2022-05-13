@@ -26,9 +26,20 @@ namespace {
   // or, at runtime: assert( shutdown_requested.is_lock_free() );
 }
 
+struct CutoffHistoryElement{
+    unsigned long int seed;
+    int step;
+    double time;
+};
+
+struct CutoffHistoryPacket{
+    unsigned long int seed;
+    std::vector<CutoffHistoryElement> cutoff;
+};
+
 struct StateHistoryElement{
     unsigned long int seed; //seed
-    unsigned int site_id; 
+    int site_id; 
     int degree_of_freedom; //energy level the site is at
 };
 
@@ -38,7 +49,6 @@ struct StateHistoryPacket {
 };
 
 struct HistoryElement {
-
     unsigned long int seed; // seed
     Reaction reaction; // reaction which fired
     double time;  // time after reaction has occoured.
@@ -67,22 +77,27 @@ struct Simulation {
 
     Simulation(Model &model,
                unsigned long int seed,
+               int step,
+               double time,
+               std::vector<int> state,
+               std::vector<Reaction> initial_reactions,
+               std::vector<std::set<int>> site_reaction_dependency,
                int history_chunk_size,
                HistoryQueue<HistoryPacket> &history_queue,
                HistoryQueue<StateHistoryPacket> &state_history_queue
         ) :
         model (model),
         seed (seed),
-        state (model.initial_state),
-        time (0.0),
-        step (0),
-        solver (seed, std::ref(model.initial_reactions)),
+        state (state),
+        time (time),
+        step (step),
+        solver (seed, std::ref(initial_reactions)),
         history_chunk_size (history_chunk_size),
         history_queue (history_queue),
         state_history_queue (state_history_queue),
         // update_function ([&] (Update update) {solver.update(update);}),
         // current_reactions (model.initial_reactions),
-        site_reaction_dependency (model.site_reaction_dependency)
+        site_reaction_dependency (site_reaction_dependency)
         {
             history.reserve(history_chunk_size);
         };
@@ -141,11 +156,6 @@ bool Simulation<Solver, Model>::execute_step() {
         // update list of current available reactions
         model.update_reactions(std::cref(state), next_reaction, std::ref(site_reaction_dependency), std::ref(solver.current_reactions));
         solver.update();
-        // // update propensities
-        // model.update_propensities(
-        //     update_function,
-        //     std::ref(state),
-        //     next_reaction);
 
         return true;
     }
