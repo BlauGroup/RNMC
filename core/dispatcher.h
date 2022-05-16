@@ -315,6 +315,16 @@ template <
     typename ReadStateSql,
     typename WriteCutoffSql,
     typename ReadCutoffSql>
+<<<<<<< HEAD
+=======
+
+void Dispatcher<Solver, Model, WriteTrajectoriesSql, ReadTrajectoriesSql, WriteStateSql, ReadStateSql, WriteCutoffSql, ReadCutoffSql>::run_dispatcher() {
+
+    // Check if there are existing runs
+        // Check if individual states have been written to the initial_state.sqlite
+
+        // Check if there are any trajectories
+>>>>>>> pass_reactions
 
 void Dispatcher<Solver, Model, WriteTrajectoriesSql, ReadTrajectoriesSql, WriteStateSql, ReadStateSql, WriteCutoffSql, ReadCutoffSql>::run_dispatcher() {
 
@@ -394,7 +404,11 @@ void Dispatcher<Solver, Model, WriteTrajectoriesSql, ReadTrajectoriesSql, WriteS
 
         if (maybe_cutoff_history_packet) {
             CutoffHistoryPacket cutoff_history_packet = std::move(maybe_cutoff_history_packet.value());
+<<<<<<< HEAD
             record_cutoff(std::move(cutoff_history_packet));
+=======
+            // record_cutoff(std::move(cutoff_history_packet));
+>>>>>>> pass_reactions
         }
     }
 
