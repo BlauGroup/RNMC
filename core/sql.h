@@ -5,6 +5,7 @@
 #include <optional>
 #include <iostream>
 #include <iomanip>
+#include <cstring>
 
 // DESIGN
 // the sqlite C API has two kinds of resources: connections and

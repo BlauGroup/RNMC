@@ -4,6 +4,10 @@
 #include <functional>
 #include <csignal>
 #include <set>
+#include <atomic>
+#include <unistd.h>
+#include <cstring>
+
 //
 // //Include this here for now, but breakout into own file later
 // struct Reaction {

@@ -113,8 +113,8 @@ struct SimulatorPayload {
 
             cutoff_packet.push_back(CutoffHistoryElement {
                 .seed = seed,
-                .time = simulation.time,
-                .step = simulation.step
+                .step = simulation.step,
+                .time = simulation.time
             });
 
             // Construct a history packet from the history elements and add it to the queue
