@@ -290,8 +290,16 @@ void signalHandler(int signum) {
     write_error_message("received signal " + std::to_string(signum) + "\n");
     switch (signum) {
         case 2:
-        case 4:
-        case 6:
+            // A SIGINT has been issued, handle this gracefully 
+            // by writing current states and trajectories to the db
+
+            write_error_message("SIGINT received. Terminating NPMC run(s) early.\n");
+            do_shutdown = 1;
+            shutdown_requested = true;
+
+            write_error_message("Writing current states and history queue to the initial_states db\n");
+            break;
+        case 15:
             // A SIGTERM has been issued, handle this gracefully 
             // by writing current states and trajectories to the db
 
@@ -353,6 +361,7 @@ void Dispatcher<Solver, Model, WriteTrajectoriesSql, ReadTrajectoriesSql, WriteS
     sigemptyset(&action.sa_mask);
     action.sa_flags = 0;
     sigaction(SIGINT, &action, NULL);
+    sigaction(SIGTERM, &action, NULL);
 
     bool finished = false;
     while (! finished) {
