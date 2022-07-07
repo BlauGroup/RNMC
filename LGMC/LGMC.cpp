@@ -7,6 +7,10 @@
 #include <iostream>
 #include <getopt.h>
 
+#include "../core/dispatcher.h"
+#include "../GMC/sql_types.h"
+#include "../GMC/reaction_network.h"
+
 
 using namespace LGMC_NS;
 
@@ -100,6 +104,9 @@ LGMC::LGMC(int argc, char ** argv){
     }
     
     ReactionNetworkParameters parameters;           // TODO: implement parameters
+
+    Dispatcher< TreeSolver, ReactionNetwork,         // Gillespie for electrolyte
+    ReactionNetworkParameters, TrajectoriesSql>
 
     dispatcher (reaction_database, initial_state_database,
     number_of_simulations, base_seed, thread_count,

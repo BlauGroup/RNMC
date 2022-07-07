@@ -197,9 +197,9 @@ void Lattice::structured_connectivity() {
             // ijkm neigh = indices of neighbor site
             // calculated from siteijk and cmap offsets
 
-            ineigh = xyz[i][0] + cmap[neigh][0];
-            jneigh = xyz[i][1] + cmap[neigh][1];
-            kneigh = xyz[i][2] + cmap[neigh][2];
+            ineigh = xyz[i][0]/latconst + cmap[neigh][0];
+            jneigh = xyz[i][1]/latconst + cmap[neigh][1];
+            kneigh = xyz[i][2]/latconst + cmap[neigh][2];
 
             // xyz neigh = coords of neighbor site
             // calculated in same manner that structured_lattice() generated coords
@@ -246,9 +246,9 @@ void Lattice::structured_connectivity() {
             }
 
             // discard neighs that are outside non-periodic box or region
-            if (!xperiodic && (xneigh < boxxlo || xneigh >= boxxhi)) continue;
-            if (!yperiodic && (yneigh < boxylo || yneigh >= boxyhi)) continue;
-            if (!zperiodic && (zneigh < boxzlo || zneigh >= boxzhi)) continue;
+            if (!xperiodic && (xneigh < boxxlo || xneigh > boxxhi)) continue;
+            if (!yperiodic && (yneigh < boxylo || yneigh > boxyhi)) continue;
+            if (!zperiodic && (zneigh < boxzlo || zneigh > boxzhi)) continue;
 
             // gid = global ID of neighbor
             // calculated in same manner that structured_lattice() generated IDs
