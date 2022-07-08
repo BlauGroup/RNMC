@@ -1,5 +1,3 @@
-## EECS 281 Advanced Makefile
-
 # How to use this Makefile...
 ###################
 ###################
@@ -8,22 +6,12 @@
 ##               ##
 ###################
 ###################
-
-
-#######################
-# TODO (begin) #
-#######################
-# Change 'executable' to match the command name given in the project spec.
-EXECUTABLE  = main
+EXECUTABLE  = LGMC
 
 # The following line looks for a project's main() in files named project*.cpp,
 # executable.cpp (substituted from EXECUTABLE above), or main.cpp
-PROJECTFILE = $(or $(wildcard project*.cpp $(EXECUTABLE).cpp), main.cpp)
-# If main() is in another file delete line above, edit and uncomment below
-#PROJECTFILE = mymainfile.cpp
-#######################
-# TODO (end) #
-#######################
+#PROJECTFILE = $(or $(wildcard project*.cpp $(EXECUTABLE).cpp), main.cpp)
+PROJECTFILE = main.cpp
 
 # designate which compiler to use
 CXX         = g++
@@ -43,10 +31,11 @@ OBJECTS     = $(SOURCES:%.cpp=%.o)
 # name of the perf data file, only used by the clean target
 PERF_FILE = perf.data*
 
+
 # Default Flags (we prefer -std=c++17 but Mac/Xcode/Clang doesn't support)
 # WARNING: Adding flags like _GLIBCXX_DEBUG or -fsanitize
 # may prevent your project from working properly!
-CXXFLAGS = -std=c++1z -Wconversion -Wall -Werror -Wextra -pedantic
+CXXFLAGS = -fno-rtti -fno-exceptions -std=c++20 -Wall -Wextra -g $(shell gsl-config --cflags) $(shell gsl-config --libs) -lsqlite3 -lpthread
 
 # make release - will compile "all" with $(CXXFLAGS) and the -O3 flag
 #                also defines NDEBUG so that asserts will not check
@@ -68,12 +57,6 @@ profile:
 gprof: CXXFLAGS += -pg
 gprof:
 	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)_profile
-
-# make static - will perform static analysis in the matter currently used
-#               on the autograder
-static:
-	cppcheck --enable=all --suppress=missingIncludeSystem \
-      $(SOURCES) *.h *.hpp
 
 # Build all executables
 all: release debug profile
@@ -111,37 +94,18 @@ alltests: $(TESTS)
 # make clean - remove .o files, executables, tarball
 clean:
 	rm -f $(OBJECTS) $(EXECUTABLE) $(EXECUTABLE)_debug $(EXECUTABLE)_profile \
-      $(TESTS) $(PARTIAL_SUBMITFILE) $(FULL_SUBMITFILE) $(PERF_FILE) \
-      $(UNGRADED_SUBMITFILE)
+      $(TESTS) 
 	rm -Rf *.dSYM
 
 define MAKEFILE_HELP
-EECS281 Advanced Makefile Help
+Makefile Help
 * This Makefile uses advanced techniques, for more information:
     $$ man make
 
 * General usage
     1. Follow directions at each "TODO" in this file.
        a. Set EXECUTABLE equal to the name from the project specification.
-       b. Add any dependency rules specific to your files.
     2. Build, test ... repeat as necessary.
-
-* Unit testing support
-    A) Source files for unit testing should be named test*.cpp.  Examples
-       include test_input.cpp or test3.cpp.
-    B) Automatic build rules are generated to support the following:
-           $$ make test_input
-           $$ make test3
-           $$ make alltests        (this builds all test drivers)
-    C) If test drivers need special dependencies, they must be added
-       manually.
-    D) IMPORTANT: NO SOURCE FILES WITH NAMES THAT BEGIN WITH test WILL BE
-       ADDED TO ANY SUBMISSION TARBALLS.
-
-* Static Analysis support
-    A) Matches current autograder style grading tests
-    B) Usage:
-           $$ make static
 
 endef
 export MAKEFILE_HELP
@@ -180,9 +144,7 @@ help:
 ######################
 
 # these targets do not create any files
-.PHONY: all release debug profile gprof static clean alltests
-.PHONY: partialsubmit fullsubmit ungraded sync2caen help identifier
+.PHONY: all release debug profile gprof clean 
 
 # disable built-in rules
 .SUFFIXES:
-

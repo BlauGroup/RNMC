@@ -1,9 +1,13 @@
 #include "lattice.h"
+#include <cassert> 
 #include "stdio.h"
 #include "stdlib.h"
 #include "string"
 #include "math.h"
+#include <numeric>
+#include "../GMC/GMC.cpp"
 #include <iostream>
+#include <format>
 
 using namespace LGMC_NS;
 
@@ -12,22 +16,31 @@ using namespace LGMC_NS;
 #define EPSILON 0.0001
 #define DELTABUF 10000
 
+// types of reactions
+enum {ELECTRO, DIFFU, CHEM, DESORP};
+
+
 /* ---------------------------------------------------------------------- */
 
-Lattice::Lattice(int, char **arg) {
+Lattice::Lattice(int latconst_in, <Solver, Model, Parameters, TrajectoriesSql>Dispatcher *ptr_in, 
+        int boxxlo_in, int boxxhi_in, int boxylo_in,
+        int boxyhi_in, int boxzlo_in, int boxzhi_in)  {
     // TODO: implement error handling
     
     memory = new Memory();
 
-    latconst = atof(arg[1]);
+    latconst = latconst_in;
+
+    // pointer to gillespie dispatcher
+    dis_ptr = ptr_in;
     
     // region of simulation input * lattice spacing
-    boxxlo = latconst*atof(arg[2]);
-    boxxhi = latconst*atof(arg[3]);
-    boxylo = latconst*atof(arg[4]);
-    boxyhi = latconst*atof(arg[5]);
-    boxzlo = latconst*atof(arg[6]);
-    boxzhi = latconst*atof(arg[7]);
+    boxxlo = boxxlo_in;
+    boxxhi = boxxhi_in;
+    boxylo = boxylo_in;
+    boxyhi = boxyhi_in;
+    boxzlo = boxzlo_in;
+    boxzhi = boxzhi_in;
     
     // 0 = non-periodic, 1 = periodic
     xperiodic = 1;
@@ -35,20 +48,19 @@ Lattice::Lattice(int, char **arg) {
     zperiodic = 0;
     
     nsites = nmax = 0;
-    id = NULL;
-    xyz = NULL;
+    sites = NULL;
     
     maxneigh = 6;
     numneigh = NULL;
     idneigh = NULL;
+    
+    prop_sum = 0;
     
     // create sites on lattice
     structured_lattice();
     
     // set neighbors of each site
     structured_connectivity();
-
-    // TODO: set initial state and propensities
     
     /*for(int n = 0; n < nsites; ++n) {
         std::cout << "id: " << n << " [" << xyz[n][0] << ", " <<
@@ -61,8 +73,7 @@ Lattice::Lattice(int, char **arg) {
 
 Lattice::~Lattice() {
 
-    memory->destroy(id);
-    memory->destroy(xyz);
+    memory->destroy(sites);
     
     memory->destroy(numneigh);
     memory->destroy(idneigh);
@@ -78,10 +89,10 @@ void Lattice::structured_lattice() {
     // set domain->nx,ny,nz iff style = BOX and system is fully periodic
     // else site IDs may be non-contiguous and/or ordered irregularly
     // 3 dimensions
-    int nx, ny, nz;
-    nx = static_cast<int> (boxxhi - boxxlo / latconst);
-    ny = static_cast<int> (boxyhi - boxylo / latconst);
-    nz = static_cast<int> (boxzhi - boxzlo / latconst);
+    uint32_t nx, ny, nz;
+    nx = (boxxhi - boxxlo / latconst);
+    ny = (boxyhi - boxylo / latconst);
+    nz = (boxzhi - boxzlo / latconst);
 
     // if dim is periodic:
     //    lattice origin = lower box boundary
@@ -95,10 +106,10 @@ void Lattice::structured_lattice() {
         xhi = nx-1;
       }
     else {
-        xlo = static_cast<int> (boxxlo / latconst);
+        xlo = (boxxlo / latconst);
         while ((xlo+1)*latconst > boxxlo) xlo--;
         xlo++;
-        xhi = static_cast<int> (boxxhi / latconst);
+        xhi = (boxxhi / latconst);
         while (xhi*latconst <= boxxhi) xhi++;
         xhi--;
       }
@@ -108,10 +119,10 @@ void Lattice::structured_lattice() {
         yhi = ny-1;
     }
     else {
-        ylo = static_cast<int> (boxylo / latconst);
+        ylo = (boxylo / latconst);
         while ((ylo+1)*latconst > boxylo) ylo--;
         ylo++;
-        yhi = static_cast<int> (boxyhi / latconst);
+        yhi = (boxyhi / latconst);
         while (yhi*latconst <= boxyhi) yhi++;
         yhi--;
     }
@@ -121,10 +132,10 @@ void Lattice::structured_lattice() {
         zhi = nz-1;
     }
     else {
-        zlo = static_cast<int> (boxzlo / latconst);
+        zlo = (boxzlo / latconst);
         while ((zlo+1)*latconst > boxzlo) zlo--;
         zlo++;
-        zhi = static_cast<int> (boxzhi / latconst);
+        zhi = (boxzhi / latconst);
         while (zhi*latconst <= boxzhi) zhi++;
         zhi--;
     }
@@ -137,9 +148,9 @@ void Lattice::structured_lattice() {
     // for style = REGION, check if site is within region
     // if non-periodic or style = REGION, IDs may not be contiguous
 
-    double x,y,z;
+    uint32_t x,y,z;
 
-    tagint n = 0;
+    uint32_t n = 0;
     for (int k = zlo; k <= zhi; k++)
         for (int j = ylo; j <= yhi; j++)
             for (int i = xlo; i <= xhi; i++) {
@@ -162,18 +173,18 @@ void Lattice::structured_lattice() {
 void Lattice::structured_connectivity() {
 
     int ineigh,jneigh,kneigh;
-    tagint gid;
-    double xneigh,yneigh,zneigh;
-    double xprd, yprd, zprd;
+    int gid;
+    int xneigh,yneigh,zneigh;
+    int xprd, yprd, zprd;
     
     xprd = boxxhi - boxxlo;
     yprd = boxyhi - boxylo;
     zprd = boxzhi - boxzlo;
     
     int nx, ny, nz;
-    nx = static_cast<int> (xprd / latconst);
-    ny = static_cast<int> (yprd / latconst);
-    nz = static_cast<int> (zprd / latconst);
+    nx = xprd / latconst;
+    ny = yprd / latconst;
+    nz = zprd / latconst;
     
     memory->create(idneigh,nsites,maxneigh,"create:idneigh");
     memory->create(numneigh,nmax,"create:numneigh");
@@ -197,16 +208,16 @@ void Lattice::structured_connectivity() {
             // ijkm neigh = indices of neighbor site
             // calculated from siteijk and cmap offsets
 
-            ineigh = xyz[i][0]/latconst + cmap[neigh][0];
-            jneigh = xyz[i][1]/latconst + cmap[neigh][1];
-            kneigh = xyz[i][2]/latconst + cmap[neigh][2];
+            ineigh = static_cast<int> (sites[i].x/latconst) + cmap[neigh][0];
+            jneigh = static_cast<int> (sites[i].y/latconst) + cmap[neigh][1];
+            kneigh = static_cast<int> (sites[i].z/latconst) + cmap[neigh][2];
 
             // xyz neigh = coords of neighbor site
             // calculated in same manner that structured_lattice() generated coords
             
-            xneigh = ineigh * latconst;
-            yneigh = jneigh * latconst;
-            zneigh = kneigh * latconst;
+            xneigh = ineigh * static_cast<int> (latconst);
+            yneigh = jneigh * static_cast<int> (latconst);
+            zneigh = kneigh * static_cast<int> (latconst);
             
             // remap neighbor coords and indices into periodic box via ijk neigh
             // remap neighbor coords and indices into periodic box via ijk neigh
@@ -218,7 +229,7 @@ void Lattice::structured_connectivity() {
                 }
                 if (ineigh >= nx) {
                     xneigh -= xprd;
-                    xneigh = MAX(xneigh,boxxlo);
+                    xneigh = MAX(xneigh, static_cast<int> (boxxlo));
                     ineigh -= nx;
                 }
             }
@@ -229,7 +240,7 @@ void Lattice::structured_connectivity() {
                 }
                 if (jneigh >= ny) {
                     yneigh -= yprd;
-                    yneigh = MAX(yneigh,boxylo);
+                    yneigh = MAX(yneigh, static_cast<int> (boxylo));
                     jneigh -= ny;
                 }
             }
@@ -240,7 +251,7 @@ void Lattice::structured_connectivity() {
                 }
                 if (kneigh >= nz) {
                     zneigh -= zprd;
-                    zneigh = MAX(zneigh,boxzlo);
+                    zneigh = MAX(zneigh, static_cast<int> (boxzlo));
                     kneigh -= nz;
                 }
             }
@@ -252,25 +263,24 @@ void Lattice::structured_connectivity() {
 
             // gid = global ID of neighbor
             // calculated in same manner that structured_lattice() generated IDs
-            int one = 1;   // use this to avoid int overflow in calc of gid
-            gid = one*tagint((kneigh-zlo)*(yhi-ylo+1)*(xhi-xlo+1)) +
-                  one*tagint((jneigh-ylo)*(xhi-xlo+1)) + one*tagint((ineigh-xlo));
+            uint32_t one = 1;   // use this to avoid int overflow in calc of gid
+            gid = one*uint32_t((kneigh-zlo)*(yhi-ylo+1)*(xhi-xlo+1)) +
+                  one*uint32_t((jneigh-ylo)*(xhi-xlo+1)) + one*uint32_t((ineigh-xlo));
             
             
-        std::cout << "neighbor: (" << xyz[gid][0] << ", " << xyz[gid][1] << ", " << xyz[gid][2] << ") for: " << "[" << xyz[i][0] << ", " << xyz[i][1] << ", " << xyz[i][2] << "]" << std::endl;
+        std::cout << "neighbor: (" << sites[gid].x << ", " << sites[gid].y << ", " 
+                  << sites[gid].z << ") for: " << "[" << sites[i].x << ", " << 
+                  sites[i].y << ", " << sites[i].z << "]" << std::endl;
             
         // add gid to neigh list of site i
         idneigh[i][numneigh[i]++] = gid;
       }
     }
 
-    // delete siteijk and connectivity offsets
-    //memory->destroy(cmap);
-    //memory->destroy(basis);
     std::cout << "numneigh" << std::endl;
     for(int i = 0; i < nsites; i++) {
-        std::cout << "[" << xyz[i][0] << ", " <<
-        xyz[i][1] << ", " << xyz[i][2] << "]" << ",";
+        std::cout << "[" << sites[i].x << ", " <<
+        sites[i].y << ", " << sites[i].z << "]" << ",";
         std::cout << "num: " << numneigh[i] << std::endl;
     }
     
@@ -316,44 +326,183 @@ void Lattice::offsets_3d(int **cmapin) {
 
 /* ---------------------------------------------------------------------- */
 
-void Lattice::add_site(tagint n, double x, double y, double z) {
+void Lattice::add_site(uint32_t n, uint32_t x, uint32_t y, uint32_t z) {
     if (nsites == nmax) grow(0);
 
-    id[nsites] = n;
-    xyz[nsites][0] = x;
-    xyz[nsites][1] = y;
-    xyz[nsites][2] = z;
+    // initially empty site, species = -1
+    sites[n] = Site{x, y, z, -1};
 
     nsites++;
 } // add_site()
 
 /* ---------------------------------------------------------------------- */
 
-void Lattice::grow(int n) {
+void Lattice::grow(uint32_t n) {
     if (n == 0) nmax += DELTA;
     else nmax = n;
 
-    memory->grow(id,nmax,"grow:id");
-    memory->grow(xyz,nmax,3,"grow:xyz");
+    memory->grow(sites,nmax,"grow:sites");
     
 } // grow()
 
-/* ----------------------------------------------------------------------
-Set species list to -1, state list to 0, set propensities to zero
- ---------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------- 
+    Only calls this function if necessary reactants are on lattice sites
+---------------------------------------------------------------------- */
 
-void Lattice::init() {
+void Lattice::update_propensity(int site_one, int site_two, Lat_Reaction &reaction) {
     
-    //memory->create(state,,"create:cmap");
+    // TODO: for certain reactions make sure there is an empty site 
+    // TODO: for interactions with electrolyte make sure possible (take into account distance??)
+
+    double p;
+    // zero reactants
+    if (reaction.number_of_reactants == 0)
+        p = dis_ptr->model.factor_zero * reaction.rate;
+
+    // one reactant
+    else if (reaction.number_of_reactants == 1)
+        p = 1 * reaction.rate;
+
+
+    // two reactants
+    else {
+       if (reaction.reactants[0] == reaction.reactants[1])
+            p = dis_ptr->model.factor_duplicate
+                * dis_ptr->model.factor_two
+                * 2
+                * (2 - 1)
+                * reaction.rate;
+
+        else
+            p = dis_ptr->model.factor_two
+                * 1
+                * 1
+                * reaction.rate;
+    }
+
+    // add or change existing propensity 
+    std::string site_combo = (site_one < site_two) ? std::to_string(site_one) + "." + std::to_string(site_two) : std::to_string(site_two) + "." + std::to_string(site_one);
+    props[site_combo].push_back(p);
+
+    // update running sum 
+    prop_sum += p;
+
+
     
-    
-} // init()
+} // update_propensity()
 
 /* ---------------------------------------------------------------------- */
 
-void Lattice::update() {
+void Lattice::update(int site_one, int site_two) {
+
+    if(site_one > -1) {
+        relevant_react(site_one);       
+    }
+    if(site_two > -1) {
+        relevant_react(site_two);
+    }
     
-    //memory->create(state,,"create:cmap");
+}
+
+/* ---------------------------------------------------------------------- */
+
+void Lattice::clear_site(int site) {
+
+    // reset or initiate site combos
+    for(uint32_t neigh = 0; neigh < numneigh[site]; neigh++ ) {
+        int neighbor = idneigh[site][neigh];
+
+        std::string combo = (site > neighbor) ? std::to_string(site) + "." + std::to_string(neighbor) : std::to_string(neighbor) + "." + std::to_string(site);
+        
+        // check if first time key has been added
+        if(props.find(combo) == props.end()) {
+            // key not found
+            // TODO: is this valid?????
+            props[combo].resize(lat_dependents.size());
+        }
+        else {
+            // already exists, clear vector to update
+            prop_sum -= std::accumulate(props[combo].begin(), props[combo].end(), 0);
+
+            // TODO: make sure capacity does not get changed
+            props[combo].clear();
+        }
+    }
+
+    // reset for gillespie (-2) and empty site (-1)
+    for(int i = -2; i < 0; i++) {
+        std::string combo = std::to_string(site) + "." + std::to_string(i);
+
+        if(props.find(combo) == props.end()) {
+         props[combo].resize(lat_dependents.size());
+        }
+        else {
+            prop_sum -= std::accumulate(props[combo].begin(), props[combo].end(), 0);
+            props[combo].clear();
+        }
+
+    }
+
+} // clear_site
+
+/* ---------------------------------------------------------------------- */
+
+void Lattice::relevant_react(int site) {
+
+    clear_site(site);
+
+    // all reactions related to central site 
+    std::vector<int> &potential_reactions = lat_dependents[sites[site].species]; 
+
+    // compute and add new propensities 
+    for(int reaction_id = 0; reaction_id < static_cast<int> (potential_reactions.size()); reaction_id++ ) {
+
+        Lat_Reaction &reaction = dis_ptr->model.reactions[reaction_id];
+
+        // reaction with gillepsie 
+        if(reaction.type == DESORP) {
+            update_propensity(site, -2, reaction);
+        }
+
+        // single reaction 
+        if(reaction.number_of_reactants == 1) {
+            
+            if(reaction.number_of_products == 1) {
+                update_propensity(site, -1, reaction);
+            }
+            else {
+                // two products make sure site is empty
+                for(uint32_t neigh = 0; neigh < numneigh[site]; neigh++) {
+                    
+                    int neighbor = idneigh[site][neigh];
+                    
+                    if(sites[neighbor].species == -1) {
+                        // empty 
+                        update_propensity(site, neighbor, reaction);
+                    }
+
+
+                } // for neigh
+            }
+
+        } // single reactant
+
+        if(reaction.number_of_reactants == 2) {
     
-    
-} // update()
+            int other_reactant = (site == reaction.reactants[0]) ? reaction.reactants[1] : reaction.reactants[0];
+            // make sure neighbor is relevant 
+            for(uint32_t neigh = 0; neigh < numneigh[site]; neigh++) {
+                int neighbor = idneigh[site][neigh];
+                    
+                if(sites[neighbor].species == other_reactant) {
+                    update_propensity(site, neighbor, reaction);
+                }
+
+            } // for neigh
+            
+        } // two reactants
+
+
+    }
+
+}
