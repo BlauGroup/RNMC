@@ -5,9 +5,6 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
-#include "../core/dispatcher.h"
-#include "../GMC/reaction_network.h"
-#include "../GMC/sql_types.h"
 
 namespace LGMC_NS {
 
@@ -29,11 +26,11 @@ private:
     
     /* ----------------------- structural information ------------------------ */
     
-    int latconst;                               // lattice constant
+    float latconst;                               // lattice constant
     int boxxlo,boxxhi,boxylo,                   // bounding of box
     boxyhi,boxzlo,boxzhi;                       // (yscale * read in value)
     int xlo,xhi,ylo,yhi,zlo,zhi;                // geometry info neighbors
-    uint32_t xperiodic,yperiodic,zperiodic;          // 0 = non-periodic, 1 = periodic
+    bool is_xperiodic, is_yperiodic, is_zperiodic;          // 0 = non-periodic, 1 = periodic
     
     int nsites;                                 // number of sites
     int nmax;                                   // max # of sites per-site arrays can store
@@ -55,29 +52,18 @@ private:
 
     };
 
-    Site *sites;                                // list of Sites for lattice
-
     int maxneigh;                               // max neighbors per site
+
+public: 
+
+    Site *sites;                                // list of Sites for lattice
     uint32_t **idneigh;                         // neighbor IDs for each site
     uint32_t *numneigh;                         // # of neighbors of each site
 
-    /* -------------------------- kMC information ------------------------------ */
-    
-    std::unordered_map<std::string,     // lattice propensities as site neighbor pair
-                        std::vector<double> > props;          // -1 single site, -2 gillespie
-                                                 
-
-    std::vector<std::vector<int>>               // dependency list without products  
-    lat_dependents;         
-
-    int prop_sum;                               // running total of propensities
-    
-    <Solver, Model, Parameters, TrajectoriesSql>Dispatcher *dis_ptr;                        // pointer to gillespie dispatcher object
-    
-public: 
-    Lattice(int latconst_in, <Solver, Model, Parameters, TrajectoriesSql>Dispatcher *ptr_in, 
+    Lattice(float latconst_in, 
         int boxxlo_in, int boxxhi_in, int boxylo_in,
-        int boxyhi_in, int boxzlo_in, int boxzhi_in);   
+        int boxyhi_in, int boxzlo_in, int boxzhi_in, 
+        bool xperiodic_in, bool yperiodic_in, bool zperiodic_in);   
 
     ~Lattice();
 
@@ -90,14 +76,6 @@ public:
     void add_site(uint32_t n, uint32_t x, uint32_t y, uint32_t z);
 
     void grow(uint32_t n);
-    
-    void update_propensity(int site_one, int site_two, Lat_Reaction &reaction);
-
-    void update(int site_one, int site_two);
-
-    void relevant_react(int site);
-
-    void clear_site(int site);
     
 };
 

@@ -11,7 +11,7 @@ EXECUTABLE  = LGMC
 # The following line looks for a project's main() in files named project*.cpp,
 # executable.cpp (substituted from EXECUTABLE above), or main.cpp
 #PROJECTFILE = $(or $(wildcard project*.cpp $(EXECUTABLE).cpp), main.cpp)
-PROJECTFILE = main.cpp
+PROJECTFILE = LGMC.cpp
 
 # designate which compiler to use
 CXX         = g++
