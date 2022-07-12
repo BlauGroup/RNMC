@@ -46,6 +46,51 @@ void ReactionSql::action(ReactionSql &r, sqlite3_stmt *stmt) {
         r.rate = sqlite3_column_double(stmt, 7);
 };
 
+struct LatticeReactionSql {
+    unsigned long int reaction_id;
+    int number_of_reactants;
+    int number_of_products;
+    int reactant_1;
+    int reactant_2;
+    int product_1;
+    int product_2;
+    double rate;
+    double dG;
+    double reorganization;
+    char phase_reactant_1;
+    char phase_reactant_2;
+    char phase_product_1;
+    char phase_product_2;
+    char type;
+    static std::string sql_statement;
+    static void action(LatticeReactionSql &r, sqlite3_stmt *stmt);
+};
+
+std::string LatticeReactionSql::sql_statement =
+    "SELECT reaction_id, number_of_reactants, number_of_products, "
+    "reactant_1, reactant_2, product_1, product_2, rate, dG, "
+    "reorganization, phase_reactant_1, phase_reactant_2, "
+    "phase_product_1, phase_product_2, type FROM reactions;";
+
+
+void LatticeReactionSql::action(LatticeReactionSql &r, sqlite3_stmt *stmt) {
+        r.reaction_id = sqlite3_column_int(stmt, 0);
+        r.number_of_reactants = sqlite3_column_int(stmt, 1);
+        r.number_of_products = sqlite3_column_int(stmt, 2);
+        r.reactant_1 = sqlite3_column_int(stmt, 3);
+        r.reactant_2 = sqlite3_column_int(stmt, 4);
+        r.product_1 = sqlite3_column_int(stmt, 5);
+        r.product_2 = sqlite3_column_int(stmt, 6);
+        r.rate = sqlite3_column_double(stmt, 7);
+        r.dG = sqlite3_column_double(stmt, 8);
+        r.reorganization = sqlite3_column_double(stmt, 9);
+        r.phase_reactant_1 = sqlite3_column_double(stmt, 10);
+        r.phase_reactant_2 = sqlite3_column_double(stmt, 11);
+        r.phase_product_1 = sqlite3_column_double(stmt, 12);
+        r.phase_product_2 = sqlite3_column_double(stmt, 13);
+        r.type = sqlite3_column_double(stmt, 14);
+};
+
 
 struct InitialStateSql {
     int species_id;
@@ -100,4 +145,3 @@ void FactorsSql::action (FactorsSql &r, sqlite3_stmt *stmt) {
     r.factor_two = sqlite3_column_double(stmt, 1);
     r.factor_duplicate = sqlite3_column_double(stmt, 2);
 };
-
