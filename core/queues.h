@@ -3,9 +3,6 @@
 #include <mutex>
 #include <optional>
 
-
-
-
 struct SeedQueue {
     std::queue<unsigned long int> seeds;
     std::mutex mutex;
@@ -76,4 +73,3 @@ struct HistoryQueue {
     };
 
 };
-

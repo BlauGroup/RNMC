@@ -286,7 +286,7 @@ void Lattice::offsets_3d(int **cmapin) {
     
     int n = 0;
     double delx,dely,delz,r;
-    double cutoff = 1*latconst;
+    double cutoff = latconst;
 
     for (int i = -1; i <= 1; i++) {
         for (int j = -1; j <= 1; j++) {
@@ -328,3 +328,18 @@ void Lattice::grow(uint32_t n) {
     memory->grow(sites,nmax,"grow:sites");
     
 } // grow()
+
+
+int Lattice::is_on_edge(int site) {
+    if(!is_xperiodic) {
+        return (sites[site].x == boxxhi);
+    }
+    else if(!is_yperiodic) {
+        return (sites[site].y == boxyhi);
+    }
+    else if(!is_zperiodic) {
+        return (sites[site].z == boxzhi);
+    }
+
+    return 0;
+}

@@ -76,6 +76,8 @@ public:
     void add_site(uint32_t n, uint32_t x, uint32_t y, uint32_t z);
 
     void grow(uint32_t n);
+
+    bool is_on_edge(int site);
     
 };
 

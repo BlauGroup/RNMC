@@ -8,3 +8,4 @@ echo "building GMC"
 $CC $flags ./GMC/GMC.cpp -o ./build/GMC
 echo "building NPMC"
 $CC $flags ./NPMC/NPMC.cpp -o ./build/NPMC
+GM

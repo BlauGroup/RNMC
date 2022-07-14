@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(lldb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/LGMC/main_debug",
+            "args": ["1", "0", "3", "0", "3", "0", "3"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/LGMC",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb"
+        }
+    ]
+}

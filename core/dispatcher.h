@@ -31,20 +31,23 @@ struct SimulatorPayload {
     SeedQueue &seed_queue;
     Cutoff cutoff;
     std::vector<bool>::iterator running;
+    bool isLGMC;
 
     SimulatorPayload(
         Model &model,
         HistoryQueue<HistoryPacket> &history_queue,
         SeedQueue &seed_queue,
         Cutoff cutoff,
-        std::vector<bool>::iterator running
+        std::vector<bool>::iterator running, 
+        bool isLGMC
         ) :
 
             model (model),
             history_queue (history_queue),
             seed_queue (seed_queue),
             cutoff (cutoff),
-            running (running)
+            running (running),
+            isLGMC (isLGMC)
         {};
 
     void run_simulator() {
@@ -60,10 +63,10 @@ struct SimulatorPayload {
 
             switch(cutoff.type_of_cutoff) {
             case step_termination :
-                simulation.execute_steps(cutoff.bound.step);
+                simulation.execute_steps(cutoff.bound.step, isLGMC);
                 break;
             case time_termination :
-                simulation.execute_time(cutoff.bound.time);
+                simulation.execute_time(cutoff.bound.time, isLGMC);
                 break;
             }
 
@@ -103,6 +106,7 @@ struct Dispatcher {
     TypeOfCutoff type_of_cutoff;
     int number_of_simulations;
     int number_of_threads;
+    bool isLGMC;
 
     Dispatcher(
         std::string model_database_file,
@@ -111,7 +115,8 @@ struct Dispatcher {
         unsigned long int base_seed,
         int number_of_threads,
         Cutoff cutoff,
-        Parameters parameters) :
+        Parameters parameters, 
+        bool isLGMC) :
         model_database (
             model_database_file,
             SQLITE_OPEN_READWRITE),
@@ -132,8 +137,10 @@ struct Dispatcher {
         running (number_of_threads, false),
         cutoff (cutoff),
         number_of_simulations (number_of_simulations),
-        number_of_threads (number_of_threads)
+        number_of_threads (number_of_threads), 
+        isLGMC (isLGMC)
         {
+            model.init(model_database);
         };
 
     void run_dispatcher();
@@ -150,6 +157,7 @@ template <
 
 void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
 
+
     threads.resize(number_of_threads);
     for (int i = 0; i < number_of_threads; i++) {
         running[i] = true;
@@ -160,7 +168,8 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
                 history_queue,
                 seed_queue,
                 cutoff,
-                running.begin() + i
+                running.begin() + i, 
+                isLGMC
                 )
             );
 
@@ -191,7 +200,7 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
         if (maybe_history_packet) {
             HistoryPacket history_packet = std::move(maybe_history_packet.value());
             record_simulation_history(std::move(history_packet));
-        };
+        }
     }
 
     for (int i = 0; i < number_of_threads; i++) threads[i].join();

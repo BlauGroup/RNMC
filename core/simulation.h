@@ -21,7 +21,6 @@ template <typename Solver, typename Model>
 struct Simulation {
     Model &model;
     unsigned long int seed;
-    std::vector<int> state;
     double time;
     int step; // number of reactions which have occoured
     Solver solver;
@@ -38,10 +37,9 @@ struct Simulation {
         ) :
         model (model),
         seed (seed),
-        state (model.initial_state),
         time (0.0),
         step (0),
-        solver (seed, std::ref(model.initial_propensities)),
+        solver (seed, model),
         history_chunk_size (history_chunk_size),
         history_queue(history_queue),
         update_function ([&] (Update update) {solver.update(update);})
@@ -51,8 +49,9 @@ struct Simulation {
 
 
     bool execute_step();
-    void execute_steps(int step_cutoff);
-    void execute_time(double time_cutoff);
+    bool execute_step_LGMC();
+    void execute_steps(int step_cutoff, bool isLGMC);
+    void execute_time(double time_cutoff, bool isLGMC);
 
 };
 
@@ -98,13 +97,12 @@ bool Simulation<Solver, Model>::execute_step() {
         step++;
 
         // update state
-        model.update_state(std::ref(state), next_reaction);
+        model.update_state(next_reaction);
 
 
         // update propensities
         model.update_propensities(
             update_function,
-            std::ref(state),
             next_reaction);
 
         return true;
@@ -112,17 +110,78 @@ bool Simulation<Solver, Model>::execute_step() {
 };
 
 template <typename Solver, typename Model>
-void Simulation<Solver, Model>::execute_steps(int step_cutoff) {
-    while(execute_step()) {
-        if (step > step_cutoff)
-            break;
+bool Simulation<Solver, Model>::execute_step_LGMC() { 
+    std::optional<Event> maybe_event = solver.event();
+
+    if (! maybe_event) {
+
+        return false;
+
+    } else {
+        // an event happens
+        Event event = maybe_event.value();
+        int next_reaction = event.index;
+
+        // update time
+        time += event.dt;
+
+        // record what happened
+        history.push_back(HistoryElement {
+            .seed = seed,
+            .reaction_id = next_reaction,
+            .time = time,
+            .step = step
+            });
+
+        if ( history.size() == history_chunk_size ) {
+            history_queue.insert_history(
+                std::move(
+                    HistoryPacket {
+                        .history = std::move(history),
+                        .seed = seed
+                        }));
+
+            history = std::vector<HistoryElement> ();
+            history.reserve(history_chunk_size);
+        }
+
+
+        // increment step
+        step++;
+
+        return true;
     }
 };
 
 template <typename Solver, typename Model>
-void Simulation<Solver, Model>::execute_time(double time_cutoff) {
-    while(execute_step()) {
+void Simulation<Solver, Model>::execute_steps(int step_cutoff, bool isLGMC) {
+    if(isLGMC) {
+        while(execute_step_LGMC()) {
+        if (step > step_cutoff)
+            break;
+        }
+    }
+    else {
+        while(execute_step()) {
+            if (step > step_cutoff)
+                break;
+        }
+    }
+    
+};
+
+template <typename Solver, typename Model>
+void Simulation<Solver, Model>::execute_time(double time_cutoff, bool isLGMC) {
+    if(isLGMC) {
+        while(execute_step_LGMC()) {
         if (time > time_cutoff)
             break;
+        }
+    }
+    else {
+        while(execute_step()) {
+        if (time > time_cutoff)
+            break;
+        }
     }
 };

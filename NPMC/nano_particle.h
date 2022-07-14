@@ -68,7 +68,7 @@ struct NanoParticle {
     // initial state of the simulations.
     // initial_state[i] is a local degree of freedom
     // from the species at site i.
-    std::vector<int> initial_state;
+    std::vector<int> state;
 
     std::vector<double> initial_propensities;
 
@@ -95,11 +95,9 @@ struct NanoParticle {
     void compute_reactions();
 
     double compute_propensity(
-        std::vector<int> &state,
         int reaction_id);
 
     void update_state(
-        std::vector<int> &state,
         int reaction_id);
 
     // updates are passed directly to the solver, but the model
@@ -112,10 +110,10 @@ struct NanoParticle {
 
     void update_propensities(
         std::function<void(Update update)> update_function,
-        std::vector<int> &state,
         int next_reaction_id
         );
 
+    void init(SqlConnection &nano_particle_database){};
     // convert a history element as found a simulation to history
     // to a SQL type.
     TrajectoriesSql history_element_to_sql(
@@ -238,12 +236,12 @@ NanoParticle::NanoParticle(
     }
 
     // initialize initial_state
-    initial_state.resize(metadata_row.number_of_sites);
+    state.resize(metadata_row.number_of_sites);
 
     while(std::optional<InitialStateSql> maybe_initial_state_row =
           initial_state_reader.next()) {
         InitialStateSql initial_state_row = maybe_initial_state_row.value();
-        initial_state[initial_state_row.site_id] = initial_state_row.degree_of_freedom;
+        state[initial_state_row.site_id] = initial_state_row.degree_of_freedom;
     }
 
     compute_reactions();
@@ -251,7 +249,7 @@ NanoParticle::NanoParticle(
 
     // initializing initial_propensities
     for (unsigned int reaction_id = 0; reaction_id < reactions.size(); reaction_id++) {
-        initial_propensities[reaction_id] = compute_propensity(std::ref(initial_state), reaction_id);
+        initial_propensities[reaction_id] = compute_propensity(reaction_id);
     }
 
 }
@@ -434,7 +432,6 @@ void NanoParticle::compute_reactions() {
 }
 
 double NanoParticle::compute_propensity(
-    std::vector<int> &state,
     int reaction_id) {
 
     Interaction interaction = interactions[reactions[reaction_id].interaction_id];
@@ -476,7 +473,6 @@ double NanoParticle::compute_propensity(
 
 
 void NanoParticle::update_state(
-    std::vector<int> &state,
     int reaction_id) {
     Reaction reaction = reactions[reaction_id];
 
@@ -491,7 +487,6 @@ void NanoParticle::update_state(
 
 void NanoParticle::update_propensities(
     std::function<void(Update update)> update_function,
-    std::vector<int> &state,
     int next_reaction_id
     ) {
     Reaction reaction = reactions[next_reaction_id];
@@ -503,7 +498,7 @@ void NanoParticle::update_propensities(
               i < site_reaction_dependency[reaction.site_id[k]].size();
               i++ ) {
             int reaction_id = site_reaction_dependency[reaction.site_id[k]][i];
-            double new_propensity = compute_propensity(std::ref(state), reaction_id);
+            double new_propensity = compute_propensity(reaction_id);
 
 
             update_function( Update {
