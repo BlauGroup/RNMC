@@ -32,11 +32,8 @@ public:
     // for linear solver we can moves initial_propensities vector into the object
     // and use it as the propensity buffer. For compatibility with other solvers,
     // we also implement initialization by copying from a reference
-    template < typename Model>
-    LinearSolver(unsigned long int seed, Model &&model);
-
-    template < typename Model>
-    LinearSolver(unsigned long int seed, Model &model);
+    LinearSolver(unsigned long int seed, std::vector<double> &&initial_propensities);
+    LinearSolver(unsigned long int seed, std::vector<double> &initial_propensities);
     void update(Update update);
     void update(std::vector<Update> updates);
     std::optional<Event> event();
@@ -60,8 +57,7 @@ private:
 public:
     // tree solver is constructed using a reference because it ends up
     // forming the tail end of a larger vector
-    template < typename Model>
-    TreeSolver(unsigned long int seed, Model &model);
+    TreeSolver(unsigned long int seed, std::vector<double> &initial_propensities);
     void update(Update update);
     void update(std::vector<Update> updates);
     std::optional<Event> event();
@@ -77,8 +73,7 @@ private:
     double propensity_sum;
 
 public:
-    template < typename Model>
-    SparseSolver(unsigned long int seed, Model &model);
+    SparseSolver(unsigned long int seed, std::vector<double> &initial_propensities);
     void update(Update update);
     void update(std::vector<Update> updates);
     std::optional<Event> event();
@@ -86,17 +81,19 @@ public:
     double get_propensity_sum();
 };
 
+
+
+
 // LinearSolver implementation
 // LinearSolver can opperate directly on the passed propensities using a move
-template < typename Model>
 LinearSolver::LinearSolver(
     unsigned long int seed,
-    Model &&model) :
+    std::vector<double> &&initial_propensities) :
     sampler (Sampler(seed)),
     // if this move isn't here, the semantics is that initial
     // propensities gets moved into a stack variable for the function
     // call and that stack variable is copied into the object.
-    propensities (std::move(model.initial_propensities)),
+    propensities (std::move(initial_propensities)),
     number_of_active_indices (0),
     propensity_sum (0.0) {
         for (unsigned long i = 0; i < propensities.size(); i++) {
@@ -109,12 +106,11 @@ LinearSolver::LinearSolver(
         }
     };
 
-template < typename Model>
 LinearSolver::LinearSolver(
     unsigned long int seed,
-    Model &model) :
+    std::vector<double> &initial_propensities) :
     sampler (Sampler(seed)),
-    propensities (model.initial_propensities),
+    propensities (initial_propensities),
     number_of_active_indices (0),
     propensity_sum (0.0) {
 
@@ -186,15 +182,14 @@ double LinearSolver::get_propensity_sum() {
 
 // TreeSolver implementation
 // TreeSolver always copies the initial propensities into a new array.
-template <typename Model>
 TreeSolver::TreeSolver(
     unsigned long int seed,
-    Model &model) :
+    std::vector<double> &initial_propensities) :
     sampler (Sampler(seed)),
     number_of_active_indices (0) {
         int m = 0; // tree depth
         int pow2 = 1; // power of 2 >= numberOfReactions
-        number_of_indices = model.initial_propensities.size();
+        number_of_indices = initial_propensities.size();
 
         while (pow2 < number_of_indices) {
             pow2 *= 2;
@@ -208,7 +203,7 @@ TreeSolver::TreeSolver(
         for (int i = propensity_offset;
              i < propensity_offset + number_of_indices;
              i++) {
-            tree[i] = model.initial_propensities[i - propensity_offset];
+            tree[i] = initial_propensities[i - propensity_offset];
             if (tree[i] > 0.0) number_of_active_indices++;
 
         }
@@ -289,15 +284,15 @@ double TreeSolver::get_propensity_sum() {
     return tree[0];
 }
 
-template < typename Model>
-SparseSolver::SparseSolver(unsigned long int seed, Model &model) :
+
+SparseSolver::SparseSolver(unsigned long int seed, std::vector<double> &initial_propensities) :
     sampler (Sampler(seed)) {
 
-    for ( int i = 0; i < (int) model.initial_propensities.size(); i++ ) {
+    for ( int i = 0; i < (int) initial_propensities.size(); i++ ) {
 
-        if ( model.initial_propensities[i] != 0.0 ) {
-            propensities[i] = model.initial_propensities[i];
-            propensity_sum += model.initial_propensities[i];
+        if ( initial_propensities[i] != 0.0 ) {
+            propensities[i] = initial_propensities[i];
+            propensity_sum += initial_propensities[i];
         }
     }
 }
@@ -358,6 +353,3 @@ double SparseSolver::get_propensity(int index) {
 
 
 double SparseSolver::get_propensity_sum() { return propensity_sum;};
-
-
-

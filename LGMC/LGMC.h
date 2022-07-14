@@ -18,11 +18,15 @@ class LGMC {
         ~LGMC();
         
         void print_usage();
+
+        void run();
         
         void update_propensity(int site_one, 
         int site_two, LatticeReaction *reaction, int react_id, int num_one, int num_two);
 
-        void update(std::optional<int> site_one, std::optional<int> site_two, int reaction_id);
+        void update_state(std::unordered_map<std::string,                     
+        std::vector< std::pair<double, int> > > &props,
+        int next_reaction, int event.site_one, int event.site_two);
 
         void relevant_react(int site);
 
@@ -30,13 +34,9 @@ class LGMC {
 
         void clear_site_helper(int site_one, int site_two);
 
-        void run();
-
         void update_one_lattice_site(int site, LatticeReaction *reaction);
 
         void update_two_lattice_sites(int site_one, int site_two, LatticeReaction *reaction);
-
-        int sum_row(std::string hash);
 
         std::string make_string(int site_one, int site_two);
 
@@ -44,12 +44,18 @@ class LGMC {
 
         void update_electrochemical();
 
+        /* -------------------------------- Gillespie Updates ----------------------------- */
+        void update_state(std::vector<int> &state,
+        int reaction_index);
 
-    public: 
-    
-        std::unordered_map<std::string,             // lattice propensities as site neighbor pair
-            std::vector< std::pair<double, int> > > props;          
-                                                      
+        void update_propensities(
+        std::function<void(Update update)> update_function,
+        std::vector<int> &state,
+        int next_reaction
+        );
+
+
+    private:                                                          
 
         int prop_sum;                               // running total of propensities
                                     

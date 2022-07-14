@@ -364,14 +364,20 @@ void LatticeReactionNetwork::fill_reactions(SqlConnection &reaction_network_data
         reaction->phase_products[0] = (reaction_row.phase_product_1 == 'L') ? Phase::LATTICE : Phase::SOLUTION;
         reaction->phase_products[1] = (reaction_row.phase_product_2 == 'L') ? Phase::LATTICE : Phase::SOLUTION;
 
-        if(reaction_row.type == 'E') {
-            reaction->type = Type::ELECTROCHEMICAL;
+        if(reaction_row.type == 'C') {
+            reaction->type = Type::CHARGE_TRANSFER;
         }
-        else if (reaction_row.type == 'D') {
+        else if (reaction_row.type == 'F') {
             reaction->type = Type::DIFFUSION;
         }
-        else if (reaction_row.type == 'C') {
-            reaction->type = Type::CHEMICAL;
+        else if (reaction_row.type == 'S') {
+            reaction->type = Type::HOMOGENEOUS_SOLID;
+        }
+        else if (reaction_row.type == 'E') {
+            reaction->type = Type::HOMOGENEOUS_ELYTE;
+        }
+        else if (reaction_row.type == 'D') {
+            reaction->type = Type::DESORPTION;
         }
         else if (reaction_row.type == 'A') {
             reaction->type = Type::ADSORPTION;

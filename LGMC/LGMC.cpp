@@ -71,26 +71,6 @@ LGMC::LGMC(int argc, char **argv){
     prop_sum = 0;
 
     ReactionNetworkParameters parameters;
-
-    Dispatcher<
-        LatSolver,
-        LatticeReactionNetwork,
-        ReactionNetworkParameters,
-        TrajectoriesSql
-        >
-
-        dispatcher (
-        reaction_database,
-        initial_state_database,
-        number_of_simulations,
-        base_seed,
-        0,
-        cutoff,
-        parameters, 
-        false
-        );
-
-    dispatcher.run_dispatcher();
    
 } // LGMC()
 
@@ -155,22 +135,17 @@ void LGMC::update_propensity(int site_one, int site_two, LatticeReaction *reacti
                 * reaction->rate;
     }
 
-    // add or change existing propensity 
-    std::string site_combo = make_string(site_one, site_two);
-    props[site_combo].push_back(std::make_pair(p, react_id));
-
-    // update running sum 
-    prop_sum += p;
-
-
+    assert(p != 0);
     
 } // update_propensity()
 
 /* ---------------------------------------------------------------------- */
 
-void LGMC::update(std::optional<int> site_one, std::optional<int> site_two, int reaction_id) {
+void LGMC::update_state(std::unordered_map<std::string,                     
+        std::vector< std::pair<double, int> > > &props, int
+        next_reaction, int event.site_one, int event.site_two) {
 
-    LatticeReaction *reaction = static_cast<LatticeReaction *> (react_net->reactions[reaction_id].get());
+    LatticeReaction *reaction = static_cast<LatticeReaction *> (react_net->reactions[next_reaction].get());
 
     if(site_one) {
         // site_one specified must be a lattice reaction 
@@ -194,42 +169,6 @@ void LGMC::update(std::optional<int> site_one, std::optional<int> site_two, int 
             }
 
         } // two reactants 
-    }
-    else {/*
-        // Gillespie reaction 
-        for(int i = 0; i < reaction->number_of_reactants; i++) {
-            if(reaction->phase_reactants[i] == Phase::SOLUTION) {
-               react_net->decrease_species(reaction->reactants[i]);
-            }
-            else {
-                //find site to become empty 
-                int site_id = *react_net->lattice_sites[reaction->reactants[i]].end(); 
-                react_net->lattice_sites[reaction->reactants[i]].pop_back();
-
-                lattice->sites[site_id].species = EMPTY_SITE;
-                update_site(site_id, std::optional<int> ());
-
-            }
-        } // reactants 
-
-        for(int i = 0; i < reaction->num_of_reactants; i++) {
-            if(reaction->phase_reactants[i] == Phase::SOLUTION) {
-               react_new->increase_species(reaction->reactants[i]);
-            }
-            else {
-                int site_id = *react_net->lattice_sites[0].end(); 
-                react_net->lattice_sites[0].pop_back();
-                lattice->sites[site_id].species = reaction->products[i];
-                update_site(site_id, std::optional<int> ());
-
-            }
-            // update propensities 
-        react_net->update_propensities(std::function<void(Update update)> update_function,
-                             int next_reaction);
-                             */
-        } // products
-        
-
     }
 
     
@@ -392,6 +331,7 @@ void LGMC::clear_site(int site, std::optional<int> ignore_neighbor) {
 
 /* ---------------------------------------------------------------------- */
 
+// deal with active_indicies
 void LGMC::clear_site_helper(int site_one, int site_two) {
 
     std::string combo = make_string(site_one, site_two);
@@ -488,20 +428,46 @@ std::string LGMC::make_string(int site_one, int site_two) {
 
 } // make_string
 
-/* ---------------------------------------------------------------------- */
 
-int LGMC::sum_row(std::string hash) {
-    
-    int sum = 0;    
-    for(auto it = props[hash].begin(); it != props[hash].end(); it++) {
-        sum += it->first;
-    }
-    return sum;
+/* -------------------------------- Gillespie Updates ----------------------------- */
+void LGMC::update_state(std::vector<int> &state, int reaction_index) {
+    react_net->update_state(state, reaction_index);
 }
+
+void LGMC::update_propensities(std::function<void(Update update)> update_function,
+                                std::vector<int> &state, int next_reaction) {
+    react_net->update_propensities(update_function, state, next_reaction);
+
+}
+
 
 /* ---------------------------------------------------------------------- */
 
 int main(int argc, char **argv) { 
+
+
+
+
+    Dispatcher<
+        LatSolver,
+        LGMC,
+        ReactionNetworkParameters,
+        TrajectoriesSql
+        >
+
+        dispatcher (
+        reaction_database,
+        initial_state_database,
+        number_of_simulations,
+        base_seed,
+        0,
+        cutoff,
+        parameters, 
+        false
+        );
+
+    dispatcher.run_dispatcher();
+
 
     LGMC *battery = new LGMC(argc, argv);
     battery->run();

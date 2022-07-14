@@ -330,7 +330,7 @@ void Lattice::grow(uint32_t n) {
 } // grow()
 
 
-int Lattice::is_on_edge(int site) {
+bool Lattice::is_on_edge(int site) {
     if(!is_xperiodic) {
         return (sites[site].x == boxxhi);
     }

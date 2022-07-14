@@ -29,6 +29,7 @@ struct Simulation {
     std::vector<HistoryElement> history;
     HistoryQueue<HistoryPacket> &history_queue;
     std::function<void(Update)> update_function;
+    std::function<void(LatticeUpdate)> lattice_update_function;
 
 
     Simulation(Model &model,
@@ -51,6 +52,7 @@ struct Simulation {
 
 
     bool execute_step();
+    bool execite_step_LGMC();
     void execute_steps(int step_cutoff);
     void execute_time(double time_cutoff);
 
@@ -109,6 +111,82 @@ bool Simulation<Solver, Model>::execute_step() {
 
         return true;
     }
+};
+
+template <typename Solver, typename Model>
+bool Simulation<Solver, Model>::execute_step_LGMC() {
+    std::pair<std::optional<Event>, std::optional<LatticeEvent>> maybe_events = solver.event();
+
+    int next_reaction = 0;
+
+    if (!maybe_event.first && !maybe_event.second) {
+
+        return false;
+
+    } 
+    else if (maybe_event.second) {
+        // lattice event happens
+        LatticeEvent event = maybe_event.second.value();
+        int next_reaction = event.index;
+
+        // update time
+        time += event.dt;
+
+        // update state
+        model.update_state(std::ref(props), next_reaction, event.site_one, event.site_two);
+
+
+        // update propensities
+        model.update_propensities(
+            update_function,
+            std::ref(state),
+            next_reaction);
+    }
+    
+    else {
+        // gillespie event happens
+        Event event = maybe_event.first.value();
+        int next_reaction = event.index;
+
+        // update time
+        time += event.dt;
+
+        // update state
+        model.update_state(std::ref(state), next_reaction);
+
+
+        // update propensities
+        model.update_propensities(
+            update_function,
+            std::ref(state),
+            next_reaction);
+    }
+
+    // record what happened
+    history.push_back(HistoryElement {
+        .seed = seed,
+        .reaction_id = next_reaction,
+        .time = time,
+        .step = step
+        });
+
+    if ( history.size() == history_chunk_size ) {
+        history_queue.insert_history(
+            std::move(
+                HistoryPacket {
+                    .history = std::move(history),
+                    .seed = seed
+                    }));
+
+        history = std::vector<HistoryElement> ();
+        history.reserve(history_chunk_size);
+    }
+
+
+    // increment step
+    step++;
+
+    return true;
 };
 
 template <typename Solver, typename Model>
