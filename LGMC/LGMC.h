@@ -45,14 +45,11 @@ class LGMC {
         void update_electrochemical();
 
 
-    private: 
+    public: 
     
         std::unordered_map<std::string,             // lattice propensities as site neighbor pair
             std::vector< std::pair<double, int> > > props;          
-                                                    
-
-        std::vector<std::vector<int>>               // dependency list without products  
-        lat_dependents;         
+                                                      
 
         int prop_sum;                               // running total of propensities
                                     

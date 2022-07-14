@@ -24,7 +24,7 @@ class Reaction {
 };
 
 enum Phase {LATTICE, SOLUTION};
-enum Type {ELECTROCHEMICAL, DIFFUSION, CHEMICAL, ADSORPTION};
+enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_ELYTE, HOMOGENEOUS_SOLID, DIFFUSION,CHARGE_TRANSFER};
 
 class LatticeReaction : public Reaction {
     public:
@@ -54,7 +54,7 @@ struct ReactionNetworkParameters {
 class ReactionNetwork {
     public:
     std::vector<std::shared_ptr<Reaction>> reactions; // list of reactions (either Reaction or LatticeReactions)
-    std::vector<int> state; // initial state for all the simulations
+    std::vector<int> initial_state; // initial state for all the simulations
     std::vector<double> initial_propensities; // initial propensities for all the reactions
     double factor_zero; // rate modifer for reactions with zero reactants
     double factor_two; // rate modifier for reactions with two reactants
@@ -70,16 +70,17 @@ class ReactionNetwork {
 
     virtual void compute_dependents();
 
-    virtual double compute_propensity(
+    virtual double compute_propensity(std::vector<int> &state,
         int reaction_index);
 
-    void update_state(
+    void update_state(std::vector<int> &state,
         int reaction_index);
 
     virtual void update_propensities(
         std::function<void(Update update)> update_function,
+        std::vector<int> &state,
         int next_reaction
-        );
+    );
 
     // convert a history element as found a simulation to history
     // to a SQL type.
@@ -125,7 +126,7 @@ ReactionNetwork::ReactionNetwork(
     factor_duplicate = factors_row.factor_duplicate;
 
     // loading intial state
-    state.resize(metadata_row.number_of_species);
+    initial_state.resize(metadata_row.number_of_species);
 
     SqlStatement<InitialStateSql> initial_state_statement (initial_state_database);
     SqlReader<InitialStateSql> initial_state_reader (initial_state_statement);
@@ -136,7 +137,7 @@ ReactionNetwork::ReactionNetwork(
 
         InitialStateSql initial_state_row = maybe_initial_state_row.value();
         species_id = initial_state_row.species_id;
-        state[species_id] = initial_state_row.count;
+        initial_state[species_id] = initial_state_row.count;
     }
     reactions.reserve(metadata_row.number_of_reactions);
     initial_propensities.resize(metadata_row.number_of_reactions);
@@ -153,7 +154,7 @@ void ReactionNetwork::init(SqlConnection &reaction_network_database) {
 
     // computing initial propensities
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
-        initial_propensities[i] = compute_propensity(i);
+        initial_propensities[i] = compute_propensity(initial_state, i);
     }
 
     std::cerr << time_stamp() << "computing dependency graph...\n";
@@ -164,7 +165,7 @@ void ReactionNetwork::init(SqlConnection &reaction_network_database) {
 void ReactionNetwork::compute_dependents() {
     // initializing dependency graph
 
-    dependents.resize(state.size());
+    dependents.resize(initial_state.size());
 
 
     for ( unsigned int reaction_id = 0; reaction_id <  reactions.size(); reaction_id++ ) {
@@ -179,7 +180,7 @@ void ReactionNetwork::compute_dependents() {
 };
 
 
-double ReactionNetwork::compute_propensity(
+double ReactionNetwork::compute_propensity(std::vector<int> &state,
     int reaction_index) {
 
     std::shared_ptr<Reaction> reaction = reactions[reaction_index];
@@ -214,7 +215,7 @@ double ReactionNetwork::compute_propensity(
 
 };
 
-void ReactionNetwork::update_state(
+void ReactionNetwork::update_state(std::vector<int> &state,
     int reaction_index) {
 
     for (int m = 0;
@@ -234,6 +235,7 @@ void ReactionNetwork::update_state(
 
 void ReactionNetwork::update_propensities(
     std::function<void(Update update)> update_function,
+    std::vector<int> &state,
     int next_reaction
     ) {
 
@@ -257,7 +259,7 @@ void ReactionNetwork::update_propensities(
     for ( int species_id : species_of_interest ) {
         for ( unsigned int reaction_index : dependents[species_id] ) {
 
-            double new_propensity = compute_propensity(
+            double new_propensity = compute_propensity(state,
                 reaction_index);
 
             update_function(Update {
