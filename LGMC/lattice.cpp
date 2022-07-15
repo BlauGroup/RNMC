@@ -38,13 +38,14 @@ Lattice::Lattice(float latconst_in,
     is_yperiodic = is_yperiodic_in;
     is_zperiodic = is_zperiodic_in;
     
-    nsites = nmax = 0;
-    sites = NULL;
-    
+    nsites = 0;
+    nmax = DELTA;
+    sites.reserve(nmax);
+
     maxneigh = 6;
-    numneigh = NULL;
-    idneigh = NULL;
-    
+    idneigh.resize(0);
+    numneigh.reserve(nmax);
+
     // create sites on lattice
     structured_lattice();
     
@@ -135,18 +136,29 @@ void Lattice::structured_lattice() {
     // for style = REGION, check if site is within region
     // if non-periodic or style = REGION, IDs may not be contiguous
 
-    uint32_t x,y,z;
+    float x,y,z;
+    bool can_adsorb;
 
-    uint32_t n = 0;
     for (int k = zlo; k <= zhi; k++)
         for (int j = ylo; j <= yhi; j++)
             for (int i = xlo; i <= xhi; i++) {
-                n++;
                 x = i*latconst;
                 y = j*latconst;
                 z = k*latconst;
 
-                add_site(n,x,y,z);
+                if (i == xhi && !is_xperiodic) {
+                    can_adsorb = true;
+                }
+                else if (j == yhi && !is_yperiodic) {
+                    can_adsorb = true;
+                }
+                else if (k == zhi && !is_zperiodic) {
+                    can_adsorb = true;
+                }
+
+                // By default, assume all lattice sites empty
+                // TODO: This should use the global variable EMPTY_SITE
+                add_site(i,j,k,x,y,z,can_adsorb);
 
     }
 
@@ -170,10 +182,7 @@ void Lattice::structured_connectivity() {
     int nx = xprd / latconst;
     int ny = yprd / latconst;
     int nz = zprd / latconst;
-    
-    memory->create(idneigh,nsites,maxneigh,"create:idneigh");
-    memory->create(numneigh,nmax,"create:numneigh");
-    
+
     // create connectivity offsets
     
     int **cmap;                 // connectivity map for regular lattices
@@ -187,6 +196,10 @@ void Lattice::structured_connectivity() {
     // generate global lattice connectivity for each site
     for (int i = 0; i < nsites; i++) {
         numneigh[i] = 0;
+
+        uint32_t* neighi;
+        memory->create(neighi, maxneigh, "create:neighi");
+        idneigh.push_back(neighi);
       
         for (int neigh = 0; neigh < maxneigh; neigh++) {
 
@@ -310,36 +323,31 @@ void Lattice::offsets_3d(int **cmapin) {
 
 /* ---------------------------------------------------------------------- */
 
-void Lattice::add_site(uint32_t n, uint32_t x, uint32_t y, uint32_t z) {
-    if (nsites == nmax) grow(0);
+void Lattice::add_site(uint32_t i_in, uint32_t j_in, 
+                       uint32_t k_in, float x_in, float y_in, float z_in,
+                       bool can_adsorb_in) {
+    if (nsites == nmax) {
+        nmax += DELTA;
+        sites.reserve(nmax);
+        numneigh.reserve(nmax);
 
-    // initially empty site, species = -1
-    sites[n] = Site{x, y, z, -1};
+        // Initialize neighbor information for this new site
+        numneigh[nsites] = 0;
+
+        uint32_t* neighi;
+        memory->create(neighi, maxneigh, "create:neighi");
+        idneigh.push_back(neighi);
+
+    }
+
+    // initially empty site, species = 0
+    sites[nsites] = Site{i_in, j_in, k_in, x_in, y_in, z_in, 0, can_adsorb_in};
 
     nsites++;
+
 } // add_site()
 
-/* ---------------------------------------------------------------------- */
-
-void Lattice::grow(uint32_t n) {
-    if (n == 0) nmax += DELTA;
-    else nmax = n;
-
-    memory->grow(sites,nmax,"grow:sites");
+void Lattice::update_neighbors(unit32_t n) {
     
-} // grow()
 
-
-bool Lattice::is_on_edge(int site) {
-    if(!is_xperiodic) {
-        return (sites[site].x == boxxhi);
-    }
-    else if(!is_yperiodic) {
-        return (sites[site].y == boxyhi);
-    }
-    else if(!is_zperiodic) {
-        return (sites[site].z == boxzhi);
-    }
-
-    return 0;
-}
+} // update_neighbors()
