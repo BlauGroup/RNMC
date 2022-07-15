@@ -110,101 +110,45 @@ struct Dispatcher {
     int number_of_threads;
     bool isLGMC;
 
-    Dispatcher(std::string file_in, bool isLGMC, ReactionNetworkParameters parameters); 
+    
+    Dispatcher(
+        std::string model_database_file,
+        std::string initial_state_database_file,
+        unsigned long int number_of_simulations,
+        unsigned long int base_seed,
+        int number_of_threads,
+        Cutoff cutoff,
+        Parameters parameters, 
+        bool isLGMC) :
+        model_database (
+            model_database_file,
+            SQLITE_OPEN_READWRITE),
+        initial_state_database (
+            initial_state_database_file,
+            SQLITE_OPEN_READWRITE),
+        model (
+            model_database,
+            initial_state_database,
+            parameters),
+        trajectories_stmt (initial_state_database),
+        trajectories_writer (trajectories_stmt),
+        history_queue (),
+        seed_queue (number_of_simulations, base_seed),
+
+        // don't want to start threads in the constructor.
+        threads (),
+        running (number_of_threads, false),
+        cutoff (cutoff),
+        number_of_simulations (number_of_simulations),
+        number_of_threads (number_of_threads), 
+        isLGMC(isLGMC)
+        {
+        };
+
+
     void run_dispatcher();
     void record_simulation_history(HistoryPacket history_packet);
 };
-
-
-template <
-    typename Solver,
-    typename Model,
-    typename Parameters,
-    typename TrajectoriesSql>
-
-Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::Dispatcher(std::string file_in, bool isLGMC, ReactionNetworkParameters parameters) {
-
-    std::string reaction_database_in;
-    std::string initial_state_database_in;
-    unsigned long int number_of_simulations_in;
-    unsigned long int number_of_threads_in;
-    int base_seed_in;
-    int cutoff_in;
-    char cutoff_flag_in;
-    bool isLGMC_in;
-
-    Cutoff cutoff = {
-        .bound =  { .step =  0 },
-        .type_of_cutoff = step_termination
-    };
-
-    std::cin >> reaction_database_in >> initial_state_database_in
-    >> number_of_simulations_in >> base_seed_in >> number_of_threads_in >> 
-    cutoff_flag_in >> cutoff_in >> isLGMC_in;
-
-    if(std::cin.fail()) {
-        std::cout << "Incorrect file arguments.\n";
-        exit(EXIT_FAILURE);
-    }
-
-    if(cutoff_flag == 'S') {
-        cutoff.bound.step = cutoff;
-        cutoff.type_of_cutoff = step_termination;
-        break;
-    }
-    else if(cutoff_flag == 'T') {
-        cutoff.bound.time = atof(optarg);
-        cutoff.type_of_cutoff = time_termination;
-        break;
-    }
-    else {
-        std::cout << "Incorrect cutoff flag (S/T).";
-        exit(EXIT_FAILURE);
-    }
-
-    model_database = SQLConnection (reaction_database_in, SQLITE_OPEN_READWRITE);
-    initial_state_database = SqlConnection (initial_state_database_in, SQLITE_OPEN_READWRITE);
-
-
-    trajectories_stmt = SqlStatement<TrajectoriesSql> (initial_state_database_in);
-    trajectories_writer = SqlWriter<TrajectoriesSql> (trajectories_stmt);
-    history_queue = HistoryQueue<HistoryPacket> ();
-    seed_queue = SeedQueue (number_of_simulations_in, base_seed_in);
-
-    running = std::vector<bool> (number_of_threads, false);
-    number_of_simulations = number_of_simulations_in;
-    number_of_threads = number_of_threads_in;
-    isLGMC = isLGMC_in;
-
-    if(isLGMC) {
-        float latconst;                               
-        int boxxlo,boxxhi,boxylo,                   
-        boxyhi,boxzlo,boxzhi;                       
-        float xperiodic,yperiodic,zperiodic;
-
-        std::cin >> latconst >> boxxlo >> boxxhi >> boxylo >> boxyhi >> boxzlo >> boxzhi
-        >> xperiodic >> yperiodic >> zperiodic;
-
-        if(std::cin.fail()) {
-            std::cout << "Incorrect file arguments.\n";
-            exit(EXIT_FAILURE);
-        }   
-
-        LatticeReactionNetwork lattice_reaction_network = LatticeReactionNetwork(model_database, initial_state_database, parameters);
-
-        // create lattice
-        lattice = new Lattice(latconst, boxxlo, boxxhi, boxylo,
-                          boxyhi, boxzlo, boxzhi, xperiodic, yperiodic, zperiodic);
-
-        model = new LGMC(lattice, lattice_reaction_network);
-
-    } else {
-        model = Model (model_database, initial_state_database, parameters);
-    }
-
-    model.init(model_database);
-
-}
 
 template <
     typename Solver,

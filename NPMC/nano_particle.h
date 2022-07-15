@@ -113,7 +113,6 @@ struct NanoParticle {
         int next_reaction_id
         );
 
-    void init(SqlConnection &nano_particle_database){};
     // convert a history element as found a simulation to history
     // to a SQL type.
     TrajectoriesSql history_element_to_sql(

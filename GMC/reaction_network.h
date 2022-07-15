@@ -63,6 +63,8 @@ class ReactionNetwork {
     // maps species to the reactions which involve that species
     std::vector<std::vector<int>> dependents;
 
+    ReactionNetwork();          // defualt constructor for inheritence
+
     ReactionNetwork(
         SqlConnection &reaction_network_database,
         SqlConnection &initial_state_database,
@@ -140,6 +142,8 @@ ReactionNetwork::ReactionNetwork(
     }
     reactions.reserve(metadata_row.number_of_reactions);
     initial_propensities.resize(metadata_row.number_of_reactions);
+
+    init(reaction_network_database);
 
 };
 
@@ -321,8 +325,65 @@ class LatticeReactionNetwork : public ReactionNetwork{
                              std::vector<int> &state, int next_reaction);
     void update_state(std::vector<int> &state, int reaction_index);
 
+    LatticeReactionNetwork(
+        SqlConnection &reaction_network_database,
+        SqlConnection &initial_state_database,
+        ReactionNetworkParameters parameters);
+
 };
 
+LatticeReactionNetwork::LatticeReactionNetwork(
+     SqlConnection &reaction_network_database,
+     SqlConnection &initial_state_database,
+     ReactionNetworkParameters)
+
+    {
+    ReactionNetwork();
+    // collecting reaction network metadata
+    SqlStatement<MetadataSql> metadata_statement (reaction_network_database);
+    SqlReader<MetadataSql> metadata_reader (metadata_statement);
+
+    std::optional<MetadataSql> maybe_metadata_row = metadata_reader.next();
+
+    if (! maybe_metadata_row.has_value()) {
+        std::cerr << time_stamp()
+                  << "no metadata row\n";
+
+        std::abort();
+    }
+
+    MetadataSql metadata_row = maybe_metadata_row.value();
+
+    // setting reaction network factors
+    SqlStatement<FactorsSql> factors_statement (initial_state_database);
+    SqlReader<FactorsSql> factors_reader (factors_statement);
+
+    // TODO: make sure this isn't nothing
+    FactorsSql factors_row = factors_reader.next().value();
+    factor_zero = factors_row.factor_zero;
+    factor_two = factors_row.factor_two;
+    factor_duplicate = factors_row.factor_duplicate;
+
+    // loading intial state
+    initial_state.resize(metadata_row.number_of_species);
+
+    SqlStatement<InitialStateSql> initial_state_statement (initial_state_database);
+    SqlReader<InitialStateSql> initial_state_reader (initial_state_statement);
+
+    int species_id;
+    while(std::optional<InitialStateSql> maybe_initial_state_row =
+          initial_state_reader.next()) {
+
+        InitialStateSql initial_state_row = maybe_initial_state_row.value();
+        species_id = initial_state_row.species_id;
+        initial_state[species_id] = initial_state_row.count;
+    }
+    reactions.reserve(metadata_row.number_of_reactions);
+    initial_propensities.resize(metadata_row.number_of_reactions);
+
+    init(reaction_network_database);
+
+};
 
 void LatticeReactionNetwork::fill_reactions(SqlConnection &reaction_network_database) {
     

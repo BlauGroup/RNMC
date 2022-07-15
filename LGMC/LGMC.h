@@ -8,12 +8,18 @@
 #include "../GMC/reaction_network.h"
 #include "../core/sampler.h"
 
-
+struct LatticeGillespieMonteCarlo {
+    float latconst;                               
+    int boxxlo,boxxhi,boxylo,                   
+    boxyhi,boxzlo,boxzhi;                       
+    float xperiodic,yperiodic,zperiodic;
+    
+}
 namespace LGMC_NS {
 
 class LGMC {
     public: 
-        LGMC(Lattice &lattice);
+        LGMC(Lattice &lattice, LatticeReactionNetwork &react_net);
         
         ~LGMC();
 
@@ -62,6 +68,9 @@ class LGMC {
         TrajectoriesSql history_element_to_sql(
             int seed,
             HistoryElement history_element);
+        
+        std::vector<double> initial_propensities;
+        std::vector<int> initial_state;
 
     private:                                                          
                            
