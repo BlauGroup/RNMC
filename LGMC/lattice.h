@@ -70,8 +70,8 @@ public:
     std::map<std::tuple<uint32_t, uint32_t, uint32_t>, int> loc_map;  // Mapping from site location to site ID
 
     Lattice(float latconst_in, 
-        int boxxlo_in, int boxxhi_in, int boxylo_in,
-        int boxyhi_in, int boxzlo_in, int boxzhi_in, 
+        float boxxlo_in, float boxxhi_in, float boxylo_in,
+        float boxyhi_in, float boxzlo_in, float boxzhi_in, 
         bool xperiodic_in, bool yperiodic_in, bool zperiodic_in);   
 
     ~Lattice();

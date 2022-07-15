@@ -28,10 +28,10 @@ enum Phase {LATTICE, SOLUTION};
 enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_ELYTE, HOMOGENEOUS_SOLID, DIFFUSION,CHARGE_TRANSFER};
 
 
-const double TUNNEL_COEF = 1.2        // Electron tunneling coefficient, in A^-1 
-const double TEMPERATURE = 298.15     // In Kelvin
-const double KB = 8.6173e-5           // In eV/K
-const double PLANCK = 4.1357e-15      // In eV s
+const double TUNNEL_COEF = 1.2;        // Electron tunneling coefficient, in A^-1 
+const double TEMPERATURE = 298.15;     // In Kelvin
+const double KB = 8.6173e-5;           // In eV/K
+const double PLANCK = 4.1357e-15;      // In eV s
 
 
 double get_marcus_rate_coefficient(double base_dg, double reorganization_energy, double e_free, double distance, bool reduction) {

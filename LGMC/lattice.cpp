@@ -17,8 +17,8 @@ using namespace LGMC_NS;
 /* ---------------------------------------------------------------------- */
 
 Lattice::Lattice(float latconst_in, 
-        int boxxlo_in, int boxxhi_in, int boxylo_in,
-        int boxyhi_in, int boxzlo_in, int boxzhi_in,
+        float boxxlo_in, float boxxhi_in, float boxylo_in,
+        float boxyhi_in, float boxzlo_in, float boxzhi_in,
         bool is_xperiodic_in, bool is_yperiodic_in, bool is_zperiodic_in)  {
     // TODO: implement error handling
     
@@ -334,7 +334,7 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
         numneigh.reserve(nmax);
 
         // Initialize neighbor information for this new site
-        numneigh[nsites] = 0;
+        numneigh.push_back(0);
 
         uint32_t* neighi;
         memory->create(neighi, maxneigh, "create:neighi");
@@ -343,7 +343,7 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     }
 
     // initially empty site, species = 0
-    sites[nsites] = Site{i_in, j_in, k_in, x_in, y_in, z_in, 0, can_adsorb_in};
+    sites.push_back(Site{i_in, j_in, k_in, x_in, y_in, z_in, 0, can_adsorb_in});
     std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
     loc_map[key] = nsites;
 
