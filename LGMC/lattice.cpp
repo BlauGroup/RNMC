@@ -5,6 +5,7 @@
 #include <string>
 #include "math.h"
 #include <iostream>
+#include <map>
 
 using namespace LGMC_NS;
 

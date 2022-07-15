@@ -413,6 +413,9 @@ void LatticeReactionNetwork::compute_dependents() {
 
 };
 
+void LatticeReactionNetwork::update_state(std::vector<int> &state, int reaction_index) {
+};
+
 
 void LatticeReactionNetwork::update_propensities(std::function<void(Update update)> update_function,
                                                  std::vector<int> &state, int next_reaction) {

@@ -10,8 +10,6 @@ using namespace LGMC_NS;
 
 int main(int argc, char **argv) {
 
-    LGMC *battery = new LGMC(argc, argv);
-    delete battery;
+    // LGMC *battery = new LGMC(argc, argv);
+    // delete battery;
 }
-
-

@@ -43,7 +43,7 @@ class LatSolver {
         double propensity_sum;  
 
         // for comptability 
-        std::optional<Event> event() {return std::optional<Event>()}
+        std::optional<Event> event() {return std::optional<Event>();};
 
     private:
         Sampler sampler;
