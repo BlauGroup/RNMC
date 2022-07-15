@@ -73,14 +73,13 @@ class ReactionNetwork {
     virtual double compute_propensity(std::vector<int> &state,
         int reaction_index);
 
-    void update_state(std::vector<int> &state,
+    virtual void update_state(std::vector<int> &state,
         int reaction_index);
 
     virtual void update_propensities(
         std::function<void(Update update)> update_function,
         std::vector<int> &state,
-        int next_reaction
-    );
+        int next_reaction);
 
     // convert a history element as found a simulation to history
     // to a SQL type.
@@ -314,24 +313,16 @@ TrajectoriesSql ReactionNetwork::history_element_to_sql(
 
 class LatticeReactionNetwork : public ReactionNetwork{
     public:
-    //LatticeReactionNetwork(std::vector<std::pair<int, int>>  &lattice_sites_in, int empty);
     void init(SqlConnection &reaction_network_database);
     void fill_reactions(SqlConnection &reaction_network_database);
     void compute_dependents();
-    void increase_species(int species_id);
-    void decrease_species(int species_id);
+    double compute_propensity(std::vector<int> &state, int reaction_index);
     void update_propensities(std::function<void(Update update)> update_function,
-                             int next_reaction);
-    //std::unordered_map<int, std::vector<int> > lattice_sites; // key: species type, value: vector of sites
-    //int empty_lattice_sites;
+                             std::vector<int> &state, int next_reaction);
+    void update_state(std::vector<int> &state, int reaction_index);
 
 };
 
-/*LatticeReactionNetwork::LatticeReactionNetwork(std::vector<std::pair<int, int>>  &lattice_sites_in, int empty) {
-    empty_lattice_sites = empty;
-    // TODO make sure this is the right way to initalize the vector 
-    lattice_sites = lattice_sites_in;
-}*/
 
 void LatticeReactionNetwork::fill_reactions(SqlConnection &reaction_network_database) {
     
@@ -397,7 +388,7 @@ void LatticeReactionNetwork::init(SqlConnection &reaction_network_database) {
 
     // computing initial propensities
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
-        initial_propensities[i] = compute_propensity(i);
+        initial_propensities[i] = compute_propensity(initial_state, i);
     }
 
     std::cerr << time_stamp() << "computing dependency graph...\n";
@@ -408,7 +399,7 @@ void LatticeReactionNetwork::init(SqlConnection &reaction_network_database) {
 void LatticeReactionNetwork::compute_dependents() {
     // initializing dependency graph
 
-    dependents.resize(state.size());
+    dependents.resize(initial_state.size());
 
 
     for ( unsigned int reaction_id = 0; reaction_id <  reactions.size(); reaction_id++ ) {
@@ -422,19 +413,9 @@ void LatticeReactionNetwork::compute_dependents() {
 
 };
 
-void LatticeReactionNetwork::increase_species(int species_id) {
-    state[species_id++];
-}
 
-void LatticeReactionNetwork::decrease_species(int species_id) {
-    state[species_id--];
-}
-
-
-void LatticeReactionNetwork::update_propensities(
-    std::function<void(Update update)> update_function,
-    int next_reaction
-    ) {
+void LatticeReactionNetwork::update_propensities(std::function<void(Update update)> update_function,
+                                                 std::vector<int> &state, int next_reaction) {
 
     LatticeReaction *reaction = static_cast<LatticeReaction *> (reactions[next_reaction].get());
 
@@ -456,17 +437,47 @@ void LatticeReactionNetwork::update_propensities(
         
     }
 
-
     for ( int species_id : species_of_interest ) {
         for ( unsigned int reaction_index : dependents[species_id] ) {
 
-            double new_propensity = compute_propensity(
-                reaction_index);
+            double new_propensity = compute_propensity(state, reaction_index);
 
             update_function(Update {
                     .index = reaction_index,
                     .propensity = new_propensity});
         }
     }
+}
+
+double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int reaction_index) {
+    LatticeReaction *reaction = static_cast<LatticeReaction *> (reactions[reaction_index].get());
+
+    double p;
+    // zero reactants
+    if (reaction->number_of_reactants == 0)
+        p = factor_zero * reaction->rate;
+
+    // one reactant
+    else if (reaction->number_of_reactants == 1)
+        p = state[reaction->reactants[0]] * reaction->rate;
+
+
+    // two reactants
+    else {
+        if (reaction->reactants[0] == reaction->reactants[1])
+            p = factor_duplicate
+                * factor_two
+                * state[reaction->reactants[0]]
+                * (state[reaction->reactants[0]] - 1)
+                * reaction->rate;
+
+        else
+            p = factor_two
+                * state[reaction->reactants[0]]
+                * state[reaction->reactants[1]]
+                * reaction->rate;
+    }
+
+    return p;
 }
 #endif

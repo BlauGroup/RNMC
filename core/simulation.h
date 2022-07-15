@@ -1,5 +1,6 @@
 #pragma once
 #include "solvers.h"
+#include "../LGMC/LatSolver.h"
 #include "queues.h"
 #include <functional>
 #include <csignal>
@@ -22,6 +23,8 @@ struct Simulation {
     Model &model;
     unsigned long int seed;
     std::vector<int> state;
+    std::unordered_map<std::string,                     
+        std::vector< std::pair<double, int> > > props;
     double time;
     int step; // number of reactions which have occoured
     Solver solver;
@@ -30,7 +33,6 @@ struct Simulation {
     HistoryQueue<HistoryPacket> &history_queue;
     std::function<void(Update)> update_function;
     std::function<void(LatticeUpdate)> lattice_update_function;
-
 
     Simulation(Model &model,
                unsigned long int seed,
@@ -52,9 +54,10 @@ struct Simulation {
 
 
     bool execute_step();
-    bool execite_step_LGMC();
-    void execute_steps(int step_cutoff);
-    void execute_time(double time_cutoff);
+    bool execute_step_LGMC();
+    void init_lattice_props(); // TODO: FOR EVAN
+    void execute_steps(int step_cutoff, bool isLGMC);
+    void execute_time(double time_cutoff, bool isLGMC);
 
 };
 
@@ -115,37 +118,37 @@ bool Simulation<Solver, Model>::execute_step() {
 
 template <typename Solver, typename Model>
 bool Simulation<Solver, Model>::execute_step_LGMC() {
-    std::pair<std::optional<Event>, std::optional<LatticeEvent>> maybe_events = solver.event();
+    std::pair<std::optional<Event>, std::optional<LatticeEvent>> maybe_events = solver.event_lattice();
 
     int next_reaction = 0;
 
-    if (!maybe_event.first && !maybe_event.second) {
+    if (!maybe_events.first && !maybe_events.second) {
 
         return false;
 
     } 
-    else if (maybe_event.second) {
+    else if (maybe_events.second) {
         // lattice event happens
-        LatticeEvent event = maybe_event.second.value();
+        LatticeEvent event = maybe_events.second.value();
         int next_reaction = event.index;
 
         // update time
         time += event.dt;
 
         // update state
-        model.update_state(std::ref(props), next_reaction, event.site_one, event.site_two);
-
-
-        // update propensities
-        model.update_propensities(
-            update_function,
-            std::ref(state),
-            next_reaction);
+        bool update_gillepsie = model.update_state(std::ref(props), next_reaction, 
+                                                    event.site_one, event.site_two, solver.propensity_sum);
+        model.update_propensities(std::ref(state), lattice_update_function, next_reaction, event.site_one, event.site_two);
+        
+        if(update_gillepsie) {
+            model.update_state(std::ref(state), next_reaction);
+            model.update_propensities(update_function, std::ref(state), next_reaction);
+        }
     }
     
     else {
         // gillespie event happens
-        Event event = maybe_event.first.value();
+        Event event = maybe_events.first.value();
         int next_reaction = event.index;
 
         // update time
@@ -153,7 +156,6 @@ bool Simulation<Solver, Model>::execute_step_LGMC() {
 
         // update state
         model.update_state(std::ref(state), next_reaction);
-
 
         // update propensities
         model.update_propensities(
@@ -191,6 +193,10 @@ bool Simulation<Solver, Model>::execute_step_LGMC() {
 
 template <typename Solver, typename Model>
 void Simulation<Solver, Model>::execute_steps(int step_cutoff, bool isLGMC) {
+    
+    
+    init_lattice_props(); // TODO: FOR EVAN
+
     if(isLGMC) {
         while(execute_step_LGMC()) {
         if (step > step_cutoff)
@@ -221,3 +227,11 @@ void Simulation<Solver, Model>::execute_time(double time_cutoff, bool isLGMC) {
         }
     }
 };
+
+/* ----------------*/
+/* TODO: FOR EVAN */
+/* ----------------*/
+template <typename Solver, typename Model>
+void Simulation<Solver, Model>::init_lattice_props() {
+    assert(false);
+}

@@ -11,6 +11,12 @@
 
 using namespace LGMC_NS;
 
+struct LatticeUpdate {
+    unsigned long int index;
+    double propensity;
+    int site_one;
+    int site_two;
+};
 
 struct LatticeEvent {
     int site_one;
@@ -19,44 +25,37 @@ struct LatticeEvent {
     double dt;
 };
 
-struct LatticeUpdate {
-    int site_one;
-    int site_two;
-    double propensity;
-};
-
 class LatSolver {
     public:
         LatSolver(unsigned long int seed, std::vector<double> &&initial_propensities);
         LatSolver(unsigned long int seed, std::vector<double> &initial_propensities);
 
         void update(Update update);
-
-        void update(LatticeUpdate lattice_update);
-
         void update(std::vector<Update> updates);
 
-        update(LatticeUpdate lattice_update);
+        void update(LatticeUpdate lattice_update);
+        void update(std::vector<LatticeUpdate> lattice_updates);
 
-        int sum_row(std::string hash);
-
-        std::pair<std::optional<Event>, std::optional<LatticeEvent>> event();
-
-        void init_lattice_props();
+        std::pair<std::optional<Event>, std::optional<LatticeEvent>> event_lattice();
 
         std::string make_string(int site_one, int site_two);
 
+        double propensity_sum;  
+
+        // for comptability 
+        std::optional<Event> event() {return std::optional<Event>()}
+
     private:
+        Sampler sampler;
 
-        int number_of_active_indices;               // end simulation of no sites with non zero propensity
-
-        double propensity_sum;              
+        int number_of_active_indices;               // end simulation of no sites with non zero propensity            
 
         unsigned long int last_non_zero_event;   
 
         std::unordered_map<std::string,                     // lattice propensities 
         std::vector< std::pair<double, int> > > props;      // key: (site_one, site_two) value: propensity 
         std::vector<double> propensities;                   // Gillepsie propensities 
+
 };
 
 /* ---------------------------------------------------------------------- */
@@ -123,31 +122,17 @@ void LatSolver::update(Update update) {
 /* ---------------------------------------------------------------------- */
 
 void LatSolver::update(LatticeUpdate lattice_update) {
-
-    std::string hash = make_string(lattice_update.site_one, lattice_update.site_two);
-
-    // add propensity 
-    props[site_combo].push_back(std::make_pair(lattice_update.propensity, react_id));
-
-    // update running sum 
+    
     propensity_sum += lattice_update.propensity;
 
-
-    if (update.propensity > 0.0) {
-        number_of_active_indices++;
-        if ( update.index > last_non_zero_event )
-            last_non_zero_event = update.index;
-    }
-
-    // hash should only store propensities > 0
-    number_of_active_indices++;
-
+    std::string hash = make_string(lattice_update.site_one, lattice_update.site_two);
+    props[hash].push_back(std::make_pair(lattice_update.propensity, lattice_update.index));
 };
 
 /* ---------------------------------------------------------------------- */
 
 void LatSolver::update(std::vector<LatticeUpdate> lattice_updates) {
-    for (Update u : lattice_updates) {
+    for (LatticeUpdate u : lattice_updates) {
         update(u);
     }
 };
@@ -162,31 +147,29 @@ void LatSolver::update(std::vector<Update> updates) {
 
 /* ---------------------------------------------------------------------- */
 
-std::pair<std::optional<Event>, std::optional<LatticeEvent>> LatSolver::event() {
+std::pair<std::optional<Event>, std::optional<LatticeEvent>> LatSolver::event_lattice() {
     if (number_of_active_indices == 0) {
         propensity_sum = 0.0;
-        return std::pair<std::optional<Event>(), std::optional<LatticeEvent>()>;
+        return std::make_pair(std::optional<Event>(), std::optional<LatticeEvent>());
     }
 
-    double r1 = lgmc->sampler.generate();
-    double r2 = lgmc->sampler.generate();
+    double r1 = sampler.generate();
+    double r2 = sampler.generate();
     double fraction = propensity_sum * r1;
     double partial = 0.0;
 
     unsigned long m;
     bool isFound = false;
     bool isLattice = false;
-    int reaction_id = 0;
-    std::optional<int> site_one = std::optional<int>();
-    std::optional<int> site_two = std::optional<int>();
+    unsigned long int reaction_id = 0;
+    int site_one = 0;
+    int site_two = 0;
     std::string hash;
 
-    // model handles updating lattice propensities
-    propensity_sum -= lgmc->prop_sum;
 
     // start with Gillespie propensities
-    for (m = 0; m < lgmc->react_net->initial_propensities.size(); m++) {
-        partial += lgmc->react_net->initial_propensities[m];
+    for (m = 0; m < propensities.size(); m++) {
+        partial += propensities[m];
         if (partial > fraction) {
             isFound = true;
             reaction_id = m;
@@ -196,8 +179,8 @@ std::pair<std::optional<Event>, std::optional<LatticeEvent>> LatSolver::event() 
 
     // go through lattice propensities if not found 
     if(!isFound) {
-        auto it = lgmc->props.begin();
-        while(!isFound || it != lgmc->props.end()) {
+        auto it = props.begin();
+        while(!isFound || it != props.end()) {
             for(int i = 0; i < it->second.size(); i++ ) {
                 partial += it->second[i].first;
 
@@ -208,8 +191,8 @@ std::pair<std::optional<Event>, std::optional<LatticeEvent>> LatSolver::event() 
                     reaction_id = it->second[i].second;
 
                     std::size_t pos = hash.find(".");
-                    site_one = std::optional<int>(stoi(hash.substr(0, pos)));
-                    site_two = std::optional<int>(stoi(hash.substr(pos)));
+                    site_one = stoi(hash.substr(0, pos));
+                    site_two = stoi(hash.substr(pos));
                     isFound = true;
                     break;
                 }
@@ -221,43 +204,26 @@ std::pair<std::optional<Event>, std::optional<LatticeEvent>> LatSolver::event() 
     double dt = - std::log(r2) / propensity_sum;
 
     if(isFound && isLattice) {
-        return std::pair<std::optional<Event>(), std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id,
+        return std::make_pair(std::optional<Event>(), std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id,
                                                                                 .site_one = site_one, .site_two = site_two, 
-                                                                                .dt = dt})>;
+                                                                                .dt = dt}));
     }
     else if(isFound && !isLattice) {
-        return std::pair<std::optional<Event>(Event {.index = last_non_zero_event, .dt = dt}), std::optional<LatticeEvent> ()>;
+        return std::make_pair(std::optional<Event>(Event {.index = last_non_zero_event, .dt = dt}), std::optional<LatticeEvent> ());
     }
     else {
-        return std::pair<std::optional<Event> (Event {.index = last_non_zero_event, .dt = dt}), std::optional<LatticeEvent> ()>;
+        return std::make_pair(std::optional<Event> (Event {.index = last_non_zero_event, .dt = dt}), std::optional<LatticeEvent> ());
     }
         
 }
 
 /* ---------------------------------------------------------------------- */
 
-int LatSolver::sum_row(std::string hash) {
-    
-    int sum = 0;    
-    for(auto it = props[hash].begin(); it != props[hash].end(); it++) {
-        sum += it->first;
-    }
-    return sum;
-}
-
-/* ---------------------------------------------------------------------- */
-
-std::string LGMC::make_string(int site_one, int site_two) {
+std::string LatSolver::make_string(int site_one, int site_two) {
 
     return (site_one < site_two) ? std::to_string(site_one) + "." + 
     std::to_string(site_two) : std::to_string(site_two) + "." + std::to_string(site_one);
 
 } // make_string
-
-/* ---------------------------------------------------------------------- */
-
-void LatSolver::init_lattice_props() {
-
-} // init_lattice_props()
 
 #endif
