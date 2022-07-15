@@ -5,6 +5,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <map>
 
 namespace LGMC_NS {
 
@@ -19,6 +20,29 @@ namespace LGMC_NS {
 #define MAX(A,B) ((A) > (B) ? (A) : (B))
 #endif
 
+struct Site {
+
+    Site() {}                               // default constructor does nothing
+
+    Site(uint32_t i_in, uint32_t j_in,      // custom constructor for convenience 
+        uint32_t k_in, float x_in, float y_in, float z_in,
+        int species_in,
+        bool can_adsorb_in) :
+        i(i_in), j(j_in), k(k_in),
+        x(x_in), y(y_in), z(z_in), 
+        species(species_in), can_adsorb(can_adsorb_in) { }
+
+    uint32_t i;                             // site location on lattice
+    uint32_t j;
+    uint32_t k;
+    float x;                                // location in space
+    float y;
+    float z;
+    int species;                            // species at site
+    bool can_adsorb;                        // is the site in contact with the electrolyte?
+
+};
+
 class Lattice {
 
 private:
@@ -27,42 +51,27 @@ private:
     /* ----------------------- structural information ------------------------ */
     
     float latconst;                               // lattice constant
-    int boxxlo,boxxhi,boxylo,                   // bounding of box
+    float boxxlo,boxxhi,boxylo,                   // bounding of box
     boxyhi,boxzlo,boxzhi;                       // (yscale * read in value)
     int xlo,xhi,ylo,yhi,zlo,zhi;                // geometry info neighbors
-    bool is_xperiodic, is_yperiodic, is_zperiodic;          // 0 = non-periodic, 1 = periodic
+    bool is_xperiodic, is_yperiodic, is_zperiodic;          // 0 =   non-periodic, 1 = periodic
     
     int nsites;                                 // number of sites
     int nmax;                                   // max # of sites per-site arrays can store
-
-    struct Site {
-
-        Site() {}                               // default constructor does nothing
-
-        
-        Site(uint32_t x_in, uint32_t y_in,      // custom constructor for convenience 
-            uint32_t z_in, int species_in) :
-            x(x_in), y(y_in), z(z_in), 
-            species(species_in) { }
-
-        uint32_t x;                             // site location on lattice
-        uint32_t y;
-        uint32_t z;
-        int species;                            // species at site
-
-    };
 
     int maxneigh;                               // max neighbors per site
 
 public: 
 
-    Site *sites;                                // list of Sites for lattice
-    uint32_t **idneigh;                         // neighbor IDs for each site
-    uint32_t *numneigh;                         // # of neighbors of each site
+    std::vector<Site> sites;                                // list of Sites for lattice
+    std::vector<uint32_t*> idneigh;                         // neighbor IDs for each site
+    std::vector<uint32_t> numneigh;                         // # of neighbors of each site
+
+    std::map<std::tuple<uint32_t, uint32_t, uint32_t>, int> loc_map;  // Mapping from site location to site ID
 
     Lattice(float latconst_in, 
-        int boxxlo_in, int boxxhi_in, int boxylo_in,
-        int boxyhi_in, int boxzlo_in, int boxzhi_in, 
+        float boxxlo_in, float boxxhi_in, float boxylo_in,
+        float boxyhi_in, float boxzlo_in, float boxzhi_in, 
         bool xperiodic_in, bool yperiodic_in, bool zperiodic_in);   
 
     ~Lattice();
@@ -73,12 +82,11 @@ public:
     
     void offsets_3d(int **cmapone);
     
-    void add_site(uint32_t n, uint32_t x, uint32_t y, uint32_t z);
+    void add_site(uint32_t i_in, uint32_t j_in, 
+                  uint32_t k_in, float x_in, float y_in, float z_in,
+                  bool can_adsorb_in, bool update_neighbors_in, bool meta_neighbors_in);
 
-    void grow(uint32_t n);
-
-    bool is_on_edge(int site);
-    
+    void update_neighbors(uint32_t n, bool meta_neighbors_in);
 };
 
 }

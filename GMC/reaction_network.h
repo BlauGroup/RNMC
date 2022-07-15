@@ -7,6 +7,7 @@
 #include <mutex>
 #include <memory>
 #include <unordered_map>
+#include <cmath>
 #include "../core/sql.h"
 #include "../GMC/sql_types.h"
 #include "../core/simulation.h"
@@ -25,6 +26,36 @@ class Reaction {
 
 enum Phase {LATTICE, SOLUTION};
 enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_ELYTE, HOMOGENEOUS_SOLID, DIFFUSION,CHARGE_TRANSFER};
+
+
+const double TUNNEL_COEF = 1.2;        // Electron tunneling coefficient, in A^-1 
+const double TEMPERATURE = 298.15;     // In Kelvin
+const double KB = 8.6173e-5;           // In eV/K
+const double PLANCK = 4.1357e-15;      // In eV s
+
+
+double get_marcus_rate_coefficient(double base_dg, double reorganization_energy, double e_free, double distance, bool reduction) {
+
+    double dg, dg_barrier, squared, kappa;
+
+    if (reduction) {
+        dg = base_dg - e_free;
+    }
+    else {
+        dg = base_dg + e_free;
+    }
+
+    squared = 1 + dg / reorganization_energy;
+    dg_barrier = reorganization_energy / 4 * squared * squared;
+    kappa = std::exp(-1 * TUNNEL_COEF * distance);
+
+    if (dg_barrier < 0) {
+        return kappa * KB * TEMPERATURE / PLANCK;
+    } else {
+        return kappa * KB * TEMPERATURE / PLANCK * std::exp(-1 * dg_barrier / (KB * TEMPERATURE));
+    }
+}
+
 
 class LatticeReaction : public Reaction {
     public:
@@ -472,6 +503,10 @@ void LatticeReactionNetwork::compute_dependents() {
         }
     }
 
+};
+
+void LatticeReactionNetwork::update_state(std::vector<int> &state, int reaction_index) {
+    //TODO
 };
 
 
