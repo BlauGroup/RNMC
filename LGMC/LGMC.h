@@ -20,29 +20,34 @@ class LGMC {
         void print_usage();
 
         void run();
-        
-        void update_propensity(int site_one, 
-        int site_two, LatticeReaction *reaction, int react_id, int num_one, int num_two);
 
-        void update_state(std::unordered_map<std::string,                     
-        std::vector< std::pair<double, int> > > &props,
-        int next_reaction, int event.site_one, int event.site_two);
 
-        void relevant_react(int site);
+        /* -------------------------------- Lattice Updates ----------------------------- */
 
-        void clear_site(int site, std::optional<int> ignore_neighbor);
+        bool update_state(int next_reaction, int site_one, int site_two);
 
-        void clear_site_helper(int site_one, int site_two);
+        void clear_site(std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props,
+                        int site, std::optional<int> ignore_neighbor);
 
-        void update_one_lattice_site(int site, LatticeReaction *reaction);
+        void clear_site_helper(std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props,
+                        int site_one, int site_two);
 
-        void update_two_lattice_sites(int site_one, int site_two, LatticeReaction *reaction);
+        void relevant_react(std::function<void(LatticeUpdate lattice_update)>
+                            update_function, int site, std::optional<int> ignore_neighbor);
 
-        std::string make_string(int site_one, int site_two);
+        void compute_propensitycompute_propensity(int site_one, int site_two, int num_one, 
+                                                  int num_two, int react_id)
 
-        void update_site(int site, std::optional<int> ignore_neighbor);
+        void update_propensities(std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props,
+                        std::function<void(LatticeUpdate lattice_update)> update_function,
+                        int next_reaction);
 
         void update_electrochemical();
+
+        std::string make_string(int site_one, int site_two);
 
         /* -------------------------------- Gillespie Updates ----------------------------- */
         void update_state(std::vector<int> &state,
