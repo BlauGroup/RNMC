@@ -50,7 +50,7 @@ private:
     /* ----------------------- structural information ------------------------ */
     
     float latconst;                               // lattice constant
-    int boxxlo,boxxhi,boxylo,                   // bounding of box
+    float boxxlo,boxxhi,boxylo,                   // bounding of box
     boxyhi,boxzlo,boxzhi;                       // (yscale * read in value)
     int xlo,xhi,ylo,yhi,zlo,zhi;                // geometry info neighbors
     bool is_xperiodic, is_yperiodic, is_zperiodic;          // 0 =   non-periodic, 1 = periodic
@@ -65,6 +65,8 @@ public:
     std::vector<Site> sites;                                // list of Sites for lattice
     std::vector<uint32_t*> idneigh;                         // neighbor IDs for each site
     std::vector<uint32_t> numneigh;                         // # of neighbors of each site
+
+    std::map<std::tuple<uint32_t, uint32_t, uint32_t>, int> loc_map;  // Mapping from site location to site ID
 
     Lattice(float latconst_in, 
         int boxxlo_in, int boxxhi_in, int boxylo_in,

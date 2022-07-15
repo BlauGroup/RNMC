@@ -175,13 +175,13 @@ void Lattice::structured_connectivity() {
     uint32_t gid;
     int xneigh,yneigh,zneigh;
     
-    int xprd = boxxhi - boxxlo;
-    int yprd = boxyhi - boxylo;
-    int zprd = boxzhi - boxzlo;
+    float xprd = boxxhi - boxxlo;
+    float yprd = boxyhi - boxylo;
+    float zprd = boxzhi - boxzlo;
     
-    int nx = xprd / latconst;
-    int ny = yprd / latconst;
-    int nz = zprd / latconst;
+    int nx = static_cast<int> (xprd / latconst);
+    int ny = static_cast<int> (yprd / latconst);
+    int nz = static_cast<int> (zprd / latconst);
 
     // create connectivity offsets
     
@@ -213,9 +213,9 @@ void Lattice::structured_connectivity() {
             // xyz neigh = coords of neighbor site
             // calculated in same manner that structured_lattice() generated coords
             
-            xneigh = ineigh * static_cast<int> (latconst);
-            yneigh = jneigh * static_cast<int> (latconst);
-            zneigh = kneigh * static_cast<int> (latconst);
+            xneigh = static_cast<float> (ineigh) * latconst;
+            yneigh = static_cast<float> (jneigh) * latconst;
+            zneigh = static_cast<float> (jneigh) * latconst;
             
             // remap neighbor coords and indices into periodic box via ijk neigh
             // remap neighbor coords and indices into periodic box via ijk neigh
@@ -342,12 +342,76 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
 
     // initially empty site, species = 0
     sites[nsites] = Site{i_in, j_in, k_in, x_in, y_in, z_in, 0, can_adsorb_in};
+    std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
+    loc_map[key] = nsites;
 
     nsites++;
 
 } // add_site()
 
 void Lattice::update_neighbors(unit32_t n) {
+
+    float xprd = boxxhi - boxxlo;
+    float yprd = boxyhi - boxylo;
+    float zprd = boxzhi - boxzlo;
     
+    int nx = static_cast<int> (xprd / latconst);
+    int ny = static_cast<int> (yprd / latconst);
+    int nz = static_cast<int> (zprd / latconst);
+
+    uint32_t left, right, backward, forward, down, up;
+    
+    left = sites[n].i - 1;
+    right = sites[n].i + 1;
+    if (is_xperiodic) {
+        if (left < 0) {
+            left += nx;
+        }
+        if (right >= nx) {
+            right -= nx;
+        }
+    }
+    
+    backward = sites[n].j - 1;
+    forward = sites[n].j + 1;
+    if (is_yperiodic) {
+        if (backward < 0) {
+            backward += nx;
+        }
+        if (forward >= nx) {
+            forward -= nx;
+        }
+    }
+
+    down = sites[n].k - 1;
+    up = sites[n].k + 1;
+    if (is_zperiodic) {
+        if (down < 0) {
+            down += nx;
+        }
+        if (up >= nx) {
+            up -= nx;
+        }
+    }
+
+    std::tuple<unit32_t,unit32_t,unit32_t> *ijk = {
+        {left, sites[n].j, sites[n].k},
+        {right, sites[n].j, sites[n].k},
+        {sites[n].i, backward, sites[n].k},
+        {sites[n].i, forward, sites[n].k},
+        {sites[n].i, sites[n].j, down},
+        {sites[n].i, sites[n].j, up},
+    };
+
+    std::map<std::tuple<unit32_t,unit32_t,unit32_t>, int>::iterator it;
+
+    int thisnumneigh = 0;
+    for (int q = 0; q < 6; q++) {
+        it = loc_map.find(ijk[q]);
+        if (it != loc_map.end()) {
+            idneigh[n][thisnumneigh] = it->second;
+            thisnumneigh++;
+        }
+    }
 
 } // update_neighbors()
