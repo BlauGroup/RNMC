@@ -110,7 +110,7 @@ struct Dispatcher {
     int number_of_threads;
     bool isLGMC;
 
-    Dispatcher(std::string file_in); 
+    Dispatcher(std::string file_in, bool isLGMC, ReactionNetworkParameters parameters); 
     void run_dispatcher();
     void record_simulation_history(HistoryPacket history_packet);
 };
@@ -122,15 +122,15 @@ template <
     typename Parameters,
     typename TrajectoriesSql>
 
-Dispatcher::Dispatcher<Solver, Model, Parameters, TrajectoriesSql>Dispatcher(std::string file_in, bool isLGMC) {
+Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::Dispatcher(std::string file_in, bool isLGMC, ReactionNetworkParameters parameters) {
 
-    std::string reaction_database;
-    std::string initial_state_database;
-    unsigned long int number_of_simulations;
-    unsigned long int number_of_threads;
-    int base_seed;
-    int cutoff;
-    char cutoff_flag;
+    std::string reaction_database_in;
+    std::string initial_state_database_in;
+    unsigned long int number_of_simulations_in;
+    unsigned long int number_of_threads_in;
+    int base_seed_in;
+    int cutoff_in;
+    char cutoff_flag_in;
     bool isLGMC_in;
 
     Cutoff cutoff = {
@@ -138,9 +138,9 @@ Dispatcher::Dispatcher<Solver, Model, Parameters, TrajectoriesSql>Dispatcher(std
         .type_of_cutoff = step_termination
     };
 
-    std::cin >> reaction_database >> initial_state_database
-    >> number_of_simulations >> base_seed >> number_of_threads >> 
-    cutoff_flag >> cutoff >> isLGMC_in;
+    std::cin >> reaction_database_in >> initial_state_database_in
+    >> number_of_simulations_in >> base_seed_in >> number_of_threads_in >> 
+    cutoff_flag_in >> cutoff_in >> isLGMC_in;
 
     if(std::cin.fail()) {
         std::cout << "Incorrect file arguments.\n";
@@ -162,19 +162,18 @@ Dispatcher::Dispatcher<Solver, Model, Parameters, TrajectoriesSql>Dispatcher(std
         exit(EXIT_FAILURE);
     }
 
-    model_database = SQLConnection (model_database, SQLITE_OPEN_READWRITE);
-    initial_state_database = SqlConnection (initial_state_database, SQLITE_OPEN_READWRITE);
+    model_database = SQLConnection (reaction_database_in, SQLITE_OPEN_READWRITE);
+    initial_state_database = SqlConnection (initial_state_database_in, SQLITE_OPEN_READWRITE);
 
 
-    trajectories_stmt = SqlStatement<TrajectoriesSql> (initial_state_database);
+    trajectories_stmt = SqlStatement<TrajectoriesSql> (initial_state_database_in);
     trajectories_writer = SqlWriter<TrajectoriesSql> (trajectories_stmt);
     history_queue = HistoryQueue<HistoryPacket> ();
-    seed_queue = SeedQueue (number_of_simulations, base_seed);
+    seed_queue = SeedQueue (number_of_simulations_in, base_seed_in);
 
     running = std::vector<bool> (number_of_threads, false);
-    cutoff (cutoff),
-    number_of_simulations = number_of_simulations;
-    number_of_threads = number_of_threads;
+    number_of_simulations = number_of_simulations_in;
+    number_of_threads = number_of_threads_in;
     isLGMC = isLGMC_in;
 
     if(isLGMC) {
@@ -191,8 +190,7 @@ Dispatcher::Dispatcher<Solver, Model, Parameters, TrajectoriesSql>Dispatcher(std
             exit(EXIT_FAILURE);
         }   
 
-        lattice_reaction_network = LatticeReactionNetwork(model_database, initial_state_database, 
-        parameters);
+        LatticeReactionNetwork lattice_reaction_network = LatticeReactionNetwork(model_database, initial_state_database, parameters);
 
         // create lattice
         lattice = new Lattice(latconst, boxxlo, boxxhi, boxylo,

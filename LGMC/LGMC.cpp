@@ -21,6 +21,8 @@ LGMC::LGMC(Lattice &lattice, LatticeReactionNetwork &react_net){
     react_net = react_net;
 } // LGMC()
 
+/* ---------------------------------------------------------------------- */
+
 LGMC::~LGMC()
 {
     // deal with pointers 
@@ -28,18 +30,6 @@ LGMC::~LGMC()
     delete lattice;
 } // ~LGMC()
 
-void LGMC::print_usage() {
-    
-    std::cout << "Usage: specify the following in the input file\n"
-              << "latconst, boxxlo, boxxhi, boxylo, boxyhi, boxzlo, boxzhi" 
-              << "xperiodic (true/false), yperiodic (true/false), zperiodic (true/false)\n"
-              << "reaction_database\n"
-              << "initial_state_database\n"
-              << "number_of_simulations\n"
-              << "base_seed\n"
-              << "step_cutoff\n";
-    
-} // print_usage()
 
 /* ---------------------------------------------------------------------- 
     Only calls this function if necessary reactants are on lattice sites
@@ -416,6 +406,23 @@ TrajectoriesSql LGMC::history_element_to_sql(
 }
 
 /* ---------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------- */
+/* ---------------------------------------------------------------------- */
+
+void print_usage() {
+    
+    std::cout << "Usage: specify the following in the input file\n"
+              << "latconst, boxxlo, boxxhi, boxylo, boxyhi, boxzlo, boxzhi" 
+              << "xperiodic (true/false), yperiodic (true/false), zperiodic (true/false)\n"
+              << "reaction_database\n"
+              << "initial_state_database\n"
+              << "number_of_simulations\n"
+              << "base_seed\n"
+              << "step_cutoff\n";
+    
+} // print_usage()
+
+/* ---------------------------------------------------------------------- */
 
 int main(int argc, char **argv) { 
 
@@ -444,7 +451,7 @@ int main(int argc, char **argv) {
         TrajectoriesSql
         >
 
-        dispatcher (file_in, false);
+        dispatcher (file_in, true, parameters);
 
     dispatcher.run_dispatcher();
 

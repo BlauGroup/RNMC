@@ -13,11 +13,9 @@ namespace LGMC_NS {
 
 class LGMC {
     public: 
-        LGMC();
+        LGMC(Lattice &lattice);
         
         ~LGMC();
-        
-        void print_usage();
 
         /* -------------------------------- Lattice Updates ----------------------------- */
 
