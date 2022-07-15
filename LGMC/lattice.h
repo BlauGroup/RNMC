@@ -83,9 +83,9 @@ public:
     
     void add_site(uint32_t i_in, uint32_t j_in, 
                   uint32_t k_in, float x_in, float y_in, float z_in,
-                  bool can_adsorb_in);
+                  bool can_adsorb_in, bool update_neighbors_in, bool meta_neighbors_in);
 
-    void update_neighbors(unit32_t n);
+    void update_neighbors(uint32_t n, bool meta_neighbors_in);
 };
 
 }

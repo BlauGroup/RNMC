@@ -158,7 +158,8 @@ void Lattice::structured_lattice() {
 
                 // By default, assume all lattice sites empty
                 // TODO: This should use the global variable EMPTY_SITE
-                add_site(i,j,k,x,y,z,can_adsorb);
+                // Don't update neighbors, since we'll use the connectivity function next
+                add_site(i,j,k,x,y,z,can_adsorb,false,false);
 
     }
 
@@ -325,7 +326,7 @@ void Lattice::offsets_3d(int **cmapin) {
 
 void Lattice::add_site(uint32_t i_in, uint32_t j_in, 
                        uint32_t k_in, float x_in, float y_in, float z_in,
-                       bool can_adsorb_in) {
+                       bool can_adsorb_in, bool update_neighbors_in, bool meta_neighbors_in) {
     if (nsites == nmax) {
         nmax += DELTA;
         sites.reserve(nmax);
@@ -345,11 +346,15 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
     loc_map[key] = nsites;
 
+    if (update_neighbors_in) {
+        update_neighbors(nsites, meta_neighbors_in);
+    }
+
     nsites++;
 
 } // add_site()
 
-void Lattice::update_neighbors(unit32_t n) {
+void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
 
     float xprd = boxxhi - boxxlo;
     float yprd = boxyhi - boxylo;
@@ -394,7 +399,7 @@ void Lattice::update_neighbors(unit32_t n) {
         }
     }
 
-    std::tuple<unit32_t,unit32_t,unit32_t> *ijk = {
+    std::tuple<uint32_t,uint32_t,uint32_t> *ijk = {
         {left, sites[n].j, sites[n].k},
         {right, sites[n].j, sites[n].k},
         {sites[n].i, backward, sites[n].k},
@@ -403,13 +408,18 @@ void Lattice::update_neighbors(unit32_t n) {
         {sites[n].i, sites[n].j, up},
     };
 
-    std::map<std::tuple<unit32_t,unit32_t,unit32_t>, int>::iterator it;
+    std::map<std::tuple<uint32_t,uint32_t,uint32_t>, int>::iterator it;
 
     int thisnumneigh = 0;
     for (int q = 0; q < 6; q++) {
         it = loc_map.find(ijk[q]);
         if (it != loc_map.end()) {
             idneigh[n][thisnumneigh] = it->second;
+
+            if(meta_neighbors_in) {
+                update_neighbors(idneigh[n][thisnumneigh], false);
+            }
+
             thisnumneigh++;
         }
     }
