@@ -5,6 +5,7 @@
 #include <string>
 #include "math.h"
 #include <iostream>
+#include <map>
 
 using namespace LGMC_NS;
 
@@ -16,8 +17,8 @@ using namespace LGMC_NS;
 /* ---------------------------------------------------------------------- */
 
 Lattice::Lattice(float latconst_in, 
-        int boxxlo_in, int boxxhi_in, int boxylo_in,
-        int boxyhi_in, int boxzlo_in, int boxzhi_in,
+        float boxxlo_in, float boxxhi_in, float boxylo_in,
+        float boxyhi_in, float boxzlo_in, float boxzhi_in,
         bool is_xperiodic_in, bool is_yperiodic_in, bool is_zperiodic_in)  {
     // TODO: implement error handling
     
@@ -38,13 +39,14 @@ Lattice::Lattice(float latconst_in,
     is_yperiodic = is_yperiodic_in;
     is_zperiodic = is_zperiodic_in;
     
-    nsites = nmax = 0;
-    sites = NULL;
-    
+    nsites = 0;
+    nmax = DELTA;
+    sites.reserve(nmax);
+
     maxneigh = 6;
-    numneigh = NULL;
-    idneigh = NULL;
-    
+    idneigh.resize(0);
+    numneigh.reserve(nmax);
+
     // create sites on lattice
     structured_lattice();
     
@@ -135,18 +137,30 @@ void Lattice::structured_lattice() {
     // for style = REGION, check if site is within region
     // if non-periodic or style = REGION, IDs may not be contiguous
 
-    uint32_t x,y,z;
+    float x,y,z;
+    bool can_adsorb;
 
-    uint32_t n = 0;
     for (int k = zlo; k <= zhi; k++)
         for (int j = ylo; j <= yhi; j++)
             for (int i = xlo; i <= xhi; i++) {
-                n++;
                 x = i*latconst;
                 y = j*latconst;
                 z = k*latconst;
 
-                add_site(n,x,y,z);
+                if (i == xhi && !is_xperiodic) {
+                    can_adsorb = true;
+                }
+                else if (j == yhi && !is_yperiodic) {
+                    can_adsorb = true;
+                }
+                else if (k == zhi && !is_zperiodic) {
+                    can_adsorb = true;
+                }
+
+                // By default, assume all lattice sites empty
+                // TODO: This should use the global variable EMPTY_SITE
+                // Don't update neighbors, since we'll use the connectivity function next
+                add_site(i,j,k,x,y,z,can_adsorb,false,false);
 
     }
 
@@ -163,17 +177,14 @@ void Lattice::structured_connectivity() {
     uint32_t gid;
     int xneigh,yneigh,zneigh;
     
-    int xprd = boxxhi - boxxlo;
-    int yprd = boxyhi - boxylo;
-    int zprd = boxzhi - boxzlo;
+    float xprd = boxxhi - boxxlo;
+    float yprd = boxyhi - boxylo;
+    float zprd = boxzhi - boxzlo;
     
-    int nx = xprd / latconst;
-    int ny = yprd / latconst;
-    int nz = zprd / latconst;
-    
-    memory->create(idneigh,nsites,maxneigh,"create:idneigh");
-    memory->create(numneigh,nmax,"create:numneigh");
-    
+    int nx = static_cast<int> (xprd / latconst);
+    int ny = static_cast<int> (yprd / latconst);
+    int nz = static_cast<int> (zprd / latconst);
+
     // create connectivity offsets
     
     int **cmap;                 // connectivity map for regular lattices
@@ -187,6 +198,10 @@ void Lattice::structured_connectivity() {
     // generate global lattice connectivity for each site
     for (int i = 0; i < nsites; i++) {
         numneigh[i] = 0;
+
+        uint32_t* neighi;
+        memory->create(neighi, maxneigh, "create:neighi");
+        idneigh.push_back(neighi);
       
         for (int neigh = 0; neigh < maxneigh; neigh++) {
 
@@ -200,9 +215,9 @@ void Lattice::structured_connectivity() {
             // xyz neigh = coords of neighbor site
             // calculated in same manner that structured_lattice() generated coords
             
-            xneigh = ineigh * static_cast<int> (latconst);
-            yneigh = jneigh * static_cast<int> (latconst);
-            zneigh = kneigh * static_cast<int> (latconst);
+            xneigh = static_cast<float> (ineigh) * latconst;
+            yneigh = static_cast<float> (jneigh) * latconst;
+            zneigh = static_cast<float> (jneigh) * latconst;
             
             // remap neighbor coords and indices into periodic box via ijk neigh
             // remap neighbor coords and indices into periodic box via ijk neigh
@@ -310,36 +325,104 @@ void Lattice::offsets_3d(int **cmapin) {
 
 /* ---------------------------------------------------------------------- */
 
-void Lattice::add_site(uint32_t n, uint32_t x, uint32_t y, uint32_t z) {
-    if (nsites == nmax) grow(0);
+void Lattice::add_site(uint32_t i_in, uint32_t j_in, 
+                       uint32_t k_in, float x_in, float y_in, float z_in,
+                       bool can_adsorb_in, bool update_neighbors_in, bool meta_neighbors_in) {
+    if (nsites == nmax) {
+        nmax += DELTA;
+        sites.reserve(nmax);
+        numneigh.reserve(nmax);
 
-    // initially empty site, species = -1
-    sites[n] = Site{x, y, z, -1};
+        // Initialize neighbor information for this new site
+        numneigh.push_back(0);
+
+        uint32_t* neighi;
+        memory->create(neighi, maxneigh, "create:neighi");
+        idneigh.push_back(neighi);
+
+    }
+
+    // initially empty site, species = 0
+    sites.push_back(Site{i_in, j_in, k_in, x_in, y_in, z_in, 0, can_adsorb_in});
+    std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
+    loc_map[key] = nsites;
+
+    if (update_neighbors_in) {
+        update_neighbors(nsites, meta_neighbors_in);
+    }
 
     nsites++;
+
 } // add_site()
 
-/* ---------------------------------------------------------------------- */
+void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
 
-void Lattice::grow(uint32_t n) {
-    if (n == 0) nmax += DELTA;
-    else nmax = n;
-
-    memory->grow(sites,nmax,"grow:sites");
+    float xprd = boxxhi - boxxlo;
+    float yprd = boxyhi - boxylo;
+    float zprd = boxzhi - boxzlo;
     
-} // grow()
+    int nx = static_cast<int> (xprd / latconst);
+    int ny = static_cast<int> (yprd / latconst);
+    int nz = static_cast<int> (zprd / latconst);
 
+    uint32_t left, right, backward, forward, down, up;
+    
+    left = sites[n].i - 1;
+    right = sites[n].i + 1;
+    if (is_xperiodic) {
+        if (left < 0) {
+            left += nx;
+        }
+        if (right >= nx) {
+            right -= nx;
+        }
+    }
+    
+    backward = sites[n].j - 1;
+    forward = sites[n].j + 1;
+    if (is_yperiodic) {
+        if (backward < 0) {
+            backward += nx;
+        }
+        if (forward >= nx) {
+            forward -= nx;
+        }
+    }
 
-bool Lattice::is_on_edge(int site) {
-    if(!is_xperiodic) {
-        return (sites[site].x == boxxhi);
-    }
-    else if(!is_yperiodic) {
-        return (sites[site].y == boxyhi);
-    }
-    else if(!is_zperiodic) {
-        return (sites[site].z == boxzhi);
+    down = sites[n].k - 1;
+    up = sites[n].k + 1;
+    if (is_zperiodic) {
+        if (down < 0) {
+            down += nx;
+        }
+        if (up >= nx) {
+            up -= nx;
+        }
     }
 
-    return 0;
-}
+    std::tuple<uint32_t,uint32_t,uint32_t> *ijk = {
+        {left, sites[n].j, sites[n].k},
+        {right, sites[n].j, sites[n].k},
+        {sites[n].i, backward, sites[n].k},
+        {sites[n].i, forward, sites[n].k},
+        {sites[n].i, sites[n].j, down},
+        {sites[n].i, sites[n].j, up},
+    };
+
+    std::map<std::tuple<uint32_t,uint32_t,uint32_t>, int>::iterator it;
+
+    int thisnumneigh = 0;
+    for (int q = 0; q < 6; q++) {
+        it = loc_map.find(ijk[q]);
+        if (it != loc_map.end()) {
+            idneigh[n][thisnumneigh] = it->second;
+
+            if(meta_neighbors_in) {
+                update_neighbors(idneigh[n][thisnumneigh], false);
+            }
+
+            thisnumneigh++;
+        }
+    }
+
+} // update_neighbors()
