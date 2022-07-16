@@ -10,11 +10,44 @@
 #include <getopt.h>
 
 
-int EMPTY_SITE = 0;
-int SELF_REACTION = -3;
-int GILLESPIE_SITE = -2;
+const int EMPTY_SITE = 0;
+const int SELF_REACTION = -3;
+const int GILLESPIE_SITE = -2;
+
+const double TEMPERATURE = 298.15;     // In Kelvin
+const double KB = 8.6173e-5;           // In eV/K
+const double PLANCK = 4.1357e-15;      // In eV s
+
+// NOT ACTUALLY CONSTANTS
+// SHOULD PROBABLY BE COMPONENTS OF THE REACTION NETWORK PARAMETERS
+const double TUNNEL_COEF = 1.2;        // Electron tunneling coefficient, in A^-1 
+const double G_E = -2.15;              // Electron free energy, in eV
+
 
 using namespace LGMC_NS;
+
+
+double get_marcus_rate_coefficient(double base_dg, double reorganization_energy, double e_free, double distance, bool reduction) {
+
+    double dg, dg_barrier, squared, kappa;
+
+    if (reduction) {
+        dg = base_dg - e_free;
+    }
+    else {
+        dg = base_dg + e_free;
+    }
+
+    squared = 1 + dg / reorganization_energy;
+    dg_barrier = reorganization_energy / 4 * squared * squared;
+    kappa = std::exp(-1 * TUNNEL_COEF * distance);
+
+    if (dg_barrier < 0) {
+        return kappa * KB * TEMPERATURE / PLANCK;
+    } else {
+        return kappa * KB * TEMPERATURE / PLANCK * std::exp(-1 * dg_barrier / (KB * TEMPERATURE));
+    }
+}
 
 LGMC::LGMC(SqlConnection &reaction_network_database, SqlConnection &initial_state_database, 
             LGMCParameters parameters) : sampler (Sampler(0)) {

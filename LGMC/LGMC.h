@@ -80,7 +80,6 @@ class LGMC {
     private:                                                          
                            
         LatticeReactionNetwork *react_net;                   // pointer to gillespie reaction network
-
         Memory *memory;                            // memory allocation functions
         Lattice *lattice;                          // lattice for SEI
         Sampler sampler;

@@ -51,9 +51,9 @@ private:
     /* ----------------------- structural information ------------------------ */
     
     float latconst;                               // lattice constant
-    float boxxlo,boxxhi,boxylo,                   // bounding of box
-    boxyhi,boxzlo,boxzhi;                       // (yscale * read in value)
-    int xlo,xhi,ylo,yhi,zlo,zhi;                // geometry info neighbors
+    float xlo, xhi, ylo,                   // bounding of box
+          yhi, zlo, zhi;                       // (yscale * read in value)
+    int ilo, ihi, klo, khi, jlo, jhi;                // geometry info neighbors
     bool is_xperiodic, is_yperiodic, is_zperiodic;          // 0 =   non-periodic, 1 = periodic
     
     int nsites;                                 // number of sites
@@ -70,8 +70,8 @@ public:
     std::map<std::tuple<uint32_t, uint32_t, uint32_t>, int> loc_map;  // Mapping from site location to site ID
 
     Lattice(float latconst_in, 
-        float boxxlo_in, float boxxhi_in, float boxylo_in,
-        float boxyhi_in, float boxzlo_in, float boxzhi_in, 
+        int ilo_in, int ihi_in, int jlo_in,
+        int jhi_in, int klo_in, int khi_in, 
         bool xperiodic_in, bool yperiodic_in, bool zperiodic_in);   
 
     ~Lattice();
