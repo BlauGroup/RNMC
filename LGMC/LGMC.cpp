@@ -52,7 +52,7 @@ void LGMC::update_state(std::unordered_map<std::string,
     if(site_one) {
         // update lattice state
         bool update_gillepsie = update_state(props, next_reaction, site_one.value(), 
-                                            site_two.value(), solver.propensity_sum);
+                                            site_two.value(), prop_sum);
         
         if(update_gillepsie) {
             react_net->update_state(state, next_reaction);
@@ -92,12 +92,6 @@ void LGMC::update_propensities(std::vector<int> &state, std::function<void(Updat
 
 }
 
-/* ---------------------------------------------------------------------- */
-
-void LGMC::update_adsorption() {
-    assert(false);
-}
-
 /* ---------------------------------------------------------------------- 
 ---------------------------------------------------------------------- */
 
@@ -106,8 +100,8 @@ void LGMC::update_adsorption() {
     Only calls this function if necessary reactants are on lattice sites
 ---------------------------------------------------------------------- */
 
-double LGMC::compute_propensity(int site_one, int site_two, int num_one, int num_two, 
-                              int react_id) {
+double LGMC::compute_propensity(int num_one, int num_two, 
+                                int react_id) {
     
     LatticeReaction *reaction = static_cast<LatticeReaction *> (react_net->reactions[react_id].get());
 
@@ -151,7 +145,7 @@ double LGMC::compute_propensity(int site_one, int site_two, int num_one, int num
 
 bool LGMC::update_state(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props, 
-                        int next_reaction, int site_one, int site_two, double &prop_sum) {
+                        int next_reaction, int site_one, int site_two, double prop_sum) {
 
     LatticeReaction *reaction = static_cast<LatticeReaction *> (react_net->reactions[next_reaction].get());
 
@@ -232,7 +226,7 @@ bool LGMC::update_state(std::unordered_map<std::string,
     
 } // update_state() lattice
 
-void LGMC::update_propensities(std::vector<int> &state,
+bool LGMC::update_propensities(std::vector<int> &state,
                         std::function<void(LatticeUpdate lattice_update)> 
                         update_function, int next_reaction, int site_one, int site_two) {
 
@@ -244,7 +238,8 @@ void LGMC::update_propensities(std::vector<int> &state,
         assert(lattice->sites[site_two].species == GILLESPIE_SITE);
 
         relevant_react(update_function, state, site_one, std::optional<int> ());
-
+        
+        return true;
     } // ADSORPTION 
     if(reaction->type == Type::DESORPTION) {
         
@@ -253,7 +248,7 @@ void LGMC::update_propensities(std::vector<int> &state,
 
         relevant_react(update_function, state, site_one, std::optional<int> ());
 
-
+        return true;
     } // DESORPTION
     else if(reaction->type == Type::HOMOGENEOUS_SOLID) {
         
@@ -268,7 +263,7 @@ void LGMC::update_propensities(std::vector<int> &state,
             relevant_react(update_function, state, site_one, site_two);
             relevant_react(update_function, state, site_two, std::optional<int> ());
         }
-
+        return false;
     } // HOMOGENEOUS_SOLID
     else if(reaction->type == Type::DIFFUSION) {
 
@@ -277,6 +272,7 @@ void LGMC::update_propensities(std::vector<int> &state,
         relevant_react(update_function, state, site_one, site_two);
         relevant_react(update_function, state, site_two, std::optional<int> ());
         
+        return false;
     } // DIFFUSION
 
 
@@ -296,7 +292,7 @@ void LGMC::update_adsorption() {
 
 void LGMC::clear_site(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props, 
-                        int site, std::optional<int> ignore_neighbor, double &prop_sum) {
+                        int site, std::optional<int> ignore_neighbor, double prop_sum) {
 
     // reset or initiate site combos
     for(uint32_t neigh = 0; neigh < lattice->numneigh[site]; neigh++ ) {
@@ -363,7 +359,7 @@ void LGMC::relevant_react(std::function<void(LatticeUpdate lattice_update)> upda
             if(reaction->type == Type::DESORPTION) {
                 if(lattice->sites[site].can_adsorb) {
                     
-                    double new_propensity = compute_propensity(site, SELF_REACTION, 1, 0, reaction_id);
+                    double new_propensity = compute_propensity(1, 0, reaction_id);
 
                     update_function(LatticeUpdate {
                     .index = reaction_id,
@@ -394,7 +390,7 @@ void LGMC::relevant_react(std::function<void(LatticeUpdate lattice_update)> upda
                 
                 if(reaction->type == Type::ADSORPTION) {
                     
-                    double new_propensity = compute_propensity(site, GILLESPIE_SITE, 1, state[other_reactant_id], reaction_id);
+                    double new_propensity = compute_propensity(1, state[other_reactant_id], reaction_id);
 
                     update_function(LatticeUpdate {
                                     .index = reaction_id,
@@ -411,7 +407,7 @@ void LGMC::relevant_react(std::function<void(LatticeUpdate lattice_update)> upda
                     if(!ignore_neighbor || (ignore_neighbor && neighbor != ignore_neighbor)) {
                         if(lattice->sites[neighbor].species == reaction->reactants[other_reactant_id]) {
 
-                            double new_propensity = compute_propensity(site, neighbor, 1, 1, reaction_id);
+                            double new_propensity = compute_propensity(1, 1, reaction_id);
 
                             update_function(LatticeUpdate {
                                             .index = reaction_id,
@@ -482,7 +478,7 @@ void print_usage() {
 
 void print_usage_lattice() {
     // TODO
-    assert(false)
+    assert(false);
 }
 
 /* ---------------------------------------------------------------------- */

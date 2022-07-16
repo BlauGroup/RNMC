@@ -64,10 +64,10 @@ Lattice::Lattice(float latconst_in,
 
 Lattice::~Lattice() {
 
-    memory->destroy(sites);
+    //memory->destroy(sites);
     
-    memory->destroy(numneigh);
-    memory->destroy(idneigh);
+    //memory->destroy(numneigh);
+    //memory->destroy(idneigh);
 
     delete memory;
 } // ~Lattice()

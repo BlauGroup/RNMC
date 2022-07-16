@@ -35,9 +35,9 @@ class LGMC {
                         std::vector<int> &state, int next_reaction, 
                         std::optional<int> site_one, std::optional<int> site_two, double prop_sum);
 
-        void update_propensities(std::vector<int> &state, this->update_function, 
-                                        lattice_update_function, int next_reaction, 
-                                        std::optional<int> site_one, std::optional<int> site_two);
+        void update_propensities(std::vector<int> &state, std::function<void(Update update)> update_function, 
+                                        std::function<void(LatticeUpdate lattice_update)> lattice_update_function, 
+                                        int next_reaction, std::optional<int> site_one, std::optional<int> site_two);
 
         void update_adsorption(); // TODO
 
@@ -58,10 +58,9 @@ class LGMC {
         void relevant_react(std::function<void(LatticeUpdate lattice_update)> update_function, 
                             std::vector<int> &state, int site, std::optional<int> ignore_neighbor);
 
-        double compute_propensity(int site_one, int site_two, int num_one, 
-                                int num_two, int react_id);
+        double compute_propensity(int num_one, int num_two, int react_id);
 
-        void update_propensities(std::vector<int> &state,
+        bool update_propensities(std::vector<int> &state,
                         std::function<void(LatticeUpdate lattice_update)> 
                         update_function, int next_reaction, int site_one, int site_two);
 
@@ -70,10 +69,6 @@ class LGMC {
         double sum_row(std::string hash, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props);
 
-        /* for EVAN */
-        void update_electrochemical();
-
-        void update_adsorption();
 
         /* -------------------------------------------------------------------------------- */
         // convert a history element as found a simulation to history
@@ -84,6 +79,15 @@ class LGMC {
         
         std::vector<double> initial_propensities;
         std::vector<int> initial_state;
+
+        // model compatibility 
+        void update_state(std::vector<int> &state,
+        int reaction_index) {assert(false);};
+
+        void update_propensities(
+        std::function<void(Update update)> update_function,
+        std::vector<int> &state,
+        int next_reaction) {assert(false);};
 
     private:                                                          
                            
