@@ -2,6 +2,7 @@
 #include "solvers.h"
 #include "../LGMC/LatSolver.h"
 #include "queues.h"
+#include "../LGMC/lattice.h"
 #include <functional>
 #include <csignal>
 

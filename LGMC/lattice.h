@@ -66,6 +66,7 @@ public:
     std::vector<Site> sites;                                // list of Sites for lattice
     std::vector<uint32_t*> idneigh;                         // neighbor IDs for each site
     std::vector<uint32_t> numneigh;                         // # of neighbors of each site
+    std::vector<uint32_t> edge;                             // ids of sites on the edge that can adsorb
 
     std::map<std::tuple<uint32_t, uint32_t, uint32_t>, int> loc_map;  // Mapping from site location to site ID
 

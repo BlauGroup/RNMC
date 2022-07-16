@@ -39,7 +39,10 @@ class LGMC {
                                         std::function<void(LatticeUpdate lattice_update)> lattice_update_function, 
                                         int next_reaction, std::optional<int> site_one, std::optional<int> site_two);
 
-        void update_adsorption(); // TODO
+        void update_adsorp_state(std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props,
+                                double prop_sum); 
+
+        void update_adsorp_props(std::function<void(LatticeUpdate lattice_update)> lattice_update_function, std::vector<int> &state);
 
         /* -------------------------------- Updates Lattice ----------------------------- */
 
