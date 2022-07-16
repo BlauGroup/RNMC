@@ -50,8 +50,6 @@ class LatSolver {
 
         int number_of_active_indices;               // end simulation of no sites with non zero propensity            
 
-        unsigned long int last_non_zero_event;   
-
         std::unordered_map<std::string,                     // lattice propensities 
         std::vector< std::pair<double, int> > > props;      // key: (site_one, site_two) value: propensity 
         std::vector<double> propensities;                   // Gillepsie propensities 
@@ -76,7 +74,6 @@ LatSolver::LatSolver(unsigned long int seed,
             propensity_sum += propensities[i];
             if (propensities[i] > 0) {
                 number_of_active_indices += 1;
-                last_non_zero_event = i;
             }
 
         }
@@ -95,7 +92,6 @@ LatSolver::LatSolver( unsigned long int seed,
             propensity_sum += propensities[i];
             if (propensities[i] > 0) {
                 number_of_active_indices += 1;
-                last_non_zero_event = i;
             }
 
         }
@@ -109,8 +105,6 @@ void LatSolver::update(Update update) {
 
     if (update.propensity > 0.0) {
         number_of_active_indices++;
-        if ( update.index > last_non_zero_event )
-            last_non_zero_event = update.index;
     }
 
 
@@ -209,10 +203,10 @@ std::pair<std::optional<Event>, std::optional<LatticeEvent>> LatSolver::event_la
                                                                                 .dt = dt}));
     }
     else if(isFound && !isLattice) {
-        return std::make_pair(std::optional<Event>(Event {.index = last_non_zero_event, .dt = dt}), std::optional<LatticeEvent> ());
+        return std::make_pair(std::optional<Event>(Event {.index = reaction_id, .dt = dt}), std::optional<LatticeEvent> ());
     }
     else {
-        return std::make_pair(std::optional<Event> (Event {.index = last_non_zero_event, .dt = dt}), std::optional<LatticeEvent> ());
+        return std::make_pair(std::optional<Event> (), std::optional<LatticeEvent> ());
     }
         
 }

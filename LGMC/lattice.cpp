@@ -17,8 +17,8 @@ using namespace LGMC_NS;
 /* ---------------------------------------------------------------------- */
 
 Lattice::Lattice(float latconst_in, 
-        float boxxlo_in, float boxxhi_in, float boxylo_in,
-        float boxyhi_in, float boxzlo_in, float boxzhi_in,
+        int ilo_in, int ihi_in, int jlo_in,
+        int jhi_in, int klo_in, int khi_in, 
         bool is_xperiodic_in, bool is_yperiodic_in, bool is_zperiodic_in)  {
     // TODO: implement error handling
     
@@ -27,12 +27,12 @@ Lattice::Lattice(float latconst_in,
     latconst = latconst_in;
     
     // region of simulation input * lattice spacing
-    boxxlo = boxxlo_in * latconst;
-    boxxhi = boxxhi_in * latconst;
-    boxylo = boxylo_in * latconst;
-    boxyhi = boxyhi_in * latconst;
-    boxzlo = boxzlo_in * latconst;
-    boxzhi = boxzhi_in * latconst;
+    xlo = ilo_in * latconst;
+    xhi = ihi_in * latconst;
+    ylo = jlo_in * latconst;
+    yhi = jhi_in * latconst;
+    zlo = klo_in * latconst;
+    zhi = khi_in * latconst;
     
     // 0 = non-periodic, 1 = periodic
     is_xperiodic = is_xperiodic_in;
@@ -79,9 +79,9 @@ void Lattice::structured_lattice() {
     
     // if not fully periodic IDs may be non-contiguous and/or ordered irregularly
     uint32_t nx, ny, nz;
-    nx = (boxxhi - boxxlo / latconst);
-    ny = (boxyhi - boxylo / latconst);
-    nz = (boxzhi - boxzlo / latconst);
+    nx = (xhi - xlo / latconst);
+    ny = (yhi - ylo / latconst);
+    nz = (zhi - zlo / latconst);
 
     // if dim is periodic:
     //    lattice origin = lower box boundary
@@ -91,42 +91,42 @@ void Lattice::structured_lattice() {
     //   loop bounds = enough to tile box completely, with all basis atoms
     
     if (is_xperiodic) {
-        xlo = 0;
-        xhi = nx-1;
+        ilo = 0;
+        ihi = nx-1;
       }
     else {
-        xlo = (boxxlo / latconst);
-        while ((xlo+1)*latconst > boxxlo) xlo--;
-        xlo++;
-        xhi = (boxxhi / latconst);
-        while (xhi*latconst <= boxxhi) xhi++;
-        xhi--;
+        ilo = (xlo / latconst);
+        while ((ilo+1) * latconst > xlo) ilo--;
+        ilo++;
+        ihi = (xhi / latconst);
+        while (ihi * latconst <= xhi) ihi++;
+        ihi--;
       }
 
     if (is_yperiodic) {
-        ylo = 0;
-        yhi = ny-1;
+        jlo = 0;
+        jhi = ny-1;
     }
     else {
-        ylo = (boxylo / latconst);
-        while ((ylo+1)*latconst > boxylo) ylo--;
-        ylo++;
-        yhi = (boxyhi / latconst);
-        while (yhi*latconst <= boxyhi) yhi++;
-        yhi--;
+        jlo = (ylo / latconst);
+        while ((jlo+1)*latconst > ylo) jlo--;
+        jlo++;
+        jhi = (yhi / latconst);
+        while (jhi*latconst <= yhi) jhi++;
+        jhi--;
     }
 
     if (is_zperiodic) {
-        zlo = 0;
-        zhi = nz-1;
+        klo = 0;
+        khi = nz-1;
     }
     else {
-        zlo = (boxzlo / latconst);
-        while ((zlo+1)*latconst > boxzlo) zlo--;
-        zlo++;
-        zhi = (boxzhi / latconst);
-        while (zhi*latconst <= boxzhi) zhi++;
-        zhi--;
+        klo = (zlo / latconst);
+        while ((klo+1)*latconst > zlo) klo--;
+        klo++;
+        khi = (zhi / latconst);
+        while (khi*latconst <= zhi) khi++;
+        khi--;
     }
 
     
@@ -140,20 +140,20 @@ void Lattice::structured_lattice() {
     float x,y,z;
     bool can_adsorb;
 
-    for (int k = zlo; k <= zhi; k++)
-        for (int j = ylo; j <= yhi; j++)
-            for (int i = xlo; i <= xhi; i++) {
+    for (int k = klo; k <= khi; k++)
+        for (int j = jlo; j <= jhi; j++)
+            for (int i = ilo; i <= ihi; i++) {
                 x = i*latconst;
                 y = j*latconst;
                 z = k*latconst;
 
-                if (i == xhi && !is_xperiodic) {
+                if (i == ihi && !is_xperiodic) {
                     can_adsorb = true;
                 }
-                else if (j == yhi && !is_yperiodic) {
+                else if (j == jhi && !is_yperiodic) {
                     can_adsorb = true;
                 }
-                else if (k == zhi && !is_zperiodic) {
+                else if (k == khi && !is_zperiodic) {
                     can_adsorb = true;
                 }
 
@@ -177,9 +177,9 @@ void Lattice::structured_connectivity() {
     uint32_t gid;
     int xneigh,yneigh,zneigh;
     
-    float xprd = boxxhi - boxxlo;
-    float yprd = boxyhi - boxylo;
-    float zprd = boxzhi - boxzlo;
+    float xprd = xhi - xlo;
+    float yprd = yhi - ylo;
+    float zprd = zhi - zlo;
     
     int nx = static_cast<int> (xprd / latconst);
     int ny = static_cast<int> (yprd / latconst);
@@ -229,7 +229,7 @@ void Lattice::structured_connectivity() {
                 }
                 if (ineigh >= nx) {
                     xneigh -= xprd;
-                    xneigh = MAX(xneigh, static_cast<int> (boxxlo));
+                    xneigh = MAX(xneigh, static_cast<int> (xlo));
                     ineigh -= nx;
                 }
             }
@@ -240,7 +240,7 @@ void Lattice::structured_connectivity() {
                 }
                 if (jneigh >= ny) {
                     yneigh -= yprd;
-                    yneigh = MAX(yneigh, static_cast<int> (boxylo));
+                    yneigh = MAX(yneigh, static_cast<int> (ylo));
                     jneigh -= ny;
                 }
             }
@@ -251,20 +251,20 @@ void Lattice::structured_connectivity() {
                 }
                 if (kneigh >= nz) {
                     zneigh -= zprd;
-                    zneigh = MAX(zneigh, static_cast<int> (boxzlo));
+                    zneigh = MAX(zneigh, static_cast<int> (zlo));
                     kneigh -= nz;
                 }
             }
 
             // discard neighs that are outside non-periodic box or region
-            if (!is_xperiodic && (xneigh < boxxlo || xneigh > boxxhi)) continue;
-            if (!is_yperiodic && (yneigh < boxylo || yneigh > boxyhi)) continue;
-            if (!is_zperiodic && (zneigh < boxzlo || zneigh > boxzhi)) continue;
+            if (!is_xperiodic && (xneigh < xlo || xneigh > xhi)) continue;
+            if (!is_yperiodic && (yneigh < ylo || yneigh > yhi)) continue;
+            if (!is_zperiodic && (zneigh < zlo || zneigh > zhi)) continue;
 
             // gid = global ID of neighbor
             // calculated in same manner that structured_lattice() generated IDs
-            gid = uint32_t((kneigh-zlo)*(yhi-ylo+1)*(xhi-xlo+1)) +
-                  uint32_t((jneigh-ylo)*(xhi-xlo+1)) + uint32_t((ineigh-xlo));
+            gid = uint32_t((kneigh-klo)*(jhi-jlo+1)*(ihi-ilo+1)) +
+                  uint32_t((jneigh-jlo)*(ihi-ilo+1)) + uint32_t((ineigh-ilo));
             
             
         /*std::cout << "neighbor: (" << sites[gid].x << ", " << sites[gid].y << ", " 
@@ -332,6 +332,7 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
         nmax += DELTA;
         sites.reserve(nmax);
         numneigh.reserve(nmax);
+        idneigh.reserve(nmax);
 
         // Initialize neighbor information for this new site
         numneigh.push_back(0);
@@ -351,15 +352,42 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
         update_neighbors(nsites, meta_neighbors_in);
     }
 
+    if (sites[nsites].x < xlo) {
+        xlo = sites[nsites].x;
+        ilo = sites[nsites].i;
+    }
+    else if (sites[nsites].x > xhi) {
+        xhi = sites[nsites].x;
+        ihi = sites[nsites].i;
+    }
+
+    if (sites[nsites].y < ylo) {
+        ylo = sites[nsites].y;
+        jlo = sites[nsites].j;
+    }
+    else if (sites[nsites].y > yhi) {
+        yhi = sites[nsites].y;
+        jhi = sites[nsites].j;
+    }
+
+    if (sites[nsites].z < zlo) {
+        zlo = sites[nsites].z;
+        klo = sites[nsites].k;
+    }
+    else if (sites[nsites].z > zhi) {
+        zhi = sites[nsites].z;
+        khi = sites[nsites].k;
+    }
+
     nsites++;
 
 } // add_site()
 
 void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
 
-    float xprd = boxxhi - boxxlo;
-    float yprd = boxyhi - boxylo;
-    float zprd = boxzhi - boxzlo;
+    float xprd = xhi - xlo;
+    float yprd = yhi - ylo;
+    float zprd = zhi - zlo;
     
     int nx = static_cast<int> (xprd / latconst);
     int ny = static_cast<int> (yprd / latconst);

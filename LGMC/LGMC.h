@@ -7,19 +7,24 @@
 #include "lattice.h"
 #include "../GMC/reaction_network.h"
 #include "../core/sampler.h"
+#include "../core/simulation.h"
+#include "LatSolver.h"
 
-struct LatticeGillespieMonteCarlo {
+struct LGMCParameters {
     float latconst;                               
-    int boxxlo,boxxhi,boxylo,                   
-    boxyhi,boxzlo,boxzhi;                       
-    float xperiodic,yperiodic,zperiodic;
-    
-}
+    float boxxlo,boxxhi,boxylo,                   
+          boxyhi,boxzlo,boxzhi;                       
+    bool xperiodic, yperiodic, zperiodic;
+    float temperature;
+    float potential;
+};
+
 namespace LGMC_NS {
 
 class LGMC {
     public: 
-        LGMC(Lattice &lattice, LatticeReactionNetwork &react_net);
+        LGMC(SqlConnection &reaction_network_database, SqlConnection &initial_state_database, 
+            LGMCParameters parameters);
         
         ~LGMC();
 
@@ -75,7 +80,6 @@ class LGMC {
     private:                                                          
                            
         LatticeReactionNetwork *react_net;                   // pointer to gillespie reaction network
-
         Memory *memory;                            // memory allocation functions
         Lattice *lattice;                          // lattice for SEI
         Sampler sampler;
