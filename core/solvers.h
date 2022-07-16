@@ -34,6 +34,7 @@ public:
     // we also implement initialization by copying from a reference
     LinearSolver(unsigned long int seed, std::vector<double> &&initial_propensities);
     LinearSolver(unsigned long int seed, std::vector<double> &initial_propensities);
+    LinearSolver(): sampler(Sampler(0)) {}; // defualt constructor
     void update(Update update);
     void update(std::vector<Update> updates);
     std::optional<Event> event();
@@ -57,6 +58,7 @@ private:
 public:
     // tree solver is constructed using a reference because it ends up
     // forming the tail end of a larger vector
+    TreeSolver(): sampler(Sampler(0)) {}; // defualt constructor
     TreeSolver(unsigned long int seed, std::vector<double> &initial_propensities);
     void update(Update update);
     void update(std::vector<Update> updates);
@@ -74,6 +76,7 @@ private:
 
 public:
     SparseSolver(unsigned long int seed, std::vector<double> &initial_propensities);
+    SparseSolver(): sampler(Sampler(0)) {}; // defualt constructor
     void update(Update update);
     void update(std::vector<Update> updates);
     std::optional<Event> event();

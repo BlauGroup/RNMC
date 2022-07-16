@@ -35,7 +35,7 @@ PERF_FILE = perf.data*
 # Default Flags (we prefer -std=c++17 but Mac/Xcode/Clang doesn't support)
 # WARNING: Adding flags like _GLIBCXX_DEBUG or -fsanitize
 # may prevent your project from working properly!
-CXXFLAGS = -fno-rtti -fno-exceptions -std=c++17 -Wall -Wextra -g $(shell gsl-config --cflags) $(shell gsl-config --libs) -lsqlite3 -lpthread
+CXXFLAGS = -fno-rtti -fno-exceptions -std=c++20 -Wall -Wextra -g $(shell gsl-config --cflags) $(shell gsl-config --libs) -lsqlite3 -lpthread
 
 # make release - will compile "all" with $(CXXFLAGS) and the -O3 flag
 #                also defines NDEBUG so that asserts will not check

@@ -1,15 +1,10 @@
-#ifndef LAT_SOLVER_H
-#define LAT_SOLVER_H
-
+#pragma once
 #include "../core/sampler.h"
 #include <vector>
 #include <unordered_map>
 #include "../core/solvers.h"
 #include <string>
 #include <numeric>
-#include "LGMC.h"
-
-using namespace LGMC_NS;
 
 struct LatticeUpdate {
     unsigned long int index;
@@ -19,14 +14,15 @@ struct LatticeUpdate {
 };
 
 struct LatticeEvent {
-    int site_one;
-    int site_two;
+    std::optional<int> site_one;
+    std::optional<int> site_two;
     unsigned long int index;
     double dt;
 };
 
 class LatSolver {
     public:
+        LatSolver() : sampler(Sampler(0)) {}; // defualt constructor
         LatSolver(unsigned long int seed, std::vector<double> &&initial_propensities);
         LatSolver(unsigned long int seed, std::vector<double> &initial_propensities);
 
@@ -36,23 +32,23 @@ class LatSolver {
         void update(LatticeUpdate lattice_update);
         void update(std::vector<LatticeUpdate> lattice_updates);
 
-        std::pair<std::optional<Event>, std::optional<LatticeEvent>> event_lattice();
+        std::optional<LatticeEvent> event_lattice();
 
         std::string make_string(int site_one, int site_two);
-
-        double propensity_sum;  
 
         // for comptability 
         std::optional<Event> event() {return std::optional<Event>();};
 
+        double propensity_sum;
+
     private:
         Sampler sampler;
+        std::vector<double> propensities;                   // Gillepsie propensities 
 
-        int number_of_active_indices;               // end simulation of no sites with non zero propensity            
-
+        int number_of_active_indices;               // end simulation of no sites with non zero propensity              
+        
         std::unordered_map<std::string,                     // lattice propensities 
         std::vector< std::pair<double, int> > > props;      // key: (site_one, site_two) value: propensity 
-        std::vector<double> propensities;                   // Gillepsie propensities 
 
 };
 
@@ -62,13 +58,13 @@ class LatSolver {
 // LinearSolver can opperate directly on the passed propensities using a move
 LatSolver::LatSolver(unsigned long int seed,
     std::vector<double> &&initial_propensities) :
+    propensity_sum (0.0),
     sampler (Sampler(seed)),
     // if this move isn't here, the semantics is that initial
     // propensities gets moved into a stack variable for the function
     // call and that stack variable is copied into the object.
     propensities (std::move(initial_propensities)),
-    number_of_active_indices (0),
-    propensity_sum (0.0) 
+    number_of_active_indices (0)
 {
     for (unsigned long i = 0; i < propensities.size(); i++) {
             propensity_sum += propensities[i];
@@ -83,10 +79,10 @@ LatSolver::LatSolver(unsigned long int seed,
 
 LatSolver::LatSolver( unsigned long int seed,
     std::vector<double> &initial_propensities) :
+    propensity_sum (0.0),
     sampler (Sampler(seed)),
     propensities (initial_propensities),
-    number_of_active_indices (0),
-    propensity_sum (0.0) 
+    number_of_active_indices (0)
     {
         for (unsigned long i = 0; i < propensities.size(); i++) {
             propensity_sum += propensities[i];
@@ -141,10 +137,10 @@ void LatSolver::update(std::vector<Update> updates) {
 
 /* ---------------------------------------------------------------------- */
 
-std::pair<std::optional<Event>, std::optional<LatticeEvent>> LatSolver::event_lattice() {
+std::optional<LatticeEvent> LatSolver::event_lattice() {
     if (number_of_active_indices == 0) {
         propensity_sum = 0.0;
-        return std::make_pair(std::optional<Event>(), std::optional<LatticeEvent>());
+        return std::optional<LatticeEvent> ();
     }
 
     double r1 = sampler.generate();
@@ -156,8 +152,8 @@ std::pair<std::optional<Event>, std::optional<LatticeEvent>> LatSolver::event_la
     bool isFound = false;
     bool isLattice = false;
     unsigned long int reaction_id = 0;
-    int site_one = 0;
-    int site_two = 0;
+    std::optional<int> site_one = std::optional<int>();
+    std::optional<int> site_two = std::optional<int>();
     std::string hash;
 
 
@@ -175,7 +171,7 @@ std::pair<std::optional<Event>, std::optional<LatticeEvent>> LatSolver::event_la
     if(!isFound) {
         auto it = props.begin();
         while(!isFound || it != props.end()) {
-            for(int i = 0; i < it->second.size(); i++ ) {
+            for(int i = 0; i < int(it->second.size()); i++ ) {
                 partial += it->second[i].first;
 
                 if(partial > fraction) {
@@ -185,8 +181,8 @@ std::pair<std::optional<Event>, std::optional<LatticeEvent>> LatSolver::event_la
                     reaction_id = it->second[i].second;
 
                     std::size_t pos = hash.find(".");
-                    site_one = stoi(hash.substr(0, pos));
-                    site_two = stoi(hash.substr(pos));
+                    site_one = std::optional<int>(stoi(hash.substr(0, pos)));
+                    site_two = std::optional<int>(stoi(hash.substr(pos)));
                     isFound = true;
                     break;
                 }
@@ -197,16 +193,12 @@ std::pair<std::optional<Event>, std::optional<LatticeEvent>> LatSolver::event_la
     
     double dt = - std::log(r2) / propensity_sum;
 
-    if(isFound && isLattice) {
-        return std::make_pair(std::optional<Event>(), std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id,
-                                                                                .site_one = site_one, .site_two = site_two, 
-                                                                                .dt = dt}));
-    }
-    else if(isFound && !isLattice) {
-        return std::make_pair(std::optional<Event>(Event {.index = reaction_id, .dt = dt}), std::optional<LatticeEvent> ());
+    if(isFound ) {
+        return std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id, .dt = dt,
+                                                           .site_one = site_one, .site_two = site_two});
     }
     else {
-        return std::make_pair(std::optional<Event> (), std::optional<LatticeEvent> ());
+        return std::optional<LatticeEvent> ();
     }
         
 }
@@ -220,4 +212,3 @@ std::string LatSolver::make_string(int site_one, int site_two) {
 
 } // make_string
 
-#endif

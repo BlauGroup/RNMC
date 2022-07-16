@@ -40,6 +40,67 @@ LGMC::~LGMC()
     delete lattice;
 } // ~LGMC()
 
+/* ---------------------------------------------------------------------- 
+    Global Updates
+---------------------------------------------------------------------- */
+
+void LGMC::update_state(std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props,
+                        std::vector<int> &state, int next_reaction, 
+                        std::optional<int> site_one, std::optional<int> site_two, double prop_sum) {
+    
+    if(site_one) {
+        // update lattice state
+        bool update_gillepsie = update_state(props, next_reaction, site_one.value(), 
+                                            site_two.value(), solver.propensity_sum);
+        
+        if(update_gillepsie) {
+            react_net->update_state(state, next_reaction);
+        }
+    }
+    
+    else {
+        // gillespie event happens
+        react_net->update_state(state, next_reaction);
+
+    }
+
+} // update_state
+
+/* ---------------------------------------------------------------------- */
+
+void LGMC::update_propensities(std::vector<int> &state, std::function<void(Update update)> update_function, 
+                                        std::function<void(LatticeUpdate lattice_update)> lattice_update_function, 
+                                        int next_reaction, std::optional<int> site_one, std::optional<int> site_two) {
+
+    if(site_one) {
+        // update lattice state
+        bool update_gillepsie = update_propensities(state, lattice_update_function, next_reaction, site_one.value(), site_two.value());
+        
+        if(update_gillepsie) {
+            react_net->update_propensities(update_function, state, next_reaction);
+        }
+    }
+    
+    else {
+        // gillespie event happens
+        react_net->update_propensities(update_function, state, next_reaction);
+
+    }
+
+    update_adsorption();
+
+}
+
+/* ---------------------------------------------------------------------- */
+
+void LGMC::update_adsorption() {
+    assert(false);
+}
+
+/* ---------------------------------------------------------------------- 
+---------------------------------------------------------------------- */
+
 
 /* ---------------------------------------------------------------------- 
     Only calls this function if necessary reactants are on lattice sites
@@ -378,18 +439,6 @@ std::string LGMC::make_string(int site_one, int site_two) {
 
 } // make_string
 
-
-/* -------------------------------- Gillespie Updates ----------------------------- */
-void LGMC::update_state(std::vector<int> &state, int reaction_index) {
-    react_net->update_state(state, reaction_index);
-}
-
-void LGMC::update_propensities(std::function<void(Update update)> update_function,
-                                std::vector<int> &state, int next_reaction) {
-    react_net->update_propensities(update_function, state, next_reaction);
-
-}
-
 /* ---------------------------------------------------------------------- */
 
 double LGMC::sum_row(std::string hash, std::unordered_map<std::string,                     
@@ -432,7 +481,8 @@ void print_usage() {
 } // print_usage()
 
 void print_usage_lattice() {
-
+    // TODO
+    assert(false)
 }
 
 /* ---------------------------------------------------------------------- */

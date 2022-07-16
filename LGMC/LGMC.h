@@ -28,15 +28,28 @@ class LGMC {
         
         ~LGMC();
 
-        /* -------------------------------- Lattice Updates ----------------------------- */
+        /* -------------------------------- Updates LGMC ----------------------------- */
+
+        void update_state(std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props,
+                        std::vector<int> &state, int next_reaction, 
+                        std::optional<int> site_one, std::optional<int> site_two, double prop_sum);
+
+        void update_propensities(std::vector<int> &state, this->update_function, 
+                                        lattice_update_function, int next_reaction, 
+                                        std::optional<int> site_one, std::optional<int> site_two);
+
+        void update_adsorption(); // TODO
+
+        /* -------------------------------- Updates Lattice ----------------------------- */
 
         bool update_state(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props, 
-                        int next_reaction, int site_one, int site_two, double &prop_sum);
+                        int next_reaction, int site_one, int site_two, double prop_sum);
 
         void clear_site(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props,
-                        int site, std::optional<int> ignore_neighbor, double &prop_sum);
+                        int site, std::optional<int> ignore_neighbor, double prop_sum);
 
         void clear_site_helper(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props,
@@ -62,12 +75,7 @@ class LGMC {
 
         void update_adsorption();
 
-        /* -------------------------------- Gillespie Updates ----------------------------- */
-        void update_state(std::vector<int> &state, int reaction_index);
-
-        void update_propensities(std::function<void(Update update)> update_function,
-                                 std::vector<int> &state, int next_reaction);
-
+        /* -------------------------------------------------------------------------------- */
         // convert a history element as found a simulation to history
         // to a SQL type.
         TrajectoriesSql history_element_to_sql(
