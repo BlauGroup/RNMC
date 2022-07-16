@@ -96,6 +96,8 @@ class ReactionNetwork {
     virtual void fill_reactions(SqlConnection &reaction_network_database);
 };
 
+ReactionNetwork::ReactionNetwork() {};
+
 ReactionNetwork::ReactionNetwork(
      SqlConnection &reaction_network_database,
      SqlConnection &initial_state_database,
