@@ -17,18 +17,18 @@ int GILLESPIE_SITE = -2;
 using namespace LGMC_NS;
 
 LGMC::LGMC(SqlConnection &reaction_network_database, SqlConnection &initial_state_database, 
-            LatticeGillespieMonteCarlo parameters) : sampler (Sampler(0)) {
+            LGMCParameters parameters) : sampler (Sampler(0)) {
 
-    ReactionNetworkParameters react_parametrs;
+    ReactionNetworkParameters react_parameters;
     LatticeReactionNetwork lattice_reaction_network = LatticeReactionNetwork(reaction_network_database, initial_state_database, react_parameters);
-    react_net = &lattice_reactin_network;
+    react_net = &lattice_reaction_network;
 
     // create lattice
     lattice = new Lattice(parameters.latconst, parameters.boxxlo, parameters.boxxhi, parameters.boxylo,
                     parameters.boxyhi, parameters.boxzlo, parameters.boxzhi, parameters.xperiodic, parameters.yperiodic, parameters.zperiodic);
 
-    initial_propensities = react_net.initial_propensities;
-    initial_state = react_net.initial_state;
+    initial_propensities = react_net->initial_propensities;
+    initial_state = react_net->initial_state;
 } // LGMC()
 
 /* ---------------------------------------------------------------------- */
@@ -54,9 +54,9 @@ double LGMC::compute_propensity(int site_one, int site_two, int num_one, int num
 
     if(reaction->type == Type::CHARGE_TRANSFER) {
        assert(false);
-        /* ----------------*/
-        /* TODO: FOR EVAN */
-        /* ----------------*/
+        /* --------------- */
+        /* TODO: FOR EVAN  */
+        /* --------------- */
     }
 
     // one reactant
@@ -246,7 +246,7 @@ void LGMC::clear_site(std::unordered_map<std::string,
         }
     }
 
-    if(lattice->is_on_edge(site)) {
+    if(lattice->sites[site].can_adsorb) {
         // can interact with gillespie
         clear_site_helper(props, site, GILLESPIE_SITE, prop_sum);
     }
@@ -300,7 +300,7 @@ void LGMC::relevant_react(std::function<void(LatticeUpdate lattice_update)> upda
 
             // if reaction produces a solid product make sure on edge 
             if(reaction->type == Type::DESORPTION) {
-                if(lattice->is_on_edge(site)) {
+                if(lattice->sites[site].can_adsorb) {
                     
                     double new_propensity = compute_propensity(site, SELF_REACTION, 1, 0, reaction_id);
 
@@ -427,8 +427,7 @@ void print_usage() {
               << "number_of_simulations\n"
               << "base_seed\n"
               << "step_cutoff\n"
-              << "lattice_parameters\n"
-              << "isLGMC (T/F)\n";
+              << "lattice_parameters\n";
     
 } // print_usage()
 
@@ -454,7 +453,6 @@ int main(int argc, char **argv) {
         {"step_cutoff", optional_argument, NULL, 6},
         {"time_cutoff", optional_argument, NULL, 7},
         {"lattice_parameters", required_argument, NULL, 8},
-        {"isLGMC", required_argument, NULL, 9}
         {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };
@@ -467,6 +465,8 @@ int main(int argc, char **argv) {
     int number_of_simulations = 0;
     int base_seed = 0;
     int thread_count = 0;
+    std::string lattice_params_file; 
+
     Cutoff cutoff = {
         .bound =  { .step =  0 },
         .type_of_cutoff = step_termination
@@ -510,6 +510,9 @@ int main(int argc, char **argv) {
             cutoff.type_of_cutoff = time_termination;
             break;
 
+        case 8:
+            lattice_params_file = optarg;
+            break;
 
         default:
             // if an unexpected argument is passed, exit
@@ -521,12 +524,39 @@ int main(int argc, char **argv) {
 
     }
 
-    ReactionNetworkParameters parameters;
+    // read in LGMC parameters from file 
+    std::ifstream fin;
+    fin.open(lattice_params_file);
+
+    if(!fin.is_open()) {
+        std::cout << "Failed to open file: " << lattice_params_file << "\n";
+        exit(EXIT_FAILURE);
+    }
+
+    float latconst;                               
+    float boxxlo,boxxhi,boxylo,                   
+          boxyhi,boxzlo,boxzhi;                       
+    bool xperiodic, yperiodic, zperiodic;
+
+
+    std::cin >> latconst >> boxxlo >> boxxhi >> boxylo >> boxyhi >> boxzlo >> boxzhi
+    >> xperiodic >> yperiodic >> zperiodic;
+
+    if(std::cin.fail()) {
+        std::cout << "Incorrect file arguments.\n";
+        exit(EXIT_FAILURE);
+    }
+
+
+
+    LGMCParameters parameters{.latconst = latconst, .boxxlo = boxxlo, .boxxhi = boxxhi, 
+                              .boxylo = boxyhi, .boxzlo = boxzlo, .boxzhi = boxzhi, 
+                              .xperiodic = xperiodic, .yperiodic = yperiodic, .zperiodic = zperiodic};                               
 
     Dispatcher<
         TreeSolver,
-        ReactionNetwork,
-        ReactionNetworkParameters,
+        LGMC,
+        LGMCParameters,
         TrajectoriesSql
         >
 
@@ -538,7 +568,7 @@ int main(int argc, char **argv) {
         thread_count,
         cutoff,
         parameters, 
-        false
+        true
         );
 
     dispatcher.run_dispatcher();
