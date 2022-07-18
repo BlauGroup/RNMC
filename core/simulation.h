@@ -140,13 +140,22 @@ class LatticeSimulation : public Simulation<LatSolver, Model> {
     std::unordered_map<std::string,                     
         std::vector< std::pair<double, int> > > props;
     LatSolver latsolver;
+    LGMC_NS::Lattice *lattice;
     std::function<void(LatticeUpdate)> lattice_update_function;
 
     LatticeSimulation(Model &model, unsigned long int seed, int history_chunk_size,
                HistoryQueue<HistoryPacket> &history_queue) :
                Simulation<LatSolver, Model>(model, seed, history_chunk_size, history_queue),
                latsolver (seed, std::ref(model.initial_propensities)),
-               lattice_update_function ([&] (LatticeUpdate lattice_update) {latsolver.update(lattice_update);}) {};
+               lattice_update_function ([&] (LatticeUpdate lattice_update) {latsolver.update(lattice_update);}) {
+                
+                    if(model.initial_lattice) {
+                        lattice = new  LGMC_NS::Lattice(*model.initial_lattice);
+                    } else {
+                        lattice = nullptr;
+                    }
+                
+               };
 
     bool execute_step();
     void init(); 
@@ -155,8 +164,9 @@ class LatticeSimulation : public Simulation<LatSolver, Model> {
 
 template<typename Model>
 void LatticeSimulation<Model>::init() {
-    // TODO: initialize lattice components
-    assert(false);
+    this->model.update_adsorp_state(this->lattice, this->props, latsolver.propensity_sum, latsolver.number_of_active_indices);
+    this->model.update_adsorp_props(this->lattice, lattice_update_function, this->state);
+    
 }
 
 template<typename Model>
@@ -201,11 +211,11 @@ bool LatticeSimulation<Model>::execute_step() {
         this->step++;
 
         // update_state
-        this->model.update_state(std::ref(props), std::ref(this->state), next_reaction, 
-                    event.site_one, event.site_two, latsolver.propensity_sum);
+        this->model.update_state(lattice, std::ref(props), std::ref(this->state), next_reaction, 
+                    event.site_one, event.site_two, latsolver.propensity_sum, latsolver.number_of_active_indices);
 
         // update_propensities 
-        this->model.update_propensities(std::ref(this->state), this->update_function, 
+        this->model.update_propensities(lattice, std::ref(this->state), this->update_function, 
                                         lattice_update_function, next_reaction, 
                                         event.site_one, event.site_two);
 
