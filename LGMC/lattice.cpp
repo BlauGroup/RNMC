@@ -43,6 +43,7 @@ Lattice::Lattice(float latconst_in,
     maxneigh = 6;
     idneigh.resize(nmax);
     numneigh.resize(nmax);
+    edge.reserve(nmax);
 
     // create sites on lattice
     structured_lattice();
@@ -56,6 +57,54 @@ Lattice::Lattice(float latconst_in,
     }
 
 } // Lattice()
+
+/* ---------------------------------------------------------------------- */
+
+Lattice::Lattice(const Lattice& other) {
+
+    latconst = other.latconst;                               
+    boxxlo = other.boxxlo;
+    boxxhi = other.boxxhi;
+    boxylo = other.boxylo;               
+    boxyhi = other.boxyhi;
+    boxzlo = other.boxzlo;
+    boxzhi = other.boxzhi;                       
+    xlo = other.xlo;
+    xhi = other.xhi;
+    ylo = other.ylo;
+    yhi = other.yhi;
+    zlo = other.zlo;
+    zhi = other.zhi;                
+    is_xperiodic = other.is_xperiodic;
+    is_yperiodic = other.is_yperiodic;
+    is_zperiodic = other.is_zperiodic;         
+    
+    nsites = other.nsites;                               
+    nmax = other.nmax;                                
+
+    maxneigh = other.maxneigh;                              
+
+    sites = other.sites;                               
+                            
+    numneigh = other.numneigh;                         
+    edge = other.edge;
+
+    idneigh.resize(other.idneigh.size());
+
+    for(size_t i = 0; i < idneigh.size(); i++) {
+        
+        uint32_t* neighi;
+        create(neighi, maxneigh, "create:neighi");
+        for(size_t j = 0; j < other.numneigh[i]; j++) {
+            neighi[j] = other.idneigh[i][j];
+        }
+        idneigh[i] = neighi;
+    }                           
+
+    std::vector<uint32_t*> idneigh; 
+
+
+} // Lattice, custom constructor
 
 /* ---------------------------------------------------------------------- */
 
@@ -333,6 +382,7 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
         sites.reserve(nmax);
         numneigh.resize(nmax);
         idneigh.resize(nmax);
+        edge.reserve(edge);
     }
 
     // Initialize neighbor information for this new site
@@ -346,6 +396,10 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     sites.push_back(Site{i_in, j_in, k_in, x_in, y_in, z_in, 0, can_adsorb_in});
     std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
     loc_map[key] = nsites;
+    
+    if(can_absorb_in) {
+        edge.push_back(nsites);
+    }
 
     if (update_neighbors_in) {
         update_neighbors(nsites, meta_neighbors_in);
@@ -503,8 +557,32 @@ void Lattice::sfree(void *ptr)
 
 // TESTING //
 
-int main(int argc, char **argv) {
+/*int main(int argc, char **argv) {
 
     Lattice *lattice = new Lattice(1, 0, 2, 0, 2, 0, 2, true, true, false);
 
-}
+    // test copy constructor 
+    Lattice *lattice2 = new Lattice(*lattice);
+
+    std::cout << "using copy constructor" << std::endl;
+    std::cout << "numneigh" << std::endl;
+    for(int i = 0; i < 12; i++) {
+        std::cout << "[" << lattice2->sites[i].x << ", " <<
+        lattice2->sites[i].y << ", " << lattice2->sites[i].z << "]" << ",";
+        std::cout << "num: " << lattice2->numneigh[i] << std::endl;
+    }
+    
+    std::cout << "idneigh" << std::endl;
+    for(int i = 0; i < 12; i++) {
+        std::cout << "neighbors: ";
+        for(int j = 0; j < 6; j++) {
+            std::cout << lattice2->idneigh[i][j] << ", ";
+        }
+        std::cout << std::endl;
+    }
+
+    delete lattice;
+    delete lattice2;
+    
+
+}*/

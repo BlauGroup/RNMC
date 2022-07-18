@@ -67,10 +67,10 @@ private:
     float boxxlo,boxxhi,boxylo,                   // bounding of box
     boxyhi,boxzlo,boxzhi;                       // (yscale * read in value)
     int xlo,xhi,ylo,yhi,zlo,zhi;                // geometry info neighbors
-    bool is_xperiodic, is_yperiodic, is_zperiodic;          // 0 =   non-periodic, 1 = periodic
+    bool is_xperiodic, is_yperiodic, is_zperiodic;          
     
     int nsites;                                 // number of sites
-    int nmax;                                   // max # of sites per-site arrays can store
+    int nmax;                                   // max # sites, idneigh, numneigh can store at a given time
 
     int maxneigh;                               // max neighbors per site
 
@@ -87,6 +87,8 @@ public:
         float boxxlo_in, float boxxhi_in, float boxylo_in,
         float boxyhi_in, float boxzlo_in, float boxzhi_in, 
         bool xperiodic_in, bool yperiodic_in, bool zperiodic_in);   
+    
+    Lattice(const Lattice& other);                          // copy constructor
 
     ~Lattice();
 
@@ -101,6 +103,8 @@ public:
                   bool can_adsorb_in, bool update_neighbors_in, bool meta_neighbors_in);
 
     void update_neighbors(uint32_t n, bool meta_neighbors_in);
+
+    
 };
 
 }
