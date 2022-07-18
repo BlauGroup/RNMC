@@ -28,27 +28,46 @@ class LGMC {
         
         ~LGMC();
 
-        /* -------------------------------- Lattice Updates ----------------------------- */
+        /* -------------------------------- Updates LGMC ----------------------------- */
 
-        bool update_state(std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props, 
-                        int next_reaction, int site_one, int site_two, double &prop_sum);
-
-        void clear_site(std::unordered_map<std::string,                     
+        void update_state(Lattice *lattice, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props,
-                        int site, std::optional<int> ignore_neighbor, double &prop_sum);
+                        std::vector<int> &state, int next_reaction, 
+                        std::optional<int> site_one, std::optional<int> site_two, 
+                        double prop_sum, int active_indices);
+
+        void update_propensities(Lattice *lattice, std::vector<int> &state, std::function<void(Update update)> update_function, 
+                                        std::function<void(LatticeUpdate lattice_update)> lattice_update_function, 
+                                        int next_reaction, std::optional<int> site_one, std::optional<int> site_two);
+
+        void update_adsorp_state(Lattice *lattice, std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props,
+                                double prop_sum, int active_indices); 
+
+        void update_adsorp_props(Lattice *lattice, std::function<void(LatticeUpdate lattice_update)> lattice_update_function, std::vector<int> &state);
+
+        /* -------------------------------- Updates Lattice ----------------------------- */
+
+        bool update_state(Lattice *lattice, std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props, 
+                        int next_reaction, int site_one, int site_two, 
+                        double prop_sum, int active_indices);
+
+        void clear_site(Lattice *lattice, std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props,
+                        int site, std::optional<int> ignore_neighbor, 
+                        double prop_sum, int active_indices);
 
         void clear_site_helper(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props,
-                        int site_one, int site_two, double &prop_sum);
+                        int site_one, int site_two, double &prop_sum, 
+                        int active_indices);
 
-        void relevant_react(std::function<void(LatticeUpdate lattice_update)> update_function, 
-                            std::vector<int> &state, int site, std::optional<int> ignore_neighbor);
+        void relevant_react(Lattice *lattice, std::function<void(LatticeUpdate lattice_update)> update_function,
+                                            int site, std::optional<int> ignore_neighbor);
 
-        double compute_propensity(int site_one, int site_two, int num_one, 
-                                int num_two, int react_id);
+        double compute_propensity(int num_one, int num_two, int react_id);
 
-        void update_propensities(std::vector<int> &state,
+        bool update_propensities(Lattice *lattice, std::vector<int> &state,
                         std::function<void(LatticeUpdate lattice_update)> 
                         update_function, int next_reaction, int site_one, int site_two);
 
@@ -57,17 +76,8 @@ class LGMC {
         double sum_row(std::string hash, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props);
 
-        /* for EVAN */
-        void update_electrochemical();
 
-        void update_adsorption();
-
-        /* -------------------------------- Gillespie Updates ----------------------------- */
-        void update_state(std::vector<int> &state, int reaction_index);
-
-        void update_propensities(std::function<void(Update update)> update_function,
-                                 std::vector<int> &state, int next_reaction);
-
+        /* -------------------------------------------------------------------------------- */
         // convert a history element as found a simulation to history
         // to a SQL type.
         TrajectoriesSql history_element_to_sql(
@@ -76,12 +86,21 @@ class LGMC {
         
         std::vector<double> initial_propensities;
         std::vector<int> initial_state;
+        Lattice *initial_lattice;                          // lattice for SEI
+
+        // model compatibility 
+        void update_state(std::vector<int> &state,
+        int reaction_index) {assert(false);};
+
+        void update_propensities(
+        std::function<void(Update update)> update_function,
+        std::vector<int> &state,
+        int next_reaction) {assert(false);};
 
     private:                                                          
                            
         LatticeReactionNetwork *react_net;                   // pointer to gillespie reaction network
-        Memory *memory;                            // memory allocation functions
-        Lattice *lattice;                          // lattice for SEI
+
         Sampler sampler;
 
 };

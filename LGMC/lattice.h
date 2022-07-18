@@ -1,7 +1,6 @@
 #ifndef LATTICE_H
 #define LATTICE_H
 
-#include "memory.h"
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -46,7 +45,21 @@ struct Site {
 class Lattice {
 
 private:
-    Memory *memory;                             // handle lattice memory
+
+    /* ----------------------- handle memory ---------------------------------- */
+    
+    void *smalloc(int nbytes, const char *name);              // safe allocate         
+
+    template <typename TYPE>
+    TYPE *create(TYPE *&array, int n, const char *name);         // create 1D array
+
+    template <typename TYPE>
+    TYPE **create(TYPE **&array, int n1, int n2, const char *name); // create 2D array
+
+    template <typename TYPE>
+    void destroy(TYPE **array);                                  // destroy 2D array
+
+    void sfree(void *ptr);                                        // safe free
     
     /* ----------------------- structural information ------------------------ */
     
@@ -57,7 +70,7 @@ private:
     bool is_xperiodic, is_yperiodic, is_zperiodic;          // 0 =   non-periodic, 1 = periodic
     
     int nsites;                                 // number of sites
-    int nmax;                                   // max # of sites per-site arrays can store
+    int nmax;                                   // max # sites, idneigh, numneigh can store at a given time
 
     int maxneigh;                               // max neighbors per site
 
@@ -66,6 +79,7 @@ public:
     std::vector<Site> sites;                                // list of Sites for lattice
     std::vector<uint32_t*> idneigh;                         // neighbor IDs for each site
     std::vector<uint32_t> numneigh;                         // # of neighbors of each site
+    std::vector<uint32_t> edge;                             // ids of sites on the edge that can adsorb
 
     std::map<std::tuple<uint32_t, uint32_t, uint32_t>, int> loc_map;  // Mapping from site location to site ID
 
@@ -73,6 +87,8 @@ public:
         int ilo_in, int ihi_in, int jlo_in,
         int jhi_in, int klo_in, int khi_in, 
         bool xperiodic_in, bool yperiodic_in, bool zperiodic_in);   
+    
+    Lattice(const Lattice& other);                          // copy constructor
 
     ~Lattice();
 
@@ -87,6 +103,8 @@ public:
                   bool can_adsorb_in, bool update_neighbors_in, bool meta_neighbors_in);
 
     void update_neighbors(uint32_t n, bool meta_neighbors_in);
+
+    
 };
 
 }

@@ -59,26 +59,46 @@ struct SimulatorPayload {
 
             unsigned long int seed = maybe_seed.value();
 
+            if(!isLGMC) {
+                Simulation<Solver, Model> simulation (model, seed, history_chunk_size, history_queue);
+                simulation.init(model);
 
-            Simulation<Solver, Model> simulation (model, seed, history_chunk_size, history_queue);
+                switch(cutoff.type_of_cutoff) {
+                case step_termination :
+                    simulation.execute_steps(cutoff.bound.step);
+                    break;
+                case time_termination :
+                    simulation.execute_time(cutoff.bound.time);
+                    break;
+                }
 
-
-            switch(cutoff.type_of_cutoff) {
-            case step_termination :
-                simulation.execute_steps(cutoff.bound.step, isLGMC);
-                break;
-            case time_termination :
-                simulation.execute_time(cutoff.bound.time, isLGMC);
-                break;
-            }
-
-
-            history_queue.insert_history(
+                history_queue.insert_history(
                 std::move(
                     HistoryPacket {
                         .history = std::move(simulation.history),
                         .seed = seed
                         }));
+            }
+            else {
+                LatticeSimulation simulation (model, seed, history_chunk_size, history_queue);
+                simulation.init();
+
+                switch(cutoff.type_of_cutoff) {
+                case step_termination :
+                    simulation.execute_steps(cutoff.bound.step);
+                    break;
+                case time_termination :
+                    simulation.execute_time(cutoff.bound.time);
+                    break;
+                }
+
+                history_queue.insert_history(
+                std::move(
+                    HistoryPacket {
+                        .history = std::move(simulation.history),
+                        .seed = seed
+                        }));
+            }
 
         }
 
@@ -126,8 +146,7 @@ struct Dispatcher {
         initial_state_database (
             initial_state_database_file,
             SQLITE_OPEN_READWRITE),
-        model (
-            model_database,
+        model (model_database,
             initial_state_database,
             parameters),
         trajectories_stmt (initial_state_database),
@@ -144,7 +163,6 @@ struct Dispatcher {
         isLGMC(isLGMC)
         {
         };
-
 
     void run_dispatcher();
     void record_simulation_history(HistoryPacket history_packet);

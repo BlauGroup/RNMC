@@ -2,6 +2,7 @@
 #include "solvers.h"
 #include "../LGMC/LatSolver.h"
 #include "queues.h"
+#include "../LGMC/lattice.h"
 #include <functional>
 #include <csignal>
 
@@ -19,23 +20,21 @@ struct HistoryPacket {
 };
 
 template <typename Solver, typename Model>
-struct Simulation {
+class Simulation {
+    private: 
+        Solver solver;
+    public:
     Model &model;
     unsigned long int seed;
     std::vector<int> state;
-    std::unordered_map<std::string,                     
-        std::vector< std::pair<double, int> > > props;
     double time;
     int step; // number of reactions which have occoured
-    Solver solver;
     unsigned long int history_chunk_size;
     std::vector<HistoryElement> history;
     HistoryQueue<HistoryPacket> &history_queue;
     std::function<void(Update)> update_function;
-    std::function<void(LatticeUpdate)> lattice_update_function;
 
-    Simulation(Model &model,
-               unsigned long int seed,
+    Simulation(Model &model, unsigned long int seed,
                int history_chunk_size,
                HistoryQueue<HistoryPacket> &history_queue
         ) :
@@ -44,7 +43,6 @@ struct Simulation {
         state (model.initial_state),
         time (0.0),
         step (0),
-        solver (seed, std::ref(model.initial_propensities)),
         history_chunk_size (history_chunk_size),
         history_queue(history_queue),
         update_function ([&] (Update update) {solver.update(update);})
@@ -52,15 +50,16 @@ struct Simulation {
             history.reserve(history_chunk_size);
         };
 
-
-    bool execute_step();
-    bool execute_step_LGMC();
-    void init_lattice_props(); // TODO: FOR EVAN
-    void execute_steps(int step_cutoff, bool isLGMC);
-    void execute_time(double time_cutoff, bool isLGMC);
+    void init(Model &model);
+    virtual bool execute_step();
+    void execute_steps(int step_cutoff);
+    void execute_time(double time_cutoff);
 
 };
-
+template <typename Solver, typename Model>
+void Simulation<Solver, Model>::init(Model &model) {
+    solver = Solver(seed, std::ref(model.initial_propensities));
+}
 
 template <typename Solver, typename Model>
 bool Simulation<Solver, Model>::execute_step() {
@@ -117,121 +116,110 @@ bool Simulation<Solver, Model>::execute_step() {
 };
 
 template <typename Solver, typename Model>
-bool Simulation<Solver, Model>::execute_step_LGMC() {
-    std::pair<std::optional<Event>, std::optional<LatticeEvent>> maybe_events = solver.event_lattice();
+void Simulation<Solver, Model>::execute_steps(int step_cutoff) {
 
-    int next_reaction = 0;
+    while(execute_step()) {
+        if (step > step_cutoff)
+            break;
+    }
+    
+};
 
-    if (!maybe_events.first && !maybe_events.second) {
+template <typename Solver, typename Model>
+void Simulation<Solver, Model>::execute_time(double time_cutoff) {
+    while(execute_step()) {
+        if (time > time_cutoff)
+            break;
+    }
+};
+
+/* ---------------------------------------------------------------------- */
+template<typename Model>
+class LatticeSimulation : public Simulation<LatSolver, Model> {
+    public:
+    std::unordered_map<std::string,                     
+        std::vector< std::pair<double, int> > > props;
+    LatSolver latsolver;
+    LGMC_NS::Lattice *lattice;
+    std::function<void(LatticeUpdate)> lattice_update_function;
+
+    LatticeSimulation(Model &model, unsigned long int seed, int history_chunk_size,
+               HistoryQueue<HistoryPacket> &history_queue) :
+               Simulation<LatSolver, Model>(model, seed, history_chunk_size, history_queue),
+               latsolver (seed, std::ref(model.initial_propensities)),
+               lattice_update_function ([&] (LatticeUpdate lattice_update) {latsolver.update(lattice_update);}) {
+                
+                    if(model.initial_lattice) {
+                        lattice = new  LGMC_NS::Lattice(*model.initial_lattice);
+                    } else {
+                        lattice = nullptr;
+                    }
+                
+               };
+
+    bool execute_step();
+    void init(); 
+
+};
+
+template<typename Model>
+void LatticeSimulation<Model>::init() {
+    this->model.update_adsorp_state(this->lattice, this->props, latsolver.propensity_sum, latsolver.number_of_active_indices);
+    this->model.update_adsorp_props(this->lattice, lattice_update_function, this->state);
+    
+}
+
+template<typename Model>
+bool LatticeSimulation<Model>::execute_step() {
+
+    std::optional<LatticeEvent> maybe_event = latsolver.event_lattice();
+
+    if (! maybe_event) {
 
         return false;
 
-    } 
-    else if (maybe_events.second) {
-        // lattice event happens
-        LatticeEvent event = maybe_events.second.value();
+    } else {
+        // an event happens
+        LatticeEvent event = maybe_event.value();
         int next_reaction = event.index;
 
         // update time
-        time += event.dt;
+        this->time += event.dt;
 
-        // update state
-        bool update_gillepsie = model.update_state(std::ref(props), next_reaction, 
-                                                    event.site_one, event.site_two, solver.propensity_sum);
-        model.update_propensities(std::ref(state), lattice_update_function, next_reaction, event.site_one, event.site_two);
-        
-        if(update_gillepsie) {
-            model.update_state(std::ref(state), next_reaction);
-            model.update_propensities(update_function, std::ref(state), next_reaction);
+        // record what happened
+        this->history.push_back(HistoryElement {
+            .seed = this->seed,
+            .reaction_id = next_reaction,
+            .time = this->time,
+            .step = this->step
+            });
+
+        if (this->history.size() == this->history_chunk_size ) {
+            this->history_queue.insert_history(
+                std::move(
+                    HistoryPacket {
+                        .history = std::move(this->history),
+                        .seed = this->seed
+                        }));
+
+            this->history = std::vector<HistoryElement> ();
+            this->history.reserve(this->history_chunk_size);
         }
+
+
+        // increment step
+        this->step++;
+
+        // update_state
+        this->model.update_state(lattice, std::ref(props), std::ref(this->state), next_reaction, 
+                    event.site_one, event.site_two, latsolver.propensity_sum, latsolver.number_of_active_indices);
+
+        // update_propensities 
+        this->model.update_propensities(lattice, std::ref(this->state), this->update_function, 
+                                        lattice_update_function, next_reaction, 
+                                        event.site_one, event.site_two);
+
+        return true;
     }
-    
-    else {
-        // gillespie event happens
-        Event event = maybe_events.first.value();
-        int next_reaction = event.index;
-
-        // update time
-        time += event.dt;
-
-        // update state
-        model.update_state(std::ref(state), next_reaction);
-
-        // update propensities
-        model.update_propensities(
-            update_function,
-            std::ref(state),
-            next_reaction);
-    }
-
-    // record what happened
-    history.push_back(HistoryElement {
-        .seed = seed,
-        .reaction_id = next_reaction,
-        .time = time,
-        .step = step
-        });
-
-    if ( history.size() == history_chunk_size ) {
-        history_queue.insert_history(
-            std::move(
-                HistoryPacket {
-                    .history = std::move(history),
-                    .seed = seed
-                    }));
-
-        history = std::vector<HistoryElement> ();
-        history.reserve(history_chunk_size);
-    }
-
-
-    // increment step
-    step++;
-
-    return true;
-};
-
-template <typename Solver, typename Model>
-void Simulation<Solver, Model>::execute_steps(int step_cutoff, bool isLGMC) {
-    
-    
-    init_lattice_props(); // TODO: FOR EVAN
-
-    if(isLGMC) {
-        while(execute_step_LGMC()) {
-        if (step > step_cutoff)
-            break;
-        }
-    }
-    else {
-        while(execute_step()) {
-            if (step > step_cutoff)
-                break;
-        }
-    }
-    
-};
-
-template <typename Solver, typename Model>
-void Simulation<Solver, Model>::execute_time(double time_cutoff, bool isLGMC) {
-    if(isLGMC) {
-        while(execute_step_LGMC()) {
-        if (time > time_cutoff)
-            break;
-        }
-    }
-    else {
-        while(execute_step()) {
-        if (time > time_cutoff)
-            break;
-        }
-    }
-};
-
-/* ----------------*/
-/* TODO: FOR EVAN */
-/* ----------------*/
-template <typename Solver, typename Model>
-void Simulation<Solver, Model>::init_lattice_props() {
-    assert(false);
+ 
 }

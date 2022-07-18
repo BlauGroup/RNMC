@@ -11,6 +11,7 @@
 #include "../core/sql.h"
 #include "../GMC/sql_types.h"
 #include "../core/simulation.h"
+#include "../LGMC/lattice.h"
 
 class Reaction {
     public:
@@ -61,11 +62,12 @@ class ReactionNetwork {
     double factor_zero; // rate modifer for reactions with zero reactants
     double factor_two; // rate modifier for reactions with two reactants
     double factor_duplicate; // rate modifier for reactions of form A + A -> ...
+     LGMC_NS::Lattice *initial_lattice;
 
     // maps species to the reactions which involve that species
     std::vector<std::vector<int>> dependents;
 
-    ReactionNetwork();          // defualt constructor for inheritence
+    ReactionNetwork(){};         // defualt constructor for inheritence
 
     ReactionNetwork(
         SqlConnection &reaction_network_database,
@@ -94,6 +96,16 @@ class ReactionNetwork {
     // overwritten by base class
     virtual void init(SqlConnection &reaction_network_database);
     virtual void fill_reactions(SqlConnection &reaction_network_database);
+
+    // for model compatibilty 
+    void update_state(std::unordered_map<std::string,                     
+                    std::vector< std::pair<double, int> > > &props,
+                    std::vector<int> &state, int next_reaction, 
+                    std::optional<int> site_one, std::optional<int> site_two, double prop_sum){assert(false);};
+
+    void update_propensities(std::vector<int> &state, std::function<void(Update update)> update_function, 
+                                    std::function<void(LatticeUpdate lattice_update)> lattice_update_function, 
+                                    int next_reaction, std::optional<int> site_one, std::optional<int> site_two) {assert(false);};
 };
 
 ReactionNetwork::ReactionNetwork(
@@ -102,6 +114,7 @@ ReactionNetwork::ReactionNetwork(
      ReactionNetworkParameters parameters)
 
     {
+    initial_lattice = nullptr;
 
     // collecting reaction network metadata
     SqlStatement<MetadataSql> metadata_statement (reaction_network_database);
@@ -464,7 +477,6 @@ void LatticeReactionNetwork::compute_dependents() {
 
     dependents.resize(initial_state.size());
 
-
     for ( unsigned int reaction_id = 0; reaction_id <  reactions.size(); reaction_id++ ) {
         LatticeReaction *reaction = static_cast<LatticeReaction*> (reactions[reaction_id].get());
 
@@ -477,7 +489,20 @@ void LatticeReactionNetwork::compute_dependents() {
 };
 
 void LatticeReactionNetwork::update_state(std::vector<int> &state, int reaction_index) {
-    //TODO
+    
+    LatticeReaction *reaction = static_cast<LatticeReaction *> (reactions[reaction_index].get());
+
+    for (int m = 0;
+         m < reactions[reaction_index]->number_of_products;
+         m++) {
+        if(reaction->phase_reactants[m] == Phase::SOLUTION) state[reactions[reaction_index]->reactants[m]]--;
+    }
+
+    for (int m = 0;
+         m < reactions[reaction_index]->number_of_products;
+         m++) {
+        if(reaction->phase_products[m] == Phase::SOLUTION) state[reactions[reaction_index]->products[m]]++;
+    }
 };
 
 
