@@ -40,12 +40,11 @@ class LatSolver {
         std::optional<Event> event() {return std::optional<Event>();};
 
         double propensity_sum;
+        int number_of_active_indices;               // end simulation of no sites with non zero propensity   
 
     private:
         Sampler sampler;
-        std::vector<double> propensities;                   // Gillepsie propensities 
-
-        int number_of_active_indices;               // end simulation of no sites with non zero propensity              
+        std::vector<double> propensities;                   // Gillepsie propensities            
         
         std::unordered_map<std::string,                     // lattice propensities 
         std::vector< std::pair<double, int> > > props;      // key: (site_one, site_two) value: propensity 
@@ -114,6 +113,7 @@ void LatSolver::update(Update update) {
 void LatSolver::update(LatticeUpdate lattice_update) {
     
     propensity_sum += lattice_update.propensity;
+    number_of_active_indices++;
 
     std::string hash = make_string(lattice_update.site_one, lattice_update.site_two);
     props[hash].push_back(std::make_pair(lattice_update.propensity, lattice_update.index));
