@@ -20,9 +20,6 @@ Lattice::Lattice(float latconst_in,
         float boxxlo_in, float boxxhi_in, float boxylo_in,
         float boxyhi_in, float boxzlo_in, float boxzhi_in,
         bool is_xperiodic_in, bool is_yperiodic_in, bool is_zperiodic_in)  {
-    // TODO: implement error handling
-    
-    memory = new Memory();
 
     latconst = latconst_in;
     
@@ -44,8 +41,8 @@ Lattice::Lattice(float latconst_in,
     sites.reserve(nmax);
 
     maxneigh = 6;
-    idneigh.resize(0);
-    numneigh.reserve(nmax);
+    idneigh.resize(nmax);
+    numneigh.resize(nmax);
 
     // create sites on lattice
     structured_lattice();
@@ -53,10 +50,10 @@ Lattice::Lattice(float latconst_in,
     // set neighbors of each site
     structured_connectivity();
     
-    /*for(int n = 0; n < nsites; ++n) {
-        std::cout << "id: " << n << " [" << xyz[n][0] << ", " <<
-        xyz[n][1] << ", " << xyz[n][2] << "]" << std::endl;
-    }*/
+    for(int n = 0; n < nsites; ++n) {
+        std::cout << "id: " << n << " [" << sites[n].x << ", " <<
+        sites[n].y << ", " << sites[n].z << "]" << std::endl;
+    }
 
 } // Lattice()
 
@@ -64,12 +61,9 @@ Lattice::Lattice(float latconst_in,
 
 Lattice::~Lattice() {
 
-    //memory->destroy(sites);
-    
-    //memory->destroy(numneigh);
-    //memory->destroy(idneigh);
-
-    delete memory;
+    for(size_t i = 0; i < idneigh.size(); i++) {
+        sfree(idneigh[i]);
+    }
 } // ~Lattice()
 
 
@@ -191,7 +185,7 @@ void Lattice::structured_connectivity() {
                                 // cmap[maxneigh][3]
                                 // 0,1,2 = i,j,k lattice unit cell offsets
     
-    memory->create(cmap,maxneigh,3,"create:cmap");
+    create(cmap,maxneigh,3,"create:cmap");
 
     offsets_3d(cmap);
     
@@ -200,8 +194,8 @@ void Lattice::structured_connectivity() {
         numneigh[i] = 0;
 
         uint32_t* neighi;
-        memory->create(neighi, maxneigh, "create:neighi");
-        idneigh.push_back(neighi);
+        create(neighi, maxneigh, "create:neighi");
+        idneigh[i] = neighi;
       
         for (int neigh = 0; neigh < maxneigh; neigh++) {
 
@@ -217,7 +211,7 @@ void Lattice::structured_connectivity() {
             
             xneigh = static_cast<float> (ineigh) * latconst;
             yneigh = static_cast<float> (jneigh) * latconst;
-            zneigh = static_cast<float> (jneigh) * latconst;
+            zneigh = static_cast<float> (kneigh) * latconst;
             
             // remap neighbor coords and indices into periodic box via ijk neigh
             // remap neighbor coords and indices into periodic box via ijk neigh
@@ -263,13 +257,19 @@ void Lattice::structured_connectivity() {
 
             // gid = global ID of neighbor
             // calculated in same manner that structured_lattice() generated IDs
-            gid = uint32_t((kneigh-zlo)*(yhi-ylo+1)*(xhi-xlo+1)) +
-                  uint32_t((jneigh-ylo)*(xhi-xlo+1)) + uint32_t((ineigh-xlo));
+            int hello = (yhi-ylo+1);
+            int hi = (xhi-xlo+1);
+            int wtf = (kneigh-zlo);
+            int h = ((kneigh-zlo)*(yhi-ylo+1)*(xhi-xlo+1));
+            int l = ((jneigh-ylo)*(xhi-xlo+1));
+            int o = ((ineigh-xlo));
+            gid = ((kneigh-zlo)*(yhi-ylo+1)*(xhi-xlo+1)) +
+                  ((jneigh-ylo)*(xhi-xlo+1)) + ((ineigh-xlo));
             
             
-        /*std::cout << "neighbor: (" << sites[gid].x << ", " << sites[gid].y << ", " 
+        std::cout << "neighbor: (" << sites[gid].x << ", " << sites[gid].y << ", " 
                   << sites[gid].z << ") for: " << "[" << sites[i].x << ", " << 
-                  sites[i].y << ", " << sites[i].z << "]" << std::endl;*/
+                  sites[i].y << ", " << sites[i].z << "]" << std::endl;
             
         // add gid to neigh list of site i
         idneigh[i][numneigh[i]++] = gid;
@@ -292,7 +292,7 @@ void Lattice::structured_connectivity() {
         std::cout << std::endl;
     }
     
-    memory->destroy(cmap);
+    destroy(cmap);
 } // structured_connectivity()
 
 /* ---------------------------------------------------------------------- */
@@ -331,16 +331,16 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     if (nsites == nmax) {
         nmax += DELTA;
         sites.reserve(nmax);
-        numneigh.reserve(nmax);
-
-        // Initialize neighbor information for this new site
-        numneigh.push_back(0);
-
-        uint32_t* neighi;
-        memory->create(neighi, maxneigh, "create:neighi");
-        idneigh.push_back(neighi);
-
+        numneigh.resize(nmax);
+        idneigh.resize(nmax);
     }
+
+    // Initialize neighbor information for this new site
+    numneigh[nsites] = 0;
+
+    uint32_t* neighi;
+    create(neighi, maxneigh, "create:neighi");
+    idneigh[nsites]= neighi;
 
     // initially empty site, species = 0
     sites.push_back(Site{i_in, j_in, k_in, x_in, y_in, z_in, 0, can_adsorb_in});
@@ -354,6 +354,8 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     nsites++;
 
 } // add_site()
+
+/* ---------------------------------------------------------------------- */
 
 void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
 
@@ -400,14 +402,15 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
         }
     }
 
-    std::tuple<uint32_t,uint32_t,uint32_t> *ijk = {
-        {left, sites[n].j, sites[n].k},
-        {right, sites[n].j, sites[n].k},
-        {sites[n].i, backward, sites[n].k},
-        {sites[n].i, forward, sites[n].k},
-        {sites[n].i, sites[n].j, down},
-        {sites[n].i, sites[n].j, up},
-    };
+    std::tuple<uint32_t,uint32_t,uint32_t> *ijk;
+    create(ijk, 6, "create::ijk");
+    ijk[0] = {left, sites[n].j, sites[n].k};
+    ijk[1] = {right, sites[n].j, sites[n].k};
+    ijk[2] = {sites[n].i, backward, sites[n].k};
+    ijk[3] = {sites[n].i, forward, sites[n].k};
+    ijk[4] = {sites[n].i, sites[n].j, down};
+    ijk[5] = {sites[n].i, sites[n].j, up};
+    
 
     std::map<std::tuple<uint32_t,uint32_t,uint32_t>, int>::iterator it;
 
@@ -426,3 +429,82 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
     }
 
 } // update_neighbors()
+
+/* ----------------------------------------------------------------------
+   safe malloc 
+------------------------------------------------------------------------- */
+
+void *Lattice::smalloc(int nbytes, const char *name)
+{
+    if (nbytes == 0) return NULL;
+
+    void *ptr = malloc(size_t(nbytes));
+    if(ptr == NULL) {
+        std::cout << name << '\n';
+        assert(false);
+    }               
+    return ptr;
+}
+/* ----------------------------------------------------------------------
+   create a 1d array 
+------------------------------------------------------------------------- */
+
+template <typename TYPE>
+TYPE *Lattice::create(TYPE *&array, int n, const char *name)
+{
+    int nbytes = ((int) sizeof(TYPE)) * n;
+    array = (TYPE *) smalloc(nbytes, name);
+    return array;
+}
+
+/* ----------------------------------------------------------------------
+   create a 2d array 
+------------------------------------------------------------------------- */
+
+template <typename TYPE>
+TYPE **Lattice::create(TYPE **&array, int n1, int n2, const char *name) 
+{
+    int nbytes = ((int) sizeof(TYPE)) * n1*n2;
+    TYPE *data = (TYPE *) smalloc(nbytes,name);
+    nbytes = ((int) sizeof(TYPE *)) * n1;
+    array = (TYPE **) smalloc(nbytes,name);
+    
+    int n = 0;
+    for (int i = 0; i < n1; i++) {
+    array[i] = &data[n];
+    n += n2;
+    }
+    return array;
+}
+
+/* ----------------------------------------------------------------------
+   destroy a 2d array 
+------------------------------------------------------------------------- */
+
+template <typename TYPE>
+void Lattice::destroy(TYPE **array)
+{
+    if (array == NULL) return;
+    sfree(array[0]);
+    sfree(array);
+}
+
+/* ----------------------------------------------------------------------
+   safe free 
+------------------------------------------------------------------------- */
+
+void Lattice::sfree(void *ptr)
+{
+  if (ptr == NULL) return;
+  free(ptr);
+}
+
+/* ---------------------------------------------------------------------- */
+
+// TESTING //
+
+int main(int argc, char **argv) {
+
+    Lattice *lattice = new Lattice(1, 0, 2, 0, 2, 0, 2, true, true, false);
+
+}

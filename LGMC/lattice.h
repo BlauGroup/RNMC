@@ -1,7 +1,6 @@
 #ifndef LATTICE_H
 #define LATTICE_H
 
-#include "memory.h"
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -46,7 +45,21 @@ struct Site {
 class Lattice {
 
 private:
-    Memory *memory;                             // handle lattice memory
+
+    /* ----------------------- handle memory ---------------------------------- */
+    
+    void *smalloc(int nbytes, const char *name);              // safe allocate         
+
+    template <typename TYPE>
+    TYPE *create(TYPE *&array, int n, const char *name);         // create 1D array
+
+    template <typename TYPE>
+    TYPE **create(TYPE **&array, int n1, int n2, const char *name); // create 2D array
+
+    template <typename TYPE>
+    void destroy(TYPE **array);                                  // destroy 2D array
+
+    void sfree(void *ptr);                                        // safe free
     
     /* ----------------------- structural information ------------------------ */
     
