@@ -382,7 +382,7 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
         sites.reserve(nmax);
         numneigh.resize(nmax);
         idneigh.resize(nmax);
-        edge.reserve(edge);
+        edge.reserve(nmax);
     }
 
     // Initialize neighbor information for this new site
@@ -397,7 +397,7 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
     loc_map[key] = nsites;
     
-    if(can_absorb_in) {
+    if(can_adsorb_in) {
         edge.push_back(nsites);
     }
 

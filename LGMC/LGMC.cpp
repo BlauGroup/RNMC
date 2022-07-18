@@ -101,7 +101,7 @@ void LGMC::update_adsorp_state(Lattice *lattice, std::unordered_map<std::string,
                                 double prop_sum, int active_indicies) {
     // update only sites on the edge 
     for(size_t i = 0; i < lattice->edge.size(); i++) {
-        site = lattice->edge[i];
+        int site = lattice->edge[i];
         if(lattice->sites[site].species == EMPTY_SITE) {
             // clear the site 
             clear_site_helper(props, lattice->edge[i], GILLESPIE_SITE, prop_sum, active_indicies);
@@ -115,7 +115,7 @@ void LGMC::update_adsorp_props(Lattice *lattice, std::function<void(LatticeUpdat
         // update only sites on the edge 
     for(size_t i = 0; i < lattice->edge.size(); i++) {
         int site = lattice->edge[i];
-        
+
         if(lattice->sites[site].species == EMPTY_SITE) {
             // find relevant adsorption reactions
             std::vector<int> &potential_reactions = react_net->dependents[lattice->sites[site].species]; 
@@ -507,8 +507,18 @@ void print_usage() {
 } // print_usage()
 
 void print_usage_lattice() {
-    // TODO
-    assert(false);
+ 
+     std::cout << "Usage: specify the following in the input file\n"
+              << "lattice constant\n"
+              << "box x lower boundary\n"
+              << "box x upper boundary\n"
+              << "box y lower boundary\n"
+              << "box y upper boundary\n"
+              << "box z lower boundary\n"
+              << "box z upper boundary\n"
+              << "Periodicity in x dimension (T/F)\n"
+              << "Periodicity in y dimension (T/F)\n"
+              << "Periodicity in z dimension (T/F)\n";
 }
 
 /* ---------------------------------------------------------------------- */
@@ -606,6 +616,7 @@ int main(int argc, char **argv) {
 
     if(!fin.is_open()) {
         std::cout << "Failed to open file: " << lattice_params_file << "\n";
+        print_usage_lattice();
         exit(EXIT_FAILURE);
     }
 
@@ -619,7 +630,7 @@ int main(int argc, char **argv) {
     >> xperiodic >> yperiodic >> zperiodic;
 
     if(std::cin.fail()) {
-        std::cout << "Incorrect file arguments.\n";
+        std::cout << "Incorrect lattice file arguments.\n";
         exit(EXIT_FAILURE);
     }
 
