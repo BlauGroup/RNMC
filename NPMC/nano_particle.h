@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <functional>
+#include "../LGMC/lattice.h"
 // #include <csignal>
 
 struct Site {
@@ -53,6 +54,8 @@ struct Reaction {
 struct NanoParticleParameters {};
 
 struct NanoParticle {
+     LGMC_NS::Lattice *initial_lattice;
+
     // maps a species index to the number of degrees of freedom
     std::vector<int> degrees_of_freedom;
 
@@ -139,6 +142,7 @@ NanoParticle::NanoParticle(
     SqlConnection &initial_state_database,
     NanoParticleParameters
     ) {
+    initial_lattice = nullptr;
 
     // sql statements
     SqlStatement<SpeciesSql> species_statement(nano_particle_database);

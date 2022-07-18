@@ -11,6 +11,7 @@
 #include "../core/sql.h"
 #include "../GMC/sql_types.h"
 #include "../core/simulation.h"
+#include "../LGMC/lattice.h"
 
 class Reaction {
     public:
@@ -90,6 +91,7 @@ class ReactionNetwork {
     double factor_zero; // rate modifer for reactions with zero reactants
     double factor_two; // rate modifier for reactions with two reactants
     double factor_duplicate; // rate modifier for reactions of form A + A -> ...
+     LGMC_NS::Lattice *initial_lattice;
 
     // maps species to the reactions which involve that species
     std::vector<std::vector<int>> dependents;
@@ -141,6 +143,7 @@ ReactionNetwork::ReactionNetwork(
      ReactionNetworkParameters)
 
     {
+    initial_lattice = nullptr;
 
     // collecting reaction network metadata
     SqlStatement<MetadataSql> metadata_statement (reaction_network_database);
