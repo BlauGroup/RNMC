@@ -524,7 +524,7 @@ void print_usage_lattice() {
 /* ---------------------------------------------------------------------- */
 
 int main(int argc, char **argv) {
-    if (argc != 8) {
+    if (argc != 7) {
         print_usage();
         exit(EXIT_FAILURE);
     }
@@ -535,7 +535,7 @@ int main(int argc, char **argv) {
         {"initial_state_database", required_argument, NULL, 2},
         {"number_of_simulations", required_argument, NULL, 3},
         {"base_seed", required_argument, NULL, 4},
-        {"thread_count", required_argument, NULL, 5},
+        //{"thread_count", required_argument, NULL, 5},
         {"step_cutoff", optional_argument, NULL, 6},
         {"time_cutoff", optional_argument, NULL, 7},
         {"lattice_parameters", required_argument, NULL, 8},
