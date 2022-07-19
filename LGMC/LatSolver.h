@@ -150,7 +150,6 @@ std::optional<LatticeEvent> LatSolver::event_lattice() {
 
     unsigned long m;
     bool isFound = false;
-    bool isLattice = false;
     unsigned long int reaction_id = 0;
     std::optional<int> site_one = std::optional<int>();
     std::optional<int> site_two = std::optional<int>();
@@ -176,7 +175,6 @@ std::optional<LatticeEvent> LatSolver::event_lattice() {
 
                 if(partial > fraction) {
                     isFound = true;
-                    isLattice = true;
                     hash = it->first;
                     reaction_id = it->second[i].second;
 

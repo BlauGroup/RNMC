@@ -37,13 +37,15 @@ Lattice::Lattice(float latconst_in,
     is_zperiodic = is_zperiodic_in;
     
     nsites = 0;
+    maxz = 0;
     nmax = DELTA;
     sites.reserve(nmax);
 
     maxneigh = 6;
     idneigh.resize(nmax);
     numneigh.resize(nmax);
-    edge.reserve(nmax);
+    can_adsorb.reserve(nmax);
+    can_desorb.reserve(nmax);
 
     // create sites on lattice
     structured_lattice();
@@ -63,12 +65,12 @@ Lattice::Lattice(float latconst_in,
 Lattice::Lattice(const Lattice& other) {
 
     latconst = other.latconst;                               
-    boxxlo = other.boxxlo;
-    boxxhi = other.boxxhi;
-    boxylo = other.boxylo;               
-    boxyhi = other.boxyhi;
-    boxzlo = other.boxzlo;
-    boxzhi = other.boxzhi;                       
+    ilo = other.ilo;
+    ihi = other.ihi;
+    jlo = other.jlo;               
+    jhi = other.jhi;
+    klo = other.klo;
+    khi = other.khi;                       
     xlo = other.xlo;
     xhi = other.xhi;
     ylo = other.ylo;
@@ -87,7 +89,8 @@ Lattice::Lattice(const Lattice& other) {
     sites = other.sites;                               
                             
     numneigh = other.numneigh;                         
-    edge = other.edge;
+    can_adsorb = other.can_adsorb;
+    can_desorb = other.can_desorb;
 
     idneigh.resize(other.idneigh.size());
 
@@ -306,12 +309,7 @@ void Lattice::structured_connectivity() {
 
             // gid = global ID of neighbor
             // calculated in same manner that structured_lattice() generated IDs
-            int hello = (yhi-ylo+1);
-            int hi = (xhi-xlo+1);
-            int wtf = (kneigh-zlo);
-            int h = ((kneigh-zlo)*(yhi-ylo+1)*(xhi-xlo+1));
-            int l = ((jneigh-ylo)*(xhi-xlo+1));
-            int o = ((ineigh-xlo));
+
             gid = ((kneigh-zlo)*(yhi-ylo+1)*(xhi-xlo+1)) +
                   ((jneigh-ylo)*(xhi-xlo+1)) + ((ineigh-xlo));
             
@@ -377,12 +375,20 @@ void Lattice::offsets_3d(int **cmapin) {
 void Lattice::add_site(uint32_t i_in, uint32_t j_in, 
                        uint32_t k_in, float x_in, float y_in, float z_in,
                        bool can_adsorb_in, bool update_neighbors_in, bool meta_neighbors_in) {
+    
+    std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
+    if(loc_map.find(key) != loc_map.end()) {
+        // site already exists
+        return;
+    }
+
     if (nsites == nmax) {
         nmax += DELTA;
         sites.reserve(nmax);
         numneigh.resize(nmax);
         idneigh.resize(nmax);
-        edge.reserve(nmax);
+        can_adsorb.reserve(nmax);
+        can_desorb.reserve(nmax);
     }
 
     // Initialize neighbor information for this new site
@@ -394,11 +400,11 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
 
     // initially empty site, species = 0
     sites.push_back(Site{i_in, j_in, k_in, x_in, y_in, z_in, 0, can_adsorb_in});
-    std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
+    
     loc_map[key] = nsites;
     
     if(can_adsorb_in) {
-        edge.push_back(nsites);
+        can_adsorb.push_back(nsites);
     }
 
     if (update_neighbors_in) {
@@ -433,6 +439,11 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     }
 
     nsites++;
+
+    // update running max distance // TODO: make general for all types of periodicity 
+    if(z_in > maxz) {
+        maxz = z_in;
+    }
 
 } // add_site()
 
@@ -582,15 +593,23 @@ void Lattice::sfree(void *ptr)
 
 /* ---------------------------------------------------------------------- */
 
+float Lattice::get_latconst() {
+    return latconst;
+}
+
+/* ---------------------------------------------------------------------- */
+
+// TODO: make general for all types of periodicity 
+float Lattice::get_maxz() {
+    return maxz;
+}
+
 // TESTING //
 
 /*int main(int argc, char **argv) {
-
     Lattice *lattice = new Lattice(1, 0, 2, 0, 2, 0, 2, true, true, false);
-
     // test copy constructor 
     Lattice *lattice2 = new Lattice(*lattice);
-
     std::cout << "using copy constructor" << std::endl;
     std::cout << "numneigh" << std::endl;
     for(int i = 0; i < 12; i++) {
@@ -607,9 +626,7 @@ void Lattice::sfree(void *ptr)
         }
         std::cout << std::endl;
     }
-
     delete lattice;
     delete lattice2;
     
-
 }*/
