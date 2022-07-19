@@ -73,15 +73,17 @@ private:
     int nmax;                                   // max # sites, idneigh, numneigh can store at a given time
 
     int maxneigh;                               // max neighbors per site
+    float maxz;                                   // the largest distance the lattice goes 
 
 public: 
 
     std::vector<Site> sites;                                // list of Sites for lattice
     std::vector<uint32_t*> idneigh;                         // neighbor IDs for each site
     std::vector<uint32_t> numneigh;                         // # of neighbors of each site
-    std::vector<uint32_t> edge;                             // ids of sites on the edge that can adsorb
+    std::vector<uint32_t> can_adsorb;                             // ids of sites on the edge that can adsorb
+    std::vector<uint32_t> can_desorb;                             // ids of sites on the edge that can adsorb
 
-    std::map<std::tuple<uint32_t, uint32_t, uint32_t>, int> loc_map;  // Mapping from site location to site ID
+    std::map<std::tuple<uint32_t, uint32_t, uint32_t>, int> loc_map;  // Mapping from site location (i,j,k) to site ID
 
     Lattice(float latconst_in, 
         int ilo_in, int ihi_in, int jlo_in,
@@ -104,7 +106,11 @@ public:
 
     void update_neighbors(uint32_t n, bool meta_neighbors_in);
 
-    
+    float get_latconst();
+
+    // TODO: make general for all types of periodicity 
+    float get_maxz();
+
 };
 
 }
