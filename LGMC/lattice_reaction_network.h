@@ -12,6 +12,11 @@
 #include "LatSolver.h"
 #include "../GMC/sql_types.h"
 
+
+enum Phase {LATTICE, SOLUTION};
+enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_ELYTE, HOMOGENEOUS_SOLID, DIFFUSION, OXIDATION, REDUCTION};
+enum ChargeTransferStyle {MARCUS, BUTLER_VOLMER};
+
 struct LGMCParameters {
     float latconst;                               
     float boxxlo,boxxhi,boxylo,                   
@@ -20,10 +25,8 @@ struct LGMCParameters {
     float temperature;
     float g_e;
     bool is_add_sites;
+    ChargeTransferStyle charge_transfer_style;
 };
-
-enum Phase {LATTICE, SOLUTION};
-enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_ELYTE, HOMOGENEOUS_SOLID, DIFFUSION, OXIDATION, REDUCTION};
 
 
 struct LatticeReaction {
