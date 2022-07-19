@@ -26,7 +26,7 @@ class Reaction {
 };
 
 enum Phase {LATTICE, SOLUTION};
-enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_ELYTE, HOMOGENEOUS_SOLID, DIFFUSION,CHARGE_TRANSFER};
+enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_ELYTE, HOMOGENEOUS_SOLID, DIFFUSION, OXIDATION, REDUCTION};
 
 
 class LatticeReaction : public Reaction {
@@ -107,6 +107,8 @@ class ReactionNetwork {
                                     std::function<void(LatticeUpdate lattice_update)> lattice_update_function, 
                                     int next_reaction, std::optional<int> site_one, std::optional<int> site_two) {assert(false);};
 };
+
+ReactionNetwork::ReactionNetwork() {};
 
 ReactionNetwork::ReactionNetwork(
      SqlConnection &reaction_network_database,
@@ -431,8 +433,11 @@ void LatticeReactionNetwork::fill_reactions(SqlConnection &reaction_network_data
         reaction->phase_products[0] = (reaction_row.phase_product_1 == 'L') ? Phase::LATTICE : Phase::SOLUTION;
         reaction->phase_products[1] = (reaction_row.phase_product_2 == 'L') ? Phase::LATTICE : Phase::SOLUTION;
 
-        if(reaction_row.type == 'C') {
-            reaction->type = Type::CHARGE_TRANSFER;
+        if(reaction_row.type == 'O') {
+            reaction->type = Type::OXIDATION;
+        }
+        else if (reaction_row.type == 'R') {
+            reaction->type = Type::REDUCTION;
         }
         else if (reaction_row.type == 'F') {
             reaction->type = Type::DIFFUSION;

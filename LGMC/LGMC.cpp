@@ -27,7 +27,7 @@ const double G_E = -2.15;              // Electron free energy, in eV
 using namespace LGMC_NS;
 
 
-double get_marcus_rate_coefficient(double base_dg, double reorganization_energy, double e_free, double distance, bool reduction) {
+double marcus_rate_coefficient(double base_dg, double reorganization_energy, double e_free, double distance, bool reduction) {
 
     double dg, dg_barrier, squared, kappa;
 
@@ -191,17 +191,25 @@ double LGMC::compute_propensity(int num_one, int num_two,
 
     double p;
 
-    if(reaction->type == Type::CHARGE_TRANSFER) {
-       assert(false);
-        /* --------------- */
-        /* TODO: FOR EVAN  */
-        /* --------------- */
+    if(reaction->type == Type::OXIDATION || reaction->type == Type::REDUCTION) {
+        double z;
+        if (site_one < 0) {
+            //TODO: FIX THIS. REALLY SHOULD BE THE LOWEST Z OF ANY SITE THAT CAN ADSORB
+            z = lattice->zhi;
+        }
+        else {
+            z = lattice->sites[site_one].z;
+        }
+
+        bool reduction = (reaction->type == Type::REDUCTION);
+
+        p = num_one * marcus_rate_coefficient(reaction->dG, reaction->reorganization_energy, G_E, z, reduction);
+
     }
 
     // one reactant
-    if (reaction->number_of_reactants == 1)
+    else if (reaction->number_of_reactants == 1)
         p = num_one * reaction->rate;
-
 
     // two reactants
     else {
