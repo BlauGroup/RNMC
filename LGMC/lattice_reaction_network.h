@@ -983,19 +983,28 @@ void LatticeReactionNetwork::update_propensities(std::function<void(Update updat
 double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int reaction_index, Lattice *lattice) {
     LatticeReaction reaction = reactions[reaction_index];
 
-    // TODO: add BV kinetics here
+    double p, k;
 
     if(reaction.type == Type::OXIDATION || reaction.type == Type::REDUCTION) {
          bool reduction_in = (reaction.type == Type::REDUCTION) ? true : false;
-         get_marcus_rate_coefficient(reaction.dG, reaction.prefactor, reaction.reorganization_energy,
-                                     reaction.electron_tunneling_coefficient, g_e, lattice->get_maxz(), temperature, reduction_in);
+
+        if (charge_transfer_style == ChargeTransferStyle::MARCUS) {
+            k = get_marcus_rate_coefficient(reaction.dG, reaction.prefactor, reaction.reorganization_energy,
+                                            reaction.electron_tunneling_coefficient, g_e, lattice->get_maxz(), temperature,
+                                            reduction_in);
+        } else {
+            k = get_butler_volmer_rate_coefficient(reaction.dG, reaction.prefactor, reaction.charge_transfer_coefficient,
+                                                   reaction.electron_tunneling_coefficient, g_e, lattice->get_maxz(), temperature,
+                                                   reduction_in);    
+        }
+
+    } else {
+        k = reaction.rate;
     }
     
-
-    double p;
     // one reactant
     if (reaction.number_of_reactants == 1)
-        p = state[reaction.reactants[0]] * reaction.rate;
+        p = state[reaction.reactants[0]] * k;
 
 
     // two reactants
@@ -1005,13 +1014,13 @@ double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int r
                 * factor_two
                 * state[reaction.reactants[0]]
                 * (state[reaction.reactants[0]] - 1)
-                * reaction.rate;
+                * k;
 
         else
             p = factor_two
                 * state[reaction.reactants[0]]
                 * state[reaction.reactants[1]]
-                * reaction.rate;
+                * k;
     }
 
     return p;
