@@ -162,6 +162,8 @@ class LatticeReactionNetwork {
         double factor_duplicate; // rate modifier for reactions of form A + A -> ...
         std::vector<std::vector<int>> dependents;
         
+        ChargeTransferStyle charge_transfer_style;
+
         bool is_add_sites;
         float temperature;
         float g_e;
@@ -171,7 +173,7 @@ class LatticeReactionNetwork {
 
 double get_butler_volmer_rate_coefficient(double base_dg, double prefactor, double charge_transfer_coefficient,
                                           double electron_tunneling_coefficient, double e_free, double distance,
-                                          bool reduction) {
+                                          double temperature, bool reduction) {
 
     double dg, kappa;
 
@@ -184,8 +186,6 @@ double get_butler_volmer_rate_coefficient(double base_dg, double prefactor, doub
 
     kappa = std::exp(-1 * electron_tunneling_coefficient * distance);
     return kappa * prefactor * std::exp(-1 * charge_transfer_coefficient * dg / (KB * temperature));
-
-    return 
 
 }
 
@@ -214,6 +214,7 @@ double get_marcus_rate_coefficient(double base_dg, double prefactor, double reor
     }
 }
 
+
 LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection &reaction_network_database, SqlConnection &initial_state_database, 
             LGMCParameters parameters) : sampler (Sampler(0)) {
 
@@ -226,6 +227,7 @@ LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection &reaction_network_d
     is_add_sites = parameters.is_add_sites;
     temperature = parameters.temperature;
     g_e = parameters.g_e;
+    charge_transfer_style = parameters.charge_transfer_style;
 
 } // LatticeReactionNetwork()
 
@@ -242,8 +244,8 @@ LatticeReactionNetwork::~LatticeReactionNetwork()
     Global Updates
 ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::update_state(Lattice *lattice, std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props,
+void LatticeReactionNetwork::update_state(Lattice *lattice,
+                        std::unordered_map< std::string, std::vector< std::pair< double, int > > > &props,
                         std::vector<int> &state, int next_reaction, 
                         std::optional<int> site_one, std::optional<int> site_two, 
                         double &prop_sum, int &active_indices) {
@@ -305,7 +307,8 @@ void LatticeReactionNetwork::update_adsorp_state(Lattice *lattice, std::unordere
 
 } // update_adsorp_state
 
-void LatticeReactionNetwork::update_adsorp_props(Lattice *lattice, std::function<void(LatticeUpdate lattice_update)> lattice_update_function, std::vector<int> &state) {
+void LatticeReactionNetwork::update_adsorp_props(Lattice *lattice, std::function<void(LatticeUpdate lattice_update)> lattice_update_function,
+                                                 std::vector<int> &state) {
 
         // update only sites on the edge 
     for(size_t i = 0; i < lattice->can_adsorb.size(); i++) {
@@ -349,18 +352,30 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
     
     LatticeReaction reaction = reactions[react_id]; 
 
-    double p;
+    double p, k;
 
     if(reaction.type == Type::REDUCTION || reaction.type == Type::OXIDATION) {
         bool reduction_in = (reaction.type == Type::REDUCTION) ? true : false;
 
+        assert(charge_transfer_style == ChargeTransferStyle::MARCUS || charge_transfer_style == ChargeTransferStyle::BUTLER_VOLMER)
+
         // TODO: make general for all types of periodicity (distance = .z)
-        get_marcus_rate_coefficient(reaction.dG, reaction.reorganization, g_e, lattice->sites[site_id].z, reduction_in);
+        if (charge_transfer_style == ChargeTransferStyle::MARCUS) {
+            k = get_marcus_rate_coefficient(reaction.dG, reaction.prefactor, reaction.reorganization_energy,
+                                            reaction.electron_tunelling_coefficient, g_e, lattice->sites[site_id].z, temperature,
+                                            reduction_in);
+        } else {
+            k = get_butler_volmer_rate_coefficient(reaction.dG, reaction.prefactor, reaction.charge_transfer_coefficient,
+                                                   reaction.electron_tunelling_coefficient, g_e, lattice->sites[site_id].z, temperature,
+                                                   reduction_in);    
+        }
+    } else {
+        k = reaction.rate;
     }
 
     // one reactant
     if (reaction.number_of_reactants == 1)
-        p = num_one * reaction.rate;
+        p = num_one * k;
 
 
     // two reactants
@@ -370,13 +385,13 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
                 * factor_two
                 * num_one
                 * (num_one - 1)
-                * reaction.rate;
+                * k;
 
         else
             p = factor_two
                 * num_one
                 * num_two
-                * reaction.rate;
+                * k;
     }
 
     assert(p != 0);
