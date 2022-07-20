@@ -54,7 +54,7 @@ struct Reaction {
 struct NanoParticleParameters {};
 
 struct NanoParticle {
-     LGMC_NS::Lattice *initial_lattice;
+    Lattice *initial_lattice;
 
     // maps a species index to the number of degrees of freedom
     std::vector<int> degrees_of_freedom;

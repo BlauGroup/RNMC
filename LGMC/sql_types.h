@@ -3,51 +3,51 @@
 #include <string>
 
 
-struct MetadataSql {
+struct LGMCMetadataSql {
     unsigned long int number_of_species;
     unsigned long int number_of_reactions;
     static std::string sql_statement;
-    static void action(MetadataSql &r, sqlite3_stmt *stmt);
+    static void action(LGMCMetadataSql &r, sqlite3_stmt *stmt);
 };
 
-std::string MetadataSql::sql_statement =
+std::string LGMCMetadataSql::sql_statement =
     "SELECT number_of_species, number_of_reactions FROM metadata;";
 
-void MetadataSql::action(MetadataSql &r, sqlite3_stmt *stmt) {
+void LGMCMetadataSql::action(LGMCMetadataSql &r, sqlite3_stmt *stmt) {
         r.number_of_species = sqlite3_column_int(stmt, 0);
         r.number_of_reactions = sqlite3_column_int(stmt, 1);
 };
 
 
-struct FactorsSql {
+struct LGMCFactorsSql {
     double factor_zero;
     double factor_two;
     double factor_duplicate;
     static std::string sql_statement;
-    static void action(FactorsSql &r, sqlite3_stmt *stmt);
+    static void action(LGMCFactorsSql &r, sqlite3_stmt *stmt);
 };
 
-std::string FactorsSql::sql_statement =
+std::string LGMCFactorsSql::sql_statement =
     "SELECT factor_zero, factor_two, factor_duplicate FROM factors";
 
-void FactorsSql::action (FactorsSql &r, sqlite3_stmt *stmt) {
+void LGMCFactorsSql::action (LGMCFactorsSql &r, sqlite3_stmt *stmt) {
     r.factor_zero = sqlite3_column_double(stmt, 0);
     r.factor_two = sqlite3_column_double(stmt, 1);
     r.factor_duplicate = sqlite3_column_double(stmt, 2);
 };
 
 
-struct InitialStateSql {
+struct LGMCInitialStateSql {
     int species_id;
     int count;
     static std::string sql_statement;
-    static void action(InitialStateSql &r, sqlite3_stmt *stmt);
+    static void action(LGMCInitialStateSql &r, sqlite3_stmt *stmt);
 };
 
-std::string InitialStateSql::sql_statement =
+std::string LGMCInitialStateSql::sql_statement =
     "SELECT species_id, count FROM initial_state;";
 
-void InitialStateSql::action(InitialStateSql &r, sqlite3_stmt *stmt) {
+void LGMCInitialStateSql::action(LGMCInitialStateSql &r, sqlite3_stmt *stmt) {
     r.species_id = sqlite3_column_int(stmt, 0);
     r.count = sqlite3_column_int(stmt, 1);
 }
@@ -56,7 +56,7 @@ void InitialStateSql::action(InitialStateSql &r, sqlite3_stmt *stmt) {
 // TODO: Dealing with strings
 // Should these v char's be strings or char*'s?
 
-struct ReactionSql {
+struct LGMCReactionSql {
     unsigned long int reaction_id;
     
     int number_of_reactants;
@@ -67,10 +67,10 @@ struct ReactionSql {
     int product_1;
     int product_2;
     
-    const char* phase_reactant_1;
-    const char* phase_reactant_2;
-    const char* phase_product_1;
-    const char* phase_product_2;
+    const unsigned char* phase_reactant_1;
+    const unsigned char* phase_reactant_2;
+    const unsigned char* phase_product_1;
+    const unsigned char* phase_product_2;
     
     double dG;
     double prefactor;
@@ -80,20 +80,20 @@ struct ReactionSql {
     double reorganization_energy;
     double charge_transfer_coefficient;
 
-    const char* type;
+    const unsigned char* type;
     
     static std::string sql_statement;
-    static void action(LatticeReactionSql &r, sqlite3_stmt *stmt);
+    static void action(LGMCReactionSql &r, sqlite3_stmt *stmt);
 };
 
-std::string ReactionSql::sql_statement =
+std::string LGMCReactionSql::sql_statement =
     "SELECT reaction_id, number_of_reactants, number_of_products, "
     "reactant_1, reactant_2, product_1, product_2, phase_reactant_1, phase_reactant_2, "
     "phase_product_1, phase_product_2, dG, prefactor, rate, electron_tunneling_coefficient, "
     "reorganization_energy, charge_transfer_coefficient, type FROM reactions;";
 
 
-void ReactionSql::action(ReactionSql &r, sqlite3_stmt *stmt) {
+void LGMCReactionSql::action(LGMCReactionSql &r, sqlite3_stmt *stmt) {
         r.reaction_id = sqlite3_column_int(stmt, 0);
         r.number_of_reactants = sqlite3_column_int(stmt, 1);
         r.number_of_products = sqlite3_column_int(stmt, 2);
@@ -117,7 +117,7 @@ void ReactionSql::action(ReactionSql &r, sqlite3_stmt *stmt) {
 
 //TODO test and deal with text
 
-struct TrajectoriesSql {
+struct LGMCTrajectoriesSql {
     int seed;
     int step;
     int reaction_id;
@@ -126,17 +126,17 @@ struct TrajectoriesSql {
     int site_2;
     double time;
     static std::string sql_statement;
-    static void action(TrajectoriesSql &r, sqlite3_stmt *stmt);
+    static void action(LGMCTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
-std::string TrajectoriesSql::sql_statement =
+std::string LGMCTrajectoriesSql::sql_statement =
     "INSERT INTO trajectories VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);";
 
-void TrajectoriesSql::action (TrajectoriesSql& t, sqlite3_stmt* stmt) {
+void LGMCTrajectoriesSql::action (LGMCTrajectoriesSql& t, sqlite3_stmt* stmt) {
     sqlite3_bind_int(stmt, 1, t.seed);
     sqlite3_bind_int(stmt, 2, t.step);
     sqlite3_bind_int(stmt, 3, t.reaction_id);
-    sqlite3_bind_text(stmt, 4, t.reaction_type);
+    sqlite3_bind_text(stmt, 4, t.reaction_type, strlen(t.reaction_type), NULL);
     sqlite3_bind_int(stmt, 5, t.site_1);
     sqlite3_bind_int(stmt, 6, t.site_2);
     sqlite3_bind_double(stmt, 7, t.time);

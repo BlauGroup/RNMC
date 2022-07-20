@@ -1,12 +1,8 @@
-#ifndef LATTICE_H
-#define LATTICE_H
-
+#pragma once
 #include <vector>
 #include <unordered_map>
 #include <string>
 #include <map>
-
-namespace LGMC_NS {
 
 // universal defines inside namespace
 
@@ -112,7 +108,3 @@ public:
     float get_maxz();
 
 };
-
-}
-
-#endif

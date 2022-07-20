@@ -2,10 +2,8 @@
 #include "LGMC/LGMC.h"
 #include <iostream>
 
-using namespace LGMC_NS;
-
 /* ----------------------------------------------------------------------
-   main program to drive RNMCp
+   main program to drive LGMC
 ------------------------------------------------------------------------- */
 
 int main(int argc, char **argv) {

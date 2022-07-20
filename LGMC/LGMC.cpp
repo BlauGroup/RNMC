@@ -217,7 +217,7 @@ int main(int argc, char **argv) {
 
     Dispatcher<
         LatSolver,
-        LGMC_NS::LatticeReactionNetwork,
+        LatticeReactionNetwork,
         LGMCParameters,
         TrajectoriesSql
         >

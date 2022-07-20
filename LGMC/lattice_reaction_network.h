@@ -7,8 +7,10 @@
 #include "../core/simulation.h"
 #include "../core/solvers.h"
 #include "LatSolver.h"
-#include "../GMC/sql_types.h"
+#include "../LGMC/sql_types.h"
 
+#include <list>
+#include <vector>
 #include <string>
 #include <assert.h>
 
@@ -357,16 +359,16 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
     if(reaction.type == Type::REDUCTION || reaction.type == Type::OXIDATION) {
         bool reduction_in = (reaction.type == Type::REDUCTION) ? true : false;
 
-        assert(charge_transfer_style == ChargeTransferStyle::MARCUS || charge_transfer_style == ChargeTransferStyle::BUTLER_VOLMER)
+        assert(charge_transfer_style == ChargeTransferStyle::MARCUS || charge_transfer_style == ChargeTransferStyle::BUTLER_VOLMER);
 
         // TODO: make general for all types of periodicity (distance = .z)
         if (charge_transfer_style == ChargeTransferStyle::MARCUS) {
             k = get_marcus_rate_coefficient(reaction.dG, reaction.prefactor, reaction.reorganization_energy,
-                                            reaction.electron_tunelling_coefficient, g_e, lattice->sites[site_id].z, temperature,
+                                            reaction.electron_tunneling_coefficient, g_e, lattice->sites[site_id].z, temperature,
                                             reduction_in);
         } else {
             k = get_butler_volmer_rate_coefficient(reaction.dG, reaction.prefactor, reaction.charge_transfer_coefficient,
-                                                   reaction.electron_tunelling_coefficient, g_e, lattice->sites[site_id].z, temperature,
+                                                   reaction.electron_tunneling_coefficient, g_e, lattice->sites[site_id].z, temperature,
                                                    reduction_in);    
         }
     } else {
@@ -842,17 +844,17 @@ void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_netwo
 
 void LatticeReactionNetwork::fill_reactions(SqlConnection &reaction_network_database) {
     
-    SqlStatement<LatticeReactionSql> reaction_statement (reaction_network_database);
-    SqlReader<LatticeReactionSql> reaction_reader (reaction_statement);
+    SqlStatement<LGMCReactionSql> reaction_statement (reaction_network_database);
+    SqlReader<LGMCReactionSql> reaction_reader (reaction_statement);
 
     // reaction_id is lifted so we can do a sanity check after the
     // loop.  Make sure size of reactions vector, last reaction_id and
     // metadata number_of_reactions are all the same
 
     // read in Reactions
-    while(std::optional<LatticeReactionSql> maybe_reaction_row = reaction_reader.next()) {
+    while(std::optional<LGMCReactionSql> maybe_reaction_row = reaction_reader.next()) {
 
-        LatticeReactionSql reaction_row = maybe_reaction_row.value();
+        LGMCReactionSql reaction_row = maybe_reaction_row.value();
 
         LatticeReaction reaction;
 
@@ -864,32 +866,35 @@ void LatticeReactionNetwork::fill_reactions(SqlConnection &reaction_network_data
         reaction.products[1] = reaction_row.product_2;
         reaction.rate = reaction_row.rate;
         reaction.dG = reaction_row.dG;
-        reaction.reorganization = reaction_row.reorganization;
+        reaction.prefactor = reaction_row.prefactor;
+        reaction.reorganization_energy = reaction_row.reorganization_energy;
+        reaction.electron_tunneling_coefficient = reaction_row.electron_tunneling_coefficient;
+        reaction.charge_transfer_coefficient = reaction_row.charge_transfer_coefficient;
 
-        reaction.phase_reactants[0] = (reaction_row.phase_reactant_1 == 'L') ? Phase::LATTICE : Phase::SOLUTION;
-        reaction.phase_reactants[1] = (reaction_row.phase_reactant_2 == 'L') ? Phase::LATTICE : Phase::SOLUTION;
-        reaction.phase_products[0] = (reaction_row.phase_product_1 == 'L') ? Phase::LATTICE : Phase::SOLUTION;
-        reaction.phase_products[1] = (reaction_row.phase_product_2 == 'L') ? Phase::LATTICE : Phase::SOLUTION;
+        reaction.phase_reactants[0] = strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_1), "L") ? Phase::LATTICE : Phase::SOLUTION;
+        reaction.phase_reactants[1] = strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_2), "L") ? Phase::LATTICE : Phase::SOLUTION;
+        reaction.phase_products[0] = strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_1), "L") ? Phase::LATTICE : Phase::SOLUTION;
+        reaction.phase_products[1] = strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_2), "L") ? Phase::LATTICE : Phase::SOLUTION;
 
-        if(reaction_row.type == 'O') {
+        if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "O")) {
             reaction.type = Type::OXIDATION;
         }
-        else if(reaction_row.type == 'R') {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "R")) {
             reaction.type = Type::REDUCTION;
         }
-        else if (reaction_row.type == 'F') {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "F")) {
             reaction.type = Type::DIFFUSION;
         }
-        else if (reaction_row.type == 'S') {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "S")) {
             reaction.type =  Type::HOMOGENEOUS_SOLID;
         }
-        else if (reaction_row.type == 'E') {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "E")) {
             reaction.type =  Type::HOMOGENEOUS_ELYTE;
         }
-        else if (reaction_row.type == 'D') {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "D")) {
             reaction.type =  Type::DESORPTION;
         }
-        else if (reaction_row.type == 'A') {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "A")) {
             reaction.type =  Type::ADSORPTION;
         }
 
@@ -978,9 +983,12 @@ void LatticeReactionNetwork::update_propensities(std::function<void(Update updat
 double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int reaction_index, Lattice *lattice) {
     LatticeReaction reaction = reactions[reaction_index];
 
+    // TODO: add BV kinetics here
+
     if(reaction.type == Type::OXIDATION || reaction.type == Type::REDUCTION) {
          bool reduction_in = (reaction.type == Type::REDUCTION) ? true : false;
-         get_marcus_rate_coefficient(reaction.dG, reaction.reorganization, g_e, lattice->get_maxz(), reduction_in);
+         get_marcus_rate_coefficient(reaction.dG, reaction.prefactor, reaction.reorganization_energy,
+                                     reaction.electron_tunneling_coefficient, g_e, lattice->get_maxz(), temperature, reduction_in);
     }
     
 

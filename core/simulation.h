@@ -140,7 +140,7 @@ class LatticeSimulation : public Simulation<LatSolver, Model> {
     std::unordered_map<std::string,                     
         std::vector< std::pair<double, int> > > props;
     LatSolver latsolver;
-    LGMC_NS::Lattice *lattice;
+    Lattice *lattice;
     std::function<void(LatticeUpdate)> lattice_update_function;
 
     LatticeSimulation(Model &model, unsigned long int seed, int history_chunk_size,
@@ -150,7 +150,7 @@ class LatticeSimulation : public Simulation<LatSolver, Model> {
                lattice_update_function ([&] (LatticeUpdate lattice_update) {latsolver.update(lattice_update);}) {
                 
                     if(model.initial_lattice) {
-                        lattice = new  LGMC_NS::Lattice(*model.initial_lattice);
+                        lattice = new  Lattice(*model.initial_lattice);
                     } else {
                         lattice = nullptr;
                     }

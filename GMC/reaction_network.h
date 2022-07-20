@@ -19,8 +19,6 @@ struct Reaction {
     double rate;
 };
 
-
-
 // parameters passed to the ReactionNetwork constructor
 // by the dispatcher which are model specific
 struct ReactionNetworkParameters {
@@ -37,6 +35,8 @@ struct ReactionNetwork {
 
     // maps species to the reactions which involve that species
     std::vector<std::vector<int>> dependents;
+
+    ReactionNetwork();
 
     ReactionNetwork(
         SqlConnection &reaction_network_database,

@@ -7,8 +7,6 @@
 #include <iostream>
 #include <map>
 
-using namespace LGMC_NS;
-
 #define DELTALOCAL 10000
 #define DELTA 32768
 #define EPSILON 0.0001
