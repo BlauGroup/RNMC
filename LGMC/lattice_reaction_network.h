@@ -402,8 +402,8 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
 
 /* ---------------------------------------------------------------------- */
 
-bool LatticeReactionNetwork::update_state(Lattice *lattice, std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props, 
+bool LatticeReactionNetwork::update_state(Lattice *lattice, 
+                        std::unordered_map<std::string, std::vector< std::pair< double, int > > > &props, 
                         int next_reaction, int site_one, int site_two, 
                         double &prop_sum, int &active_indices) {
 
@@ -413,6 +413,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice, std::unordered_map<s
 
         assert(lattice->sites[site_one].species == SPECIES_EMPTY);
         assert(site_two == SITE_GILLESPIE);
+        // TODO: The below might be a slow operation
         assert(std::find(lattice->can_adsorb.begin(), lattice->can_adsorb.end(), site_one) != lattice->can_adsorb.end());
 
         // update site
@@ -453,6 +454,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice, std::unordered_map<s
 
             // remove site from desorb vector 
             auto it = std::find(lattice->can_desorb.begin(), lattice->can_desorb.end(), site_one);
+            // TODO: how large do we expect this vector to be? Is this erase expensive?
             std::erase(lattice->can_desorb, site_one);
 
             // add to adsorb vector 
