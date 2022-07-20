@@ -871,11 +871,38 @@ void LatticeReactionNetwork::fill_reactions(SqlConnection &reaction_network_data
         reaction.electron_tunneling_coefficient = reaction_row.electron_tunneling_coefficient;
         reaction.charge_transfer_coefficient = reaction_row.charge_transfer_coefficient;
 
-        reaction.phase_reactants[0] = strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_1), "L") ? Phase::LATTICE : Phase::SOLUTION;
-        reaction.phase_reactants[1] = strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_2), "L") ? Phase::LATTICE : Phase::SOLUTION;
-        reaction.phase_products[0] = strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_1), "L") ? Phase::LATTICE : Phase::SOLUTION;
-        reaction.phase_products[1] = strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_2), "L") ? Phase::LATTICE : Phase::SOLUTION;
+        if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_1), "L")) {
+            reaction.phase_reactants[0] = Phase::LATTICE;
+        } else if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_1), "S")) {
+            reaction.phase_reactants[0] = Phase::SOLUTION;
+        } else {
+            reaction.phase_reactants[0] = Phase::NONE;
+        }
 
+        if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_2), "L")) {
+            reaction.phase_reactants[1] = Phase::LATTICE;
+        } else if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_2), "S")) {
+            reaction.phase_reactants[1] = Phase::SOLUTION;
+        } else {
+            reaction.phase_reactants[1] = Phase::NONE;
+        }
+
+        if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_1), "L")) {
+            reaction.phase_products[0] = Phase::LATTICE;
+        } else if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_1), "S")) {
+            reaction.phase_products[0] = Phase::SOLUTION;
+        } else {
+            reaction.phase_products[0] = Phase::NONE;
+        }
+
+        if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_2), "L")) {
+            reaction.phase_products[1] = Phase::LATTICE;
+        } else if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_2), "S")) {
+            reaction.phase_products[1] = Phase::SOLUTION;
+        } else {
+            reaction.phase_products[1] = Phase::NONE;
+        }
+        
         if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "O")) {
             reaction.type = Type::OXIDATION;
         }
