@@ -169,7 +169,30 @@ class LatticeReactionNetwork {
 };
 
 
-double get_marcus_rate_coefficient(double base_dg, double reorganization_energy, double e_free, double distance, bool reduction) {
+double get_butler_volmer_rate_coefficient(double base_dg, double prefactor, double charge_transfer_coefficient,
+                                          double electron_tunneling_coefficient, double e_free, double distance,
+                                          bool reduction) {
+
+    double dg, kappa;
+
+    if (reduction) {
+        dg = base_dg - e_free;
+    }
+    else {
+        dg = base_dg + e_free;
+    }
+
+    kappa = std::exp(-1 * electron_tunneling_coefficient * distance);
+    return kappa * prefactor * std::exp(-1 * charge_transfer_coefficient * dg / (KB * temperature));
+
+    return 
+
+}
+
+
+double get_marcus_rate_coefficient(double base_dg, double prefactor, double reorganization_energy,
+                                   double electron_tunneling_coefficient, double e_free, double distance,
+                                   double temperature, bool reduction) {
 
     double dg, dg_barrier, squared, kappa;
 
@@ -182,12 +205,12 @@ double get_marcus_rate_coefficient(double base_dg, double reorganization_energy,
 
     squared = 1 + dg / reorganization_energy;
     dg_barrier = reorganization_energy / 4 * squared * squared;
-    kappa = std::exp(-1 * TUNNEL_COEF * distance);
+    kappa = std::exp(-1 * electron_tunneling_coefficient * distance);
 
     if (dg_barrier < 0) {
-        return kappa * KB * TEMPERATURE / PLANCK;
+        return kappa * prefactor;
     } else {
-        return kappa * KB * TEMPERATURE / PLANCK * std::exp(-1 * dg_barrier / (KB * TEMPERATURE));
+        return kappa * prefactor * std::exp(-1 * dg_barrier / (KB * temperature));
     }
 }
 
