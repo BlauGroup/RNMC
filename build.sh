@@ -1,6 +1,6 @@
 mkdir -p build
 
-flags="-fno-rtti -fno-exceptions -std=c++17 -Wall -Wextra -g $(gsl-config --cflags) $(gsl-config --libs) -lsqlite3 -lpthread"
+flags="-fno-rtti -fno-exceptions -std=c++20 -Wall -Wextra -g $(gsl-config --cflags) $(gsl-config --libs) -lsqlite3 -lpthread"
 
 #echo "building test_core"
 #$CC $flags ./core/test.cpp -o ./build/test_core
