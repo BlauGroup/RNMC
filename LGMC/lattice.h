@@ -158,10 +158,10 @@ Lattice::Lattice(float latconst_in,
     // set neighbors of each site
     structured_connectivity();
     
-    for(int n = 0; n < nsites; ++n) {
+    /*for(int n = 0; n < nsites; ++n) {
         std::cout << "id: " << n << " [" << sites[n].x << ", " <<
         sites[n].y << ", " << sites[n].z << "]" << std::endl;
-    }
+    }*/
 
 } // Lattice()
 
@@ -419,16 +419,16 @@ void Lattice::structured_connectivity() {
                   ((jneigh-ylo)*(xhi-xlo+1)) + ((ineigh-xlo));
             
             
-        std::cout << "neighbor: (" << sites[gid].x << ", " << sites[gid].y << ", " 
+        /*std::cout << "neighbor: (" << sites[gid].x << ", " << sites[gid].y << ", " 
                   << sites[gid].z << ") for: " << "[" << sites[i].x << ", " << 
-                  sites[i].y << ", " << sites[i].z << "]" << std::endl;
+                  sites[i].y << ", " << sites[i].z << "]" << std::endl;*/
             
         // add gid to neigh list of site i
         idneigh[i][numneigh[i]++] = gid;
       }
     }
 
-    std::cout << "numneigh" << std::endl;
+   /* std::cout << "numneigh" << std::endl;
     for(int i = 0; i < nsites; i++) {
         std::cout << "[" << sites[i].x << ", " <<
         sites[i].y << ", " << sites[i].z << "]" << ",";
@@ -442,7 +442,7 @@ void Lattice::structured_connectivity() {
             std::cout << idneigh[i][j] << ", ";
         }
         std::cout << std::endl;
-    }
+    }*/
     
     destroy(cmap);
 } // structured_connectivity()
@@ -712,7 +712,7 @@ float Lattice::get_maxz() {
 // TESTING //
 
 /*int main(int argc, char **argv) {
-    Lattice *lattice = new Lattice(1, 0, 2, 0, 2, 0, 2, true, true, false);
+    Lattice *lattice = new Lattice(1, 0, 200, 0, 200, 0, 1, true, true, false);
     // test copy constructor 
     Lattice *lattice2 = new Lattice(*lattice);
     std::cout << "using copy constructor" << std::endl;

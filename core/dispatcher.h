@@ -251,7 +251,6 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::record_simulation_h
                 (int) history_packet.seed,
                 history_packet.history[i]));
 
-
     }
     initial_state_database.exec("COMMIT;");
 

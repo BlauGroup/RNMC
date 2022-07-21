@@ -13,6 +13,7 @@ void print_usage() {
               << "reaction_database\n"
               << "initial_state_database\n"
               << "number_of_simulations\n"
+              << "thread_count\n"
               << "base_seed\n"
               << "step_cutoff\n"
               << "parameters\n";
@@ -41,22 +42,18 @@ void print_usage_LGMC_parameters() {
 /* ---------------------------------------------------------------------- */
 
 int main(int argc, char **argv) {
-    if (argc != 7) {
-        print_usage();
-        exit(EXIT_FAILURE);
-    }
-
 
     struct option long_options[] = {
-        {"reaction_database", required_argument, NULL, 1},
-        {"initial_state_database", required_argument, NULL, 2},
-        {"number_of_simulations", required_argument, NULL, 3},
-        {"base_seed", required_argument, NULL, 4},
-        //{"thread_count", required_argument, NULL, 5},
-        {"step_cutoff", optional_argument, NULL, 6},
-        {"time_cutoff", optional_argument, NULL, 7},
-        {"parameters", required_argument, NULL, 8},
-        {NULL, 0, NULL, 0}
+        {"reaction_database", required_argument, NULL, 'r'},
+        {"initial_state_database", required_argument, NULL, 'i'},
+        {"number_of_simulations", required_argument, NULL, 'n'},
+        {"base_seed", required_argument, NULL, 'b'},
+        {"thread_count", required_argument, NULL, 'c'},
+        {"step_cutoff", required_argument, NULL, 's'},
+        {"time_cutoff", required_argument, NULL, 't'},
+        {"parameters", required_argument, NULL, 'p'},
+        {"help", no_argument, NULL, 'h'},
+        {NULL, 0, NULL, '\0'}
         // last element of options array needs to be filled with zeros
     };
 
@@ -68,52 +65,59 @@ int main(int argc, char **argv) {
     int number_of_simulations = 0;
     int base_seed = 0;
     int thread_count = 0;
-    std::string LGMC_params_file; 
+    char *LGMC_params_file = nullptr;
 
     Cutoff cutoff = {
         .bound =  { .step =  0 },
         .type_of_cutoff = step_termination
     };
 
-
     while ((c = getopt_long_only(
-                argc, argv, "",
+                argc, argv, "hr:i:n:b:c:s:t:p:",
                 long_options,
                 &option_index)) != -1) {
 
         switch (c) {
 
-        case 1:
+        case 'h': 
+            print_usage();
+            exit(0);
+            break; 
+
+        case 'r':
             reaction_database = optarg;
+            std::cout << "inside reaction_database" << reaction_database << std::endl;
             break;
 
-        case 2:
+        case 'i':
             initial_state_database = optarg;
+            std::cout << "inside initial_state_database" << initial_state_database << std::endl;
             break;
 
-        case 3:
+        case 'n':
             number_of_simulations = atoi(optarg);
+            std::cout << "inside number_of_simulations" << number_of_simulations << std::endl;
             break;
 
-        case 4:
+        case 'b':
             base_seed = atoi(optarg);
             break;
 
-        case 5:
+        case 'c':
             thread_count = atoi(optarg);
             break;
 
-        case 6:
+        case 's':
             cutoff.bound.step = atoi(optarg);
             cutoff.type_of_cutoff = step_termination;
             break;
 
-        case 7:
+        case 't':
             cutoff.bound.time = atof(optarg);
             cutoff.type_of_cutoff = time_termination;
             break;
 
-        case 8:
+        case 'p':
             LGMC_params_file = optarg;
             break;
 
@@ -127,9 +131,10 @@ int main(int argc, char **argv) {
 
     }                    
 
-    // read in LGMC parameters from file 
+    // read in LGMC parameters from file
+    std::string LGMC_params_str(LGMC_params_file);
     std::ifstream fin;
-    fin.open(LGMC_params_file);
+    fin.open(LGMC_params_str);
 
     if(!fin.is_open()) {
         std::cout << "Failed to open file: " << LGMC_params_file << "\n";
@@ -137,7 +142,7 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    float latconst;                               
+    float latconst;                              
     float boxxlo,boxxhi,boxylo,                   
           boxyhi,boxzlo,boxzhi;                       
     char xperiod, yperiod, zperiod;
@@ -149,19 +154,13 @@ int main(int argc, char **argv) {
     ChargeTransferStyle charge_transfer_style;
     char ct_style;
 
-
-    std::cin >> latconst >> boxxlo >> boxxhi >> boxylo >> boxyhi >> boxzlo >> boxzhi
+    fin >> latconst >> boxxlo >> boxxhi >> boxylo >> boxyhi >> boxzlo >> boxzhi
     >> xperiod >> yperiod >> zperiod >> temperature >> g_e >> add_site >> ct_style;
-
-    if(std::cin.fail()) {
-        std::cout << "Incorrect parameter file arguments.\n";
-        exit(EXIT_FAILURE);
-    }
 
     if(add_site == 'T') {
         is_add_site = true;
     }
-    else if (xperiod == 'F') {
+    else if (add_site == 'F') {
         is_add_site = false;
     }else {
         std::cout << "Incorrect parameter file argument for add site.\n";
@@ -209,8 +208,10 @@ int main(int argc, char **argv) {
     }
 
 
-    LGMCParameters parameters{.latconst = latconst, .boxxlo = boxxlo, .boxxhi = boxxhi, 
-                              .boxylo = boxyhi, .boxzlo = boxzlo, .boxzhi = boxzhi, 
+    LGMCParameters parameters{.latconst = latconst, 
+                              .boxxlo = boxxlo, .boxxhi = boxxhi, 
+                              .boxylo = boxylo, .boxyhi = boxyhi,
+                              .boxzlo = boxzlo, .boxzhi = boxzhi, 
                               .xperiodic = xperiodic, .yperiodic = yperiodic, .zperiodic = zperiodic, 
                               .temperature = temperature, .g_e = g_e, .is_add_sites = is_add_site,
                               .charge_transfer_style = charge_transfer_style};                               
@@ -219,7 +220,7 @@ int main(int argc, char **argv) {
         LatSolver,
         LatticeReactionNetwork,
         LGMCParameters,
-        TrajectoriesSql
+        LGMCTrajectoriesSql
         >
 
         dispatcher (

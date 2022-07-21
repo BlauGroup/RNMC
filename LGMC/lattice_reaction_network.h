@@ -151,7 +151,7 @@ class LatticeReactionNetwork {
 
         // convert a history element as found a simulation to history
         // to a SQL type.
-        TrajectoriesSql history_element_to_sql(
+        LGMCTrajectoriesSql history_element_to_sql(
             int seed,
             HistoryElement history_element);
 
@@ -304,6 +304,7 @@ void LatticeReactionNetwork::update_adsorp_state(Lattice *lattice, std::unordere
     // update only sites on the edge 
     for(size_t i = 0; i < lattice->can_adsorb.size(); i++) {
         int site = lattice->can_adsorb[i];
+        assert(lattice->sites[site].species == SPECIES_EMPTY);
         clear_site_helper(props, site, SITE_GILLESPIE, prop_sum, active_indicies);
     }
 
@@ -350,8 +351,8 @@ void LatticeReactionNetwork::update_adsorp_props(Lattice *lattice, std::function
 ---------------------------------------------------------------------- */
 
 double LatticeReactionNetwork::compute_propensity(int num_one, int num_two, 
-                                int react_id, Lattice *lattice, int site_id) {
-    
+                                int react_id, Lattice *lattice, int site_id) {   
+
     LatticeReaction reaction = reactions[react_id]; 
 
     double p, k;
@@ -746,7 +747,7 @@ void LatticeReactionNetwork::relevant_react(Lattice *lattice, std::function<void
 
 std::string LatticeReactionNetwork::make_string(int site_one, int site_two) {
 
-    return (site_one < site_two) ? std::to_string(site_one) + "." + 
+    return (site_one > site_two) ? std::to_string(site_one) + "." + 
     std::to_string(site_two) : std::to_string(site_two) + "." + std::to_string(site_one);
 
 } // make_string
@@ -765,10 +766,10 @@ double LatticeReactionNetwork::sum_row(std::string hash, std::unordered_map<std:
 
 /* ---------------------------------------------------------------------- */
 
-TrajectoriesSql LatticeReactionNetwork::history_element_to_sql(
+LGMCTrajectoriesSql LatticeReactionNetwork::history_element_to_sql(
     int seed,
     HistoryElement history_element) {
-    return TrajectoriesSql {
+    return LGMCTrajectoriesSql {
         .seed = seed,
         .step = history_element.step,
         .reaction_id = history_element.reaction_id,
@@ -871,57 +872,57 @@ void LatticeReactionNetwork::fill_reactions(SqlConnection &reaction_network_data
         reaction.electron_tunneling_coefficient = reaction_row.electron_tunneling_coefficient;
         reaction.charge_transfer_coefficient = reaction_row.charge_transfer_coefficient;
 
-        if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_1), "L")) {
+        if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_1), "L") == 0) {
             reaction.phase_reactants[0] = Phase::LATTICE;
-        } else if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_1), "S")) {
+        } else if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_1), "S") == 0) {
             reaction.phase_reactants[0] = Phase::SOLUTION;
         } else {
             reaction.phase_reactants[0] = Phase::NONE;
         }
 
-        if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_2), "L")) {
+        if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_2), "L") == 0) {
             reaction.phase_reactants[1] = Phase::LATTICE;
-        } else if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_2), "S")) {
+        } else if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_reactant_2), "S") == 0) {
             reaction.phase_reactants[1] = Phase::SOLUTION;
         } else {
             reaction.phase_reactants[1] = Phase::NONE;
         }
 
-        if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_1), "L")) {
+        if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_1), "L") == 0) {
             reaction.phase_products[0] = Phase::LATTICE;
-        } else if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_1), "S")) {
+        } else if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_1), "S") == 0) {
             reaction.phase_products[0] = Phase::SOLUTION;
         } else {
             reaction.phase_products[0] = Phase::NONE;
         }
 
-        if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_2), "L")) {
+        if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_2), "L") == 0) {
             reaction.phase_products[1] = Phase::LATTICE;
-        } else if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_2), "S")) {
+        } else if (strcmp(reinterpret_cast<const char *>(reaction_row.phase_product_2), "S") == 0) {
             reaction.phase_products[1] = Phase::SOLUTION;
         } else {
             reaction.phase_products[1] = Phase::NONE;
         }
         
-        if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "O")) {
+        if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "O") == 0) {
             reaction.type = Type::OXIDATION;
         }
-        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "R")) {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "R") == 0) {
             reaction.type = Type::REDUCTION;
         }
-        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "F")) {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "F") == 0) {
             reaction.type = Type::DIFFUSION;
         }
-        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "S")) {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "S") == 0) {
             reaction.type =  Type::HOMOGENEOUS_SOLID;
         }
-        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "E")) {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "E") == 0) {
             reaction.type =  Type::HOMOGENEOUS_ELYTE;
         }
-        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "D")) {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "D") == 0) {
             reaction.type =  Type::DESORPTION;
         }
-        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "A")) {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "A") == 0) {
             reaction.type =  Type::ADSORPTION;
         }
 

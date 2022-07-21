@@ -180,7 +180,10 @@ std::optional<LatticeEvent> LatSolver::event_lattice() {
 
                     std::size_t pos = hash.find(".");
                     site_one = std::optional<int>(stoi(hash.substr(0, pos)));
-                    site_two = std::optional<int>(stoi(hash.substr(pos)));
+                    site_two = std::optional<int>(stoi(hash.substr(pos+1)));
+                    if(site_one < site_two) {
+                        assert(false);
+                    }
                     isFound = true;
                     break;
                 }
@@ -205,7 +208,7 @@ std::optional<LatticeEvent> LatSolver::event_lattice() {
 
 std::string LatSolver::make_string(int site_one, int site_two) {
 
-    return (site_one < site_two) ? std::to_string(site_one) + "." + 
+    return (site_one > site_two) ? std::to_string(site_one) + "." + 
     std::to_string(site_two) : std::to_string(site_two) + "." + std::to_string(site_one);
 
 } // make_string

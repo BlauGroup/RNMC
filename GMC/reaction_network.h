@@ -91,8 +91,6 @@ ReactionNetwork::ReactionNetwork(
 
     MetadataSql metadata_row = maybe_metadata_row.value();
 
-
-
     // setting reaction network factors
     SqlStatement<FactorsSql> factors_statement (initial_state_database);
     SqlReader<FactorsSql> factors_reader (factors_statement);

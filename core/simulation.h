@@ -44,8 +44,7 @@ class Simulation {
         time (0.0),
         step (0),
         history_chunk_size (history_chunk_size),
-        history_queue(history_queue),
-        update_function ([&] (Update update) {solver.update(update);})
+        history_queue(history_queue)
         {
             history.reserve(history_chunk_size);
         };
@@ -59,6 +58,7 @@ class Simulation {
 template <typename Solver, typename Model>
 void Simulation<Solver, Model>::init(Model &model) {
     solver = Solver(seed, std::ref(model.initial_propensities));
+    update_function = std::function<void(Update)> ([&] (Update update) {solver.update(update);});
 }
 
 template <typename Solver, typename Model>
@@ -142,12 +142,14 @@ class LatticeSimulation : public Simulation<LatSolver, Model> {
     LatSolver latsolver;
     Lattice *lattice;
     std::function<void(LatticeUpdate)> lattice_update_function;
+    std::function<void(Update)> update_function;
 
     LatticeSimulation(Model &model, unsigned long int seed, int history_chunk_size,
                HistoryQueue<HistoryPacket> &history_queue) :
                Simulation<LatSolver, Model>(model, seed, history_chunk_size, history_queue),
                latsolver (seed, std::ref(model.initial_propensities)),
-               lattice_update_function ([&] (LatticeUpdate lattice_update) {latsolver.update(lattice_update);}) {
+               lattice_update_function ([&] (LatticeUpdate lattice_update) {latsolver.update(lattice_update);}), 
+               update_function ([&] (Update update) {latsolver.update(update);}) {
                 
                     if(model.initial_lattice) {
                         lattice = new  Lattice(*model.initial_lattice);
