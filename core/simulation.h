@@ -141,14 +141,21 @@ class LatticeSimulation : public Simulation<LatSolver, Model> {
         std::vector< std::pair<double, int> > > props;
     LatSolver latsolver;
     Lattice *lattice;
-    std::function<void(LatticeUpdate)> lattice_update_function;
+    std::function<void(LatticeUpdate, std::unordered_map<std::string,                     
+                std::vector< std::pair<double, int> > > &)> lattice_update_function;
     std::function<void(Update)> update_function;
+
+    std::vector<HistoryElement> lattice_history;
+    HistoryQueue<HistoryPacket> &history_queue;
 
     LatticeSimulation(Model &model, unsigned long int seed, int history_chunk_size,
                HistoryQueue<HistoryPacket> &history_queue) :
                Simulation<LatSolver, Model>(model, seed, history_chunk_size, history_queue),
+               history_queue(history_queue),
                latsolver (seed, std::ref(model.initial_propensities)),
-               lattice_update_function ([&] (LatticeUpdate lattice_update) {latsolver.update(lattice_update);}), 
+               lattice_update_function ([&] (LatticeUpdate lattice_update, 
+               std::unordered_map<std::string,                     
+                std::vector< std::pair<double, int> > > &props) {latsolver.update(lattice_update, props);}), 
                update_function ([&] (Update update) {latsolver.update(update);}) {
                 
                     if(model.initial_lattice) {
@@ -156,6 +163,8 @@ class LatticeSimulation : public Simulation<LatSolver, Model> {
                     } else {
                         lattice = nullptr;
                     }
+
+                    lattice_history.reserve(history_chunk_size);
                 
                };
 
@@ -167,14 +176,14 @@ class LatticeSimulation : public Simulation<LatSolver, Model> {
 template<typename Model>
 void LatticeSimulation<Model>::init() {
     this->model.update_adsorp_state(this->lattice, this->props, latsolver.propensity_sum, latsolver.number_of_active_indices);
-    this->model.update_adsorp_props(this->lattice, lattice_update_function, this->state);
+    this->model.update_adsorp_props(this->lattice, lattice_update_function, this->state, std::ref(props));
     
 }
 
 template<typename Model>
 bool LatticeSimulation<Model>::execute_step() {
 
-    std::optional<LatticeEvent> maybe_event = latsolver.event_lattice();
+    std::optional<LatticeEvent> maybe_event = latsolver.event_lattice(props);
 
     if (! maybe_event) {
 
@@ -189,23 +198,23 @@ bool LatticeSimulation<Model>::execute_step() {
         this->time += event.dt;
 
         // record what happened
-        this->history.push_back(HistoryElement {
+        lattice_history.push_back(HistoryElement {
             .seed = this->seed,
             .reaction_id = next_reaction,
             .time = this->time,
             .step = this->step
             });
 
-        if (this->history.size() == this->history_chunk_size ) {
-            this->history_queue.insert_history(
+        if (lattice_history.size() == this->history_chunk_size ) {
+            history_queue.insert_history(
                 std::move(
                     HistoryPacket {
                         .history = std::move(this->history),
                         .seed = this->seed
                         }));
 
-            this->history = std::vector<HistoryElement> ();
-            this->history.reserve(this->history_chunk_size);
+            lattice_history = std::vector<HistoryElement> ();
+            lattice_history.reserve(this->history_chunk_size);
         }
 
 
@@ -219,7 +228,7 @@ bool LatticeSimulation<Model>::execute_step() {
         // update_propensities 
         this->model.update_propensities(lattice, std::ref(this->state), this->update_function, 
                                         lattice_update_function, next_reaction, 
-                                        event.site_one, event.site_two);
+                                        event.site_one, event.site_two, props);
 
         return true;
     }

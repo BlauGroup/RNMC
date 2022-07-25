@@ -415,8 +415,8 @@ void Lattice::structured_connectivity() {
             // gid = global ID of neighbor
             // calculated in same manner that structured_lattice() generated IDs
 
-            gid = ((kneigh-zlo)*(yhi-ylo+1)*(xhi-xlo+1)) +
-                  ((jneigh-ylo)*(xhi-xlo+1)) + ((ineigh-xlo));
+            gid = ((kneigh-klo)*(jhi-jlo+1)*(ihi-ilo+1)) +
+                  ((jneigh-jlo)*(ihi-ilo+1)) + ((ineigh-ilo));
             
             
         /*std::cout << "neighbor: (" << sites[gid].x << ", " << sites[gid].y << ", " 
@@ -437,8 +437,8 @@ void Lattice::structured_connectivity() {
     
     std::cout << "idneigh" << std::endl;
     for(int i = 0; i < nsites; i++) {
-        std::cout << "neighbors: ";
-        for(int j = 0; j < maxneigh; j++) {
+        std::cout << "For site: " << i << "neighbors: ";
+        for(int j = 0; j < numneigh[i]; j++) {
             std::cout << idneigh[i][j] << ", ";
         }
         std::cout << std::endl;
@@ -710,13 +710,14 @@ float Lattice::get_maxz() {
 }
 
 // TESTING //
-
-/*int main(int argc, char **argv) {
-    Lattice *lattice = new Lattice(1, 0, 200, 0, 200, 0, 1, true, true, false);
+/*
+int main(int argc, char **argv) {
+    Lattice *lattice = new Lattice(1, 0, 2, 0, 2, 0, 2, true, true, false);
     // test copy constructor 
-    Lattice *lattice2 = new Lattice(*lattice);
-    std::cout << "using copy constructor" << std::endl;
-    std::cout << "numneigh" << std::endl;
+   // Lattice *lattice2 = new Lattice(*lattice);
+    //std::cout << "using copy constructor" << std::endl;
+    //std::cout << "numneigh" << std::endl;
+    
     for(int i = 0; i < 12; i++) {
         std::cout << "[" << lattice2->sites[i].x << ", " <<
         lattice2->sites[i].y << ", " << lattice2->sites[i].z << "]" << ",";
@@ -727,11 +728,11 @@ float Lattice::get_maxz() {
     for(int i = 0; i < 12; i++) {
         std::cout << "neighbors: ";
         for(int j = 0; j < 6; j++) {
-            std::cout << lattice2->idneigh[i][j] << ", ";
+            std::cout << lattice->idneigh[i][j] << ", ";
         }
         std::cout << std::endl;
     }
     delete lattice;
-    delete lattice2;
+    //delete lattice2;
     
 }*/

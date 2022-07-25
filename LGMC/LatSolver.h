@@ -29,10 +29,13 @@ class LatSolver {
         void update(Update update);
         void update(std::vector<Update> updates);
 
-        void update(LatticeUpdate lattice_update);
-        void update(std::vector<LatticeUpdate> lattice_updates);
+        void update(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props);
+        void update(std::vector<LatticeUpdate> lattice_updates, std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props);
 
-        std::optional<LatticeEvent> event_lattice();
+        std::optional<LatticeEvent> event_lattice(std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props);
 
         std::string make_string(int site_one, int site_two);
 
@@ -45,9 +48,6 @@ class LatSolver {
     private:
         Sampler sampler;
         std::vector<double> propensities;                   // Gillepsie propensities            
-        
-        std::unordered_map<std::string,                     // lattice propensities 
-        std::vector< std::pair<double, int> > > props;      // key: (site_one, site_two) value: propensity 
 
 };
 
@@ -110,7 +110,8 @@ void LatSolver::update(Update update) {
 
 /* ---------------------------------------------------------------------- */
 
-void LatSolver::update(LatticeUpdate lattice_update) {
+void LatSolver::update(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props) {
     
     propensity_sum += lattice_update.propensity;
     number_of_active_indices++;
@@ -121,9 +122,10 @@ void LatSolver::update(LatticeUpdate lattice_update) {
 
 /* ---------------------------------------------------------------------- */
 
-void LatSolver::update(std::vector<LatticeUpdate> lattice_updates) {
+void LatSolver::update(std::vector<LatticeUpdate> lattice_updates, std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props) {
     for (LatticeUpdate u : lattice_updates) {
-        update(u);
+        update(u, props);
     }
 };
 
@@ -137,7 +139,8 @@ void LatSolver::update(std::vector<Update> updates) {
 
 /* ---------------------------------------------------------------------- */
 
-std::optional<LatticeEvent> LatSolver::event_lattice() {
+std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props) {
     if (number_of_active_indices == 0) {
         propensity_sum = 0.0;
         return std::optional<LatticeEvent> ();
@@ -169,11 +172,13 @@ std::optional<LatticeEvent> LatSolver::event_lattice() {
     // go through lattice propensities if not found 
     if(!isFound) {
         auto it = props.begin();
-        while(!isFound || it != props.end()) {
+        while(!isFound && it != props.end()) {
             for(int i = 0; i < int(it->second.size()); i++ ) {
+                
                 partial += it->second[i].first;
 
                 if(partial > fraction) {
+
                     isFound = true;
                     hash = it->first;
                     reaction_id = it->second[i].second;
@@ -194,7 +199,7 @@ std::optional<LatticeEvent> LatSolver::event_lattice() {
     
     double dt = - std::log(r2) / propensity_sum;
 
-    if(isFound ) {
+    if(isFound) {
         return std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id, .dt = dt,
                                                            .site_one = site_one, .site_two = site_two});
     }

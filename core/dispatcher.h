@@ -24,7 +24,7 @@ struct Cutoff {
 // 20000 is a good value. Only change this if you fully understand the
 // performance implications
 
-constexpr int history_chunk_size = 20000;
+constexpr int history_chunk_size = 2000;
 
 template <typename Solver, typename Model>
 struct SimulatorPayload {
@@ -92,13 +92,16 @@ struct SimulatorPayload {
                     break;
                 }
 
+                std::vector<HistoryElement> hist = simulation.lattice_history;
+
                 history_queue.insert_history(
                 std::move(
                     HistoryPacket {
-                        .history = std::move(simulation.history),
+                        .history = std::move(simulation.lattice_history),
                         .seed = seed
                         }));
             }
+
 
         }
 
@@ -224,13 +227,13 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
 
     for (int i = 0; i < number_of_threads; i++) threads[i].join();
 
-    initial_state_database.exec(
+    /*initial_state_database.exec(
         "DELETE FROM trajectories WHERE rowid NOT IN"
         "(SELECT MIN(rowid) FROM trajectories GROUP BY seed, step);");
 
 
     std::cerr << time_stamp()
-              << "removing duplicate trajectories...\n";
+              << "removing duplicate trajectories...\n";*/
 
 
 };
