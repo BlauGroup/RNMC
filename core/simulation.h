@@ -14,12 +14,22 @@ struct HistoryElement {
     int step;
 };
 
+template <typename T>
 struct HistoryPacket {
-    std::vector<HistoryElement> history;
+    std::vector<T> history;
     unsigned long int seed;
 };
 
-template <typename Solver, typename Model>
+struct LatticeHistoryElement {
+    unsigned long int seed;
+    int step;
+    int reaction_id;
+    int site_1;
+    int site_2;
+    double time;
+};
+
+template <typename Solver, typename Model, typename History>
 class Simulation {
     private: 
         Solver solver;
@@ -30,21 +40,22 @@ class Simulation {
     double time;
     int step; // number of reactions which have occoured
     unsigned long int history_chunk_size;
-    std::vector<HistoryElement> history;
-    HistoryQueue<HistoryPacket> &history_queue;
+    std::vector<History> history;
+    HistoryQueue<HistoryPacket<History>> &history_queue;   
     std::function<void(Update)> update_function;
+
 
     Simulation(Model &model, unsigned long int seed,
                int history_chunk_size,
-               HistoryQueue<HistoryPacket> &history_queue
+               HistoryQueue<HistoryPacket<History>> &history_queue
         ) :
         model (model),
         seed (seed),
         state (model.initial_state),
+        history_queue(history_queue),
         time (0.0),
         step (0),
-        history_chunk_size (history_chunk_size),
-        history_queue(history_queue)
+        history_chunk_size (history_chunk_size)
         {
             history.reserve(history_chunk_size);
         };
@@ -55,14 +66,15 @@ class Simulation {
     void execute_time(double time_cutoff);
 
 };
-template <typename Solver, typename Model>
-void Simulation<Solver, Model>::init(Model &model) {
+template <typename Solver, typename Model, typename History>
+void Simulation<Solver, Model, History>::init(Model &model) {
     solver = Solver(seed, std::ref(model.initial_propensities));
     update_function = std::function<void(Update)> ([&] (Update update) {solver.update(update);});
+    history.reserve(history_chunk_size);
 }
 
-template <typename Solver, typename Model>
-bool Simulation<Solver, Model>::execute_step() {
+template <typename Solver, typename Model, typename History>
+bool Simulation<Solver, Model, History>::execute_step() {
     std::optional<Event> maybe_event = solver.event();
 
     if (! maybe_event) {
@@ -78,7 +90,7 @@ bool Simulation<Solver, Model>::execute_step() {
         time += event.dt;
 
         // record what happened
-        history.push_back(HistoryElement {
+        history.push_back(History {
             .seed = seed,
             .reaction_id = next_reaction,
             .time = time,
@@ -88,12 +100,12 @@ bool Simulation<Solver, Model>::execute_step() {
         if ( history.size() == history_chunk_size ) {
             history_queue.insert_history(
                 std::move(
-                    HistoryPacket {
+                    HistoryPacket<History> {
                         .history = std::move(history),
                         .seed = seed
                         }));
 
-            history = std::vector<HistoryElement> ();
+            history = std::vector<History> ();
             history.reserve(history_chunk_size);
         }
 
@@ -115,8 +127,8 @@ bool Simulation<Solver, Model>::execute_step() {
     }
 };
 
-template <typename Solver, typename Model>
-void Simulation<Solver, Model>::execute_steps(int step_cutoff) {
+template <typename Solver, typename Model, typename History>
+void Simulation<Solver, Model, History>::execute_steps(int step_cutoff) {
 
     while(execute_step()) {
         if (step > step_cutoff)
@@ -125,8 +137,8 @@ void Simulation<Solver, Model>::execute_steps(int step_cutoff) {
     
 };
 
-template <typename Solver, typename Model>
-void Simulation<Solver, Model>::execute_time(double time_cutoff) {
+template <typename Solver, typename Model, typename History>
+void Simulation<Solver, Model, History>::execute_time(double time_cutoff) {
     while(execute_step()) {
         if (time > time_cutoff)
             break;
@@ -134,8 +146,8 @@ void Simulation<Solver, Model>::execute_time(double time_cutoff) {
 };
 
 /* ---------------------------------------------------------------------- */
-template<typename Model>
-class LatticeSimulation : public Simulation<LatSolver, Model> {
+template<typename Model, typename History>
+class LatticeSimulation : public Simulation<LatSolver, Model, History> {
     public:
     std::unordered_map<std::string,                     
         std::vector< std::pair<double, int> > > props;
@@ -145,13 +157,9 @@ class LatticeSimulation : public Simulation<LatSolver, Model> {
                 std::vector< std::pair<double, int> > > &)> lattice_update_function;
     std::function<void(Update)> update_function;
 
-    std::vector<HistoryElement> lattice_history;
-    HistoryQueue<HistoryPacket> &history_queue;
-
     LatticeSimulation(Model &model, unsigned long int seed, int history_chunk_size,
-               HistoryQueue<HistoryPacket> &history_queue) :
-               Simulation<LatSolver, Model>(model, seed, history_chunk_size, history_queue),
-               history_queue(history_queue),
+               HistoryQueue<HistoryPacket<History>> &history_queue) :
+               Simulation<LatSolver, Model, History>(model, seed, history_chunk_size, history_queue),
                latsolver (seed, std::ref(model.initial_propensities)),
                lattice_update_function ([&] (LatticeUpdate lattice_update, 
                std::unordered_map<std::string,                     
@@ -163,8 +171,6 @@ class LatticeSimulation : public Simulation<LatSolver, Model> {
                     } else {
                         lattice = nullptr;
                     }
-
-                    lattice_history.reserve(history_chunk_size);
                 
                };
 
@@ -173,15 +179,15 @@ class LatticeSimulation : public Simulation<LatSolver, Model> {
 
 };
 
-template<typename Model>
-void LatticeSimulation<Model>::init() {
+template<typename Model, typename History>
+void LatticeSimulation<Model, History>::init() {
     this->model.update_adsorp_state(this->lattice, this->props, latsolver.propensity_sum, latsolver.number_of_active_indices);
     this->model.update_adsorp_props(this->lattice, lattice_update_function, this->state, std::ref(props));
     
 }
 
-template<typename Model>
-bool LatticeSimulation<Model>::execute_step() {
+template<typename Model, typename History>
+bool LatticeSimulation<Model, History>::execute_step() {
 
     std::optional<LatticeEvent> maybe_event = latsolver.event_lattice(props);
 
@@ -196,25 +202,40 @@ bool LatticeSimulation<Model>::execute_step() {
 
         // update time
         this->time += event.dt;
+        int site_1 = -1;
+        int site_2 = -1;
+
+        if(event.site_one) {
+            site_1 = event.site_one.value();
+        }
+        if(event.site_two) {
+            site_2 = event.site_two.value();
+        }
 
         // record what happened
-        lattice_history.push_back(HistoryElement {
+        this->history.push_back(History {
             .seed = this->seed,
             .reaction_id = next_reaction,
             .time = this->time,
-            .step = this->step
+            .step = this->step,
+            .site_1 = site_1,
+            .site_2 = site_2
             });
+        
+        if(this->history.size() == 500) {
+            std::cout << "500 events" << std::endl;
+        }
 
-        if (lattice_history.size() == this->history_chunk_size ) {
-            history_queue.insert_history(
+        if (this->history.size() == this->history_chunk_size ) {
+            this->history_queue.insert_history(
                 std::move(
-                    HistoryPacket {
+                    HistoryPacket<History> {
                         .history = std::move(this->history),
                         .seed = this->seed
                         }));
 
-            lattice_history = std::vector<HistoryElement> ();
-            lattice_history.reserve(this->history_chunk_size);
+            this->history = std::vector<History> ();
+            this->history.reserve(this->history_chunk_size);
         }
 
 

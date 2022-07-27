@@ -220,7 +220,8 @@ int main(int argc, char **argv) {
         LatSolver,
         LatticeReactionNetwork,
         LGMCParameters,
-        TrajectoriesSql
+        LGMCTrajectoriesSql,
+        LatticeHistoryElement
         >
 
         dispatcher (

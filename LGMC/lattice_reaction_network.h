@@ -159,9 +159,9 @@ class LatticeReactionNetwork {
 
         // convert a history element as found a simulation to history
         // to a SQL type.
-        TrajectoriesSql history_element_to_sql(
+        LGMCTrajectoriesSql history_element_to_sql(
             int seed,
-            HistoryElement history_element);
+            LatticeHistoryElement history_element);
 
     private:                                                          
 
@@ -259,8 +259,8 @@ void LatticeReactionNetwork::update_state(Lattice *lattice,
                         std::vector<int> &state, int next_reaction, 
                         std::optional<int> site_one, std::optional<int> site_two, 
                         double &prop_sum, int &active_indices) {
+    
     if(site_one) {
-        std::cout << "lattice event!" << std::endl;
         // update lattice state
         bool update_gillepsie = update_state(lattice, props, next_reaction, site_one.value(), 
                                             site_two.value(), prop_sum, active_indices);
@@ -271,7 +271,6 @@ void LatticeReactionNetwork::update_state(Lattice *lattice,
     }
     
     else {
-        std::cout << "gill event!" << std::endl;
         // gillespie event happens
         update_state(state, next_reaction);
 
@@ -340,14 +339,20 @@ std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props)>
             if(reaction.type == Type::ADSORPTION) {
 
                 int other_reactant_id = (reaction.reactants[0] == lattice->sites[site].species) ? 1 : 0;
-                
-                double new_propensity = compute_propensity(1, state[other_reactant_id], reaction_id, lattice);
 
-                lattice_update_function(LatticeUpdate {
-                    .index = reaction_id,
-                    .propensity = new_propensity,
-                    .site_one = site,
-                    .site_two = SITE_GILLESPIE}, props); 
+                if(state[reaction.reactants[other_reactant_id]] != 0) {
+                    
+                    double new_propensity = compute_propensity(1, state[reaction.reactants[other_reactant_id]], reaction_id, lattice);
+
+                    lattice_update_function(LatticeUpdate {
+                        .index = reaction_id,
+                        .propensity = new_propensity,
+                        .site_one = site,
+                        .site_two = SITE_GILLESPIE}, props); 
+
+                }
+                
+                
             }
 
         }
@@ -427,10 +432,10 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
 
     if(reaction.type == Type::ADSORPTION) {
 
+        assert(std::find(lattice->can_adsorb.begin(), lattice->can_adsorb.end(), site_one) != lattice->can_adsorb.end());
         assert(lattice->sites[site_one].species == SPECIES_EMPTY);
         assert(site_two == SITE_GILLESPIE);
         // TODO: The below might be a slow operation
-        assert(std::find(lattice->can_adsorb.begin(), lattice->can_adsorb.end(), site_one) != lattice->can_adsorb.end());
 
         // update site
         lattice->sites[site_one].species = reaction.products[0];
@@ -466,6 +471,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
 
         lattice->sites[site_one].species = SPECIES_EMPTY;
         clear_site(lattice, props, site_one, std::optional<int> (), prop_sum, active_indices);
+        clear_site_helper(props, site_one, SITE_GILLESPIE, prop_sum, active_indices);
 
         // TODO: how large do we expect this vector to be? Is this erase expensive?
         std::erase(lattice->can_desorb, site_one);
@@ -483,6 +489,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
 
             // remove site above from adsorb vector
             std::erase(lattice->can_adsorb, site_above);
+            clear_site_helper(props, site_above, SITE_GILLESPIE, prop_sum, active_indices);
         }
   
         return true;
@@ -514,6 +521,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                 && (lattice->sites[site_one].species != SPECIES_EMPTY)) {
                 std::erase(lattice->can_adsorb, site_one);
                 lattice->can_desorb.push_back(site_one);
+                clear_site_helper(props, site_one, SITE_GILLESPIE, prop_sum, active_indices);
             }
 
             if((std::find(lattice->can_desorb.begin(), lattice->can_desorb.end(), site_one) != lattice->can_desorb.end())
@@ -526,6 +534,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                 && (lattice->sites[site_two].species != SPECIES_EMPTY)) {
                 std::erase(lattice->can_adsorb, site_two);
                 lattice->can_desorb.push_back(site_two);
+                clear_site_helper(props, site_two, SITE_GILLESPIE, prop_sum, active_indices);
             }
 
             if((std::find(lattice->can_desorb.begin(), lattice->can_desorb.end(), site_two) != lattice->can_desorb.end())
@@ -533,10 +542,6 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                 std::erase(lattice->can_desorb, site_two);
                 lattice->can_adsorb.push_back(site_two);
             }
-
-
-
-
 
             clear_site(lattice, props, site_one, site_two, prop_sum, active_indices);
             clear_site(lattice, props, site_two, std::optional<int> (), prop_sum, active_indices);
@@ -573,6 +578,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
         if(std::find(lattice->can_adsorb.begin(), lattice->can_adsorb.end(), empty_site) != lattice->can_adsorb.end()) {
             std::erase(lattice->can_adsorb, empty_site);
             lattice->can_desorb.push_back(empty_site);
+            clear_site_helper(props, empty_site, SITE_GILLESPIE, prop_sum, active_indices);
         }
 
         if(std::find(lattice->can_desorb.begin(), lattice->can_desorb.end(), other_site) != lattice->can_desorb.end()) {
@@ -841,14 +847,16 @@ double LatticeReactionNetwork::sum_row(std::string hash, std::unordered_map<std:
 
 /* ---------------------------------------------------------------------- */
 
-TrajectoriesSql LatticeReactionNetwork::history_element_to_sql(
+LGMCTrajectoriesSql LatticeReactionNetwork::history_element_to_sql(
     int seed,
-    HistoryElement history_element) {
-    return TrajectoriesSql {
+    LatticeHistoryElement history_element) {
+    return LGMCTrajectoriesSql {
         .seed = seed,
         .step = history_element.step,
         .reaction_id = history_element.reaction_id,
-        .time = history_element.time
+        .time = history_element.time,
+        .site_1 = history_element.site_1,
+        .site_2 = history_element.site_2
     };
 }
 

@@ -26,10 +26,10 @@ struct Cutoff {
 
 constexpr int history_chunk_size = 2000;
 
-template <typename Solver, typename Model>
+template <typename Solver, typename Model, typename History>
 struct SimulatorPayload {
     Model &model;
-    HistoryQueue<HistoryPacket> &history_queue;
+    HistoryQueue<HistoryPacket<History>> &history_queue;
     SeedQueue &seed_queue;
     Cutoff cutoff;
     std::vector<bool>::iterator running;
@@ -37,7 +37,7 @@ struct SimulatorPayload {
 
     SimulatorPayload(
         Model &model,
-        HistoryQueue<HistoryPacket> &history_queue,
+        HistoryQueue<HistoryPacket<History>> &history_queue,
         SeedQueue &seed_queue,
         Cutoff cutoff,
         std::vector<bool>::iterator running, 
@@ -60,7 +60,7 @@ struct SimulatorPayload {
             unsigned long int seed = maybe_seed.value();
 
             if(!isLGMC) {
-                Simulation<Solver, Model> simulation (model, seed, history_chunk_size, history_queue);
+                Simulation<Solver, Model, History> simulation (model, seed, history_chunk_size, history_queue);
                 simulation.init(model);
 
                 switch(cutoff.type_of_cutoff) {
@@ -71,16 +71,17 @@ struct SimulatorPayload {
                     simulation.execute_time(cutoff.bound.time);
                     break;
                 }
+             
+                    history_queue.insert_history(
+                    std::move(
+                    HistoryPacket<History> {
+                    .history = std::move(simulation.history),
+                    .seed = seed
+                    }));
 
-                history_queue.insert_history(
-                std::move(
-                    HistoryPacket {
-                        .history = std::move(simulation.history),
-                        .seed = seed
-                        }));
             }
             else {
-                LatticeSimulation simulation (model, seed, history_chunk_size, history_queue);
+                LatticeSimulation<Model, History> simulation (model, seed, history_chunk_size, history_queue);
                 simulation.init();
 
                 switch(cutoff.type_of_cutoff) {
@@ -92,14 +93,12 @@ struct SimulatorPayload {
                     break;
                 }
 
-                std::vector<HistoryElement> hist = simulation.lattice_history;
-
-                history_queue.insert_history(
-                std::move(
-                    HistoryPacket {
-                        .history = std::move(simulation.lattice_history),
-                        .seed = seed
-                        }));
+                    history_queue.insert_history(
+                    std::move(
+                    HistoryPacket<History> {
+                    .history = std::move(simulation.history),
+                    .seed = seed
+                    }));
             }
 
 
@@ -115,15 +114,16 @@ template <
     typename Solver,
     typename Model,
     typename Parameters,
-    typename TrajectoriesSql>
+    typename OutputSQL, 
+    typename History>
 
 struct Dispatcher {
     SqlConnection model_database;
     SqlConnection initial_state_database;
     Model model;
-    SqlStatement<TrajectoriesSql> trajectories_stmt;
-    SqlWriter<TrajectoriesSql> trajectories_writer;
-    HistoryQueue<HistoryPacket> history_queue;
+    SqlStatement<OutputSQL> trajectories_stmt;
+    SqlWriter<OutputSQL> trajectories_writer;
+    HistoryQueue<HistoryPacket<History>> history_queue;
     SeedQueue seed_queue;
     std::vector<std::thread> threads;
     std::vector<bool> running;
@@ -168,24 +168,25 @@ struct Dispatcher {
         };
 
     void run_dispatcher();
-    void record_simulation_history(HistoryPacket history_packet);
+    void record_simulation_history(HistoryPacket<History> history_packet);
 };
 
 template <
     typename Solver,
     typename Model,
     typename Parameters,
-    typename TrajectoriesSql>
+    typename OutputSQL, 
+    typename History>
 
-void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
+void Dispatcher<Solver, Model, Parameters, OutputSQL, History>::run_dispatcher() {
 
 
     threads.resize(number_of_threads);
     for (int i = 0; i < number_of_threads; i++) {
         running[i] = true;
         threads[i] = std::thread (
-            [](SimulatorPayload<Solver, Model> payload) {payload.run_simulator();},
-            SimulatorPayload<Solver, Model> (
+            [](SimulatorPayload<Solver, Model, History> payload) {payload.run_simulator();},
+            SimulatorPayload<Solver, Model, History> (
                 model,
                 history_queue,
                 seed_queue,
@@ -215,25 +216,26 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
                 finished = true;
         }
 
-
-        std::optional<HistoryPacket>
-            maybe_history_packet = history_queue.get_history();
+        std::optional<HistoryPacket<History>>
+        maybe_history_packet = history_queue.get_history();
 
         if (maybe_history_packet) {
-            HistoryPacket history_packet = std::move(maybe_history_packet.value());
+            HistoryPacket<History> history_packet = std::move(maybe_history_packet.value());
             record_simulation_history(std::move(history_packet));
         }
+
+        
     }
 
     for (int i = 0; i < number_of_threads; i++) threads[i].join();
 
-    /*initial_state_database.exec(
+    initial_state_database.exec(
         "DELETE FROM trajectories WHERE rowid NOT IN"
         "(SELECT MIN(rowid) FROM trajectories GROUP BY seed, step);");
 
 
     std::cerr << time_stamp()
-              << "removing duplicate trajectories...\n";*/
+              << "removing duplicate trajectories...\n";
 
 
 };
@@ -242,9 +244,9 @@ template <
     typename Solver,
     typename Model,
     typename Parameters,
-    typename TrajectoriesSql
-    >
-void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::record_simulation_history(HistoryPacket history_packet) {
+    typename OutputSQL,
+    typename History>
+void Dispatcher<Solver, Model, Parameters, OutputSQL, History>::record_simulation_history(HistoryPacket<History> history_packet) {
     initial_state_database.exec("BEGIN");
 
 
@@ -253,7 +255,6 @@ void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::record_simulation_h
             model.history_element_to_sql(
                 (int) history_packet.seed,
                 history_packet.history[i]));
-
     }
     initial_state_database.exec("COMMIT;");
 

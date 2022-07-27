@@ -121,7 +121,6 @@ struct LGMCTrajectoriesSql {
     int seed;
     int step;
     int reaction_id;
-    const char* reaction_type;
     int site_1;
     int site_2;
     double time;
@@ -130,14 +129,13 @@ struct LGMCTrajectoriesSql {
 };
 
 std::string LGMCTrajectoriesSql::sql_statement =
-    "INSERT INTO trajectories VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);";
+    "INSERT INTO trajectories VALUES (?1, ?2, ?3, ?4, ?5, ?6);";
 
 void LGMCTrajectoriesSql::action (LGMCTrajectoriesSql& t, sqlite3_stmt* stmt) {
     sqlite3_bind_int(stmt, 1, t.seed);
     sqlite3_bind_int(stmt, 2, t.step);
     sqlite3_bind_int(stmt, 3, t.reaction_id);
-    /*sqlite3_bind_text(stmt, 4, t.reaction_type, strlen(t.reaction_type), NULL);
-    sqlite3_bind_int(stmt, 5, t.site_1);
-    sqlite3_bind_int(stmt, 6, t.site_2);
-    sqlite3_bind_double(stmt, 7, t.time);*/
+    sqlite3_bind_int(stmt, 4, t.site_1);
+    sqlite3_bind_int(stmt, 5, t.site_2);
+    sqlite3_bind_double(stmt, 6, t.time);
 };
