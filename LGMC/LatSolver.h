@@ -142,7 +142,7 @@ void LatSolver::update(std::vector<Update> updates) {
 std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props) {
     if (number_of_active_indices == 0) {
-        propensity_sum = 0.0;
+        propensity_sum == 0.0;
         return std::optional<LatticeEvent> ();
     }
 
@@ -204,6 +204,7 @@ std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::str
                                                            .site_one = site_one, .site_two = site_two});
     }
     else {
+
         return std::optional<LatticeEvent> ();
     }
         

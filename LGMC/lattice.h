@@ -86,9 +86,9 @@ public:
     std::vector<Site> sites;                                // list of Sites for lattice
     std::vector<uint32_t*> idneigh;                         // neighbor IDs for each site
     std::vector<uint32_t> numneigh;                         // # of neighbors of each site
-    std::vector<uint32_t> can_adsorb;                             // ids of sites on the edge that can adsorb
-    std::vector<uint32_t> can_desorb;                             // ids of sites on the edge that can adsorb
-
+    //std::vector<uint32_t> can_adsorb;                             // ids of sites on the edge that can adsorb
+    //std::vector<uint32_t> can_desorb;                             // ids of sites on the edge that can adsorb
+    std::unordered_map<int, char> edges;
     std::map<std::tuple<uint32_t, uint32_t, uint32_t>, int> loc_map;  // Mapping from site location (i,j,k) to site ID
 
     Lattice(float latconst_in, 
@@ -149,8 +149,8 @@ Lattice::Lattice(float latconst_in,
     maxneigh = 6;
     idneigh.resize(nmax);
     numneigh.resize(nmax);
-    can_adsorb.reserve(nmax);
-    can_desorb.reserve(nmax);
+    //can_adsorb.reserve(nmax);
+    //can_desorb.reserve(nmax);
 
     // create sites on lattice
     structured_lattice();
@@ -194,8 +194,9 @@ Lattice::Lattice(const Lattice& other) {
     sites = other.sites;                               
                             
     numneigh = other.numneigh;                         
-    can_adsorb = other.can_adsorb;
-    can_desorb = other.can_desorb;
+    //can_adsorb = other.can_adsorb;
+    //can_desorb = other.can_desorb;
+    edges = other.edges;
 
     idneigh.resize(other.idneigh.size());
 
@@ -492,8 +493,8 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
         sites.reserve(nmax);
         numneigh.resize(nmax);
         idneigh.resize(nmax);
-        can_adsorb.reserve(nmax);
-        can_desorb.reserve(nmax);
+        //can_adsorb.reserve(nmax);
+        //can_desorb.reserve(nmax);
     }
 
     // Initialize neighbor information for this new site
@@ -509,7 +510,8 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     loc_map[key] = nsites;
     
     if(can_adsorb_in) {
-        can_adsorb.push_back(nsites);
+        //can_adsorb.push_back(nsites);
+        edges[nsites] = 'a';
     }
 
     if (update_neighbors_in) {

@@ -212,6 +212,9 @@ bool LatticeSimulation<Model, History>::execute_step() {
             site_2 = event.site_two.value();
         }
 
+        if(site_1 == 5758) {
+            std::cout << "next reaction: " << next_reaction << ", step: " << this->step << ", site 1: " << site_1 << ", site_2: " << site_2 << std::endl;
+        }
         // record what happened
         this->history.push_back(History {
             .seed = this->seed,
@@ -221,9 +224,8 @@ bool LatticeSimulation<Model, History>::execute_step() {
             .site_1 = site_1,
             .site_2 = site_2
             });
-        
-        if(this->history.size() == 500) {
-            std::cout << "500 events" << std::endl;
+        if(this->history.size() == 1000) {
+            std::cout << "1000 events\n" ;
         }
 
         if (this->history.size() == this->history_chunk_size ) {
@@ -250,7 +252,6 @@ bool LatticeSimulation<Model, History>::execute_step() {
         this->model.update_propensities(lattice, std::ref(this->state), this->update_function, 
                                         lattice_update_function, next_reaction, 
                                         event.site_one, event.site_two, props);
-
         return true;
     }
  
