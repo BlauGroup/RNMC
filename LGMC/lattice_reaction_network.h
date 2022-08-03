@@ -1073,10 +1073,10 @@ void LatticeReactionNetwork::fill_reactions(SqlConnection &reaction_network_data
         else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "F") == 0) {
             reaction.type = Type::DIFFUSION;
         }
-        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "S") == 0) {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "L") == 0) {
             reaction.type =  Type::HOMOGENEOUS_SOLID;
         }
-        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "E") == 0) {
+        else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "S") == 0) {
             reaction.type =  Type::HOMOGENEOUS_ELYTE;
         }
         else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "D") == 0) {

@@ -212,9 +212,9 @@ bool LatticeSimulation<Model, History>::execute_step() {
             site_2 = event.site_two.value();
         }
 
-        if(site_1 == 5758) {
-            std::cout << "next reaction: " << next_reaction << ", step: " << this->step << ", site 1: " << site_1 << ", site_2: " << site_2 << std::endl;
-        }
+        //if(site_1 == 5758) {
+        //    std::cout << "next reaction: " << next_reaction << ", step: " << this->step << ", site 1: " << site_1 << ", site_2: " << site_2 << std::endl;
+        //}
         // record what happened
         this->history.push_back(History {
             .seed = this->seed,
@@ -252,6 +252,17 @@ bool LatticeSimulation<Model, History>::execute_step() {
         this->model.update_propensities(lattice, std::ref(this->state), this->update_function, 
                                         lattice_update_function, next_reaction, 
                                         event.site_one, event.site_two, props);
+
+        double sum = 0;
+        for(auto it = props.begin(); it != props.end(); it++) {
+            for(int i = 0; i < it->second.size(); i++) {
+                sum += it->second[i].first;
+            }
+        }
+        if(sum != latsolver.propensity_sum) {
+            latsolver.propensity_sum = sum;
+            //std::cout << "wrong sum" << std::endl;
+        }
         return true;
     }
  
