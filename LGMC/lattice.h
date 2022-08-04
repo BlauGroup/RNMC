@@ -111,6 +111,8 @@ public:
                   uint32_t k_in, float x_in, float y_in, float z_in,
                   bool can_adsorb_in, bool update_neighbors_in, bool meta_neighbors_in);
 
+    void delete_site(int id, bool in_edge);
+
     void update_neighbors(uint32_t n, bool meta_neighbors_in);
 
     float get_latconst();
@@ -560,6 +562,17 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
 
 /* ---------------------------------------------------------------------- */
 
+void Lattice::delete_site(int id, bool in_edge) {
+
+    // remove from sites
+    std::erase(sites.begin(), sites.end(), id);
+
+    // update neighbors of n, and neighbors of n's neighbors
+    update_neighbors(n, true);
+}
+
+/* ---------------------------------------------------------------------- */
+
 void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
 
     float xprd = xhi - xlo;
@@ -605,8 +618,9 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
         }
     }
 
-    std::tuple<uint32_t,uint32_t,uint32_t> *ijk;
-    create(ijk, 6, "create::ijk");
+    std::vector<std::tuple<uint32_t,uint32_t,uint32_t>> ijk;
+    ijk.resize(6);
+
     ijk[0] = {left, sites[n].j, sites[n].k};
     ijk[1] = {right, sites[n].j, sites[n].k};
     ijk[2] = {sites[n].i, backward, sites[n].k};
@@ -617,17 +631,21 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
 
     std::map<std::tuple<uint32_t,uint32_t,uint32_t>, int>::iterator it;
 
-    int thisnumneigh = 0;
+    // rest numneigh, and idneigh
+    numneigh[n] = 0;
+    uint32_t* neighi;
+    create(neighi, maxneigh, "create:neighi");
+    idneigh[n] = neighi;
+
     for (int q = 0; q < 6; q++) {
         it = loc_map.find(ijk[q]);
         if (it != loc_map.end()) {
-            idneigh[n][thisnumneigh] = it->second;
-
+            idneigh[n][numneigh[n]++] = it->second;
+            
             if(meta_neighbors_in) {
-                update_neighbors(idneigh[n][thisnumneigh], false);
+                update_neighbors(it->second, false);
             }
 
-            thisnumneigh++;
         }
     }
 
@@ -769,21 +787,37 @@ void Lattice::fill(std::string filename) {
 
 int main(int argc, char **argv) {
     
-    Lattice *lattice = new Lattice(1, 0, 3, 0, 3, 0, 3, true, true, true);
-    
-    lattice->fill("../test_materials/LGMC/lattice_fill_test_L.txt");
-
-    std::cout << lattice->sites.size();
+    Lattice *lattice = new Lattice(1, 0, 3, 0, 3, 0, 3, false, false, false);
 
     for(int i = 0; i < lattice->sites.size(); i++) {
         std::cout << "[" << lattice->sites[i].x << ", " <<
-        lattice->sites[i].y << ", " << lattice->sites[i].z << "]" << ",";
+        lattice->sites[i].y << ", " << lattice->sites[i].z << "]" << ":";
 
-        std::cout << lattice->sites[i].species << std::endl;
+        for(int j = 0; j < lattice->numneigh[i]; j++) {
+            int id = lattice->idneigh[i][j];
+            std::cout << "(" << lattice->sites[id].x << ", " <<
+            lattice->sites[id].y << ", " << lattice->sites[id].z << ")" << ",";
+        }
+        std::cout << std::endl;
     }
     
-    
-    
+    lattice->add_site(3, 3, 4, 3, 3, 4, true, true, true);
+    lattice->add_site(2, 3, 4, 2, 3, 4, true, true, true);
+
+    std::cout << "added two sites " << std::endl;
+
+    for(int i = 0; i < lattice->sites.size(); i++) {
+        std::cout << "[" << lattice->sites[i].x << ", " <<
+        lattice->sites[i].y << ", " << lattice->sites[i].z << "]" << ":";
+
+        for(int j = 0; j < lattice->numneigh[i]; j++) {
+            int id = lattice->idneigh[i][j];
+            std::cout << "(" << lattice->sites[id].x << ", " <<
+            lattice->sites[id].y << ", " << lattice->sites[id].z << ")" << ",";
+        }
+        std::cout << std::endl;
+    }
+
     
    /* for(int i = 0; i < 12; i++) {
         std::cout << "[" << lattice2->sites[i].x << ", " <<

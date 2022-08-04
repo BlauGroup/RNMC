@@ -42,7 +42,7 @@ void print_usage_LGMC_parameters() {
 
 /* ---------------------------------------------------------------------- */
 
-int main(int argc, char **argv) {
+/*int main(int argc, char **argv) {
 
     struct option long_options[] = {
         {"reaction_database", required_argument, NULL, 'r'},
@@ -243,4 +243,4 @@ int main(int argc, char **argv) {
     exit(EXIT_SUCCESS);
 
 
-}
+}*/
