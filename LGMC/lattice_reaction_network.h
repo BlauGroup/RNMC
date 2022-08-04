@@ -490,7 +490,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
             std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, lattice->sites[site_one].j, lattice->sites[site_one].k + 1};
             int site_above = lattice->loc_map[key];
 
-            edges.erase(site_above);
+            lattice->edges.erase(site_above);
             clear_site_helper(props, site_above, SITE_GILLESPIE, prop_sum, active_indices);
             
         }
@@ -540,10 +540,10 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
 
                         // remove site above from adsorb
                         if(is_add_sites) {
-                            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[other_site].i, lattice->sites[other_site].j, lattice->sites[other_site].k + 1};
+                            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, lattice->sites[site_one].j, lattice->sites[site_one].k + 1};
                             int site_above = lattice->loc_map[key];
 
-                            edges.erase(site_above);
+                            lattice->edges.erase(site_above);
                             clear_site_helper(props, site_above, SITE_GILLESPIE, prop_sum, active_indices);
                         }
                     }
@@ -566,10 +566,10 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
 
                         // remove site above from adsorb
                         if(is_add_sites) {
-                            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[other_site].i, lattice->sites[other_site].j, lattice->sites[other_site].k + 1};
+                            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_two].i, lattice->sites[site_two].j, lattice->sites[site_two].k + 1};
                             int site_above = lattice->loc_map[key];
 
-                            edges.erase(site_above);
+                            lattice->edges.erase(site_above);
                             clear_site_helper(props, site_above, SITE_GILLESPIE, prop_sum, active_indices);
                         }
                     }
@@ -631,7 +631,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                         std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[other_site].i, lattice->sites[other_site].j, lattice->sites[other_site].k + 1};
                         int site_above = lattice->loc_map[key];
 
-                        edges.erase(site_above);
+                        lattice->edges.erase(site_above);
                         clear_site_helper(props, site_above, SITE_GILLESPIE, prop_sum, active_indices);
                    }
                    
