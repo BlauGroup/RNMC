@@ -253,16 +253,6 @@ bool LatticeSimulation<Model, History>::execute_step() {
                                         lattice_update_function, next_reaction, 
                                         event.site_one, event.site_two, props);
 
-        double sum = 0;
-        for(auto it = props.begin(); it != props.end(); it++) {
-            for(int i = 0; i < it->second.size(); i++) {
-                sum += it->second[i].first;
-            }
-        }
-        if(sum != latsolver.propensity_sum) {
-            latsolver.propensity_sum = sum;
-            //std::cout << "wrong sum" << std::endl;
-        }
         return true;
     }
  

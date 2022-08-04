@@ -42,7 +42,7 @@ class LatSolver {
         // for comptability 
         std::optional<Event> event() {return std::optional<Event>();};
 
-        double propensity_sum;
+        long double propensity_sum;
         int number_of_active_indices;               // end simulation of no sites with non zero propensity   
 
     private:

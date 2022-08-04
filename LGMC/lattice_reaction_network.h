@@ -81,7 +81,7 @@ class LatticeReactionNetwork {
                         std::vector< std::pair<double, int> > > &props,
                         std::vector<int> &state, int next_reaction, 
                         std::optional<int> site_one, std::optional<int> site_two, 
-                        double &prop_sum, int &active_indices);
+                        long double &prop_sum, int &active_indices);
 
         void update_propensities(Lattice *lattice, std::vector<int> &state, std::function<void(Update update)> update_function, 
                                         std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
@@ -90,7 +90,7 @@ class LatticeReactionNetwork {
                                         std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props);
 
         void update_adsorp_state(Lattice *lattice, std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props,
-                                double &prop_sum, int &active_indices); 
+                                long double &prop_sum, int &active_indices); 
 
         void update_adsorp_props(Lattice *lattice, std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props)> lattice_update_function, std::vector<int> &state, 
@@ -101,16 +101,16 @@ class LatticeReactionNetwork {
         bool update_state(Lattice *lattice, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props, 
                         int next_reaction, int site_one, int site_two, 
-                        double &prop_sum, int &active_indices);
+                        long double &prop_sum, int &active_indices);
 
         void clear_site(Lattice *lattice, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props,
                         int site, std::optional<int> ignore_neighbor, 
-                        double &prop_sum, int &active_indices);
+                        long double &prop_sum, int &active_indices);
 
         void clear_site_helper(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props,
-                        int site_one, int site_two, double &prop_sum, 
+                        int site_one, int site_two, long double &prop_sum, 
                         int &active_indices);
 
         void relevant_react(Lattice *lattice, std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
@@ -258,7 +258,7 @@ void LatticeReactionNetwork::update_state(Lattice *lattice,
                         std::unordered_map< std::string, std::vector< std::pair< double, int > > > &props,
                         std::vector<int> &state, int next_reaction, 
                         std::optional<int> site_one, std::optional<int> site_two, 
-                        double &prop_sum, int &active_indices) {
+                        long double &prop_sum, int &active_indices) {
     
     if(site_one) {
         // update lattice state
@@ -310,7 +310,7 @@ void LatticeReactionNetwork::update_propensities(Lattice *lattice, std::vector<i
 /* ---------------------------------------------------------------------- */
 
 void LatticeReactionNetwork::update_adsorp_state(Lattice *lattice, std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props,
-                                double &prop_sum, int &active_indices) {
+                                long double &prop_sum, int &active_indices) {
     // update only sites on the edge 
     /*for(size_t i = 0; i < lattice->can_adsorb.size(); i++) {
         int site = lattice->can_adsorb[i];
@@ -440,7 +440,7 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
 bool LatticeReactionNetwork::update_state(Lattice *lattice, 
                         std::unordered_map<std::string, std::vector< std::pair< double, int > > > &props, 
                         int next_reaction, int site_one, int site_two, 
-                        double &prop_sum, int &active_indices) {
+                        long double &prop_sum, int &active_indices) {
 
     LatticeReaction reaction = reactions[next_reaction]; 
 
@@ -759,7 +759,7 @@ bool LatticeReactionNetwork::update_propensities(Lattice *lattice,
 void LatticeReactionNetwork::clear_site(Lattice *lattice, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props, 
                         int site, std::optional<int> ignore_neighbor, 
-                        double &prop_sum, int &active_indices) {
+                        long double &prop_sum, int &active_indices) {
 
     
     assert(site != SITE_GILLESPIE);
@@ -783,7 +783,7 @@ void LatticeReactionNetwork::clear_site(Lattice *lattice, std::unordered_map<std
 // deal with active_indices
 void LatticeReactionNetwork::clear_site_helper(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props,
-                        int site_one, int site_two, double &prop_sum,
+                        int site_one, int site_two, long double &prop_sum,
                         int &active_indices) {
 
     std::string combo = make_string(site_one, site_two);
