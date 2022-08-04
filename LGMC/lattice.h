@@ -734,17 +734,17 @@ void Lattice::fill(std::string filename) {
     fin >> type;
 
     if(type == 'L') {
-        while(fin >> junk >> i_in >> junk >> j_in >> junk >> k_in >> species) {
+        while(fin >> junk >> i_in >> junk >> j_in >> junk >> k_in >> junk >> species) {
             std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
             sites[loc_map[key]].species = species;
         }
     }
     else if(type == 'A') {
         
-        for(int k = klo; k < khi; k++) {
+        for(int k = klo; k <= khi; k++) {
             fin >> junk;
-            for(int i = ilo; i < ihi; i++) {
-                for(int j = jlo; j < jhi; j++) {
+            for(int i = ilo; i <= ihi; i++) {
+                for(int j = jlo; j <= jhi; j++) {
                     fin >> species;
                     std::tuple<uint32_t, uint32_t, uint32_t> key = {i, j, k}; 
                     sites[loc_map[key]].species = species;
@@ -767,14 +767,25 @@ void Lattice::fill(std::string filename) {
 
 // TESTING //
 
-/*int main(int argc, char **argv) {
-    Lattice *lattice = new Lattice(1, 0, 2, 0, 2, 0, 2, true, true, false);
-    // test copy constructor 
-   // Lattice *lattice2 = new Lattice(*lattice);
-    //std::cout << "using copy constructor" << std::endl;
-    //std::cout << "numneigh" << std::endl;
+int main(int argc, char **argv) {
     
-    for(int i = 0; i < 12; i++) {
+    Lattice *lattice = new Lattice(1, 0, 3, 0, 3, 0, 3, true, true, true);
+    
+    lattice->fill("../test_materials/LGMC/lattice_fill_test_L.txt");
+
+    std::cout << lattice->sites.size();
+
+    for(int i = 0; i < lattice->sites.size(); i++) {
+        std::cout << "[" << lattice->sites[i].x << ", " <<
+        lattice->sites[i].y << ", " << lattice->sites[i].z << "]" << ",";
+
+        std::cout << lattice->sites[i].species << std::endl;
+    }
+    
+    
+    
+    
+   /* for(int i = 0; i < 12; i++) {
         std::cout << "[" << lattice2->sites[i].x << ", " <<
         lattice2->sites[i].y << ", " << lattice2->sites[i].z << "]" << ",";
         std::cout << "num: " << lattice2->numneigh[i] << std::endl;
@@ -787,8 +798,9 @@ void Lattice::fill(std::string filename) {
             std::cout << lattice->idneigh[i][j] << ", ";
         }
         std::cout << std::endl;
-    }
+    }*/
+
     delete lattice;
-    //delete lattice2;
+
     
-}*/
+}
