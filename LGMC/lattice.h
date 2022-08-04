@@ -2,6 +2,7 @@
 #include <vector>
 #include <unordered_map>
 #include <string>
+#include <fstream>
 #include <map>
 #include <cassert> 
 #include "stdio.h"
@@ -116,6 +117,9 @@ public:
 
     // TODO: make general for all types of periodicity 
     float get_maxz();
+
+    // fill lattice with specified values from file
+    void fill(string filename);
 
 };
 
@@ -710,6 +714,56 @@ float Lattice::get_latconst() {
 float Lattice::get_maxz() {
     return maxz;
 }
+
+/* ---------------------------------------------------------------------- */
+void Lattice::fill(string filename) {
+
+    std::ifstream fin;
+    fin.open(filename);
+
+    if(!fin.is_open()) {
+        std::cout << "Failed to open file: " << filename << "\n";
+        exit(EXIT_FAILURE);
+    }
+
+    char type;
+    char junk;
+    double i_in, j_in, k_in;
+    int species;
+
+    fin >> type;
+
+    if(type == 'L') {
+        while(fin >> junk >> i_in >> junk >> j_in >> junk >> k_in >> species) {
+            std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
+            sites[loc_map[key]].species = species;
+        }
+    }
+    else if(type == 'A') {
+        
+        for(int k = klo; k < khi; k++) {
+            fin >> junk;
+            for(int i = ilo; i < ihi; i++) {
+                for(int j = jlo; j < jhi; j++) {
+                    fin >> species;
+                    std::tuple<uint32_t, uint32_t, uint32_t> key = {i, j, k}; 
+                    sites[loc_map[key]].species = species;
+                }
+            }
+            fin >> junk;
+        }
+
+    }
+    else {
+        std::cout << "Incorrect type of input: " << type << "\n";
+        exit(EXIT_FAILURE);
+    }
+
+}
+
+
+/* ---------------------------------------------------------------------- */
+
 
 // TESTING //
 /*
