@@ -587,10 +587,10 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
     forward = sites[n].j + 1;
     if (is_yperiodic) {
         if (backward < 0) {
-            backward += nx;
+            backward += ny;
         }
-        if (forward >= nx) {
-            forward -= nx;
+        if (forward >= ny) {
+            forward -= ny;
         }
     }
 
@@ -598,10 +598,10 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
     up = sites[n].k + 1;
     if (is_zperiodic) {
         if (down < 0) {
-            down += nx;
+            down += nz;
         }
-        if (up >= nx) {
-            up -= nx;
+        if (up >= nz) {
+            up -= nz;
         }
     }
 
@@ -766,8 +766,8 @@ void Lattice::fill(std::string filename) {
 
 
 // TESTING //
-/*
-int main(int argc, char **argv) {
+
+/*int main(int argc, char **argv) {
     Lattice *lattice = new Lattice(1, 0, 2, 0, 2, 0, 2, true, true, false);
     // test copy constructor 
    // Lattice *lattice2 = new Lattice(*lattice);

@@ -233,7 +233,8 @@ LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection &reaction_network_d
     initial_lattice = new Lattice(parameters.latconst, parameters.boxxlo, parameters.boxxhi, parameters.boxylo,
                     parameters.boxyhi, parameters.boxzlo, parameters.boxzhi, parameters.xperiodic, parameters.yperiodic, parameters.zperiodic);
 
-    if(parameters.lattice_fill != "") {
+
+    if(parameters.lattice_fill.compare("none") != 0) {
         // fill lattice
         initial_lattice->fill(parameters.lattice_fill);
     }
