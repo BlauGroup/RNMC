@@ -176,6 +176,7 @@ class LatticeSimulation : public Simulation<LatSolver, Model, History> {
 
     bool execute_step();
     void init(); 
+    ~LatticeSimulation() { delete lattice;};
 
 };
 
