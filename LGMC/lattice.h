@@ -119,7 +119,7 @@ public:
     float get_maxz();
 
     // fill lattice with specified values from file
-    void fill(string filename);
+    void fill(std::string filename);
 
 };
 
@@ -716,7 +716,7 @@ float Lattice::get_maxz() {
 }
 
 /* ---------------------------------------------------------------------- */
-void Lattice::fill(string filename) {
+void Lattice::fill(std::string filename) {
 
     std::ifstream fin;
     fin.open(filename);

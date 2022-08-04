@@ -36,7 +36,8 @@ void print_usage_LGMC_parameters() {
               << "Temperature\n"
               << "Electron free energy\n"
               << "Charge transfer style (M/B)\n"
-              << "Is Add Site (T/F)\n";
+              << "Is Add Site (T/F)\n"
+              << "Filename for lattice fill\n";
 }
 
 /* ---------------------------------------------------------------------- */
@@ -153,9 +154,11 @@ int main(int argc, char **argv) {
     char add_site;
     ChargeTransferStyle charge_transfer_style;
     char ct_style;
+    std::string fill_lattice;
 
     fin >> latconst >> boxxlo >> boxxhi >> boxylo >> boxyhi >> boxzlo >> boxzhi
-    >> xperiod >> yperiod >> zperiod >> temperature >> g_e >> add_site >> ct_style;
+    >> xperiod >> yperiod >> zperiod >> temperature >> g_e >> add_site >> ct_style
+    >> fill_lattice;
 
     if(add_site == 'T') {
         is_add_site = true;
@@ -214,7 +217,8 @@ int main(int argc, char **argv) {
                               .boxzlo = boxzlo, .boxzhi = boxzhi, 
                               .xperiodic = xperiodic, .yperiodic = yperiodic, .zperiodic = zperiodic, 
                               .temperature = temperature, .g_e = g_e, .is_add_sites = is_add_site,
-                              .charge_transfer_style = charge_transfer_style};                               
+                              .charge_transfer_style = charge_transfer_style,
+                              .lattice_fill = fill_lattice};                               
 
     Dispatcher<
         LatSolver,

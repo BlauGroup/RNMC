@@ -37,6 +37,7 @@ struct LGMCParameters {
     float g_e;
     bool is_add_sites;
     ChargeTransferStyle charge_transfer_style;
+    std::string lattice_fill;
 };
 
 
@@ -232,6 +233,10 @@ LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection &reaction_network_d
     initial_lattice = new Lattice(parameters.latconst, parameters.boxxlo, parameters.boxxhi, parameters.boxylo,
                     parameters.boxyhi, parameters.boxzlo, parameters.boxzhi, parameters.xperiodic, parameters.yperiodic, parameters.zperiodic);
 
+    if(parameters.lattice_fill != "") {
+        // fill lattice
+        initial_lattice->fill(parameters.lattice_fill);
+    }
     init_reaction_network(reaction_network_database, initial_state_database, initial_lattice);
 
     is_add_sites = parameters.is_add_sites;
@@ -245,8 +250,6 @@ LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection &reaction_network_d
 
 LatticeReactionNetwork::~LatticeReactionNetwork()
 {
-    // deal with pointers 
-
     delete initial_lattice;
 } // ~LatticeReactionNetwork()
 
