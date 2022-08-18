@@ -73,7 +73,8 @@ There are 2 tables in the reaction network database:
             reactant_2          INTEGER NOT NULL,
             product_1           INTEGER NOT NULL,
             product_2           INTEGER NOT NULL,
-            rate                REAL NOT NULL
+            rate                REAL NOT NULL,
+            dG                  REAL NOT NULL
     );
 
 ```

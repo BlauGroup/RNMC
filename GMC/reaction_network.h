@@ -17,6 +17,7 @@ struct Reaction {
     int products[2];
 
     double rate;
+    double dG;
 };
 
 
@@ -148,7 +149,8 @@ ReactionNetwork::ReactionNetwork(
             .number_of_products = number_of_products,
             .reactants = { reaction_row.reactant_1, reaction_row.reactant_2 },
             .products = { reaction_row.product_1, reaction_row.product_2},
-            .rate = reaction_row.rate
+            .rate = reaction_row.rate,
+            .dG = reaction_row.dG
         };
 
         reactions[reaction_id] = reaction;
