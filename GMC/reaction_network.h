@@ -179,9 +179,15 @@ ReactionNetwork::ReactionNetwork(
             .dG = reaction_row.dG
         };
 
-        reactions[reaction_id] = reaction;
-
+        // Check if the energy budget is > 0. If so, only add the reaction if it is dG > 0
+        // This ensures only uphill reactions are available, although this may breach the subsequent sanity check...
+        if ( energy_budget > 0  &&  reaction.dG < 0 ){
+            continue;
+        } else {
+            reactions[reaction_id] = reaction;
         }
+    
+    }
 
     // sanity check
     if ( metadata_row.number_of_reactions != reaction_id + 1 ||
@@ -276,17 +282,13 @@ double ReactionNetwork::compute_propensity(
         // When we have an energy budget, we are only interested in uphill reactions
         
         return 0.0;
-    } elif (reaction.dG <= energy_budget) {
+    } else if (reaction.dG <= energy_budget) {
         // When the reaction requires more energy than is available, it cannot happen
 
         return 0.0;
-    } else {
-        // There is remaining energy in the photon and this reaction is able to use it
-
-        return compute_propensity(state,
-                                  reaction_index);
-    }
-
+    } 
+    return compute_propensity(state,
+                                reaction_index);
 
 };
 
@@ -325,7 +327,7 @@ std::vector<int> ReactionNetwork::get_species_of_interest(
         species_of_interest.push_back(product_id);
     }
 
-    return species_of_interest
+    return species_of_interest;
 }
 
 void ReactionNetwork::update_propensities(
@@ -336,7 +338,7 @@ void ReactionNetwork::update_propensities(
 
     Reaction &reaction = reactions[next_reaction];
 
-    std::vector<int> species_of_interest = get_species_of_interest(reaction)
+    std::vector<int> species_of_interest = get_species_of_interest(reaction);
 
     for ( int species_id : species_of_interest ) {
         for ( unsigned int reaction_index : dependents[species_id] ) {
@@ -361,7 +363,7 @@ void ReactionNetwork::update_propensities(
 
     Reaction &reaction = reactions[next_reaction];
 
-    std::vector<int> species_of_interest = get_species_of_interest(reaction)
+    std::vector<int> species_of_interest = get_species_of_interest(reaction);
 
     for ( int species_id : species_of_interest ) {
         for ( unsigned int reaction_index : dependents[species_id] ) {
