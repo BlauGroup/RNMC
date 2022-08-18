@@ -88,20 +88,18 @@ struct FactorsSql {
     double factor_zero;
     double factor_two;
     double factor_duplicate;
-    double energy_budget;
     static std::string sql_statement;
     static void action(FactorsSql &r, sqlite3_stmt *stmt);
 };
 
 
 std::string FactorsSql::sql_statement =
-    "SELECT factor_zero, factor_two, factor_duplicate, energy_budget FROM factors";
+    "SELECT factor_zero, factor_two, factor_duplicate FROM factors";
 
 
 void FactorsSql::action (FactorsSql &r, sqlite3_stmt *stmt) {
     r.factor_zero = sqlite3_column_double(stmt, 0);
     r.factor_two = sqlite3_column_double(stmt, 1);
     r.factor_duplicate = sqlite3_column_double(stmt, 2);
-    r.energy_budget = sqlite3_column_double(stmt, 3);
 };
 

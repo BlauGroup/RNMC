@@ -25,6 +25,7 @@ struct Reaction {
 // parameters passed to the ReactionNetwork constructor
 // by the dispatcher which are model specific
 struct ReactionNetworkParameters {
+    double energy_budget;
 };
 
 
@@ -91,7 +92,7 @@ struct ReactionNetwork {
 ReactionNetwork::ReactionNetwork(
      SqlConnection &reaction_network_database,
      SqlConnection &initial_state_database,
-     ReactionNetworkParameters)
+     ReactionNetworkParameters parameters)
 
     {
 
@@ -121,7 +122,9 @@ ReactionNetwork::ReactionNetwork(
     factor_zero = factors_row.factor_zero;
     factor_two = factors_row.factor_two;
     factor_duplicate = factors_row.factor_duplicate;
-    energy_budget = factors_row.energy_budget;
+
+    // Get the energy_budget from parameters
+    energy_budget = parameters.energy_budget;
 
     // loading intial state
     initial_state.resize(metadata_row.number_of_species);
