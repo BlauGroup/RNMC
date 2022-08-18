@@ -35,6 +35,7 @@ struct ReactionNetwork {
     double factor_zero; // rate modifer for reactions with zero reactants
     double factor_two; // rate modifier for reactions with two reactants
     double factor_duplicate; // rate modifier for reactions of form A + A -> ...
+    double energy_budget; // The total energy available (for Delta G > 0 reactions)
 
     // maps species to the reactions which involve that species
     std::vector<std::vector<int>> dependents;
@@ -104,6 +105,7 @@ ReactionNetwork::ReactionNetwork(
     factor_zero = factors_row.factor_zero;
     factor_two = factors_row.factor_two;
     factor_duplicate = factors_row.factor_duplicate;
+    energy_budget = factors_row.energy_budget;
 
     // loading intial state
     initial_state.resize(metadata_row.number_of_species);
