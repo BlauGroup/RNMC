@@ -49,11 +49,20 @@ struct ReactionNetwork {
 
     double compute_propensity(
         std::vector<int> &state,
-        int reaction_index);
+        int reaction_index
+        );
+
+    double compute_propensity(
+        std::vector<int> &state,
+        int reaction,
+        double energy_remaining
+        );
 
     void update_state(
         std::vector<int> &state,
-        int reaction_index);
+        int reaction_index
+        );
+
     std::vector<int> get_species_of_interest(
         Reaction reaction
         );
@@ -62,6 +71,13 @@ struct ReactionNetwork {
         std::function<void(Update update)> update_function,
         std::vector<int> &state,
         int next_reaction
+        );
+    
+    void update_propensities(
+        std::function<void(Update update)> update_function,
+        std::vector<int> &state,
+        int next_reaction,
+        double energy_remaining
         );
 
     // convert a history element as found a simulation to history
@@ -206,6 +222,7 @@ void ReactionNetwork::compute_dependents() {
 double ReactionNetwork::compute_propensity(
     std::vector<int> &state,
     int reaction_index) {
+    // Compute propensities in the standard case
 
     Reaction &reaction = reactions[reaction_index];
 
@@ -236,6 +253,32 @@ double ReactionNetwork::compute_propensity(
     }
 
     return p;
+
+};
+
+double ReactionNetwork::compute_propensity(
+    std::vector<int> &state,
+    int reaction_index,
+    double energy_remaining) {
+    // Compute propensities when we are considering dG > 0 reactions
+
+    Reaction &reaction = reactions[reaction_index];
+
+    if (reaction.dG <= 0) {
+        // When we have an energy budget, we are only interested in uphill reactions
+        
+        return 0.0;
+    } elif (reaction.dG <= energy_remaining) {
+        // When the reaction requires more energy than is available, it cannot happen
+
+        return 0.0;
+    } else {
+        // There is remaining energy in the photon and this reaction is able to use it
+
+        return compute_propensity(state,
+                                  reaction_index);
+    }
+
 
 };
 
@@ -293,6 +336,32 @@ void ReactionNetwork::update_propensities(
             double new_propensity = compute_propensity(
                 state,
                 reaction_index);
+
+            update_function(Update {
+                    .index = reaction_index,
+                    .propensity = new_propensity});
+        }
+    }
+}
+
+void ReactionNetwork::update_propensities(
+    std::function<void(Update update)> update_function,
+    std::vector<int> &state,
+    int next_reaction,
+    double energy_remaining
+    ) {
+
+    Reaction &reaction = reactions[next_reaction];
+
+    std::vector<int> species_of_interest = get_species_of_interest(reaction)
+
+    for ( int species_id : species_of_interest ) {
+        for ( unsigned int reaction_index : dependents[species_id] ) {
+
+            double new_propensity = compute_propensity(
+                state,
+                reaction_index,
+                energy_remaining);
 
             update_function(Update {
                     .index = reaction_index,
