@@ -52,6 +52,9 @@ struct ReactionNetwork {
     void update_state(
         std::vector<int> &state,
         int reaction_index);
+    std::vector<int> get_species_of_interest(
+        Reaction reaction
+        );
 
     void update_propensities(
         std::function<void(Update update)> update_function,
@@ -250,15 +253,9 @@ void ReactionNetwork::update_state(
 
 }
 
-
-void ReactionNetwork::update_propensities(
-    std::function<void(Update update)> update_function,
-    std::vector<int> &state,
-    int next_reaction
+std::vector<int> ReactionNetwork::get_species_of_interest(
+    Reaction reaction
     ) {
-
-    Reaction &reaction = reactions[next_reaction];
-
     std::vector<int> species_of_interest;
     species_of_interest.reserve(4);
 
@@ -273,6 +270,18 @@ void ReactionNetwork::update_propensities(
         species_of_interest.push_back(product_id);
     }
 
+    return species_of_interest
+}
+
+void ReactionNetwork::update_propensities(
+    std::function<void(Update update)> update_function,
+    std::vector<int> &state,
+    int next_reaction
+    ) {
+
+    Reaction &reaction = reactions[next_reaction];
+
+    std::vector<int> species_of_interest = get_species_of_interest(reaction)
 
     for ( int species_id : species_of_interest ) {
         for ( unsigned int reaction_index : dependents[species_id] ) {
