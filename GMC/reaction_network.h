@@ -81,6 +81,11 @@ struct ReactionNetwork {
         double energy_budget
         );
 
+    void update_energy_budget(
+        double &energy_budget,
+        int next_reaction
+        );
+    
     // convert a history element as found a simulation to history
     // to a SQL type.
     TrajectoriesSql history_element_to_sql(
@@ -373,6 +378,13 @@ void ReactionNetwork::update_propensities(
     }
 }
 
+void ReactionNetwork::update_energy_budget(
+    double &energy_budget,
+    int next_reaction
+    ) {
+            Reaction &reaction = reactions[next_reaction];
+            energy_budget = energy_budget - reaction.dG;
+    }
 
 TrajectoriesSql ReactionNetwork::history_element_to_sql(
     int seed,
