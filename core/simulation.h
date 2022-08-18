@@ -29,6 +29,7 @@ struct Simulation {
     std::vector<HistoryElement> history;
     HistoryQueue<HistoryPacket> &history_queue;
     std::function<void(Update)> update_function;
+    double energy_budget;
 
 
     Simulation(Model &model,
@@ -44,11 +45,11 @@ struct Simulation {
         solver (seed, std::ref(model.initial_propensities)),
         history_chunk_size (history_chunk_size),
         history_queue(history_queue),
-        update_function ([&] (Update update) {solver.update(update);})
+        update_function ([&] (Update update) {solver.update(update);}),
+        energy_budget (model.energy_budget)
         {
             history.reserve(history_chunk_size);
         };
-
 
     bool execute_step();
     void execute_steps(int step_cutoff);
@@ -100,12 +101,17 @@ bool Simulation<Solver, Model>::execute_step() {
         // update state
         model.update_state(std::ref(state), next_reaction);
 
+        // update the energy_budget
+        if (energy_budget > 0) {
+            model.update_energy_budget(std::ref(energy_budget), next_reaction);
+        }
 
         // update propensities
         model.update_propensities(
             update_function,
             std::ref(state),
-            next_reaction);
+            next_reaction,
+            energy_budget);
 
         return true;
     }
