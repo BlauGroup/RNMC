@@ -56,7 +56,7 @@ struct ReactionNetwork {
     double compute_propensity(
         std::vector<int> &state,
         int reaction,
-        double energy_remaining
+        double energy_budget
         );
 
     void update_state(
@@ -78,7 +78,7 @@ struct ReactionNetwork {
         std::function<void(Update update)> update_function,
         std::vector<int> &state,
         int next_reaction,
-        double energy_remaining
+        double energy_budget
         );
 
     // convert a history element as found a simulation to history
@@ -262,7 +262,7 @@ double ReactionNetwork::compute_propensity(
 double ReactionNetwork::compute_propensity(
     std::vector<int> &state,
     int reaction_index,
-    double energy_remaining) {
+    double energy_budget) {
     // Compute propensities when we are considering dG > 0 reactions
 
     Reaction &reaction = reactions[reaction_index];
@@ -271,7 +271,7 @@ double ReactionNetwork::compute_propensity(
         // When we have an energy budget, we are only interested in uphill reactions
         
         return 0.0;
-    } elif (reaction.dG <= energy_remaining) {
+    } elif (reaction.dG <= energy_budget) {
         // When the reaction requires more energy than is available, it cannot happen
 
         return 0.0;
@@ -351,7 +351,7 @@ void ReactionNetwork::update_propensities(
     std::function<void(Update update)> update_function,
     std::vector<int> &state,
     int next_reaction,
-    double energy_remaining
+    double energy_budget
     ) {
 
     Reaction &reaction = reactions[next_reaction];
@@ -364,7 +364,7 @@ void ReactionNetwork::update_propensities(
             double new_propensity = compute_propensity(
                 state,
                 reaction_index,
-                energy_remaining);
+                energy_budget);
 
             update_function(Update {
                     .index = reaction_index,
