@@ -6,5 +6,5 @@ echo "building test_core"
 $CC $flags ./core/test.cpp -o ./build/test_core
 echo "building GMC"
 $CC $flags ./GMC/GMC.cpp -o ./build/GMC
-echo "building NPMC"
-$CC $flags ./NPMC/NPMC.cpp -o ./build/NPMC
+#echo "building NPMC"
+#$CC $flags ./NPMC/NPMC.cpp -o ./build/NPMC
