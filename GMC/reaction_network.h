@@ -179,13 +179,7 @@ ReactionNetwork::ReactionNetwork(
             .dG = reaction_row.dG
         };
 
-        // Check if the energy budget is > 0. If so, only add the reaction if it is dG > 0
-        // This ensures only uphill reactions are available, although this may breach the subsequent sanity check...
-        if ( energy_budget > 0  &&  reaction.dG < 0 ){
-            continue;
-        } else {
-            reactions[reaction_id] = reaction;
-        }
+        reactions[reaction_id] = reaction;
     
     }
 
@@ -199,9 +193,30 @@ ReactionNetwork::ReactionNetwork(
 
     // computing initial propensities
     initial_propensities.resize(metadata_row.number_of_reactions);
-    for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
-        initial_propensities[i] = compute_propensity(initial_state, i);
+    
+    // Trying (and unsuccessfully) using currying to move runtime penalty of energy_budget to compile time
+    // // auto compute_propensity_fn = [this](std::vector<int> &state, int reaction_index) -> double { return compute_propensity(state, reaction_index); };
+    // if (energy_budget > 0 ) {
+    //     auto compute_propensity_fn = [this](std::vector<int> &state, int reaction_index) -> double { return compute_propensity(state, reaction_index, energy_budget); };
+    // } else {
+    //     auto compute_propensity_fn = [this](std::vector<int> &state, int reaction_index) -> double { return compute_propensity(state, reaction_index); };
+    // }
+    // for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
+    //     initial_propensities[i] = (compute_propensity_fn)(initial_state, i);
+    // }
+
+    if ( energy_budget > 0 ) {
+        for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
+            initial_propensities[i] = compute_propensity(initial_state, i, energy_budget);
+        }
+    } else {
+        for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
+            initial_propensities[i] = compute_propensity(initial_state, i);
+        }
     }
+    
+
+    std::cerr << "energy_budget: " << energy_budget << std::endl;
 
     std::cerr << time_stamp() << "computing dependency graph...\n";
     compute_dependents();
@@ -278,11 +293,11 @@ double ReactionNetwork::compute_propensity(
 
     Reaction &reaction = reactions[reaction_index];
 
-    if (reaction.dG <= 0) {
+    if (reaction.dG <= 0.0) {
         // When we have an energy budget, we are only interested in uphill reactions
         
         return 0.0;
-    } else if (reaction.dG <= energy_budget) {
+    } else if (reaction.dG > energy_budget) {
         // When the reaction requires more energy than is available, it cannot happen
 
         return 0.0;
@@ -365,9 +380,9 @@ void ReactionNetwork::update_propensities(
 
     std::vector<int> species_of_interest = get_species_of_interest(reaction);
 
+    // Update the propensities for reactions corresponding to species which were produced or consumed
     for ( int species_id : species_of_interest ) {
         for ( unsigned int reaction_index : dependents[species_id] ) {
-
             double new_propensity = compute_propensity(
                 state,
                 reaction_index,
@@ -378,14 +393,26 @@ void ReactionNetwork::update_propensities(
                     .propensity = new_propensity});
         }
     }
+
+    // We'll need to update the propensities for all reactions which have a dG > energy_budget
+    for ( unsigned int reaction_index = 0; reaction_index < reactions.size(); reaction_index++){
+        double new_propensity = compute_propensity(
+            state,
+            reaction_index,
+            energy_budget);
+
+        update_function(Update {
+                .index = reaction_index,
+                .propensity = new_propensity});
+    }
 }
 
 void ReactionNetwork::update_energy_budget(
     double &energy_budget,
     int next_reaction
     ) {
-            Reaction &reaction = reactions[next_reaction];
-            energy_budget = energy_budget - reaction.dG;
+        Reaction &reaction = reactions[next_reaction];
+        energy_budget = energy_budget - reaction.dG;
     }
 
 TrajectoriesSql ReactionNetwork::history_element_to_sql(

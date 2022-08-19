@@ -102,16 +102,24 @@ bool Simulation<Solver, Model>::execute_step() {
         model.update_state(std::ref(state), next_reaction);
 
         // update the energy_budget
-        if (energy_budget > 0) {
+        if (model.energy_budget > 0) {
             model.update_energy_budget(std::ref(energy_budget), next_reaction);
+            
+            // update propensities
+            model.update_propensities(
+                update_function,
+                std::ref(state),
+                next_reaction,
+                energy_budget);
+        } else {
+            // update propensities
+            model.update_propensities(
+                update_function,
+                std::ref(state),
+                next_reaction);
         }
 
-        // update propensities
-        model.update_propensities(
-            update_function,
-            std::ref(state),
-            next_reaction,
-            energy_budget);
+
 
         return true;
     }
