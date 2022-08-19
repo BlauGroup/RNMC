@@ -92,8 +92,7 @@ There are 3 tables in the initial state database. The factors can be used to mod
     CREATE TABLE factors (
             factor_zero         REAL NOT NULL,
             factor_two          REAL NOT NULL,
-            factor_duplicate    REAL NOT NULL,
-            energy_budget       REAL NOT NULL)
+            factor_duplicate    REAL NOT NULL)
 ```
 
 ```
