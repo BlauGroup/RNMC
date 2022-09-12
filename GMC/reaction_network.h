@@ -293,18 +293,18 @@ double ReactionNetwork::compute_propensity(
 
     Reaction &reaction = reactions[reaction_index];
 
-    if (reaction.dG <= 0.0) {
-        // When we have an energy budget, we are only interested in uphill reactions
-        
-        return 0.0;
-    } else if (reaction.dG > energy_budget) {
+    if (reaction.dG > energy_budget) {
         // When the reaction requires more energy than is available, it cannot happen
 
         return 0.0;
-    } 
-    return compute_propensity(state,
-                                reaction_index);
+    } else {
+        // If the reaction fits within the energy budget, compute its propensity as usual
 
+        // Note: We allow all dG < 0 reactions to occur as usual.
+
+        return compute_propensity(state,
+                                reaction_index);
+    }
 };
 
 void ReactionNetwork::update_state(
@@ -411,8 +411,15 @@ void ReactionNetwork::update_energy_budget(
     double &energy_budget,
     int next_reaction
     ) {
+
         Reaction &reaction = reactions[next_reaction];
-        energy_budget = energy_budget - reaction.dG;
+
+        // We only need to update the energy budget when the reaction triggered is dG > 0.
+        // This way we avoid reaction loops
+        if ( reaction.dG > 0 ) {
+            energy_budget = energy_budget - reaction.dG;
+        }
+        
     }
 
 TrajectoriesSql ReactionNetwork::history_element_to_sql(
