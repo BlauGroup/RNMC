@@ -15,7 +15,10 @@ void print_usage() {
 }
 
 int main(int argc, char **argv) {
-    if (argc != 8) {
+    // Here we just check if there are 7 or 8 args.
+    // This is a lazy way to let energy budget be optional.
+    // This could potentially break if both step and time cutoff are specified while energy budget is not
+    if (argc < 7 || argc > 8) {
         print_usage();
         exit(EXIT_FAILURE);
     }
@@ -29,7 +32,7 @@ int main(int argc, char **argv) {
         {"thread_count", required_argument, NULL, 5},
         {"step_cutoff", optional_argument, NULL, 6},
         {"time_cutoff", optional_argument, NULL, 7},
-        {"energy_budget", optional_argument, NULL, 8},
+        {"energy_budget", optional_argument, 0, 8},
         {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };
