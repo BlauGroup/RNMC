@@ -128,6 +128,7 @@ class LatticeReactionNetwork {
                         std::unordered_map<std::string,std::vector< std::pair<double, int> > > &props);
 
         std::string make_string(int site_one, int site_two);
+        std::string make_string(std::vector<int> vec);
 
         double sum_row(std::string hash, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props);
@@ -168,6 +169,7 @@ class LatticeReactionNetwork {
 
         Sampler sampler;
         std::vector<LatticeReaction> reactions;
+        std::unordered_map<int,int> species_size;           // key: species ID, value: size of the species
 
         double factor_two; // rate modifier for reactions with two reactants
         double factor_duplicate; // rate modifier for reactions of form A + A -> ...
@@ -476,7 +478,6 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
     else if(reaction.type == Type::DESORPTION) {
         
         assert(lattice->edges.find(site_one) != lattice->edges.end());
-        assert(lattice->edges[site_one] == 'd');
         assert(lattice->sites[site_one].species == reaction.reactants[0]);
         assert(site_two == SITE_GILLESPIE);
 
@@ -484,15 +485,10 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
         clear_site(lattice, props, site_one, std::optional<int> (), prop_sum, active_indices);
 
         lattice->edges[site_one] = 'a';
-
+        
         if(is_add_sites) {
-            // remove site above from adsorb vector
-            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, lattice->sites[site_one].j, lattice->sites[site_one].k + 1};
-            int site_above = lattice->loc_map[key];
-
-            lattice->edges.erase(site_above);
-            clear_site_helper(props, site_above, SITE_GILLESPIE, prop_sum, active_indices);
-            
+            // delete site
+            lattice->delete_site(site_one);            
         }
   
         return true;
@@ -878,6 +874,18 @@ std::string LatticeReactionNetwork::make_string(int site_one, int site_two) {
 
     return (site_one > site_two) ? std::to_string(site_one) + "." + 
     std::to_string(site_two) : std::to_string(site_two) + "." + std::to_string(site_one);
+
+} // make_string
+
+std::string LatticeReactionNetwork::make_string(std::vector<int> vec) {
+    std::sort(vec.begin(), vec.end());
+    std::string hash = "";
+    
+    for(int i = 0; i < vec.size(); i++) {
+        hash = hash + std::to_string(vec[i]);
+    }
+    
+    return hash;
 
 } // make_string
 

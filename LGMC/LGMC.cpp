@@ -42,7 +42,7 @@ void print_usage_LGMC_parameters() {
 
 /* ---------------------------------------------------------------------- */
 
-/*int main(int argc, char **argv) {
+int main(int argc, char **argv) {
 
     struct option long_options[] = {
         {"reaction_database", required_argument, NULL, 'r'},
@@ -87,17 +87,14 @@ void print_usage_LGMC_parameters() {
 
         case 'r':
             reaction_database = optarg;
-            std::cout << "inside reaction_database" << reaction_database << std::endl;
             break;
 
         case 'i':
             initial_state_database = optarg;
-            std::cout << "inside initial_state_database" << initial_state_database << std::endl;
             break;
 
         case 'n':
             number_of_simulations = atoi(optarg);
-            std::cout << "inside number_of_simulations" << number_of_simulations << std::endl;
             break;
 
         case 'b':
@@ -139,7 +136,6 @@ void print_usage_LGMC_parameters() {
 
     if(!fin.is_open()) {
         std::cout << "Failed to open file: " << LGMC_params_file << "\n";
-        print_usage_LGMC_parameters();
         exit(EXIT_FAILURE);
     }
 
@@ -243,4 +239,4 @@ void print_usage_LGMC_parameters() {
     exit(EXIT_SUCCESS);
 
 
-}*/
+}
