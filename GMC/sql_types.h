@@ -62,19 +62,19 @@ void InitialStateSql::action(InitialStateSql &r, sqlite3_stmt *stmt) {
     r.count = sqlite3_column_int(stmt, 1);
 }
 
-struct TrajectoriesSql {
+struct WriteTrajectoriesSql {
     int seed;
     int step;
     int reaction_id;
     double time;
     static std::string sql_statement;
-    static void action(TrajectoriesSql &r, sqlite3_stmt *stmt);
+    static void action(WriteTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
-std::string TrajectoriesSql::sql_statement =
+std::string WriteTrajectoriesSql::sql_statement =
     "INSERT INTO trajectories VALUES (?1, ?2, ?3, ?4);";
 
-void TrajectoriesSql::action (TrajectoriesSql& t, sqlite3_stmt* stmt) {
+void WriteTrajectoriesSql::action (WriteTrajectoriesSql& t, sqlite3_stmt* stmt) {
     sqlite3_bind_int(stmt, 1, t.seed);
     sqlite3_bind_int(stmt, 2, t.step);
     sqlite3_bind_int(stmt, 3, t.reaction_id);

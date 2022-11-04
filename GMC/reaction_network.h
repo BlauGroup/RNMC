@@ -61,7 +61,7 @@ struct ReactionNetwork {
 
     // convert a history element as found a simulation to history
     // to a SQL type.
-    TrajectoriesSql history_element_to_sql(
+    WriteTrajectoriesSql history_element_to_sql(
         int seed,
         HistoryElement history_element);
 
@@ -289,10 +289,10 @@ void ReactionNetwork::update_propensities(
 }
 
 
-TrajectoriesSql ReactionNetwork::history_element_to_sql(
+WriteTrajectoriesSql ReactionNetwork::history_element_to_sql(
     int seed,
     HistoryElement history_element) {
-    return TrajectoriesSql {
+    return WriteTrajectoriesSql {
         .seed = seed,
         .step = history_element.step,
         .reaction_id = history_element.reaction_id,

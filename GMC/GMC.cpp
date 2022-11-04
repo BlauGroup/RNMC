@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
         TreeSolver,
         ReactionNetwork,
         ReactionNetworkParameters,
-        TrajectoriesSql
+        WriteTrajectoriesSql
         >
 
         dispatcher (

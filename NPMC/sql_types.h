@@ -136,8 +136,7 @@ void InitialStateSql::action(InitialStateSql &r, sqlite3_stmt *stmt) {
     r.degree_of_freedom = sqlite3_column_int(stmt, 1);
 }
 
-
-struct TrajectoriesSql {
+struct ReadTrajectoriesSql {
     int seed;
     int step;
     double time;
@@ -145,17 +144,108 @@ struct TrajectoriesSql {
     int site_id_2;
     int interaction_id;
     static std::string sql_statement;
-    static void action(TrajectoriesSql &r, sqlite3_stmt *stmt);
+    static void action(ReadTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
-std::string TrajectoriesSql::sql_statement =
+std::string ReadTrajectoriesSql::sql_statement =
+    "SELECT seed, step, time, site_id_1, site_id_2, interaction_id FROM trajectories;";
+
+void ReadTrajectoriesSql::action(ReadTrajectoriesSql &r, sqlite3_stmt *stmt) {
+    r.seed = sqlite3_column_int(stmt, 0);
+    r.step = sqlite3_column_int(stmt, 1);
+    r.time = sqlite3_column_double(stmt, 2);
+    r.site_id_1 = sqlite3_column_int(stmt, 3);
+    r.site_id_2 = sqlite3_column_int(stmt, 4);
+    r.interaction_id = sqlite3_column_int(stmt, 5);
+}
+
+struct WriteTrajectoriesSql {
+    int seed;
+    int step;
+    double time;
+    int site_id_1;
+    int site_id_2;
+    int interaction_id;
+    static std::string sql_statement;
+    static void action(WriteTrajectoriesSql &r, sqlite3_stmt *stmt);
+};
+
+std::string WriteTrajectoriesSql::sql_statement =
     "INSERT INTO trajectories VALUES (?1,?2,?3,?4,?5,?6);";
 
-void TrajectoriesSql::action(TrajectoriesSql &r, sqlite3_stmt *stmt) {
+void WriteTrajectoriesSql::action(WriteTrajectoriesSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 1, r.seed);
     sqlite3_bind_int(stmt, 2, r.step);
     sqlite3_bind_double(stmt, 3, r.time);
     sqlite3_bind_int(stmt, 4, r.site_id_1);
     sqlite3_bind_int(stmt, 5, r.site_id_2);
     sqlite3_bind_int(stmt, 6, r.interaction_id);
+}
+
+struct ReadStateSql {
+    int seed;
+    int site_id;
+    int degree_of_freedom;
+    static std::string sql_statement;
+    static void action(ReadStateSql &r, sqlite3_stmt *stmt);
+};
+
+std::string ReadStateSql::sql_statement =
+    "SELECT seed, site_id, degree_of_freedom FROM interupt_state;";
+
+void ReadStateSql::action(ReadStateSql &r, sqlite3_stmt *stmt) {
+    r.seed = sqlite3_column_int(stmt, 0);
+    r.site_id = sqlite3_column_int(stmt, 1);
+    r.degree_of_freedom = sqlite3_column_int(stmt, 2);
+}
+
+struct WriteStateSql {
+    int seed;
+    int site_id;
+    int degree_of_freedom;
+    static std::string sql_statement;
+    static void action(WriteStateSql &r, sqlite3_stmt *stmt);
+};
+
+std::string WriteStateSql::sql_statement =
+    "INSERT INTO interupt_state VALUES (?1,?2,?3);";
+
+void WriteStateSql::action(WriteStateSql &r, sqlite3_stmt *stmt) {
+    sqlite3_bind_int(stmt, 1, r.seed);
+    sqlite3_bind_int(stmt, 2, r.site_id);
+    sqlite3_bind_int(stmt, 3, r.degree_of_freedom);
+}
+
+struct ReadCutoffSql {
+    int seed;
+    int step;
+    double time;
+    static std::string sql_statement;
+    static void action(ReadCutoffSql &r, sqlite3_stmt *stmt);
+};
+
+std::string ReadCutoffSql::sql_statement =
+    "SELECT seed, step, time FROM interupt_cutoff;";
+
+void ReadCutoffSql::action(ReadCutoffSql &r, sqlite3_stmt *stmt) {
+    r.seed = sqlite3_column_int(stmt, 0);
+    r.step = sqlite3_column_int(stmt, 1);
+    r.time = sqlite3_column_double(stmt, 2);
+}
+
+struct WriteCutoffSql {
+    int seed;
+    int step;
+    double time;
+    static std::string sql_statement;
+    static void action(WriteCutoffSql &r, sqlite3_stmt *stmt);
+};
+
+std::string WriteCutoffSql::sql_statement =
+    "INSERT INTO interupt_cutoff VALUES (?1,?2,?3);";
+
+void WriteCutoffSql::action(WriteCutoffSql &r, sqlite3_stmt *stmt) {
+    sqlite3_bind_int(stmt, 1, r.seed);
+    sqlite3_bind_int(stmt, 2, r.step);
+    sqlite3_bind_double(stmt, 3, r.time);
 }
