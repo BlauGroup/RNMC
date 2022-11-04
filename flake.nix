@@ -1,9 +1,15 @@
 {
   description = "High performance Monte Carlo simulator";
 
-  inputs.nixpkgs.url = github:NixOS/nixpkgs/nixos-21.11;
+  inputs = {
+    nixpkgs.url = github:NixOS/nixpkgs/nixos-21.11;
+    flake-compat = {
+      url = github:edolstra/flake-compat;
+      flake = false;
+    };
+  };
 
-  outputs = { self, nixpkgs }:
+  outputs = { self, nixpkgs, flake-compat }:
 
     # RNMC is so simple that the build derivation looks exactly the same on
     # all platforms.
