@@ -1,2 +1,5 @@
 build
 result
+.envrc
+.cache
+compile_commands.json

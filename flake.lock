@@ -16,18 +16,34 @@
         "type": "github"
       }
     },
+    "mini-compile-commands": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1668364794,
+        "narHash": "sha256-6NmqQOJmKtX3gtc8pOnJd7yfXIWX89hwdsq0te8/NwY=",
+        "owner": "danielbarter",
+        "repo": "mini_compile_commands",
+        "rev": "a609a8cf98e5ea8cafc624e9a5c96f18229c0996",
+        "type": "github"
+      },
+      "original": {
+        "owner": "danielbarter",
+        "repo": "mini_compile_commands",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1659446231,
-        "narHash": "sha256-hekabNdTdgR/iLsgce5TGWmfIDZ86qjPhxDg/8TlzhE=",
+        "lastModified": 1668469466,
+        "narHash": "sha256-IBkBaXJ9ZQ6stveJctd3e8X6KJl9r0wwaI961TNhw9A=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "eabc38219184cc3e04a974fe31857d8e0eac098d",
+        "rev": "d4863da28cc397a1b72c08253cfa38f4c91fc2b7",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-21.11",
+        "ref": "master",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -35,6 +51,7 @@
     "root": {
       "inputs": {
         "flake-compat": "flake-compat",
+        "mini-compile-commands": "mini-compile-commands",
         "nixpkgs": "nixpkgs"
       }
     }

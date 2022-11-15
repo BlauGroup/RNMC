@@ -15,7 +15,7 @@ RNMC depends on [GSL](https://www.gnu.org/software/gsl/) for pseudo random numbe
 
 On a machine with system versions of GSL and sqlite, the executables can be built like this:
 ```
-CC=g++ ./build.sh
+./build.sh
 ```
 The executables are put in the `build` directory. Note that the build script uses the `gsl-config` utility to find headers and libraries for GSL. If you are on a cluster and sqlite is not present, it can be built as follows:
 
@@ -32,7 +32,7 @@ in which case, the simulators can be built like this:
 ```
 export CPATH=$HOME/sqlite-amalgamation-3360000:$CPATH
 export LIBRARY_PATH=$HOME/sqlite-amalgamation-3360000:$LIBRARY_PATH
-CC=g++ ./build.sh
+./build.sh
 ```
 
 ### Testing
