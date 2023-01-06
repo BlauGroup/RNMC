@@ -249,10 +249,12 @@ bool LatticeSimulation<Model, History>::execute_step() {
         this->model.update_state(lattice, std::ref(props), std::ref(this->state), next_reaction, 
                     event.site_one, event.site_two, latsolver.propensity_sum, latsolver.number_of_active_indices);
 
+
         // update_propensities 
         this->model.update_propensities(lattice, std::ref(this->state), this->update_function, 
                                         lattice_update_function, next_reaction, 
                                         event.site_one, event.site_two, props);
+
 
         return true;
     }

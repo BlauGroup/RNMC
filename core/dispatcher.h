@@ -24,7 +24,7 @@ struct Cutoff {
 // 20000 is a good value. Only change this if you fully understand the
 // performance implications
 
-constexpr int history_chunk_size = 2000;
+constexpr int history_chunk_size = 100;
 
 template <typename Solver, typename Model, typename History>
 struct SimulatorPayload {

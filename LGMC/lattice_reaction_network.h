@@ -340,10 +340,13 @@ std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props)>
 
         if(lattice->edges[site] == 'a') {
             // find relevant adsorption reactions
+            // the species on adsoprtion sites will always be empty so dependence
+            // graph will point to all adsorption reactions
             std::vector<int> &potential_reactions = dependents[lattice->sites[site].species]; 
 
-            for(unsigned long int reaction_id = 0; reaction_id < static_cast<int> (potential_reactions.size()); reaction_id++ ) {
+            for(unsigned long int i = 0; i < static_cast<int> (potential_reactions.size()); i++ ) {
 
+                unsigned long int reaction_id = potential_reactions[i];
                 LatticeReaction reaction = reactions[reaction_id]; 
 
                 if(reaction.type == Type::ADSORPTION) {
@@ -1098,7 +1101,11 @@ void LatticeReactionNetwork::update_state(std::vector<int> &state, int reaction_
     for (int m = 0;
          m < reaction.number_of_reactants;
          m++) {
-        if(reaction.phase_reactants[m] == Phase::SOLUTION) state[reactions[reaction_index].reactants[m]]--;
+        if(reaction.phase_reactants[m] == Phase::SOLUTION) {
+            assert(state[reactions[reaction_index].reactants[m]] != 0);
+            state[reactions[reaction_index].reactants[m]]--;
+        }
+        
     }
 
     for (int m = 0;
@@ -1119,14 +1126,13 @@ void LatticeReactionNetwork::update_propensities(std::function<void(Update updat
     species_of_interest.reserve(4);
 
     for ( int i = 0; i < reaction.number_of_reactants; i++ ) {
-        // make sure reactant is int the solution
+        // make sure reactant is in the solution
         if(reaction.phase_reactants[i] == Phase::SOLUTION) {
             int reactant_id = reaction.reactants[i];
             species_of_interest.push_back(reactant_id);
         }
         
     }
-
 
     for ( int j = 0; j < reaction.number_of_products; j++ ) {
         // make sure product is in the solution
@@ -1147,6 +1153,7 @@ void LatticeReactionNetwork::update_propensities(std::function<void(Update updat
                     .propensity = new_propensity});
         }
     }
+
 }
 
 /* ---------------------------------------------------------------------- */
@@ -1205,7 +1212,9 @@ double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int r
                 * state[reaction.reactants[1]]
                 * k;
     }
-
+    if(p < 0){
+        assert(false);
+    }
     return p;
 }
 

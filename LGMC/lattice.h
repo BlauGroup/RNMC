@@ -192,16 +192,22 @@ Lattice::Lattice(const Lattice& other) {
     is_yperiodic = other.is_yperiodic;
     is_zperiodic = other.is_zperiodic;         
     
+    for(auto it = other.sites.begin(); it != other.sites.end(); it++) {
+        sites[it->first] = it->second;
+    }
+
     nsites = other.nsites;                               
     nmax = other.nmax;                                
 
-    maxneigh = other.maxneigh;                   
+    maxneigh = other.maxneigh;                                             
+        
+    for(auto it = other.numneigh.begin(); it != other.numneigh.end(); it++) {
+        numneigh[it->first] = it->second;
+    }
 
-    sites = other.sites;                               
-                            
-    numneigh = other.numneigh;                         
-
-    edges = other.edges;
+    for(auto it = other.edges.begin(); it != other.edges.end(); it++) {
+        edges[it->first] = it->second;
+    }                       
 
     for(int i = 0; i < numneigh.size(); i++) {
         uint32_t* neighi;

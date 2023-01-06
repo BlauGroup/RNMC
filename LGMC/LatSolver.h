@@ -106,6 +106,11 @@ void LatSolver::update(Update update) {
     propensity_sum -= propensities[update.index];
     propensity_sum += update.propensity;
     propensities[update.index] = update.propensity;
+
+    if(propensity_sum < 0) {
+        assert(false);
+    }
+
 };
 
 /* ---------------------------------------------------------------------- */
@@ -118,6 +123,22 @@ void LatSolver::update(LatticeUpdate lattice_update, std::unordered_map<std::str
 
     std::string hash = make_string(lattice_update.site_one, lattice_update.site_two);
     props[hash].push_back(std::make_pair(lattice_update.propensity, lattice_update.index));
+
+    double sum = 0;
+    for(auto it : props){
+        for(int i =0; i < it.second.size(); i++){
+            sum += it.second[i].second;
+        }
+    }
+    for(int i = 0; i < propensities.size(); i++){
+        sum += propensities[i];
+    }
+
+    if(sum != propensity_sum){
+        std::cout << "ERROR" << std::endl;
+        propensity_sum = sum;
+    }
+
 };
 
 /* ---------------------------------------------------------------------- */
@@ -145,19 +166,20 @@ std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::str
         propensity_sum == 0.0;
         return std::optional<LatticeEvent> ();
     }
-
-    double r1 = sampler.generate();
-    double r2 = sampler.generate();
-    double fraction = propensity_sum * r1;
-    double partial = 0.0;
-
-    unsigned long m;
+    
     bool isFound = false;
+    unsigned long m;
     unsigned long int reaction_id = 0;
     std::optional<int> site_one = std::optional<int>();
     std::optional<int> site_two = std::optional<int>();
     std::string hash;
+    double dt = 0.;
 
+
+    double r1 = sampler.generate();
+    double r2 = sampler.generate();
+    double fraction = propensity_sum * r1;
+    long double partial = 0.0;
 
     // start with Gillespie propensities
     for (m = 0; m < propensities.size(); m++) {
@@ -197,7 +219,8 @@ std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::str
         }
     }
     
-    double dt = - std::log(r2) / propensity_sum;
+    dt = - std::log(r2) / propensity_sum;
+
 
     if(isFound) {
         return std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id, .dt = dt,
