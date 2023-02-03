@@ -126,8 +126,8 @@ void LatSolver::update(LatticeUpdate lattice_update, std::unordered_map<std::str
 
     double sum = 0;
     for(auto it : props){
-        for(int i =0; i < it.second.size(); i++){
-            sum += it.second[i].second;
+        for(int i = 0; i < it.second.size(); i++){
+            sum += it.second[i].first;
         }
     }
     for(int i = 0; i < propensities.size(); i++){

@@ -5,6 +5,44 @@
 #include "../LGMC/lattice.h"
 #include <functional>
 #include <csignal>
+#include <set>
+#include <atomic>
+#include <unistd.h>
+#include <cstring>
+
+namespace {
+  // In the GNUC Library, sig_atomic_t is a typedef for int,
+  // which is atomic on all systems that are supported by the
+  // GNUC Library
+  volatile sig_atomic_t do_shutdown = 0;
+
+  // std::atomic is safe, as long as it is lock-free
+  std::atomic<bool> shutdown_requested = false;
+  static_assert( std::atomic<bool>::is_always_lock_free );
+  // or, at runtime: assert( shutdown_requested.is_lock_free() );
+}
+
+struct CutoffHistoryElement{
+    unsigned long int seed;
+    int step;
+    double time;
+};
+
+struct CutoffHistoryPacket{
+    unsigned long int seed;
+    std::vector<CutoffHistoryElement> cutoff;
+};
+
+struct StateHistoryElement{
+    unsigned long int seed; //seed
+    int site_id; 
+    int degree_of_freedom; //energy level the site is at
+};
+
+struct StateHistoryPacket {
+    unsigned long int seed; //seed
+    std::vector<StateHistoryElement> state; // current state of the reaction to be written
+};
 
 struct HistoryElement {
 
@@ -29,14 +67,12 @@ struct LatticeHistoryElement {
     double time;
 };
 
-template <typename Solver, typename Model, typename History>
+/*---------------------------------------------------------------------------*/
+
+template <typename Solver, typename History>
 class Simulation {
-    private: 
-        Solver solver;
     public:
-    Model &model;
     unsigned long int seed;
-    std::vector<int> state;
     double time;
     int step; // number of reactions which have occoured
     unsigned long int history_chunk_size;
@@ -45,36 +81,87 @@ class Simulation {
     std::function<void(Update)> update_function;
 
 
-    Simulation(Model &model, unsigned long int seed,
+    Simulation(unsigned long int seed,
                int history_chunk_size,
-               HistoryQueue<HistoryPacket<History>> &history_queue
+               HistoryQueue<HistoryPacket<History>> &history_queue, int step,
+               double time
         ) :
-        model (model),
         seed (seed),
-        state (model.initial_state),
         history_queue(history_queue),
-        time (0.0),
-        step (0),
+        time (time),
+        step (step),
         history_chunk_size (history_chunk_size)
         {
             history.reserve(history_chunk_size);
         };
 
-    void init(Model &model);
-    virtual bool execute_step();
     void execute_steps(int step_cutoff);
     void execute_time(double time_cutoff);
 
 };
-template <typename Solver, typename Model, typename History>
-void Simulation<Solver, Model, History>::init(Model &model) {
-    solver = Solver(seed, std::ref(model.initial_propensities));
-    update_function = std::function<void(Update)> ([&] (Update update) {solver.update(update);});
-    history.reserve(history_chunk_size);
+
+template <typename Solver, typename History>
+void Simulation<Solver, History>::execute_steps(int step_cutoff) {
+
+    while(execute_step()) {
+        if (step > step_cutoff) {
+            break;
+        } else if (do_shutdown || shutdown_requested.load()) {
+            // Handle shutdown request from SIGTERM
+            write_error_message("Received termination request on thread - cleaning up\n");
+            break;
+        }
+    }
+};
+
+template <typename Solver, typename History>
+void Simulation<Solver, History>::execute_time(double time_cutoff) {
+    while(execute_step()) {
+        if (time > time_cutoff) {
+            break;
+        } else if (do_shutdown || shutdown_requested.load()) {
+            // Handle shutdown request from SIGTERM
+            write_error_message("Received termination request on thread - cleaning up\n");
+            break;
+        }
+    }
+};
+
+
+/* ---------------------------------------------------------------------- */
+
+template <typename Solver, typename History>
+class ReactionNetworkSimulation : public Simulation<Solver, History> {
+    private: 
+        Solver solver;
+    public:
+    ReactionNetwork &GMC;
+    std::vector<int> state;
+
+    ReactionNetworkSimulation(ReactionNetwork &GMC, 
+            unsigned long int seed,
+            int history_chunk_size,
+            HistoryQueue<HistoryPacket> &history_queue
+        ) : 
+        // time = 0, step = 0.0
+        Simulation<LatSolver, History>(seed, history_chunk_size, history_queue, 0, 0.0),
+        GMC (GMC),
+        state (GMC.initial_state),
+        { 
+        };
+
+    void init();
+    bool execute_step();
+
+};
+template <typename Solver, typename History>
+void ReactionNetworkSimulation<Solver, History>::init() {
+    solver = Solver(seed, std::ref(GMC.initial_propensities));
+
 }
 
-template <typename Solver, typename Model, typename History>
-bool Simulation<Solver, Model, History>::execute_step() {
+template <typename Solver, typename History>
+bool ReactionNetworkSimulation<Solver, History>::execute_step() {
     std::optional<Event> maybe_event = solver.event();
 
     if (! maybe_event) {
@@ -114,11 +201,11 @@ bool Simulation<Solver, Model, History>::execute_step() {
         step++;
 
         // update state
-        model.update_state(std::ref(state), next_reaction);
+        GMC.update_state(std::ref(state), next_reaction);
 
 
         // update propensities
-        model.update_propensities(
+        GMC.update_propensities(
             update_function,
             std::ref(state),
             next_reaction);
@@ -127,27 +214,9 @@ bool Simulation<Solver, Model, History>::execute_step() {
     }
 };
 
-template <typename Solver, typename Model, typename History>
-void Simulation<Solver, Model, History>::execute_steps(int step_cutoff) {
-
-    while(execute_step()) {
-        if (step > step_cutoff)
-            break;
-    }
-    
-};
-
-template <typename Solver, typename Model, typename History>
-void Simulation<Solver, Model, History>::execute_time(double time_cutoff) {
-    while(execute_step()) {
-        if (time > time_cutoff)
-            break;
-    }
-};
-
 /* ---------------------------------------------------------------------- */
-template<typename Model, typename History>
-class LatticeSimulation : public Simulation<LatSolver, Model, History> {
+template<typename History>
+class LatticeSimulation : public Simulation<LatSolver, History> {
     public:
     std::unordered_map<std::string,                     
         std::vector< std::pair<double, int> > > props;
@@ -157,20 +226,15 @@ class LatticeSimulation : public Simulation<LatSolver, Model, History> {
                 std::vector< std::pair<double, int> > > &)> lattice_update_function;
     std::function<void(Update)> update_function;
 
-    LatticeSimulation(Model &model, unsigned long int seed, int history_chunk_size,
+    LatticeSimulation(LGMC &LatticeReactionNetwork, unsigned long int seed, int history_chunk_size,
                HistoryQueue<HistoryPacket<History>> &history_queue) :
-               Simulation<LatSolver, Model, History>(model, seed, history_chunk_size, history_queue),
-               latsolver (seed, std::ref(model.initial_propensities)),
+               // Call base class constructor, step = 0, time = 0.0
+               Simulation<LatSolver, History>(seed, history_chunk_size, history_queue, 0, 0.0),
+               latsolver (seed, std::ref(LGMC.initial_propensities)),
                lattice_update_function ([&] (LatticeUpdate lattice_update, 
                std::unordered_map<std::string,                     
                 std::vector< std::pair<double, int> > > &props) {latsolver.update(lattice_update, props);}), 
                update_function ([&] (Update update) {latsolver.update(update);}) {
-                
-                    if(model.initial_lattice) {
-                        lattice = new  Lattice(*model.initial_lattice);
-                    } else {
-                        lattice = nullptr;
-                    }
                 
                };
 
@@ -180,19 +244,22 @@ class LatticeSimulation : public Simulation<LatSolver, Model, History> {
 
 };
 
-template<typename Model, typename History>
-void LatticeSimulation<Model, History>::init() {
-    this->model.update_adsorp_state(this->lattice, this->props, latsolver.propensity_sum, latsolver.number_of_active_indices);
-    this->model.update_adsorp_props(this->lattice, lattice_update_function, this->state, std::ref(props));
+template<typename History>
+void LatticeSimulation< History>::init() {
+    
+    lattice = new  Lattice(*LGMC.initial_lattice);
+   
+    LGMC.update_adsorp_state(this->lattice, this->props, latsolver.propensity_sum, latsolver.number_of_active_indices);
+    LGMC.update_adsorp_props(this->lattice, lattice_update_function, this->state, std::ref(props));
     
 }
 
-template<typename Model, typename History>
-bool LatticeSimulation<Model, History>::execute_step() {
+template<typename History>
+bool LatticeSimulation<History>::execute_step() {
 
     std::optional<LatticeEvent> maybe_event = latsolver.event_lattice(props);
 
-    if (! maybe_event) {
+    if (!maybe_event) {
 
         return false;
 
@@ -246,12 +313,12 @@ bool LatticeSimulation<Model, History>::execute_step() {
         this->step++;
 
         // update_state
-        this->model.update_state(lattice, std::ref(props), std::ref(this->state), next_reaction, 
+        this->LGMC.update_state(lattice, std::ref(props), std::ref(this->state), next_reaction, 
                     event.site_one, event.site_two, latsolver.propensity_sum, latsolver.number_of_active_indices);
 
 
         // update_propensities 
-        this->model.update_propensities(lattice, std::ref(this->state), this->update_function, 
+        this->LGMC.update_propensities(lattice, std::ref(this->state), this->update_function, 
                                         lattice_update_function, next_reaction, 
                                         event.site_one, event.site_two, props);
 
@@ -259,4 +326,114 @@ bool LatticeSimulation<Model, History>::execute_step() {
         return true;
     }
  
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+
+template <typename Solver, typename History>
+class NanoParticleSimulation : public Simulation<Solver, History> {
+
+    public:
+    NanoParticle &NPMC;
+    std::vector<int> state;
+    Solver nanoSolver;
+    HistoryQueue<StateHistoryPacket> &state_history_queue;
+    std::vector<std::set<int>> site_reaction_dependency;
+
+    NanoParticleSimulation(NanoParticle &NPMC,
+               unsigned long int seed,
+               int step,
+               double time,
+               std::vector<int> state,
+               int history_chunk_size,
+               HistoryQueue<HistoryPacket> &history_queue,
+               HistoryQueue<StateHistoryPacket> &state_history_queue
+        ) :
+        // call base class constructor
+        Simulation<LatSolver, History>(seed, history_chunk_size, history_queue, step, time),
+        NPMC (NPMC),
+        state (state),
+        time (time),
+        step (step),
+        history_queue (history_queue),
+        state_history_queue (state_history_queue),
+        
+        {
+        };
+
+    void init();
+    bool execute_step();
+
+};
+template <typename History>
+void NanoParticleSimulation<History>::init() {
+    std::vector<std::set<int>> seed_site_reaction_dependency;
+    std::vector<Reaction> seed_reactions;
+    
+    seed_site_reaction_dependency.resize(NPMC.sites.size());
+    NPMC.compute_reactions(state, std::ref(seed_reactions), std::ref(seed_site_reaction_dependency));
+    nanoSolver = NanoSolver(seed, std::ref(seed_reactions));
+    site_reaction_dependency = seed_site_reaction_dependency;
+    
+}
+
+
+template <typename History>
+bool NanoParticleSimulation<History>::execute_step() {
+    std::optional<Event> maybe_event = solver.event();
+
+    if (! maybe_event) {
+
+        return false;
+
+    } else {
+        // an event happens
+        Event event = maybe_event.value();
+        int next_reaction_id = event.index;
+        Reaction next_reaction = solver.current_reactions[next_reaction_id];
+
+        // update time
+        time += event.dt;
+
+        // record what happened
+        history.push_back(HistoryElement {
+            .seed = seed,
+            .reaction = next_reaction,
+            .time = time,
+            .step = step
+            });
+
+        if ( history.size() == history_chunk_size ) {
+            history_queue.insert_history(
+                std::move(
+                    HistoryPacket {
+                        .history = std::move(history),
+                        .seed = seed
+                        }));
+
+            history = std::vector<HistoryElement> ();
+            history.reserve(history_chunk_size);
+        }
+
+
+        // increment step
+        step++;
+
+        // update state
+        model.update_state(std::ref(state), next_reaction);
+
+        // update list of current available reactions
+        model.update_reactions(std::cref(state), next_reaction, std::ref(site_reaction_dependency), std::ref(solver.current_reactions));
+        solver.update();
+
+        return true;
+    }
+};
+
+template <typename History>
+void NanoParticleSimulation::write_error_message(std::string s){
+    char char_array[s.length()+1];
+    strcpy(char_array, s.c_str());
+
+    write(STDERR_FILENO, char_array, sizeof(char_array) - 1);
 }

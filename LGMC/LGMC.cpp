@@ -35,8 +35,8 @@ void print_usage_LGMC_parameters() {
               << "Periodicity in z dimension (T/F)\n"
               << "Temperature\n"
               << "Electron free energy\n"
-              << "Charge transfer style (M/B)\n"
               << "Is Add Site (T/F)\n"
+              << "Charge transfer style (M/B)\n"
               << "Filename for lattice fill\n";
 }
 
@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
         thread_count,
         cutoff,
         parameters, 
-        true
+        'L'
         );
 
     dispatcher.run_dispatcher();

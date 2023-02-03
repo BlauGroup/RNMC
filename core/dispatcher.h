@@ -24,32 +24,47 @@ struct Cutoff {
 // 20000 is a good value. Only change this if you fully understand the
 // performance implications
 
-constexpr int history_chunk_size = 100;
+constexpr int history_chunk_size = 20000;
 
 template <typename Solver, typename Model, typename History>
 struct SimulatorPayload {
     Model &model;
     HistoryQueue<HistoryPacket<History>> &history_queue;
+    HistoryQueue<StateHistoryPacket> &state_history_queue;
+    HistoryQueue<CutoffHistoryPacket> &cutoff_history_queue;
     SeedQueue &seed_queue;
     Cutoff cutoff;
     std::vector<bool>::iterator running;
-    bool isLGMC;
+    std::map<int, std::vector<int>> seed_state_map;
+    std::map<int, int> seed_step_map;
+    std::map<int, double> seed_time_map;
+    char model_type;
 
     SimulatorPayload(
         Model &model,
         HistoryQueue<HistoryPacket<History>> &history_queue,
+        HistoryQueue<StateHistoryPacket> &state_history_queue,
+        HistoryQueue<CutoffHistoryPacket> &cutoff_history_queue,
         SeedQueue &seed_queue,
         Cutoff cutoff,
         std::vector<bool>::iterator running, 
-        bool isLGMC
+        std::map<int, std::vector<int>> seed_state_map,
+        std::map<int, int> seed_step_map,
+        std::map<int, double> seed_time_map,  
+        char model_type
         ) :
 
             model (model),
             history_queue (history_queue),
+            state_history_queue (state_history_queue),
+            cutoff_history_queue (cutoff_history_queue),
             seed_queue (seed_queue),
             cutoff (cutoff),
             running (running),
-            isLGMC (isLGMC)
+            seed_state_map (seed_state_map),
+            seed_step_map (seed_step_map),
+            seed_time_map (seed_time_map),
+            model_type (model_type)
         {};
 
     void run_simulator() {
@@ -59,54 +74,63 @@ struct SimulatorPayload {
 
             unsigned long int seed = maybe_seed.value();
 
-            if(!isLGMC) {
-                Simulation<Solver, Model, History> simulation (model, seed, history_chunk_size, history_queue);
+            if(model_type == 'G') {
+                Simulation<Solver, History> ReactionNetworkSimulation(model, seed, history_chunk_size, history_queue) simulation;
                 simulation.init(model);
 
-                switch(cutoff.type_of_cutoff) {
-                case step_termination :
-                    simulation.execute_steps(cutoff.bound.step);
-                    break;
-                case time_termination :
-                    simulation.execute_time(cutoff.bound.time);
-                    break;
-                }
-             
-                    history_queue.insert_history(
-                    std::move(
-                    HistoryPacket<History> {
-                    .history = std::move(simulation.history),
-                    .seed = seed
-                    }));
+                run_cutoff(simulation);
+                store_history(simulation);
 
             }
-            else {
-                LatticeSimulation<Model, History> simulation (model, seed, history_chunk_size, history_queue);
-                simulation.init();
+             if(model_type == 'L') {
+                Simulation<LatSolver, History> LatticeSimulation(model, seed, history_chunk_size, history_queue) simulation;
+                simulation.init(model);
 
-                switch(cutoff.type_of_cutoff) {
-                case step_termination :
-                    simulation.execute_steps(cutoff.bound.step);
-                    break;
-                case time_termination :
-                    simulation.execute_time(cutoff.bound.time);
-                    break;
-                }
+                run_cutoff(simulation);
+                store_history(simulation);
 
-                    history_queue.insert_history(
-                    std::move(
-                    HistoryPacket<History> {
-                    .history = std::move(simulation.history),
-                    .seed = seed
-                    }));
             }
+             if(model_type == 'N') {
+                std::vector<int> state = seed_state_map[seed];
+                
+                Simulation<NanoSolver, History> NanoParticleSimulation(model, seed, step, time, state, history_chunk_size, history_queue, state_history_queue) simulation;
+                simulation.init(model);
+
+                run_cutoff(simulation);
+                store_history(simulation);
+
+            }
+
 
 
         }
 
         *running = false;
     }
+
+    void run_cutoff(Simulation &simulation) {
+        switch(cutoff.type_of_cutoff) {
+            case step_termination :
+                simulation.execute_steps(cutoff.bound.step);
+                break;
+            case time_termination :
+                simulation.execute_time(cutoff.bound.time);
+                break;
+            }
+
+    }
+
+    void store_history(Simulation &simulation) {
+        history_queue.insert_history(
+                    std::move(
+                    HistoryPacket<History> {
+                    .history = std::move(simulation.history),
+                    .seed = seed
+                    }));
+    }
 };
+
+
 
 
 
