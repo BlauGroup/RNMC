@@ -73,19 +73,19 @@ void InteractionSql::action(InteractionSql &r, sqlite3_stmt *stmt) {
 }
 
 
-struct MetadataSql {
+struct NanoMetadataSql {
     int number_of_species;
     int number_of_sites;
     int number_of_interactions;
     static std::string sql_statement;
-    static void action(MetadataSql &r, sqlite3_stmt *stmt);
+    static void action(NanoMetadataSql &r, sqlite3_stmt *stmt);
 };
 
-std::string MetadataSql::sql_statement =
+std::string NanoMetadataSql::sql_statement =
     "SELECT number_of_species, number_of_sites, "
     "number_of_interactions FROM metadata;";
 
-void MetadataSql::action(MetadataSql &r, sqlite3_stmt *stmt) {
+void NanoMetadataSql::action(NanoMetadataSql &r, sqlite3_stmt *stmt) {
     r.number_of_species = sqlite3_column_int(stmt, 0);
     r.number_of_sites = sqlite3_column_int(stmt, 1);
     r.number_of_interactions = sqlite3_column_int(stmt, 2);

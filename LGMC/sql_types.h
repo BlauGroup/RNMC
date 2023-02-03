@@ -2,57 +2,6 @@
 #include <sqlite3.h>
 #include <string>
 
-
-struct LGMCMetadataSql {
-    unsigned long int number_of_species;
-    unsigned long int number_of_reactions;
-    static std::string sql_statement;
-    static void action(LGMCMetadataSql &r, sqlite3_stmt *stmt);
-};
-
-std::string LGMCMetadataSql::sql_statement =
-    "SELECT number_of_species, number_of_reactions FROM metadata;";
-
-void LGMCMetadataSql::action(LGMCMetadataSql &r, sqlite3_stmt *stmt) {
-        r.number_of_species = sqlite3_column_int(stmt, 0);
-        r.number_of_reactions = sqlite3_column_int(stmt, 1);
-};
-
-
-struct LGMCFactorsSql {
-    double factor_zero;
-    double factor_two;
-    double factor_duplicate;
-    static std::string sql_statement;
-    static void action(LGMCFactorsSql &r, sqlite3_stmt *stmt);
-};
-
-std::string LGMCFactorsSql::sql_statement =
-    "SELECT factor_zero, factor_two, factor_duplicate FROM factors";
-
-void LGMCFactorsSql::action (LGMCFactorsSql &r, sqlite3_stmt *stmt) {
-    r.factor_zero = sqlite3_column_double(stmt, 0);
-    r.factor_two = sqlite3_column_double(stmt, 1);
-    r.factor_duplicate = sqlite3_column_double(stmt, 2);
-};
-
-
-struct LGMCInitialStateSql {
-    int species_id;
-    int count;
-    static std::string sql_statement;
-    static void action(LGMCInitialStateSql &r, sqlite3_stmt *stmt);
-};
-
-std::string LGMCInitialStateSql::sql_statement =
-    "SELECT species_id, count FROM initial_state;";
-
-void LGMCInitialStateSql::action(LGMCInitialStateSql &r, sqlite3_stmt *stmt) {
-    r.species_id = sqlite3_column_int(stmt, 0);
-    r.count = sqlite3_column_int(stmt, 1);
-}
-
-
 // TODO: Dealing with strings
 // Should these v char's be strings or char*'s?
 

@@ -8,6 +8,10 @@
 #include <csignal>
 #include <set>
 
+
+struct NanoParticleParameters {
+};
+
 struct Site {
     double x;
     double y;
@@ -145,7 +149,7 @@ NanoParticle::NanoParticle(
     SqlStatement<SpeciesSql> species_statement(nano_particle_database);
     SqlStatement<SiteSql> site_statement(nano_particle_database);
     SqlStatement<InteractionSql> interactions_statement(nano_particle_database);
-    SqlStatement<MetadataSql> metadata_statement(nano_particle_database);
+    SqlStatement<NanoMetadataSql> metadata_statement(nano_particle_database);
     SqlStatement<FactorsSql> factors_statement(initial_state_database);
     SqlStatement<InitialStateSql> initial_state_statement(initial_state_database);
 
@@ -153,12 +157,12 @@ NanoParticle::NanoParticle(
     SqlReader<SpeciesSql> species_reader(species_statement);
     SqlReader<SiteSql> site_reader(site_statement);
     SqlReader<InteractionSql> interactions_reader(interactions_statement);
-    SqlReader<MetadataSql> metadata_reader(metadata_statement);
+    SqlReader<NanoMetadataSql> metadata_reader(metadata_statement);
     SqlReader<FactorsSql> factors_reader(factors_statement);
     SqlReader<InitialStateSql> initial_state_reader(initial_state_statement);
 
     // extracting metadata
-    std::optional<MetadataSql> maybe_metadata_row =
+    std::optional<NanoMetadataSql> maybe_metadata_row =
         metadata_reader.next();
 
     if (! maybe_metadata_row.has_value()) {
@@ -168,7 +172,7 @@ NanoParticle::NanoParticle(
         std::abort();
     }
 
-    MetadataSql metadata_row = maybe_metadata_row.value();
+    NanoMetadataSql metadata_row = maybe_metadata_row.value();
 
 
     // extracting factors
