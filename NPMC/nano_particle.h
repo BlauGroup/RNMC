@@ -43,7 +43,7 @@ struct NanoParticle {
     std::vector<std::vector<int>> site_dependency;
 
     // maps site ids to sit
-    std::vector<Reaction> initial_reactions;
+    std::vector<NanoReaction> initial_reactions;
 
     // Remove this since we don't have concrete reaction_ids
     // maps site ids to reaction ids involving the site.
@@ -69,7 +69,7 @@ struct NanoParticle {
     // std::vector<double> initial_propensities;
 
     // list mapping reaction_ids to reactions
-    std::vector<Reaction> reactions;
+    std::vector<NanoReaction> reactions;
 
     double one_site_interaction_factor;
     double two_site_interaction_factor;
@@ -88,7 +88,7 @@ struct NanoParticle {
 
     void compute_reactions(
         const std::vector<int> &state,
-        std::vector<Reaction> &reactions,    
+        std::vector<NanoReaction> &reactions,    
         std::vector<std::set<int>> &site_reaction_dependency
     );
     void compute_new_reactions(
@@ -96,19 +96,19 @@ struct NanoParticle {
         const int other_site_id,
         const int site_0_state,
         const std::vector<int> &state,
-        std::vector<Reaction> &new_reactions
+        std::vector<NanoReaction> &new_reactions
     );
 
     void compute_distance_matrix();
 
     double compute_propensity(
         std::vector<int> &state,
-        Reaction reaction
+        NanoReaction reaction
         );
 
     void update_state(
         std::vector<int> &state,
-        Reaction reaction
+        NanoReaction reaction
         );
 
     // updates are passed directly to the solver, but the model
@@ -121,17 +121,17 @@ struct NanoParticle {
 
     void update_reactions(
         const std::vector<int> &state,
-        Reaction reaction,
+        NanoReaction reaction,
         std::vector<std::set<int>> &current_site_reaction_dependency,
-        std::vector<Reaction> &current_reactions);
+        std::vector<NanoReaction> &current_reactions);
 
     // convert a history element as found a simulation to history
     // to a SQL type.
-    WriteTrajectoriesSql history_element_to_sql(
+    NanoWriteTrajectoriesSql history_element_to_sql(
         int seed,
         HistoryElement history_element);
 
-    WriteStateSql state_history_element_to_sql(
+    NanoWriteStateSql state_history_element_to_sql(
         int seed,
         StateHistoryElement state_history_element);
 
@@ -151,7 +151,7 @@ NanoParticle::NanoParticle(
     SqlStatement<InteractionSql> interactions_statement(nano_particle_database);
     SqlStatement<NanoMetadataSql> metadata_statement(nano_particle_database);
     SqlStatement<FactorsSql> factors_statement(initial_state_database);
-    SqlStatement<InitialStateSql> initial_state_statement(initial_state_database);
+    SqlStatement<NanoInitialStateSql> initial_state_statement(initial_state_database);
 
     // sql readers
     SqlReader<SpeciesSql> species_reader(species_statement);
@@ -159,7 +159,7 @@ NanoParticle::NanoParticle(
     SqlReader<InteractionSql> interactions_reader(interactions_statement);
     SqlReader<NanoMetadataSql> metadata_reader(metadata_statement);
     SqlReader<FactorsSql> factors_reader(factors_statement);
-    SqlReader<InitialStateSql> initial_state_reader(initial_state_statement);
+    SqlReader<NanoInitialStateSql> initial_state_reader(initial_state_statement);
 
     // extracting metadata
     std::optional<NanoMetadataSql> maybe_metadata_row =
@@ -310,9 +310,9 @@ NanoParticle::NanoParticle(
     // initialize initial_state
     initial_state.resize(metadata_row.number_of_sites);
 
-    while(std::optional<InitialStateSql> maybe_initial_state_row =
+    while(std::optional<NanoInitialStateSql> maybe_initial_state_row =
           initial_state_reader.next()) {
-        InitialStateSql initial_state_row = maybe_initial_state_row.value();
+        NanoInitialStateSql initial_state_row = maybe_initial_state_row.value();
         initial_state[initial_state_row.site_id] = initial_state_row.degree_of_freedom;
     }
 
@@ -327,7 +327,7 @@ NanoParticle::NanoParticle(
 
 void NanoParticle::compute_reactions(
     const std::vector<int> &state,
-    std::vector<Reaction> &reactions,    
+    std::vector<NanoReaction> &reactions,    
     std::vector<std::set<int>> &site_reaction_dependency) {
     
     int reaction_count = 0;
@@ -338,7 +338,7 @@ void NanoParticle::compute_reactions(
         std::vector<Interaction>* available_interactions = &one_site_interactions_map[site_0_species_id][site_0_state];
         for (unsigned int i = 0; i < available_interactions->size(); i++) {
             Interaction interaction = (*available_interactions)[i];
-            Reaction reaction = Reaction {
+            NanoReaction reaction = NanoReaction {
                                 .site_id = { (int) site_id_0, -1},
                                 .interaction = interaction,
                                 .rate = interaction.rate * one_site_interaction_factor
@@ -359,7 +359,7 @@ void NanoParticle::compute_reactions(
                     std::vector<Interaction>* available_interactions = &two_site_interactions_map[site_0_species_id][site_1_species_id][site_0_state][site_1_state];
                     for (unsigned int i = 0; i < available_interactions->size(); i++){
                         Interaction interaction = (*available_interactions)[i];
-                        Reaction reaction = Reaction {
+                        NanoReaction reaction = NanoReaction {
                                                 .site_id = { (int) site_id_0, (int) site_id_1 },
                                                 .interaction = interaction,
                                                 .rate = distance_factor_function(distance) * interaction.rate * two_site_interaction_factor
@@ -374,7 +374,7 @@ void NanoParticle::compute_reactions(
                     available_interactions = &two_site_interactions_map[site_1_species_id][site_0_species_id][site_1_state][site_0_state];
                     for (unsigned int i = 0; i < available_interactions->size(); i++){
                         Interaction interaction = (*available_interactions)[i];
-                        Reaction reaction = Reaction {
+                        NanoReaction reaction = NanoReaction {
                                                 .site_id = { (int) site_id_1, (int) site_id_0 },
                                                 .interaction = interaction,
                                                 .rate = distance_factor_function(distance) * interaction.rate * two_site_interaction_factor
@@ -402,7 +402,7 @@ void NanoParticle::compute_distance_matrix() {
 
 void NanoParticle::update_state(
     std::vector<int> &state,
-    Reaction reaction) {
+    NanoReaction reaction) {
 
     Interaction interaction = reaction.interaction;
 
@@ -427,7 +427,7 @@ void NanoParticle::compute_new_reactions(
     const int other_site_id,
     const int site_0_state,
     const std::vector<int> &state,
-    std::vector<Reaction> &new_reactions
+    std::vector<NanoReaction> &new_reactions
 ){
     int site_0_species_id = sites[site_0_id].species_id;
 
@@ -435,7 +435,7 @@ void NanoParticle::compute_new_reactions(
     std::vector<Interaction>* available_interactions = &one_site_interactions_map[site_0_species_id][site_0_state];
     for (unsigned int i = 0; i < available_interactions->size(); i++) {
         Interaction interaction = (*available_interactions)[i];
-        Reaction new_reaction = Reaction {
+        NanoReaction new_reaction = NanoReaction {
                                 .site_id = { (int) site_0_id, -1},
                                 .interaction = interaction,
                                 .rate = interaction.rate * one_site_interaction_factor
@@ -455,7 +455,7 @@ void NanoParticle::compute_new_reactions(
                 std::vector<Interaction>* available_interactions = &two_site_interactions_map[site_0_species_id][site_1_species_id][site_0_state][site_1_state];
                 for (unsigned int i = 0; i < available_interactions -> size(); i++){
                     Interaction interaction = (*available_interactions)[i];
-                    Reaction new_reaction = Reaction {
+                    NanoReaction new_reaction = NanoReaction {
                                             .site_id = { (int) site_0_id, (int) site_1_id },
                                             .interaction = interaction,
                                             .rate = distance_factor_function(*distance) * interaction.rate * two_site_interaction_factor
@@ -471,7 +471,7 @@ void NanoParticle::compute_new_reactions(
                     available_interactions = &two_site_interactions_map[site_1_species_id][site_0_species_id][site_1_state][site_0_state];
                     for (unsigned int i = 0; i < available_interactions->size(); i++){
                         Interaction interaction = (*available_interactions)[i];
-                        Reaction new_reaction = Reaction {
+                        NanoReaction new_reaction = NanoReaction {
                                                 .site_id = { (int) site_1_id, (int) site_0_id },
                                                 .interaction = interaction,
                                                 .rate = distance_factor_function(*distance) * interaction.rate * two_site_interaction_factor
@@ -486,12 +486,12 @@ void NanoParticle::compute_new_reactions(
 
 void NanoParticle::update_reactions(
     const std::vector<int>& state,
-    Reaction reaction,
+    NanoReaction reaction,
     std::vector<std::set<int>>& current_site_reaction_dependency,
-    std::vector<Reaction>& current_reactions) {
+    std::vector<NanoReaction>& current_reactions) {
 
     // Compute the new reactions based on the new states
-    std::vector<Reaction> new_reactions;
+    std::vector<NanoReaction> new_reactions;
     const int site_0_id = reaction.site_id[0];
     const int site_0_state = state[site_0_id];
     const int site_1_id = reaction.site_id[1];
@@ -517,7 +517,7 @@ void NanoParticle::update_reactions(
             reactions_to_remove.insert(reaction_id_to_remove);
 
             // Need to remove this interaction from the second site if this is a two_site interaction
-            Reaction* reaction_to_remove = &current_reactions[reaction_id_to_remove];
+            NanoReaction* reaction_to_remove = &current_reactions[reaction_id_to_remove];
             dependencies_to_process.push_back({reaction_to_remove->site_id[0], reaction_id_to_remove});
             if ((*reaction_to_remove).interaction.number_of_sites == 2) {
                 dependencies_to_process.push_back({reaction_to_remove->site_id[1], reaction_id_to_remove});
@@ -534,7 +534,7 @@ void NanoParticle::update_reactions(
     int n_reactions_to_remove = reactions_to_remove.size();
     std::set<int>::iterator reactions_to_remove_itr = reactions_to_remove.begin();
     for (unsigned int i = 0; i < new_reactions.size(); i++) {
-        Reaction* new_reaction = &new_reactions[i];
+        NanoReaction* new_reaction = &new_reactions[i];
         if (i < (unsigned) n_reactions_to_remove) {
             // Assign the new reaction to a index belonging to a reaction to remove.
             // Since the reaction is going to be deleted anyways, this is safe.
@@ -573,7 +573,7 @@ void NanoParticle::update_reactions(
                 // Reaction to be moved is going to be removed, no point in removing it
                 reaction_idx_to_move--;
             } else {
-                Reaction reaction_to_move = current_reactions[reaction_idx_to_move];
+                NanoReaction reaction_to_move = current_reactions[reaction_idx_to_move];
                 current_reactions[*reactions_to_remove_itr] = reaction_to_move;
 
                 // Find the reaction that was moved in the site reaction dependency vector and remap it
@@ -610,11 +610,11 @@ void NanoParticle::update_reactions(
 
 }
 
-WriteTrajectoriesSql NanoParticle::history_element_to_sql(
+NanpWriteTrajectoriesSql NanoParticle::history_element_to_sql(
     int seed,
     HistoryElement history_element) {
 
-    Reaction reaction = history_element.reaction;
+    NanoReaction reaction = history_element.reaction;
     return WriteTrajectoriesSql {
         .seed = seed,
         .step = history_element.step,
@@ -625,7 +625,7 @@ WriteTrajectoriesSql NanoParticle::history_element_to_sql(
     };
 }
 
-WriteStateSql NanoParticle::state_history_element_to_sql(
+NanoWriteStateSql NanoParticle::state_history_element_to_sql(
     int seed,
     StateHistoryElement state_history_element) {
 

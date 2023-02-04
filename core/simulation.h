@@ -9,6 +9,55 @@
 #include <atomic>
 #include <unistd.h>
 #include <cstring>
+#include "../GMC/reaction_network.h"
+#include "../NPMC/NanoSolver.h"
+#include "../NPMC/nano_particle.h"
+#include "../LGMC/lattice_reaction_network.h"
+
+void write_error_message(std::string s){
+    char char_array[s.length()+1];
+    strcpy(char_array, s.c_str());
+
+    write(STDERR_FILENO, char_array, sizeof(char_array) - 1);
+}
+
+/* --------- Read Cutoff SQL ---------*/
+
+struct ReadCutoffSql {
+    int seed;
+    int step;
+    double time;
+    static std::string sql_statement;
+    static void action(ReadCutoffSql &r, sqlite3_stmt *stmt);
+};
+
+std::string ReadCutoffSql::sql_statement =
+    "SELECT seed, step, time FROM interupt_cutoff;";
+
+void ReadCutoffSql::action(ReadCutoffSql &r, sqlite3_stmt *stmt) {
+    r.seed = sqlite3_column_int(stmt, 0);
+    r.step = sqlite3_column_int(stmt, 1);
+    r.time = sqlite3_column_double(stmt, 2);
+}
+
+/* --------- WriteCutoff SQL ---------*/
+
+struct WriteCutoffSql {
+    int seed;
+    int step;
+    double time;
+    static std::string sql_statement;
+    static void action(WriteCutoffSql &r, sqlite3_stmt *stmt);
+};
+
+std::string WriteCutoffSql::sql_statement =
+    "INSERT INTO interupt_cutoff VALUES (?1,?2,?3);";
+
+void WriteCutoffSql::action(WriteCutoffSql &r, sqlite3_stmt *stmt) {
+    sqlite3_bind_int(stmt, 1, r.seed);
+    sqlite3_bind_int(stmt, 2, r.step);
+    sqlite3_bind_double(stmt, 3, r.time);
+}
 
 namespace {
   // In the GNUC Library, sig_atomic_t is a typedef for int,
@@ -97,6 +146,7 @@ class Simulation {
 
     void execute_steps(int step_cutoff);
     void execute_time(double time_cutoff);
+    virtual void execute_step();
 
 };
 
@@ -156,7 +206,7 @@ class ReactionNetworkSimulation : public Simulation<Solver, History> {
 };
 template <typename Solver, typename History>
 void ReactionNetworkSimulation<Solver, History>::init() {
-    solver = Solver(seed, std::ref(GMC.initial_propensities));
+    solver = Solver(this->seed, std::ref(GMC.initial_propensities));
 
 }
 
@@ -174,31 +224,31 @@ bool ReactionNetworkSimulation<Solver, History>::execute_step() {
         int next_reaction = event.index;
 
         // update time
-        time += event.dt;
+        this->time += event.dt;
 
         // record what happened
-        history.push_back(History {
-            .seed = seed,
+        this->history.push_back(History {
+            .seed = this->seed,
             .reaction_id = next_reaction,
-            .time = time,
-            .step = step
+            .time = this->time,
+            .step = this->step
             });
 
-        if ( history.size() == history_chunk_size ) {
-            history_queue.insert_history(
+        if ( this->history.size() == this->history_chunk_size ) {
+            this->history_queue.insert_history(
                 std::move(
                     HistoryPacket<History> {
-                        .history = std::move(history),
-                        .seed = seed
+                        .history = std::move(this->history),
+                        .seed = this->seed
                         }));
 
-            history = std::vector<History> ();
-            history.reserve(history_chunk_size);
+            this->history = std::vector<History> ();
+            this->history.reserve(this->history_chunk_size);
         }
 
 
         // increment step
-        step++;
+        this->step++;
 
         // update state
         GMC.update_state(std::ref(state), next_reaction);
@@ -206,7 +256,7 @@ bool ReactionNetworkSimulation<Solver, History>::execute_step() {
 
         // update propensities
         GMC.update_propensities(
-            update_function,
+            this->update_function,
             std::ref(state),
             next_reaction);
 
@@ -222,18 +272,22 @@ class LatticeSimulation : public Simulation<LatSolver, History> {
         std::vector< std::pair<double, int> > > props;
     LatSolver latsolver;
     Lattice *lattice;
+    LatticeReactionNetwork &LGMC;
+    std::vector<int> state;
     std::function<void(LatticeUpdate, std::unordered_map<std::string,                     
                 std::vector< std::pair<double, int> > > &)> lattice_update_function;
     std::function<void(Update)> update_function;
 
-    LatticeSimulation(LGMC &LatticeReactionNetwork, unsigned long int seed, int history_chunk_size,
+    LatticeSimulation(LatticeReactionNetwork &LGMC, unsigned long int seed, int history_chunk_size,
                HistoryQueue<HistoryPacket<History>> &history_queue) :
                // Call base class constructor, step = 0, time = 0.0
                Simulation<LatSolver, History>(seed, history_chunk_size, history_queue, 0, 0.0),
                latsolver (seed, std::ref(LGMC.initial_propensities)),
                lattice_update_function ([&] (LatticeUpdate lattice_update, 
                std::unordered_map<std::string,                     
-                std::vector< std::pair<double, int> > > &props) {latsolver.update(lattice_update, props);}), 
+                std::vector< std::pair<double, int> > > &props), 
+                state(LGMC.state)
+                 {latsolver.update(lattice_update, props);}), 
                update_function ([&] (Update update) {latsolver.update(update);}) {
                 
                };
@@ -313,12 +367,12 @@ bool LatticeSimulation<History>::execute_step() {
         this->step++;
 
         // update_state
-        this->LGMC.update_state(lattice, std::ref(props), std::ref(this->state), next_reaction, 
+        LGMC.update_state(lattice, std::ref(props), std::ref(this->state), next_reaction, 
                     event.site_one, event.site_two, latsolver.propensity_sum, latsolver.number_of_active_indices);
 
 
         // update_propensities 
-        this->LGMC.update_propensities(lattice, std::ref(this->state), this->update_function, 
+        LGMC.update_propensities(lattice, std::ref(this->state), this->update_function, 
                                         lattice_update_function, next_reaction, 
                                         event.site_one, event.site_two, props);
 
@@ -330,8 +384,8 @@ bool LatticeSimulation<History>::execute_step() {
 
 /* ---------------------------------------------------------------------------------------------- */
 
-template <typename Solver, typename History>
-class NanoParticleSimulation : public Simulation<Solver, History> {
+template <typename NanoSolver, typename History>
+class NanoParticleSimulation : public Simulation<NanoSolver, History> {
 
     public:
     NanoParticle &NPMC;
@@ -350,7 +404,7 @@ class NanoParticleSimulation : public Simulation<Solver, History> {
                HistoryQueue<StateHistoryPacket> &state_history_queue
         ) :
         // call base class constructor
-        Simulation<LatSolver, History>(seed, history_chunk_size, history_queue, step, time),
+        Simulation<NanoSolver, History>(seed, history_chunk_size, history_queue, step, time),
         NPMC (NPMC),
         state (state),
         time (time),
@@ -390,20 +444,20 @@ bool NanoParticleSimulation<History>::execute_step() {
         // an event happens
         Event event = maybe_event.value();
         int next_reaction_id = event.index;
-        Reaction next_reaction = solver.current_reactions[next_reaction_id];
+        NanoReaction next_reaction = solver.current_reactions[next_reaction_id];
 
         // update time
-        time += event.dt;
+        this->time += event.dt;
 
         // record what happened
         history.push_back(HistoryElement {
-            .seed = seed,
+            .seed = this->seed,
             .reaction = next_reaction,
-            .time = time,
-            .step = step
+            .time = this->time,
+            .step = this->step
             });
 
-        if ( history.size() == history_chunk_size ) {
+        if ( this->history.size() == this->history_chunk_size ) {
             history_queue.insert_history(
                 std::move(
                     HistoryPacket {
@@ -411,20 +465,20 @@ bool NanoParticleSimulation<History>::execute_step() {
                         .seed = seed
                         }));
 
-            history = std::vector<HistoryElement> ();
-            history.reserve(history_chunk_size);
+            this->history = std::vector<HistoryElement> ();
+            this->history.reserve(history_chunk_size);
         }
 
 
         // increment step
-        step++;
+        this->step++;
 
         // update state
-        model.update_state(std::ref(state), next_reaction);
+        NPMC.update_state(std::ref(state), next_reaction);
 
         // update list of current available reactions
-        model.update_reactions(std::cref(state), next_reaction, std::ref(site_reaction_dependency), std::ref(solver.current_reactions));
-        solver.update();
+        NPMC.update_reactions(std::cref(state), next_reaction, std::ref(site_reaction_dependency), std::ref(solver.current_reactions));
+        NanoSolver.update();
 
         return true;
     }

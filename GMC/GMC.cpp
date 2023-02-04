@@ -96,12 +96,20 @@ int main(int argc, char **argv) {
 
     ReactionNetworkParameters parameters;
 
-    Dispatcher<
+   Dispatcher<
         TreeSolver,
         ReactionNetwork,
         ReactionNetworkParameters,
-        TrajectoriesSql
+        ReactionNetworkWriteTrajectoriesSql,
+        ReactionNetworkReadTrajectoriesSql,
+        ReactionNetworkWriteStateSql,
+        ReactionNetworkReadStateSql,
+        WriteCutoffSql,
+        ReadCutoffSql, 
+        History
         >
+
+        
 
         dispatcher (
         reaction_database,

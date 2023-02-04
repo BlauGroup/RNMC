@@ -66,7 +66,9 @@ void LGMCReactionSql::action(LGMCReactionSql &r, sqlite3_stmt *stmt) {
 
 //TODO test and deal with text
 
-struct LGMCTrajectoriesSql {
+/* --------- Read Trajectories SQL ---------*/
+
+struct LatticeReadTrajectoriesSql {
     int seed;
     int step;
     int reaction_id;
@@ -74,13 +76,38 @@ struct LGMCTrajectoriesSql {
     int site_2;
     double time;
     static std::string sql_statement;
-    static void action(LGMCTrajectoriesSql &r, sqlite3_stmt *stmt);
+    static void action(LatticeReadTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
-std::string LGMCTrajectoriesSql::sql_statement =
+std::string LatticeReadTrajectoriesSql::sql_statement =
+    "SELECT seed, step, reaction_id, site_1, site_22, time FROM trajectories;";
+
+void LatticeReadTrajectoriesSql::action (LatticeReadTrajectoriesSql& t, sqlite3_stmt* stmt) {
+    sqlite3_bind_int(stmt, 0);
+    sqlite3_bind_int(stmt, 1);
+    sqlite3_bind_int(stmt, 2);
+    sqlite3_bind_int(stmt, 3);
+    sqlite3_bind_int(stmt, 4);
+    sqlite3_bind_double(stmt, 5);
+};
+
+/* --------- Write Trajectories SQL ---------*/
+
+struct LatticeWriteTrajectoriesSql {
+    int seed;
+    int step;
+    int reaction_id;
+    int site_1;
+    int site_2;
+    double time;
+    static std::string sql_statement;
+    static void action(LatticeWriteTrajectoriesSql &r, sqlite3_stmt *stmt);
+};
+
+std::string LatticeWriteTrajectoriesSql::sql_statement =
     "INSERT INTO trajectories VALUES (?1, ?2, ?3, ?4, ?5, ?6);";
 
-void LGMCTrajectoriesSql::action (LGMCTrajectoriesSql& t, sqlite3_stmt* stmt) {
+void LatticeWriteTrajectoriesSql::action (LatticeWriteTrajectoriesSql& t, sqlite3_stmt* stmt) {
     sqlite3_bind_int(stmt, 1, t.seed);
     sqlite3_bind_int(stmt, 2, t.step);
     sqlite3_bind_int(stmt, 3, t.reaction_id);
@@ -88,3 +115,44 @@ void LGMCTrajectoriesSql::action (LGMCTrajectoriesSql& t, sqlite3_stmt* stmt) {
     sqlite3_bind_int(stmt, 5, t.site_2);
     sqlite3_bind_double(stmt, 6, t.time);
 };
+
+/* --------- Read State SQL ---------*/
+
+struct LatticeReadStateSql {
+    int seed;
+    int site_1;
+    int site_2;
+    int reaction_id;
+    static std::string sql_statement;
+    static void action(LatticeReadStateSql &r, sqlite3_stmt *stmt);
+};
+
+std::string LatticeReadStateSql::sql_statement =
+    "SELECT seed, site_1, site_2, reaction_id FROM interupt_state;";
+
+void LatticeReadStateSql::action(LatticeReadStateSql &r, sqlite3_stmt *stmt) {
+    r.seed = sqlite3_column_int(stmt, 0);
+    r.site_1 = sqlite3_column_int(stmt, 1);
+    r.site_1 = sqlite3_column_int(stmt, 2);
+    r.reaction_id = sqlite3_column_int(stmt, 3);
+}
+
+/* --------- Write State SQL ---------*/
+struct LatticeWriteStateSql {
+    int seed;
+    int site_1;
+    int site_2;
+    int reaction_id;
+    static std::string sql_statement;
+    static void action(LatticeWriteStateSql &r, sqlite3_stmt *stmt);
+};
+
+std::string LatticeWriteStateSql::sql_statement =
+    "INSERT INTO interupt_state VALUES (?1,?2,?3, ?4);";
+
+void LatticeWriteStateSql::action(LatticeWriteStateSql &r, sqlite3_stmt *stmt) {
+    sqlite3_bind_int(stmt, 1, r.seed);
+    sqlite3_bind_int(stmt, 2, r.site_1);
+    sqlite3_bind_int(stmt, 3, r.site_2);
+    sqlite3_bind_int(stmt, 4, r.reaction_id);
+}

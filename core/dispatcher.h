@@ -283,6 +283,13 @@ struct Dispatcher {
     void record_cutoff(HistoryPacket<History> cutoff_history_packet);
 };
 
+void write_error_message(std::string s){
+    char char_array[s.length()+1];
+    strcpy(char_array, s.c_str());
+
+    write(STDERR_FILENO, char_array, sizeof(char_array) - 1);
+}
+
 void signalHandler(int signum) {
     
     write_error_message("received signal " + std::to_string(signum) + "\n");

@@ -1,5 +1,5 @@
 #pragma once
-#include "sampler.h"
+#include "../core/sampler.h"
 #include <vector>
 #include <optional>
 #include <cmath>
@@ -30,7 +30,7 @@ struct Interaction {
 // In a reaction, the sites must be within the interaction radius bound.
 
 //Include this here for now, but breakout into own file later
-struct Reaction {
+struct NanoReaction {
     int site_id[2];
     Interaction interaction;
 
@@ -38,16 +38,13 @@ struct Reaction {
     double rate;
 };
 
-struct Update {
+struct NanoUpdate {
     unsigned long int index;
     // double propensity;
     Reaction reaction;
 };
 
-struct Event {
-    unsigned long int index;
-    double dt;
-};
+
 
 class NanoSolver {
 private:
@@ -67,8 +64,8 @@ public:
     NanoSolver(unsigned long int seed, std::vector<Reaction> &current_reactions);
     NanoSolver(unsigned long int seed, std::vector<Reaction> &&current_reactions);
     void update();
-    void update(Update update);
-    void update(std::vector<Update> updates);
+    void update(NanoUpdate update);
+    void update(std::vector<NanoUpdate> updates);
     std::optional<Event> event();
     double get_propensity(int index);
     double get_propensity_sum();

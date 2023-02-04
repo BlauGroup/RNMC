@@ -3,6 +3,7 @@
 #include "sql_types.h"
 #include "nano_particle.h"
 #include <csignal>
+#include "NanoSolver.h"
 
 void print_usage() {
     std::cout << "Usage: specify the following options" << std::endl
@@ -101,12 +102,14 @@ int main(int argc, char **argv) {
     Dispatcher<
         NanoSolver,
         NanoParticle,
-        WriteTrajectoriesSql,
-        ReadTrajectoriesSql,
-        WriteStateSql,
-        ReadStateSql,
+        NanoParticleParameters,
+        NanoWriteTrajectoriesSql,
+        NanoReadTrajectoriesSql,
+        NanoWriteStateSql,
+        NanoReadStateSql,
         WriteCutoffSql,
-        ReadCutoffSql
+        ReadCutoffSql, 
+        History
         >
 
         dispatcher (

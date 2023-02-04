@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
     }
 
 
-    LGMCParameters parameters{.latconst = latconst, 
+    LatticeParameters parameters{.latconst = latconst, 
                               .boxxlo = boxxlo, .boxxhi = boxxhi, 
                               .boxylo = boxylo, .boxyhi = boxyhi,
                               .boxzlo = boxzlo, .boxzhi = boxzhi, 
@@ -216,14 +216,18 @@ int main(int argc, char **argv) {
                               .charge_transfer_style = charge_transfer_style,
                               .lattice_fill = fill_lattice};                               
 
+ 
     Dispatcher<
         LatSolver,
         LatticeReactionNetwork,
-        LGMCParameters,
-        LGMCTrajectoriesSql,
-        LatticeHistoryElement
+        LatticeParameters,
+        LatticeReadTrajectoriesSql,
+        LatticeWriteStateSql,
+        LatticeReadStateSql,
+        WriteCutoffSql,
+        ReadCutoffSql, 
+        History
         >
-
         dispatcher (
         reaction_database,
         initial_state_database,

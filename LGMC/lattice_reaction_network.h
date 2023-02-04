@@ -28,7 +28,7 @@ enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_ELYTE, HOMOGENEOUS_SOLID, DIFFUSI
 enum ChargeTransferStyle {MARCUS, BUTLER_VOLMER};
 
 
-struct LGMCParameters {
+struct LatticeParameters {
     float latconst;                               
     float boxxlo,boxxhi,boxylo,                   
           boxyhi,boxzlo,boxzhi;                       
@@ -72,7 +72,7 @@ struct LatticeReaction {
 class LatticeReactionNetwork {
     public: 
         LatticeReactionNetwork(SqlConnection &reaction_network_database, SqlConnection &initial_state_database, 
-            LGMCParameters parameters);
+            LatticeParameters parameters);
         
         ~LatticeReactionNetwork();
 
@@ -161,7 +161,7 @@ class LatticeReactionNetwork {
 
         // convert a history element as found a simulation to history
         // to a SQL type.
-        LGMCTrajectoriesSql history_element_to_sql(
+        LatticeWriteTrajectoriesSql history_element_to_sql(
             int seed,
             LatticeHistoryElement history_element);
 
@@ -229,7 +229,7 @@ double get_marcus_rate_coefficient(double base_dg, double prefactor, double reor
 
 
 LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection &reaction_network_database, SqlConnection &initial_state_database, 
-            LGMCParameters parameters) : sampler (Sampler(0)) {
+            LatticeParameters parameters) : sampler (Sampler(0)) {
 
     // create lattice
     initial_lattice = new Lattice(parameters.latconst, parameters.boxxlo, parameters.boxxhi, parameters.boxylo,
@@ -906,10 +906,10 @@ double LatticeReactionNetwork::sum_row(std::string hash, std::unordered_map<std:
 
 /* ---------------------------------------------------------------------- */
 
-LGMCTrajectoriesSql LatticeReactionNetwork::history_element_to_sql(
+LatticeWriteTrajectoriesSql LatticeReactionNetwork::history_element_to_sql(
     int seed,
     LatticeHistoryElement history_element) {
-    return LGMCTrajectoriesSql {
+    return LatticeWriteTrajectoriesSql {
         .seed = seed,
         .step = history_element.step,
         .reaction_id = history_element.reaction_id,
