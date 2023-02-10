@@ -63,7 +63,7 @@ struct ReactionNetwork {
     // to a SQL type.
     ReactionNetworkWriteTrajectoriesSql history_element_to_sql(
         int seed,
-        HistoryElement history_element);
+        ReactionNetworkTrajectoryHistoryElement history_element);
 
 };
 
@@ -291,7 +291,7 @@ void ReactionNetwork::update_propensities(
 
 ReactionNetworkWriteTrajectoriesSql ReactionNetwork::history_element_to_sql(
     int seed,
-    HistoryElement history_element) {
+    ReactionNetworkTrajectoryHistoryElement history_element) {
     return ReactionNetworkWriteTrajectoriesSql {
         .seed = seed,
         .step = history_element.step,

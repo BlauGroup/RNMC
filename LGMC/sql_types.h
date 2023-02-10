@@ -156,3 +156,21 @@ void LatticeWriteStateSql::action(LatticeWriteStateSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 3, r.site_2);
     sqlite3_bind_int(stmt, 4, r.reaction_id);
 }
+
+/* --------- State and Trajectory History Elements ---------*/
+
+struct LatticeStateHistoryElement{
+    unsigned long int seed; //seed
+    std::vector<int> state;
+};
+
+struct LatticeTrajectoryHistoryElement {
+
+    unsigned long int seed; // seed
+    double time;  // time after reaction has occoured.
+    int step;
+    int reaction; // reaction which fired
+    int site_1;
+    int site_2;
+
+};

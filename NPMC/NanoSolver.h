@@ -60,22 +60,23 @@ public:
     // we also implement initialization by copying from a reference
     // LinearSolver(unsigned long int seed, std::vector<double> &&initial_propensities);
     // LinearSolver(unsigned long int seed, std::vector<double> &initial_propensities);
-    std::vector<Reaction> current_reactions;
-    NanoSolver(unsigned long int seed, std::vector<Reaction> &current_reactions);
-    NanoSolver(unsigned long int seed, std::vector<Reaction> &&current_reactions);
+    std::vector<NanoReaction> current_reactions;
+    NanoSolver(unsigned long int seed, std::vector<NanoReaction> &current_reactions);
+    NanoSolver(unsigned long int seed, std::vector<NanoReaction> &&current_reactions);
     void update();
     void update(NanoUpdate update);
     void update(std::vector<NanoUpdate> updates);
     std::optional<Event> event();
     double get_propensity(int index);
     double get_propensity_sum();
+    NanoSolver() : sampler(Sampler(0)) {}; // defualt constructor
 };
 
 // LinearSolver implementation
 // LinearSolver can operate directly on the passed propensities using a move
 NanoSolver::NanoSolver(
     unsigned long int seed,
-    std::vector<Reaction> &&current_reactions) :
+    std::vector<NanoReaction> &&current_reactions) :
     sampler (Sampler(seed)),
     cumulative_propensities (current_reactions.size()),
     number_of_active_indices (0),
@@ -89,7 +90,7 @@ NanoSolver::NanoSolver(
 //
 NanoSolver::NanoSolver(
     unsigned long int seed,
-    std::vector<Reaction> &current_reactions) :
+    std::vector<NanoReaction> &current_reactions) :
     sampler (Sampler(seed)),
     cumulative_propensities (current_reactions.size()),
     number_of_active_indices (0),

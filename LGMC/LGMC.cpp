@@ -217,17 +217,20 @@ int main(int argc, char **argv) {
                               .lattice_fill = fill_lattice};                               
 
  
-    Dispatcher<
-        LatSolver,
-        LatticeReactionNetwork,
-        LatticeParameters,
-        LatticeReadTrajectoriesSql,
-        LatticeWriteStateSql,
-        LatticeReadStateSql,
-        WriteCutoffSql,
-        ReadCutoffSql, 
-        History
-        >
+    Dispatcher<LatSolver,
+    LatticeReactionNetwork,
+    LatticeParameters,
+    LatticeWriteTrajectoriesSql,
+    LatticeReadTrajectoriesSql,
+    LatticeWriteStateSql,
+    LatticeReadStateSql,
+    WriteCutoffSql,
+    ReadCutoffSql, 
+    LatticeStateHistoryElement, 
+    LatticeTrajectoryHistoryElement, 
+    CutoffHistoryElement, 
+    LatticeSimulation>
+
         dispatcher (
         reaction_database,
         initial_state_database,

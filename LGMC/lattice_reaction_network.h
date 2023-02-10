@@ -163,7 +163,7 @@ class LatticeReactionNetwork {
         // to a SQL type.
         LatticeWriteTrajectoriesSql history_element_to_sql(
             int seed,
-            LatticeHistoryElement history_element);
+            LatticeTrajectoryHistoryElement history_element);
 
     private:                                                          
 
@@ -908,11 +908,11 @@ double LatticeReactionNetwork::sum_row(std::string hash, std::unordered_map<std:
 
 LatticeWriteTrajectoriesSql LatticeReactionNetwork::history_element_to_sql(
     int seed,
-    LatticeHistoryElement history_element) {
+    LatticeTrajectoryHistoryElement history_element) {
     return LatticeWriteTrajectoriesSql {
         .seed = seed,
         .step = history_element.step,
-        .reaction_id = history_element.reaction_id,
+        .reaction = history_element.reaction,
         .time = history_element.time,
         .site_1 = history_element.site_1,
         .site_2 = history_element.site_2

@@ -1,6 +1,46 @@
 #pragma once
 #include <sqlite3.h>
 #include <string>
+
+/* --------- Read Cutoff SQL ---------*/
+
+struct ReadCutoffSql {
+    int seed;
+    int step;
+    double time;
+    static std::string sql_statement;
+    static void action(ReadCutoffSql &r, sqlite3_stmt *stmt);
+};
+
+std::string ReadCutoffSql::sql_statement =
+    "SELECT seed, step, time FROM interupt_cutoff;";
+
+void ReadCutoffSql::action(ReadCutoffSql &r, sqlite3_stmt *stmt) {
+    r.seed = sqlite3_column_int(stmt, 0);
+    r.step = sqlite3_column_int(stmt, 1);
+    r.time = sqlite3_column_double(stmt, 2);
+}
+
+/* --------- WriteCutoff SQL ---------*/
+
+struct WriteCutoffSql {
+    int seed;
+    int step;
+    double time;
+    static std::string sql_statement;
+    static void action(WriteCutoffSql &r, sqlite3_stmt *stmt);
+};
+
+std::string WriteCutoffSql::sql_statement =
+    "INSERT INTO interupt_cutoff VALUES (?1,?2,?3);";
+
+void WriteCutoffSql::action(WriteCutoffSql &r, sqlite3_stmt *stmt) {
+    sqlite3_bind_int(stmt, 1, r.seed);
+    sqlite3_bind_int(stmt, 2, r.step);
+    sqlite3_bind_double(stmt, 3, r.time);
+}
+
+
 /* --------- Species SQL ---------*/
 struct SpeciesSql {
     int species_id;
@@ -96,20 +136,20 @@ void NanoMetadataSql::action(NanoMetadataSql &r, sqlite3_stmt *stmt) {
 
 /* --------- Factors SQL ---------*/
 
-struct FactorsSql {
+struct NanoFactorsSql {
     double one_site_interaction_factor;
     double two_site_interaction_factor;
     double interaction_radius_bound;
     std::string distance_factor_type;
     static std::string sql_statement;
-    static void action(FactorsSql &r, sqlite3_stmt *stmt);
+    static void action(NanoFactorsSql &r, sqlite3_stmt *stmt);
 };
 
-std::string FactorsSql::sql_statement =
+std::string NanoFactorsSql::sql_statement =
     "SELECT one_site_interaction_factor, two_site_interaction_factor, "
     "interaction_radius_bound, distance_factor_type FROM factors;";
 
-void FactorsSql::action(FactorsSql &r, sqlite3_stmt *stmt) {
+void NanoFactorsSql::action(NanoFactorsSql &r, sqlite3_stmt *stmt) {
     r.one_site_interaction_factor = sqlite3_column_double(stmt, 0);
     r.two_site_interaction_factor = sqlite3_column_double(stmt, 1);
     r.interaction_radius_bound = sqlite3_column_double(stmt, 2);
@@ -228,3 +268,21 @@ void NanoWriteStateSql::action(NanoWriteStateSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 2, r.site_id);
     sqlite3_bind_int(stmt, 3, r.degree_of_freedom);
 }
+
+/* --------- State and Trajectory History Elements ---------*/
+// Each Element will be stored in a History Packet which will be stored 
+// in a history queue to be dumped to SQL database in batches
+
+struct NanoStateHistoryElement{
+    unsigned long int seed; //seed
+    int site_id; 
+    int degree_of_freedom; //energy level the site is at
+};
+
+struct NanoTrajectoryHistoryElement {
+
+    unsigned long int seed; // seed
+    NanoReaction reaction; // reaction which fired
+    double time;  // time after reaction has occoured.
+    int step;
+};

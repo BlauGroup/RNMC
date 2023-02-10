@@ -100,17 +100,19 @@ int main(int argc, char **argv) {
     NanoParticleParameters parameters;
     
     Dispatcher<
-        NanoSolver,
-        NanoParticle,
-        NanoParticleParameters,
-        NanoWriteTrajectoriesSql,
-        NanoReadTrajectoriesSql,
-        NanoWriteStateSql,
-        NanoReadStateSql,
-        WriteCutoffSql,
-        ReadCutoffSql, 
-        History
-        >
+    NanoSolver,
+    NanoParticle,
+    NanoParticleParameters,
+    NanoWriteTrajectoriesSql,
+    NanoReadTrajectoriesSql,
+    NanoWriteStateSql,
+    NanoReadStateSql,
+    WriteCutoffSql,
+    ReadCutoffSql, 
+    NanoStateHistoryElement, 
+    NanoTrajectoryHistoryElement, 
+    CutoffHistoryElement,
+    NanoParticleSimulation>
 
         dispatcher (
             nano_particle_database,

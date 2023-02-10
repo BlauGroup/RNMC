@@ -8,18 +8,17 @@
 #include <csignal>
 #include <set>
 
-
 struct NanoParticleParameters {
 };
 
-struct Site {
+struct NanoSite {
     double x;
     double y;
     double z;
     int species_id;
 };
 
-double site_distance_squared(Site s1, Site s2) {
+double site_distance_squared(NanoSite s1, NanoSite s2) {
     double x_diff = s1.x - s2.x;
     double y_diff = s1.y - s2.y;
     double z_diff = s1.z - s2.z;
@@ -34,7 +33,7 @@ struct NanoParticle {
     std::vector<int> degrees_of_freedom;
 
     // maps site index to site data
-    std::vector<Site> sites;
+    std::vector<NanoSite> sites;
 
     // 2D vector representing the pairwise distance between two sites
     std::vector<std::vector<double>> distance_matrix;
@@ -129,15 +128,15 @@ struct NanoParticle {
     // to a SQL type.
     NanoWriteTrajectoriesSql history_element_to_sql(
         int seed,
-        HistoryElement history_element);
+        NanoTrajectoryHistoryElement history_element);
 
     NanoWriteStateSql state_history_element_to_sql(
         int seed,
-        StateHistoryElement state_history_element);
+        NanoStateHistoryElement state_history_element);
 
-    WriteCutoffSql cutoff_history_element_to_sql(
+    /*WriteCutoffSql cutoff_history_element_to_sql(
         int seed,
-        CutoffHistoryElement cutoff_history_element);
+        CutoffHistoryElement cutoff_history_element);*/
 };
 
 NanoParticle::NanoParticle(
@@ -150,7 +149,7 @@ NanoParticle::NanoParticle(
     SqlStatement<SiteSql> site_statement(nano_particle_database);
     SqlStatement<InteractionSql> interactions_statement(nano_particle_database);
     SqlStatement<NanoMetadataSql> metadata_statement(nano_particle_database);
-    SqlStatement<FactorsSql> factors_statement(initial_state_database);
+    SqlStatement<NanoFactorsSql> factors_statement(initial_state_database);
     SqlStatement<NanoInitialStateSql> initial_state_statement(initial_state_database);
 
     // sql readers
@@ -158,7 +157,7 @@ NanoParticle::NanoParticle(
     SqlReader<SiteSql> site_reader(site_statement);
     SqlReader<InteractionSql> interactions_reader(interactions_statement);
     SqlReader<NanoMetadataSql> metadata_reader(metadata_statement);
-    SqlReader<FactorsSql> factors_reader(factors_statement);
+    SqlReader<NanoFactorsSql> factors_reader(factors_statement);
     SqlReader<NanoInitialStateSql> initial_state_reader(initial_state_statement);
 
     // extracting metadata
@@ -176,7 +175,7 @@ NanoParticle::NanoParticle(
 
 
     // extracting factors
-    std::optional<FactorsSql> maybe_factor_row =
+    std::optional<NanoFactorsSql> maybe_factor_row =
         factors_reader.next();
 
     if (! maybe_factor_row.has_value()) {
@@ -186,7 +185,7 @@ NanoParticle::NanoParticle(
         std::abort();
     }
 
-    FactorsSql factor_row = maybe_factor_row.value();
+    NanoFactorsSql factor_row = maybe_factor_row.value();
 
     one_site_interaction_factor = factor_row.one_site_interaction_factor;
     two_site_interaction_factor = factor_row.two_site_interaction_factor;
@@ -610,12 +609,12 @@ void NanoParticle::update_reactions(
 
 }
 
-NanpWriteTrajectoriesSql NanoParticle::history_element_to_sql(
+NanoWriteTrajectoriesSql NanoParticle::history_element_to_sql(
     int seed,
-    HistoryElement history_element) {
+    NanoTrajectoryHistoryElement history_element) {
 
     NanoReaction reaction = history_element.reaction;
-    return WriteTrajectoriesSql {
+    return NanoWriteTrajectoriesSql {
         .seed = seed,
         .step = history_element.step,
         .time = history_element.time,
@@ -627,16 +626,16 @@ NanpWriteTrajectoriesSql NanoParticle::history_element_to_sql(
 
 NanoWriteStateSql NanoParticle::state_history_element_to_sql(
     int seed,
-    StateHistoryElement state_history_element) {
+    NanoStateHistoryElement state_history_element) {
 
-    return WriteStateSql {
+    return NanoWriteStateSql {
         .seed = seed,
         .site_id = state_history_element.site_id,
         .degree_of_freedom = state_history_element.degree_of_freedom
     };
 }
 
-WriteCutoffSql NanoParticle::cutoff_history_element_to_sql(
+/*WriteCutoffSql NanoParticle::cutoff_history_element_to_sql(
     int seed,
     CutoffHistoryElement cutoff_history_element) {
         return WriteCutoffSql {
@@ -644,4 +643,4 @@ WriteCutoffSql NanoParticle::cutoff_history_element_to_sql(
             .step = cutoff_history_element.step,
             .time = cutoff_history_element.time
         };
-    }
+    }*/

@@ -155,3 +155,20 @@ void FactorsSql::action (FactorsSql &r, sqlite3_stmt *stmt) {
     r.factor_two = sqlite3_column_double(stmt, 1);
     r.factor_duplicate = sqlite3_column_double(stmt, 2);
 };
+
+/* --------- State and Trajectory History Elements ---------*/
+// Each Element will be stored in a History Packet which will be stored 
+// in a history queue to be dumped to SQL database in batches
+
+struct ReactionNetworkStateHistoryElement{
+    unsigned long int seed; //seed
+    std::vector<int> state;
+};
+
+struct ReactionNetworkTrajectoryHistoryElement {
+
+    unsigned long int seed; // seed
+    int reaction_id; // reaction which fired
+    double time;  // time after reaction has occoured.
+    int step;
+};
