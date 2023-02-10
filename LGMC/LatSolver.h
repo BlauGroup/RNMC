@@ -39,9 +39,6 @@ class LatSolver {
 
         std::string make_string(int site_one, int site_two);
 
-        // for comptability 
-        std::optional<Event> event() {return std::optional<Event>();};
-
         long double propensity_sum;
         int number_of_active_indices;               // end simulation of no sites with non zero propensity   
 

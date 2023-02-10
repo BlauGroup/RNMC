@@ -79,7 +79,8 @@ struct NanoParticle {
     // constructor
     NanoParticle(
         SqlConnection &nano_particle_database,
-        SqlConnection &initial_state_database);
+        SqlConnection &initial_state_database,
+        NanoParticleParameters parameters);
 
     // maps a site index to the indices of its neighbors
     // within the spatial decay radius
@@ -141,7 +142,8 @@ struct NanoParticle {
 
 NanoParticle::NanoParticle(
     SqlConnection &nano_particle_database,
-    SqlConnection &initial_state_database
+    SqlConnection &initial_state_database,
+    NanoParticleParameters parameters
     ) {
 
     // sql statements

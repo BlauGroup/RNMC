@@ -121,14 +121,17 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
 
     ReactionNetworkSimulation(ReactionNetwork &reaction_network, 
             unsigned long int seed,
+            int step,
+            double time,
+            std::vector<int> state,
             int history_chunk_size,
             HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue
         ) : 
         // time = 0, step = 0.0
-        Simulation<ReactionNetworkTrajectoryHistoryElement>(seed, history_chunk_size, 0, 0.0),
+        Simulation<Solver>(seed, history_chunk_size, step, time),
         history_queue(history_queue),
         reaction_network (reaction_network),
-        state (reaction_network.initial_state)
+        state (state)
         { 
             history.reserve(this->history_chunk_size);
         };
@@ -215,19 +218,20 @@ class LatticeSimulation : public Simulation<LatSolver> {
     HistoryQueue<HistoryPacket<LatticeTrajectoryHistoryElement>> &history_queue; 
 
 
-    LatticeSimulation(LatticeReactionNetwork &lattice_network, unsigned long int seed, int history_chunk_size,
+    LatticeSimulation(LatticeReactionNetwork &lattice_network, unsigned long int seed, int step,
+               double time, std::vector<int> state, int history_chunk_size,
                HistoryQueue<HistoryPacket<LatticeTrajectoryHistoryElement>> &history_queue) :
                // Call base class constructor, step = 0, time = 0.0
-               Simulation<LatSolver>(seed, history_chunk_size, 0, 0.0),
+               Simulation<LatSolver>(seed, history_chunk_size, step, time),
                latSolver (seed, std::ref(lattice_network.initial_propensities)),
-                state(lattice_network.initial_state),
-                lattice_network(lattice_network),
+               lattice_network(lattice_network),
                lattice_update_function ([&] (LatticeUpdate lattice_update, 
                std::unordered_map<std::string,                     
                 std::vector< std::pair<double, int> > > &props) 
                  {latSolver.update(lattice_update, props);}), 
                update_function ([&] (Update update) {latSolver.update(update);}),
-               history_queue(history_queue)
+               history_queue(history_queue),
+               state(state)
                 { 
                     history.reserve(this->history_chunk_size);
                 };

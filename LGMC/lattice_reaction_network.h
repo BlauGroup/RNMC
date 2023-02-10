@@ -147,10 +147,6 @@ class LatticeReactionNetwork {
         void update_propensities(std::function<void(Update update)> update_function,
                                 std::vector<int> &state, int next_reaction, Lattice *lattice);
         
-        // for compatibility 
-        void update_propensities(std::function<void(Update update)> update_function,
-                                std::vector<int> &state, int next_reaction) {assert(false);};
-
         void update_state(std::vector<int> &state, int reaction_index);
 
         /* -------------------------------------------------------------------------------- */

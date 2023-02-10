@@ -69,12 +69,16 @@ struct SimulatorPayload {
 
     void run_simulator() {
 
-        while (std::optional<unsigned long int> maybe_seed =
+          while (std::optional<unsigned long int> maybe_seed =
                seed_queue.get_seed()) {
-
+            
             unsigned long int seed = maybe_seed.value();
+            int step = seed_step_map[seed];
+            double time = seed_time_map[seed];
+            std::vector<int> state = seed_state_map[seed];
 
-            Sim simulation(model, seed, history_chunk_size, history_queue);
+            Sim simulation(model, seed, step, time, state, 
+                           history_chunk_size, history_queue);
 
 
             switch(cutoff.type_of_cutoff) {
