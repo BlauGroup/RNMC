@@ -71,24 +71,25 @@ void LGMCReactionSql::action(LGMCReactionSql &r, sqlite3_stmt *stmt) {
 struct LatticeReadTrajectoriesSql {
     int seed;
     int step;
+    double time;
     int reaction_id;
     int site_1;
     int site_2;
-    double time;
     static std::string sql_statement;
     static void action(LatticeReadTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
 std::string LatticeReadTrajectoriesSql::sql_statement =
-    "SELECT seed, step, reaction_id, site_1, site_22, time FROM trajectories;";
+    "SELECT seed, step, time, reaction_id, site_1, site_2 FROM trajectories;";
 
-void LatticeReadTrajectoriesSql::action (LatticeReadTrajectoriesSql& t, sqlite3_stmt* stmt) {
-    sqlite3_bind_int(stmt, 0);
-    sqlite3_bind_int(stmt, 1);
-    sqlite3_bind_int(stmt, 2);
-    sqlite3_bind_int(stmt, 3);
-    sqlite3_bind_int(stmt, 4);
-    sqlite3_bind_double(stmt, 5);
+void LatticeReadTrajectoriesSql::action (LatticeReadTrajectoriesSql& r, sqlite3_stmt* stmt) {
+    r.seed = sqlite3_column_int(stmt, 0);
+    r.step = sqlite3_column_int(stmt, 1);
+    r.time = sqlite3_column_double(stmt, 2);
+    r.reaction_id = sqlite3_column_int(stmt, 3);
+    r.site_1 = sqlite3_column_int(stmt, 4);
+    r.site_2 = sqlite3_column_int(stmt, 5);
+    
 };
 
 /* --------- Write Trajectories SQL ---------*/
@@ -96,10 +97,10 @@ void LatticeReadTrajectoriesSql::action (LatticeReadTrajectoriesSql& t, sqlite3_
 struct LatticeWriteTrajectoriesSql {
     int seed;
     int step;
+    double time;
     int reaction_id;
     int site_1;
     int site_2;
-    double time;
     static std::string sql_statement;
     static void action(LatticeWriteTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
@@ -110,19 +111,20 @@ std::string LatticeWriteTrajectoriesSql::sql_statement =
 void LatticeWriteTrajectoriesSql::action (LatticeWriteTrajectoriesSql& t, sqlite3_stmt* stmt) {
     sqlite3_bind_int(stmt, 1, t.seed);
     sqlite3_bind_int(stmt, 2, t.step);
-    sqlite3_bind_int(stmt, 3, t.reaction_id);
-    sqlite3_bind_int(stmt, 4, t.site_1);
-    sqlite3_bind_int(stmt, 5, t.site_2);
-    sqlite3_bind_double(stmt, 6, t.time);
+    sqlite3_bind_double(stmt, 3, t.time);
+    sqlite3_bind_int(stmt, 4, t.reaction_id);
+    sqlite3_bind_int(stmt, 5, t.site_1);
+    sqlite3_bind_int(stmt, 6, t.site_2);
+    
 };
 
 /* --------- Read State SQL ---------*/
 
 struct LatticeReadStateSql {
     int seed;
-    int site_1;
-    int site_2;
-    int reaction_id;
+    int site_id;
+    int species_id;
+    int quantity;
     static std::string sql_statement;
     static void action(LatticeReadStateSql &r, sqlite3_stmt *stmt);
 };
@@ -132,17 +134,17 @@ std::string LatticeReadStateSql::sql_statement =
 
 void LatticeReadStateSql::action(LatticeReadStateSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
-    r.site_1 = sqlite3_column_int(stmt, 1);
-    r.site_1 = sqlite3_column_int(stmt, 2);
-    r.reaction_id = sqlite3_column_int(stmt, 3);
+    r.site_id = sqlite3_column_int(stmt, 1);
+    r.species_id = sqlite3_column_int(stmt, 2);
+    r.quantity = sqlite3_column_int(stmt, 3);
 }
 
 /* --------- Write State SQL ---------*/
 struct LatticeWriteStateSql {
     int seed;
-    int site_1;
-    int site_2;
-    int reaction_id;
+    int site_id;
+    int species_id;
+    int quantity;
     static std::string sql_statement;
     static void action(LatticeWriteStateSql &r, sqlite3_stmt *stmt);
 };
@@ -152,23 +154,25 @@ std::string LatticeWriteStateSql::sql_statement =
 
 void LatticeWriteStateSql::action(LatticeWriteStateSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 1, r.seed);
-    sqlite3_bind_int(stmt, 2, r.site_1);
-    sqlite3_bind_int(stmt, 3, r.site_2);
-    sqlite3_bind_int(stmt, 4, r.reaction_id);
+    sqlite3_bind_int(stmt, 2, r.site_id);
+    sqlite3_bind_int(stmt, 3, r.species_id);
+    sqlite3_bind_int(stmt, 4, r.quantity);
 }
 
 /* --------- State and Trajectory History Elements ---------*/
 
 struct LatticeStateHistoryElement{
     unsigned long int seed; //seed
-    std::vector<int> state;
-};
+    int site_id;
+    int species_id;
+    int quantity;
+}
 
 struct LatticeTrajectoryHistoryElement {
 
     unsigned long int seed; // seed
-    double time;  // time after reaction has occoured.
     int step;
+    double time;  // time after reaction has occoured.
     int reaction; // reaction which fired
     int site_1;
     int site_2;
