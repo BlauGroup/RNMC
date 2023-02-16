@@ -6,7 +6,7 @@
 #include "../core/sql.h"
 #include "sql_types.h"
 #include "../core/solvers.h"
-#include "../core/simulation.h"
+#include "../core/sql_types.h"
 
 struct Reaction {
     // we assume that each reaction has zero, one or two reactants
@@ -64,6 +64,14 @@ struct ReactionNetwork {
     ReactionNetworkWriteTrajectoriesSql history_element_to_sql(
         int seed,
         ReactionNetworkTrajectoryHistoryElement history_element);
+
+    ReactionNetworkWriteStateSql state_history_element_to_sql
+    (int seed, ReactionNetworkStateHistoryElement history_element);
+
+    WriteCutoffSql cutoff_history_element_to_sql(
+        int seed,
+        CutoffHistoryElement cutoff_history_element);
+
 
 };
 
@@ -298,4 +306,23 @@ ReactionNetworkWriteTrajectoriesSql ReactionNetwork::history_element_to_sql(
         .reaction_id = history_element.reaction_id,
         .time = history_element.time
     };
+}
+
+ReactionNetworkWriteStateSql ReactionNetwork::state_history_element_to_sql
+    (int seed, ReactionNetworkStateHistoryElement history_element) {
+        return ReactionNetworkWriteStateSql {
+            .seed = seed,
+            .species_id = history_element.species_id,
+            .count = history_element.count
+        };
+}
+
+WriteCutoffSql ReactionNetwork::cutoff_history_element_to_sql(
+    int seed,
+    CutoffHistoryElement cutoff_history_element) {
+        return WriteCutoffSql {
+            .seed = seed,
+            .step = cutoff_history_element.step,
+            .time = cutoff_history_element.time
+        };
 }
