@@ -1,6 +1,7 @@
 #pragma once
 #include "../core/sql.h"
 #include "../core/simulation.h"
+#include "../core/sql_types.h"
 #include "sql_types.h"
 #include <vector>
 #include <cmath>
@@ -637,7 +638,7 @@ NanoWriteStateSql NanoParticle::state_history_element_to_sql(
     };
 }
 
-/*WriteCutoffSql NanoParticle::cutoff_history_element_to_sql(
+WriteCutoffSql NanoParticle::cutoff_history_element_to_sql(
     int seed,
     CutoffHistoryElement cutoff_history_element) {
         return WriteCutoffSql {
@@ -645,4 +646,4 @@ NanoWriteStateSql NanoParticle::state_history_element_to_sql(
             .step = cutoff_history_element.step,
             .time = cutoff_history_element.time
         };
-    }*/
+}

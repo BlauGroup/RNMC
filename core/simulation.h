@@ -21,6 +21,12 @@ void write_error_message(std::string s){
     write(STDERR_FILENO, char_array, sizeof(char_array) - 1);
 }
 
+template <typename T>
+struct HistoryPacket {
+    std::vector<T> history;
+    unsigned long int seed;
+};
+
 
 namespace {
   // In the GNUC Library, sig_atomic_t is a typedef for int,
@@ -33,18 +39,6 @@ namespace {
   static_assert( std::atomic<bool>::is_always_lock_free );
   // or, at runtime: assert( shutdown_requested.is_lock_free() );
 }
-
-struct CutoffHistoryElement{
-    unsigned long int seed;
-    int step;
-    double time;
-};
-
-template <typename T>
-struct HistoryPacket {
-    std::vector<T> history;
-    unsigned long int seed;
-};
 
 /*---------------------------------------------------------------------------*/
 
@@ -283,7 +277,7 @@ bool LatticeSimulation::execute_step() {
         // record what happened
         history.push_back(LatticeTrajectoryHistoryElement {
             .seed = this->seed,
-            .reaction = next_reaction,
+            .reaction_id = next_reaction,
             .time = this->time,
             .step = this->step,
             .site_1 = site_1,

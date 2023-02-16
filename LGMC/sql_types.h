@@ -166,14 +166,14 @@ struct LatticeStateHistoryElement{
     int site_id;
     int species_id;
     int quantity;
-}
+};
 
 struct LatticeTrajectoryHistoryElement {
 
     unsigned long int seed; // seed
     int step;
     double time;  // time after reaction has occoured.
-    int reaction; // reaction which fired
+    int reaction_id; // reaction which fired
     int site_1;
     int site_2;
 

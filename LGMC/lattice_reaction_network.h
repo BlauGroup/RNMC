@@ -4,7 +4,7 @@
 #include "lattice.h"
 #include "../core/sql.h"
 #include "../core/sampler.h"
-#include "../core/simulation.h"
+#include "../core/sql_types.h"
 #include "../core/solvers.h"
 #include "LatSolver.h"
 #include "../LGMC/sql_types.h"
@@ -160,6 +160,15 @@ class LatticeReactionNetwork {
         LatticeWriteTrajectoriesSql history_element_to_sql(
             int seed,
             LatticeTrajectoryHistoryElement history_element);
+
+        LatticeWriteStateSql state_history_element_to_sql
+            (int seed, LatticeStateHistoryElement history_element);
+
+        WriteCutoffSql cutoff_history_element_to_sql(
+            int seed,
+            CutoffHistoryElement cutoff_history_element);
+
+
 
     private:                                                          
 
@@ -908,7 +917,7 @@ LatticeWriteTrajectoriesSql LatticeReactionNetwork::history_element_to_sql(
     return LatticeWriteTrajectoriesSql {
         .seed = seed,
         .step = history_element.step,
-        .reaction = history_element.reaction,
+        .reaction_id = history_element.reaction_id,
         .time = history_element.time,
         .site_1 = history_element.site_1,
         .site_2 = history_element.site_2
