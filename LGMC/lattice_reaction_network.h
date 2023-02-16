@@ -911,21 +911,6 @@ double LatticeReactionNetwork::sum_row(std::string hash, std::unordered_map<std:
 
 /* ---------------------------------------------------------------------- */
 
-LatticeWriteTrajectoriesSql LatticeReactionNetwork::history_element_to_sql(
-    int seed,
-    LatticeTrajectoryHistoryElement history_element) {
-    return LatticeWriteTrajectoriesSql {
-        .seed = seed,
-        .step = history_element.step,
-        .reaction_id = history_element.reaction_id,
-        .time = history_element.time,
-        .site_1 = history_element.site_1,
-        .site_2 = history_element.site_2
-    };
-}
-
-/* ---------------------------------------------------------------------- */
-
 void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_network_database,
      SqlConnection &initial_state_database, Lattice *lattice)
 
@@ -1225,3 +1210,41 @@ double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int r
 
 /* ---------------------------------------------------------------------- */
 
+LatticeWriteTrajectoriesSql LatticeReactionNetwork::history_element_to_sql(
+    int seed,
+    LatticeTrajectoryHistoryElement history_element) {
+    return LatticeWriteTrajectoriesSql {
+        .seed = seed,
+        .step = history_element.step,
+        .time = history_element.time,
+        .reaction_id = history_element.reaction_id,
+        .site_1 = history_element.site_1,
+        .site_2 = history_element.site_2
+    };
+}
+
+/* ---------------------------------------------------------------------- */
+
+LatticeWriteStateSql LatticeReactionNetwork::state_history_element_to_sql(
+    int seed,
+    LatticeStateHistoryElement state_history_element) {
+
+    return LatticeWriteStateSql {
+        .seed = seed,
+        .site_id = state_history_element.site_id,
+        .species_id = state_history_element.species_id,
+        .quantity = state_history_element.quantity
+    };
+}
+
+/* ---------------------------------------------------------------------- */
+
+WriteCutoffSql LatticeReactionNetwork::cutoff_history_element_to_sql(
+    int seed,
+    CutoffHistoryElement cutoff_history_element) {
+        return WriteCutoffSql {
+            .seed = seed,
+            .step = cutoff_history_element.step,
+            .time = cutoff_history_element.time
+        };
+}
