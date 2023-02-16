@@ -135,9 +135,9 @@ struct NanoParticle {
         int seed,
         NanoStateHistoryElement state_history_element);
 
-    /*WriteCutoffSql cutoff_history_element_to_sql(
+    WriteCutoffSql cutoff_history_element_to_sql(
         int seed,
-        CutoffHistoryElement cutoff_history_element);*/
+        CutoffHistoryElement cutoff_history_element);
 };
 
 NanoParticle::NanoParticle(

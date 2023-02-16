@@ -118,8 +118,7 @@ int main(int argc, char **argv) {
         base_seed,
         thread_count,
         cutoff,
-        parameters, 
-        'G'
+        parameters
         );
 
     dispatcher.run_dispatcher();

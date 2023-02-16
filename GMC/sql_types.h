@@ -62,6 +62,8 @@ void InitialStateSql::action(InitialStateSql &r, sqlite3_stmt *stmt) {
     r.count = sqlite3_column_int(stmt, 1);
 }
 
+/* ------------ Write Trajectory ------------*/
+
 struct ReactionNetworkWriteTrajectoriesSql {
     int seed;
     int step;
@@ -77,44 +79,48 @@ std::string ReactionNetworkWriteTrajectoriesSql::sql_statement =
 void ReactionNetworkWriteTrajectoriesSql::action (ReactionNetworkWriteTrajectoriesSql& t, sqlite3_stmt* stmt) {
     sqlite3_bind_int(stmt, 1, t.seed);
     sqlite3_bind_int(stmt, 2, t.step);
-    sqlite3_bind_int(stmt, 3, t.reaction_id);
-    sqlite3_bind_double(stmt, 4, t.time);
+    sqlite3_bind_int(stmt, 3, t.time);
+    sqlite3_bind_double(stmt, 4, t.reactin_id);
 };
 
+/* ------------ Read Trajectory ------------*/
 
 struct ReactionNetworkReadTrajectoriesSql {
     int seed;
     int step;
-    int reaction_id;
     double time;
+    int reaction_id;
     static std::string sql_statement;
     static void action(ReactionNetworkReadTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
 std::string ReactionNetworkReadTrajectoriesSql::sql_statement =
-    "SELECT seed, step, reaction_id, time FROM trajectories;";
+    "SELECT seed, step, time, reaction_id FROM trajectories;";
 
 void ReactionNetworkReadTrajectoriesSql::action(ReactionNetworkReadTrajectoriesSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
     r.step = sqlite3_column_int(stmt, 1);
-    r.reaction_id = sqlite3_column_int(stmt, 2);
-    r.time = sqlite3_column_double(stmt, 3);
+    r.time = sqlite3_column_double(stmt, 2);
+    r.reaction_id = sqlite3_column_int(stmt, 3);
+    
 }
 /* ------------ Read state ------------*/
 
 struct ReactionNetworkReadStateSql {
     int seed;
-    int reaction_id;
+    int species_id;
+    int count;
     static std::string sql_statement;
     static void action(ReactionNetworkReadStateSql &r, sqlite3_stmt *stmt);
 };
 
 std::string ReactionNetworkReadStateSql::sql_statement =
-    "SELECT seed, reaction_id FROM interupt_state;";
+    "SELECT seed, species_id, count FROM interupt_state;";
 
 void ReactionNetworkReadStateSql::action(ReactionNetworkReadStateSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
-    r.reaction_id = sqlite3_column_int(stmt, 1);
+    r.species_id = sqlite3_column_int(stmt, 1);
+    r.count = sqlite3_column_int(stmt, 2)
     
 }
 
@@ -122,17 +128,19 @@ void ReactionNetworkReadStateSql::action(ReactionNetworkReadStateSql &r, sqlite3
 
 struct ReactionNetworkWriteStateSql {
     int seed;
-    int reaction_id;
+    int species_id;
+    int count;
     static std::string sql_statement;
     static void action(ReactionNetworkWriteStateSql &r, sqlite3_stmt *stmt);
 };
 
 std::string ReactionNetworkWriteStateSql::sql_statement =
-    "INSERT INTO interupt_state VALUES (?1,?2);";
+    "INSERT INTO interupt_state VALUES (?1,?2,?3);";
 
 void ReactionNetworkWriteStateSql::action(ReactionNetworkWriteStateSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 1, r.seed);
-    sqlite3_bind_int(stmt, 2, r.reaction_id);
+    sqlite3_bind_int(stmt, 2, r.species_id);
+    sqlite3_bind_int(stmt, 3, r.count);
 }
 
 /* ------------ Factor Sql ------------*/
@@ -162,7 +170,8 @@ void FactorsSql::action (FactorsSql &r, sqlite3_stmt *stmt) {
 
 struct ReactionNetworkStateHistoryElement{
     unsigned long int seed; //seed
-    std::vector<int> state;
+    int species_id;
+    int count;
 };
 
 struct ReactionNetworkTrajectoryHistoryElement {

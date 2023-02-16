@@ -39,7 +39,6 @@ struct SimulatorPayload {
     std::map<int, std::vector<int>> seed_state_map;
     std::map<int, int> seed_step_map;
     std::map<int, double> seed_time_map;
-    char model_type;
 
     SimulatorPayload(
         Model &model,
@@ -51,8 +50,7 @@ struct SimulatorPayload {
         std::vector<bool>::iterator running, 
         std::map<int, std::vector<int>> seed_state_map,
         std::map<int, int> seed_step_map,
-        std::map<int, double> seed_time_map,  
-        char model_type
+        std::map<int, double> seed_time_map
         ) :
             model (model),
             history_queue (history_queue),
@@ -63,8 +61,7 @@ struct SimulatorPayload {
             running (running),
             seed_state_map (seed_state_map),
             seed_step_map (seed_step_map),
-            seed_time_map (seed_time_map),
-            model_type (model_type)
+            seed_time_map (seed_time_map)
         {};
 
     void run_simulator() {
@@ -143,7 +140,6 @@ struct Dispatcher {
     std::map<int, std::vector<int>> seed_state_map;
     std::map<int, int> seed_step_map;
     std::map<int, double> seed_time_map;
-    char model_type;
 
     
     Dispatcher(
@@ -153,8 +149,7 @@ struct Dispatcher {
         unsigned long int base_seed,
         int number_of_threads,
         Cutoff cutoff,
-        Parameters parameters, 
-        char model_type) :
+        Parameters parameters):
         model_database (
             model_database_file,
             SQLITE_OPEN_READWRITE),
@@ -183,9 +178,8 @@ struct Dispatcher {
         number_of_threads (number_of_threads), 
         seed_state_map (),
         seed_step_map (),
-        seed_time_map (),
-        model_type(model_type)
-        { /*
+        seed_time_map ()
+        { 
             std::vector<int> default_state = model.initial_state;
 
             SeedQueue temp_seed_queue = SeedQueue(number_of_simulations, base_seed);
@@ -244,18 +238,18 @@ struct Dispatcher {
                         temp_seed_time_map[trajectory_row.seed] = trajectory_row.time;
                     }
                 }
-            }*/
+            }
 
-            //seed_state_map = temp_seed_state_map;
-            //seed_step_map = temp_seed_step_map;
-            //seed_time_map = temp_seed_time_map;
+            seed_state_map = temp_seed_state_map;
+            seed_step_map = temp_seed_step_map;
+            seed_time_map = temp_seed_time_map;
 
         };
 
     void run_dispatcher();
     void record_simulation_history(HistoryPacket<TrajHistory> traj_history_packet);
-   // void record_state(HistoryPacket<StateHistory> state_history_packet);
-    //void record_cutoff(HistoryPacket<CutoffHistory> cutoff_history_packet);
+    void record_state(HistoryPacket<StateHistory> state_history_packet);
+    void record_cutoff(HistoryPacket<CutoffHistory> cutoff_history_packet);
 };
 
 
@@ -307,6 +301,16 @@ template <
 void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectoriesSql, 
     WriteStateSql, ReadStateSql, WriteCutoffSql, ReadCutoffSql, StateHistory, TrajHistory,
     CutoffHistory, Sim>::run_dispatcher() {
+    
+    // Create a set of masks containing the SIGTERM.
+    sigset_t mask;
+    sigemptyset (&mask);
+    sigaddset (&mask, SIGCONT);
+    sigaddset (&mask, SIGTERM);
+    
+    // Set the masks so the child threads inherit the sigmask to ignore SIGTERM
+    pthread_sigmask(SIG_BLOCK, &mask, NULL);
+
 
     threads.resize(number_of_threads);
     for (int i = 0; i < number_of_threads; i++) {
@@ -325,12 +329,19 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
                 running.begin() + i,
                 seed_state_map,
                 seed_step_map,
-                seed_time_map, 
-                model_type
+                seed_time_map
                 )
             );
 
     }
+    // Unset the sigmask so that the parent thread resumes catching errors as normal
+    pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
+    
+    action.sa_handler = signalHandler;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+    sigaction(SIGINT, &action, NULL);
+    sigaction(SIGTERM, &action, NULL);
 
     bool finished = false;
     while (! finished) {
@@ -358,6 +369,22 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
             HistoryPacket<TrajHistory> history_packet = std::move(maybe_history_packet.value());
             record_simulation_history(std::move(history_packet));
         };
+
+        std::optional<HistoryPacket<StateHistory>>
+            maybe_state_history_packet = state_history_queue.get_history();
+
+        if (maybe_state_history_packet) {
+            HistoryPacket<StateHistory> state_history_packet = std::move(maybe_state_history_packet.value());
+            // record_state(std::move(state_history_packet));
+        };
+
+        std::optional<HistoryPacket<CutoffHistory>>
+            maybe_cutoff_history_packet = cutoff_history_queue.get_history();
+
+        if (maybe_cutoff_history_packet) {
+            HistoryPacket<CutoffHistory> cutoff_history_packet = std::move(maybe_cutoff_history_packet.value());
+            record_cutoff(std::move(cutoff_history_packet));
+        }
     }
 
     for (int i = 0; i < number_of_threads; i++) threads[i].join();
@@ -366,7 +393,8 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
         "DELETE FROM trajectories WHERE rowid NOT IN"
         "(SELECT MIN(rowid) FROM trajectories GROUP BY seed, step);");
 
-
+    initial_state_database.close();
+    model_database.close();
     std::cerr << time_stamp()
               << "removing duplicate trajectories...\n";
 
@@ -391,7 +419,8 @@ template <
 void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectoriesSql, 
     WriteStateSql, ReadStateSql, WriteCutoffSql, ReadCutoffSql, StateHistory, TrajHistory,
     CutoffHistory, Sim>::record_simulation_history(HistoryPacket<TrajHistory> history_packet) {
-    initial_state_database.exec("BEGIN");
+    initial_state_database.exec("BEGIN;");
+
 
     for (unsigned long int i = 0; i < history_packet.history.size(); i++) {
         trajectories_writer.insert(
@@ -408,5 +437,87 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
               << history_packet.history.size()
               << " events from trajectory "
               << history_packet.seed
+              << " to database\n";
+};
+
+template <
+    typename Solver,
+    typename Model,
+    typename Parameters,
+    typename WriteTrajectoriesSql,
+    typename ReadTrajectoriesSql,
+    typename WriteStateSql,
+    typename ReadStateSql,
+    typename WriteCutoffSql,
+    typename ReadCutoffSql, 
+    typename StateHistory, 
+    typename TrajHistory, 
+    typename CutoffHistory, 
+    typename Sim>
+
+void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectoriesSql, 
+    WriteStateSql, ReadStateSql, WriteCutoffSql, ReadCutoffSql, StateHistory, TrajHistory,
+    CutoffHistory, Sim>::record_state(HistoryPacket<StateHistory> state_history_packet) {
+
+    // Wipe the database of the states corresponding to this seed. This gets rid of the previously written states
+    std::string delete_statement = "DELETE FROM interupt_state WHERE seed = " + std::to_string(state_history_packet.seed) + ";";
+    
+    initial_state_database.exec(delete_statement);
+    
+    initial_state_database.exec("BEGIN;");
+
+    for (unsigned long int i = 0; i < state_history_packet.history.size(); i++) {
+        state_writer.insert(
+            model.state_history_element_to_sql(
+                (int) state_history_packet.seed,
+                state_history_packet.history[i]));
+    }
+    initial_state_database.exec("COMMIT;");
+
+    std::cerr << time_stamp()
+              << "wrote "
+              << state_history_packet.history.size()
+              << " states for trajectory "
+              << state_history_packet.seed
+              << " to database\n";
+};
+
+template <
+    typename Solver,
+    typename Model,
+    typename Parameters,
+    typename WriteTrajectoriesSql,
+    typename ReadTrajectoriesSql,
+    typename WriteStateSql,
+    typename ReadStateSql,
+    typename WriteCutoffSql,
+    typename ReadCutoffSql, 
+    typename StateHistory, 
+    typename TrajHistory, 
+    typename CutoffHistory, 
+    typename Sim>
+
+void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectoriesSql, 
+    WriteStateSql, ReadStateSql, WriteCutoffSql, ReadCutoffSql, StateHistory, TrajHistory,
+    CutoffHistory, Sim>::record_cutoff(HistoryPacket<CutoffHistory> cutoff_history_packet) {
+
+    // Wipe the database of the states corresponding to this seed. This gets rid of the previously written states
+    std::string delete_statement = "DELETE FROM interupt_cutoff WHERE seed = " + std::to_string(cutoff_history_packet.seed) + ";";
+    
+    initial_state_database.exec(delete_statement);
+    
+    initial_state_database.exec("BEGIN;");
+
+    for (unsigned long int i = 0; i < cutoff_history_packet.history.size(); i++) {
+        cutoff_writer.insert(
+            model.cutoff_history_element_to_sql(
+                (int) cutoff_history_packet.seed,
+                cutoff_history_packet.history[i]));
+    }
+    initial_state_database.exec("COMMIT;");
+
+    std::cerr << time_stamp()
+              << "wrote cutoff for trajectory "
+              << cutoff_history_packet.seed
               << " to database\n";
 };

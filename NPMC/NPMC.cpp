@@ -121,8 +121,7 @@ int main(int argc, char **argv) {
             base_seed,
             thread_count,
             cutoff, 
-            parameters, 
-            'N'
+            parameters
             );
 
     dispatcher.run_dispatcher();
