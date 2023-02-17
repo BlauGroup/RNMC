@@ -74,7 +74,8 @@ struct ReactionNetwork {
         CutoffHistoryElement cutoff_history_element);
 
     bool read_state(SqlReader<ReactionNetworkReadStateSql> state_reader, 
-                    std::map<int, std::vector<int>> &temp_seed_state_map);
+                    std::map<int, std::vector<int>> &temp_seed_state_map,
+                    ReactionNetwork &reaction_network);
 
     void read_trajectories(SqlReader<ReactionNetworkReadTrajectoriesSql> trajectory_reader, 
                            std::map<int, std::vector<int>> &temp_seed_state_map, 
@@ -171,6 +172,8 @@ ReactionNetwork::ReactionNetwork(
         reactions[reaction_id] = reaction;
 
         }
+     
+    initial_propensities.resize(metadata_row.number_of_reactions);
 
     // sanity check
     if ( metadata_row.number_of_reactions != reaction_id + 1 ||
@@ -187,7 +190,6 @@ ReactionNetwork::ReactionNetwork(
 
 void ReactionNetwork::compute_initial_propensities() {
     // computing initial propensities
-    initial_propensities.resize(metadata_row.number_of_reactions);
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
         initial_propensities[i] = compute_propensity(initial_state, i);
     }
@@ -342,9 +344,15 @@ WriteCutoffSql ReactionNetwork::cutoff_history_element_to_sql(
 }
 
 bool ReactionNetwork::read_state(SqlReader<ReactionNetworkReadStateSql> state_reader, 
-                std::map<int, std::vector<int>> &temp_seed_state_map) {
+                std::map<int, std::vector<int>> &temp_seed_state_map,
+                ReactionNetwork &reaction_network) {
     
     bool read_interupt_states = false;
+
+    // resize all state vectors 
+    for(auto it = temp_seed_state_map.begin(); it != temp_seed_state_map.end(); it++) {
+        it->second.resize(reaction_network.initial_state.size());
+    }
 
     while (std::optional<ReactionNetworkReadStateSql> maybe_state_row = state_reader.next()){
         read_interupt_states = true;
