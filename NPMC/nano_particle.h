@@ -136,7 +136,8 @@ struct NanoParticle {
         CutoffHistoryElement cutoff_history_element);
 
     bool read_state(SqlReader<NanoReadStateSql> state_reader, 
-                    std::map<int, std::vector<int>> &temp_seed_state_map);
+                    std::map<int, std::vector<int>> &temp_seed_state_map,
+                    NanoParticle &nano_particle);
 
     void read_trajectories(SqlReader<NanoReadTrajectoriesSql> trajectory_reader, 
                            std::map<int, std::vector<int>> &temp_seed_state_map, 
@@ -653,9 +654,17 @@ WriteCutoffSql NanoParticle::cutoff_history_element_to_sql(
         };
 }
 
-bool NanoParticle::read_state(SqlReader<NanoReadStateSql> state_reader, std::map<int, std::vector<int>> &temp_seed_state_map) {
+bool NanoParticle::read_state(SqlReader<NanoReadStateSql> state_reader, 
+                              std::map<int, std::vector<int>> &temp_seed_state_map,
+                              NanoParticle &nano_particle) {
     
     bool read_interupt_states = false;
+
+    // resize all state vectors 
+    for(auto it = temp_seed_state_map.begin(); it != temp_seed_state_map.end(); it++) {
+        it->second.resize(nano_particle.sites.size());
+    }
+
 
     while (std::optional<NanoReadStateSql> maybe_state_row = state_reader.next()){
         read_interupt_states = true;

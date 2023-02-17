@@ -201,7 +201,7 @@ struct Dispatcher {
             SqlReader<ReadStateSql> state_reader(state_statement);
             bool read_interupt_states = false;
 
-            read_interupt_states = model.read_state(state_reader, temp_seed_state_map);
+            read_interupt_states = model.read_state(state_reader, temp_seed_state_map, model);
 
             SqlStatement<ReadCutoffSql> cutoff_statement(initial_state_database);
             SqlReader<ReadCutoffSql> cutoff_reader(cutoff_statement);

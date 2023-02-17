@@ -1264,6 +1264,14 @@ bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_rea
     
     bool read_interupt_states = false;
 
+    // Static lattice
+    while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
+        read_interupt_states = true;
+        // determine if in lattice or homogeneous region
+        
+    }
+
+
     while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
         read_interupt_states = true;
 
