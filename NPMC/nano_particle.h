@@ -144,6 +144,10 @@ struct NanoParticle {
                            std::map<int, int> &temp_seed_step_map, 
                            std::map<int, double> &temp_seed_time_map,
                            NanoParticle &nano_particle);
+
+    void store_state_history(std::vector<NanoStateHistoryElement> &state_packet,
+    std::vector<int> &state, NanoParticle &nano_particle,
+    unsigned long int &seed);
                 
 };
 
@@ -697,5 +701,18 @@ void NanoParticle::read_trajectories(SqlReader<NanoReadTrajectoriesSql> trajecto
             temp_seed_step_map[trajectory_row.seed] = trajectory_row.step;
             temp_seed_time_map[trajectory_row.seed] = trajectory_row.time;
         }
+    }
+}
+
+
+void NanoParticle::store_state_history(std::vector<NanoStateHistoryElement> &state_packet,
+    std::vector<int> &state, NanoParticle &nano_particle, unsigned long int &seed) {
+    
+    for (unsigned int i = 0; i < nano_particle.sites.size(); i++) {
+                state_packet.push_back(NanoStateHistoryElement{
+                    .seed = seed,
+                    .site_id = static_cast<int>(i),
+                    .degree_of_freedom = state[i]
+                });
     }
 }

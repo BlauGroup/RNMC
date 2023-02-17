@@ -87,11 +87,43 @@ struct SimulatorPayload {
                 break;
             }
 
+            // Make a vector of StateHistoryElements for the current state
+            std::vector<StateHistory> state_packet;
+
+            model.store_state_history(state_packet,simulation.state, model , seed);
+
+            // Construct a history packet from the history elements and add it to the queue
+            state_history_queue.insert_history(
+                std::move(
+                    HistoryPacket<StateHistory> {
+                        .seed = seed,
+                        .history = state_packet
+                    }));
+
+            // Make a vector of CutoffHistories for the current time and step
+            std::vector<CutoffHistory> cutoff_packet;
+
+            cutoff_packet.push_back(CutoffHistory {
+                .seed = seed,
+                .step = simulation.step,
+                .time = simulation.time
+            });
+
+            // Construct a history packet from the history elements and add it to the queue
+            cutoff_history_queue.insert_history(
+                std::move(
+                    HistoryPacket<CutoffHistory> {
+                        .seed = seed,
+                        .history = cutoff_packet
+                    }));
+
+            // Move the remainder of the history into the queue to be saved
             history_queue.insert_history(
+                std::move(
                     HistoryPacket<TrajHistory> {
                         .history = std::move(simulation.history),
                         .seed = seed
-                        });
+                        }));
 
         }
 

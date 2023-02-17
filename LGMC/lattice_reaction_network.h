@@ -170,7 +170,8 @@ class LatticeReactionNetwork {
             CutoffHistoryElement cutoff_history_element);
 
         bool read_state(SqlReader<LatticeReadStateSql> state_reader, 
-                    std::map<int, double> &temp_seed_time_map);
+                    std::map<int, std::vector<int>> &temp_seed_state_map,
+                LatticeReactionNetwork &lattice_reaction_network);
 
         void read_trajectories(SqlReader<LatticeReadTrajectoriesSql> trajectory_reader, 
                            std::map<int, std::vector<int>> &temp_seed_state_map, 
@@ -1260,15 +1261,24 @@ WriteCutoffSql LatticeReactionNetwork::cutoff_history_element_to_sql(
 /* ---------------------------------------------------------------------- */
 
 bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_reader, 
-                    std::map<int, double> &temp_seed_time_map) {
+                    std::map<int, std::vector<int>> &temp_seed_state_map,
+                LatticeReactionNetwork &lattice_reaction_network) {
     
     bool read_interupt_states = false;
+
+    // resize all state vectors 
+    for(auto it = temp_seed_state_map.begin(); it != temp_seed_state_map.end(); it++) {
+        it->second.resize(lattice_reaction_network.initial_state.size());
+    }
 
     // Static lattice
     while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
         read_interupt_states = true;
+        LatticeReadStateSql state_row = maybe_state_row.value();
         // determine if in lattice or homogeneous region
-        
+        if(state_row.site_id == SITE_GILLESPIE) {
+            temp_seed_state_map[state_row.seed][state_row.species_id] = state_row.quantity;
+        }
     }
 
 

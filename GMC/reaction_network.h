@@ -7,6 +7,7 @@
 #include "sql_types.h"
 #include "../core/solvers.h"
 #include "../core/sql_types.h"
+#include "../core/simulation.h"
 
 struct Reaction {
     // we assume that each reaction has zero, one or two reactants
@@ -84,6 +85,9 @@ struct ReactionNetwork {
                            ReactionNetwork &reaction_network);
 
     void compute_initial_propensities();
+
+    void store_state_history(std::vector<ReactionNetworkStateHistoryElement> &state_packet,
+    std::vector<int> &state, ReactionNetwork &reaction_network, unsigned long int &seed);
 
 
 };
@@ -391,5 +395,17 @@ void ReactionNetwork::read_trajectories(SqlReader<ReactionNetworkReadTrajectorie
             temp_seed_step_map[trajectory_row.seed] = trajectory_row.step;
             temp_seed_time_map[trajectory_row.seed] = trajectory_row.time;
         }
+    }
+}
+
+void ReactionNetwork::store_state_history(std::vector<ReactionNetworkStateHistoryElement> &state_packet,
+    std::vector<int> &state, ReactionNetwork &reaction_network, unsigned long int &seed) {
+    
+    for (unsigned int i = 0; i < state.size(); i++) {
+                state_packet.push_back(ReactionNetworkStateHistoryElement{
+                    .seed = seed,
+                    .species_id = static_cast<int>(i),
+                    .count = state[i]
+                });
     }
 }
