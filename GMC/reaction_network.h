@@ -65,12 +65,24 @@ struct ReactionNetwork {
         int seed,
         ReactionNetworkTrajectoryHistoryElement history_element);
 
-    ReactionNetworkWriteStateSql state_history_element_to_sql
-    (int seed, ReactionNetworkStateHistoryElement history_element);
+    ReactionNetworkWriteStateSql state_history_element_to_sql(
+        int seed, 
+        ReactionNetworkStateHistoryElement history_element);
 
     WriteCutoffSql cutoff_history_element_to_sql(
         int seed,
         CutoffHistoryElement cutoff_history_element);
+
+    bool read_state(SqlReader<ReactionNetworkReadStateSql> state_reader, 
+                    std::map<int, std::vector<int>> &temp_seed_state_map);
+
+    void read_trajectories(SqlReader<ReactionNetworkReadTrajectoriesSql> trajectory_reader, 
+                           std::map<int, std::vector<int>> &temp_seed_state_map, 
+                           std::map<int, int> &temp_seed_step_map, 
+                           std::map<int, double> &temp_seed_time_map,
+                           ReactionNetwork &reaction_network);
+
+    void compute_initial_propensities();
 
 
 };
@@ -168,16 +180,18 @@ ReactionNetwork::ReactionNetwork(
         std::abort();
     }
 
+    std::cerr << time_stamp() << "computing dependency graph...\n";
+    compute_dependents();
+    std::cerr << time_stamp() << "finished computing dependency graph\n";
+};
+
+void ReactionNetwork::compute_initial_propensities() {
     // computing initial propensities
     initial_propensities.resize(metadata_row.number_of_reactions);
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
         initial_propensities[i] = compute_propensity(initial_state, i);
     }
-
-    std::cerr << time_stamp() << "computing dependency graph...\n";
-    compute_dependents();
-    std::cerr << time_stamp() << "finished computing dependency graph\n";
-};
+}
 
 
 void ReactionNetwork::compute_dependents() {
@@ -325,4 +339,49 @@ WriteCutoffSql ReactionNetwork::cutoff_history_element_to_sql(
             .step = cutoff_history_element.step,
             .time = cutoff_history_element.time
         };
+}
+
+bool ReactionNetwork::read_state(SqlReader<ReactionNetworkReadStateSql> state_reader, 
+                std::map<int, std::vector<int>> &temp_seed_state_map) {
+    
+    bool read_interupt_states = false;
+
+    while (std::optional<ReactionNetworkReadStateSql> maybe_state_row = state_reader.next()){
+        read_interupt_states = true;
+
+        ReactionNetworkReadStateSql state_row = maybe_state_row.value();
+        temp_seed_state_map[state_row.seed][state_row.species_id] = state_row.count;
+    }
+
+    return read_interupt_states;
+}
+
+void ReactionNetwork::read_trajectories(SqlReader<ReactionNetworkReadTrajectoriesSql> trajectory_reader, 
+                           std::map<int, std::vector<int>> &temp_seed_state_map, 
+                           std::map<int, int> &temp_seed_step_map, 
+                           std::map<int, double> &temp_seed_time_map, 
+                           ReactionNetwork &reaction_network) {
+            
+    while (std::optional<ReactionNetworkReadTrajectoriesSql> maybe_trajectory_row = trajectory_reader.next()) {
+                        // read_trajectory_states = true;
+
+        ReactionNetworkReadTrajectoriesSql trajectory_row = maybe_trajectory_row.value();
+        
+        Reaction reaction = reaction_network.reactions[trajectory_row.reaction_id];
+        // update reactants
+        for (int i = 0; i < reaction.number_of_reactants; i++) {
+            temp_seed_state_map[trajectory_row.seed][reaction.reactants[i]] = 
+            temp_seed_state_map[trajectory_row.seed][reaction.reactants[i]] - 1;
+        }
+        // update products
+        for (int i = 0; i < reaction.number_of_products; i++) {
+            temp_seed_state_map[trajectory_row.seed][reaction.products[i]] = 
+            temp_seed_state_map[trajectory_row.seed][reaction.products[i]] + 1;
+        }
+
+        if (trajectory_row.step > temp_seed_step_map[trajectory_row.seed]) {
+            temp_seed_step_map[trajectory_row.seed] = trajectory_row.step;
+            temp_seed_time_map[trajectory_row.seed] = trajectory_row.time;
+        }
+    }
 }

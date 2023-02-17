@@ -16,6 +16,7 @@
 
 
 const int SPECIES_EMPTY = 0;
+
 const int SITE_SELF_REACTION = -3;
 const int SITE_GILLESPIE = -2;
 
@@ -168,7 +169,14 @@ class LatticeReactionNetwork {
             int seed,
             CutoffHistoryElement cutoff_history_element);
 
+        bool read_state(SqlReader<LatticeReadStateSql> state_reader, 
+                    std::map<int, double> &temp_seed_time_map);
 
+        void read_trajectories(SqlReader<LatticeReadTrajectoriesSql> trajectory_reader, 
+                           std::map<int, std::vector<int>> &temp_seed_state_map, 
+                           std::map<int, int> &temp_seed_step_map, 
+                           std::map<int, double> &temp_seed_time_map);
+           
 
     private:                                                          
 
@@ -1247,4 +1255,32 @@ WriteCutoffSql LatticeReactionNetwork::cutoff_history_element_to_sql(
             .step = cutoff_history_element.step,
             .time = cutoff_history_element.time
         };
+}
+
+/* ---------------------------------------------------------------------- */
+
+bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_reader, 
+                    std::map<int, double> &temp_seed_time_map) {
+    
+    bool read_interupt_states = false;
+
+    while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
+        read_interupt_states = true;
+
+        assert(false);
+    }
+
+    return read_interupt_states;  
+
+}
+
+/* ---------------------------------------------------------------------- */
+
+void LatticeReactionNetwork::read_trajectories(SqlReader<LatticeReadTrajectoriesSql> trajectory_reader, 
+                           std::map<int, std::vector<int>> &temp_seed_state_map, 
+                           std::map<int, int> &temp_seed_step_map, 
+                           std::map<int, double> &temp_seed_time_map) {
+
+                            assert(false);
+
 }

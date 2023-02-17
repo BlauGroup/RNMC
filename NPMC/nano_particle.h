@@ -102,15 +102,10 @@ struct NanoParticle {
 
     void compute_distance_matrix();
 
-    double compute_propensity(
-        std::vector<int> &state,
-        NanoReaction reaction
-        );
-
     void update_state(
         std::vector<int> &state,
         NanoReaction reaction
-        );
+    );
 
     // updates are passed directly to the solver, but the model
     // classes don't have a reference to the solver (otherwise,
@@ -139,6 +134,16 @@ struct NanoParticle {
     WriteCutoffSql cutoff_history_element_to_sql(
         int seed,
         CutoffHistoryElement cutoff_history_element);
+
+    bool read_state(SqlReader<NanoReadStateSql> state_reader, 
+                    std::map<int, std::vector<int>> &temp_seed_state_map);
+
+    void read_trajectories(SqlReader<NanoReadTrajectoriesSql> trajectory_reader, 
+                           std::map<int, std::vector<int>> &temp_seed_state_map, 
+                           std::map<int, int> &temp_seed_step_map, 
+                           std::map<int, double> &temp_seed_time_map,
+                           NanoParticle &nano_particle);
+                
 };
 
 NanoParticle::NanoParticle(
@@ -646,4 +651,42 @@ WriteCutoffSql NanoParticle::cutoff_history_element_to_sql(
             .step = cutoff_history_element.step,
             .time = cutoff_history_element.time
         };
+}
+
+bool NanoParticle::read_state(SqlReader<NanoReadStateSql> state_reader, std::map<int, std::vector<int>> &temp_seed_state_map) {
+    
+    bool read_interupt_states = false;
+
+    while (std::optional<NanoReadStateSql> maybe_state_row = state_reader.next()){
+        read_interupt_states = true;
+
+        NanoReadStateSql state_row = maybe_state_row.value();
+        temp_seed_state_map[state_row.seed][state_row.site_id] = state_row.degree_of_freedom;
+    }
+
+    return read_interupt_states;
+}
+
+void NanoParticle::read_trajectories(SqlReader<NanoReadTrajectoriesSql> trajectory_reader, 
+                           std::map<int, std::vector<int>> &temp_seed_state_map, 
+                           std::map<int, int> &temp_seed_step_map, 
+                           std::map<int, double> &temp_seed_time_map,
+                           NanoParticle &nano_particle) {
+            
+    while (std::optional<NanoReadTrajectoriesSql> maybe_trajectory_row = trajectory_reader.next()) {
+                        // read_trajectory_states = true;
+
+        NanoReadTrajectoriesSql trajectory_row = maybe_trajectory_row.value();
+        
+        Interaction *interaction = &nano_particle.all_interactions[trajectory_row.interaction_id];
+        temp_seed_state_map[trajectory_row.seed][trajectory_row.site_id_1] = interaction->right_state[0];
+        if (interaction->number_of_sites == 2) {
+            temp_seed_state_map[trajectory_row.seed][trajectory_row.site_id_2] = interaction->right_state[1];
+        }
+
+        if (trajectory_row.step > temp_seed_step_map[trajectory_row.seed]) {
+            temp_seed_step_map[trajectory_row.seed] = trajectory_row.step;
+            temp_seed_time_map[trajectory_row.seed] = trajectory_row.time;
+        }
+    }
 }

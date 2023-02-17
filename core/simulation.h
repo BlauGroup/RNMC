@@ -121,7 +121,6 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
             int history_chunk_size,
             HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue
         ) : 
-        // time = 0, step = 0.0
         Simulation<Solver>(seed, history_chunk_size, step, time),
         history_queue(history_queue),
         reaction_network (reaction_network),
@@ -137,6 +136,7 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
 
 template <typename Solver>
 void ReactionNetworkSimulation<Solver>::init() {
+    reaction_network.compute_initial_propensities();
     solver = Solver(this->seed, std::ref(reaction_network.initial_propensities));
 
 }
@@ -215,7 +215,6 @@ class LatticeSimulation : public Simulation<LatSolver> {
     LatticeSimulation(LatticeReactionNetwork &lattice_network, unsigned long int seed, int step,
                double time, std::vector<int> state, int history_chunk_size,
                HistoryQueue<HistoryPacket<LatticeTrajectoryHistoryElement>> &history_queue) :
-               // Call base class constructor, step = 0, time = 0.0
                Simulation<LatSolver>(seed, history_chunk_size, step, time),
                latSolver (seed, std::ref(lattice_network.initial_propensities)),
                lattice_network(lattice_network),

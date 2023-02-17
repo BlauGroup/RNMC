@@ -187,6 +187,7 @@ struct Dispatcher {
             std::map<int, int> temp_seed_step_map;
             std::map<int, double> temp_seed_time_map;
 
+
             while (std::optional<unsigned long int> maybe_seed =
                temp_seed_queue.get_seed()){
                 unsigned long int seed = maybe_seed.value();
@@ -199,13 +200,8 @@ struct Dispatcher {
             SqlStatement<ReadStateSql> state_statement(initial_state_database);
             SqlReader<ReadStateSql> state_reader(state_statement);
             bool read_interupt_states = false;
-            while (std::optional<ReadStateSql> maybe_state_row = state_reader.next()){
-                read_interupt_states = true;
 
-                ReadStateSql state_row = maybe_state_row.value();
-                temp_seed_state_map[state_row.seed][state_row.site_id] = state_row.degree_of_freedom;
-            }
-
+            read_interupt_states = model.read_state(state_reader, temp_seed_state_map);
 
             SqlStatement<ReadCutoffSql> cutoff_statement(initial_state_database);
             SqlReader<ReadCutoffSql> cutoff_reader(cutoff_statement);
@@ -218,26 +214,15 @@ struct Dispatcher {
 
             // bool read_trajectory_states = false;
             if (read_interupt_states == false) {
+
                 // If the interupt_state table doesn't have entries, try to read from the trajectories table
                 SqlStatement<ReadTrajectoriesSql> trajectory_statement(initial_state_database);
                 SqlReader<ReadTrajectoriesSql> trajectory_reader(trajectory_statement);
 
-                while (std::optional<ReadTrajectoriesSql> maybe_trajectory_row = trajectory_reader.next()) {
-                    // read_trajectory_states = true;
-
-                    ReadTrajectoriesSql trajectory_row = maybe_trajectory_row.value();
-                    
-                    Interaction* interaction = &model.all_interactions[trajectory_row.interaction_id];
-                    temp_seed_state_map[trajectory_row.seed][trajectory_row.site_id_1] = interaction->right_state[0];
-                    if (interaction->number_of_sites == 2) {
-                        temp_seed_state_map[trajectory_row.seed][trajectory_row.site_id_2] = interaction->right_state[1];
-                    }
-
-                    if (trajectory_row.step > temp_seed_step_map[trajectory_row.seed]) {
-                        temp_seed_step_map[trajectory_row.seed] = trajectory_row.step;
-                        temp_seed_time_map[trajectory_row.seed] = trajectory_row.time;
-                    }
-                }
+                model.read_trajectories(trajectory_reader, temp_seed_state_map, 
+                                        temp_seed_step_map, temp_seed_time_map,
+                                        model);
+                
             }
 
             seed_state_map = temp_seed_state_map;
