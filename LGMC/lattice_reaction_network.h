@@ -29,7 +29,7 @@ enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_ELYTE, HOMOGENEOUS_SOLID, DIFFUSI
 enum ChargeTransferStyle {MARCUS, BUTLER_VOLMER};
 
 struct LatticeState {
-    std::vector<int> *homogeneous;
+    std::vector<int> homogeneous;
     Lattice *lattice;
 };
 
@@ -1291,7 +1291,7 @@ bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_rea
         initial_lattice->zlo/initial_latconst, initial_lattice->zhi/initial_latconst,
         initial_lattice->is_xperiodic, initial_lattice->is_yperiodic, initial_lattice->is_zperiodic);
 
-        LatticeState default_state = {&lattice_reaction_network.initial_state, default_lattice};
+        LatticeState default_state = {lattice_reaction_network.initial_state, default_lattice};
 
         temp_seed_state_map.insert(std::make_pair(seed, default_state));
 
@@ -1305,7 +1305,7 @@ bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_rea
         // determine if in lattice or homogeneous region
         if(state_row.site_id == SITE_GILLESPIE) {
             // set the quantity of the homogeneous region vector associated with that seed
-            temp_seed_state_map[state_row.seed].homogeneous->at(state_row.species_id) = state_row.quantity;
+            temp_seed_state_map[state_row.seed].homogeneous[state_row.species_id] = state_row.quantity;
         }
         else {
             // update occupancy of that lattice site
@@ -1351,12 +1351,11 @@ void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistory
 
 
     // Homogeneous region
-    std::vector<int> homogeneous = *state.homogeneous;
-    for (unsigned int i = 0; i < homogeneous.size(); i++) {
+    for (unsigned int i = 0; i < state.homogeneous.size(); i++) {
         state_packet.push_back(LatticeStateHistoryElement{
             .seed = seed,
             .species_id = static_cast<int>(i),
-            .quantity = homogeneous[i],
+            .quantity = state.homogeneous[i],
             .site_id = SITE_GILLESPIE
         });
     }
