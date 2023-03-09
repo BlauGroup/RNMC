@@ -109,7 +109,8 @@ int main(int argc, char **argv) {
     ReactionNetworkStateHistoryElement, 
     ReactionNetworkTrajectoryHistoryElement, 
     CutoffHistoryElement, 
-    ReactionNetworkSimulation<TreeSolver>>
+    ReactionNetworkSimulation<TreeSolver>, 
+    std::vector<int>>
 
         dispatcher (
         reaction_database,

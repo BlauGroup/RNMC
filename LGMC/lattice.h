@@ -49,8 +49,6 @@ struct Site {
     float z;
     int species;                            // species at site
     bool can_adsorb;                        // is the site in contact with the electrolyte?
-    std::vector<int> shared_sites;           // indices of sites that also share this species
-
 };
 
 class Lattice {
@@ -76,11 +74,8 @@ private:
     
     /* ----------------------- structural information ------------------------ */
     
-    float latconst;                               // lattice constant
-    float xlo, xhi, ylo,                   // bounding of box
-          yhi, zlo, zhi;                       // (yscale * read in value)
     int ilo, ihi, klo, khi, jlo, jhi;                // geometry info neighbors
-    bool is_xperiodic, is_yperiodic, is_zperiodic;          // 0 =   non-periodic, 1 = periodic
+          // 0 =   non-periodic, 1 = periodic
     
     int nsites;                                 // number of sites
     int nmax;                                   // max # sites, idneigh, numneigh can store at a given time
@@ -89,6 +84,10 @@ private:
     float maxz;                                   // the largest distance the lattice goes 
 
 public: 
+    float latconst;                               // lattice constant
+    bool is_xperiodic, is_yperiodic, is_zperiodic;    
+    float xlo, xhi, ylo,                   // bounding of box
+          yhi, zlo, zhi;                       // (yscale * read in value)
 
     std::unordered_map<int, Site> sites;                                // list of Sites for lattice
     std::unordered_map<int, uint32_t*> idneigh;                         // neighbor IDs for each site

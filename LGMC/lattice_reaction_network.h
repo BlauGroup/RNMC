@@ -28,6 +28,11 @@ enum Phase {LATTICE, SOLUTION, NONE};
 enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_ELYTE, HOMOGENEOUS_SOLID, DIFFUSION, OXIDATION, REDUCTION};
 enum ChargeTransferStyle {MARCUS, BUTLER_VOLMER};
 
+struct LatticeState {
+    std::vector<int> *homogeneous;
+    Lattice *lattice;
+};
+
 
 struct LatticeParameters {
     float latconst;                               
@@ -170,13 +175,18 @@ class LatticeReactionNetwork {
             CutoffHistoryElement cutoff_history_element);
 
         bool read_state(SqlReader<LatticeReadStateSql> state_reader, 
-                    std::map<int, std::vector<int>> &temp_seed_state_map,
-                LatticeReactionNetwork &lattice_reaction_network);
+                    std::map<int, LatticeState> &temp_seed_state_map,
+                LatticeReactionNetwork &lattice_reaction_network,
+                SeedQueue &temp_seed_queue);
 
         void read_trajectories(SqlReader<LatticeReadTrajectoriesSql> trajectory_reader, 
-                           std::map<int, std::vector<int>> &temp_seed_state_map, 
+                           std::map<int, LatticeState> &temp_seed_state_map, 
                            std::map<int, int> &temp_seed_step_map, 
-                           std::map<int, double> &temp_seed_time_map);
+                           std::map<int, double> &temp_seed_time_map,
+                           LatticeReactionNetwork &lattice_reaction_network);
+
+        void store_state_history(std::vector<LatticeStateHistoryElement> &state_packet,
+        LatticeState &state, LatticeReactionNetwork &lattice_reaction_network, unsigned long int &seed);
            
 
     private:                                                          
@@ -1261,32 +1271,53 @@ WriteCutoffSql LatticeReactionNetwork::cutoff_history_element_to_sql(
 /* ---------------------------------------------------------------------- */
 
 bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_reader, 
-                    std::map<int, std::vector<int>> &temp_seed_state_map,
-                LatticeReactionNetwork &lattice_reaction_network) {
+                    std::map<int, LatticeState> &temp_seed_state_map,
+                LatticeReactionNetwork &lattice_reaction_network,
+                SeedQueue &temp_seed_queue) {
     
     bool read_interupt_states = false;
+    Lattice *initial_lattice = lattice_reaction_network.initial_lattice;
+    int initial_latconst = initial_lattice->latconst;
 
-    // resize all state vectors 
-    for(auto it = temp_seed_state_map.begin(); it != temp_seed_state_map.end(); it++) {
-        it->second.resize(lattice_reaction_network.initial_state.size());
+    // create a default lattice for each simulation
+    while (std::optional<unsigned long int> maybe_seed =
+        temp_seed_queue.get_seed()){
+        unsigned long int seed = maybe_seed.value();
+
+        // Each LatticeState must have its own lattice to point to
+        Lattice *default_lattice = new Lattice(initial_latconst, 
+        initial_lattice->xlo/initial_latconst, initial_lattice->xhi/initial_latconst, 
+        initial_lattice->ylo/initial_latconst, initial_lattice->yhi/initial_latconst, 
+        initial_lattice->zlo/initial_latconst, initial_lattice->zhi/initial_latconst,
+        initial_lattice->is_xperiodic, initial_lattice->is_yperiodic, initial_lattice->is_zperiodic);
+
+        LatticeState default_state = {&lattice_reaction_network.initial_state, default_lattice};
+
+        temp_seed_state_map.insert(std::make_pair(seed, default_state));
+
     }
 
-    // Static lattice
+
     while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
         read_interupt_states = true;
+
         LatticeReadStateSql state_row = maybe_state_row.value();
         // determine if in lattice or homogeneous region
         if(state_row.site_id == SITE_GILLESPIE) {
-            temp_seed_state_map[state_row.seed][state_row.species_id] = state_row.quantity;
+            // set the quantity of the homogeneous region vector associated with that seed
+            temp_seed_state_map[state_row.seed].homogeneous->at(state_row.species_id) = state_row.quantity;
+        }
+        else {
+            // update occupancy of that lattice site
+            temp_seed_state_map[state_row.seed].lattice->sites[state_row.site_id].species = state_row.species_id;
+
+            // check if can absorb, if so make sure edges now 'd'
+            if(temp_seed_state_map[state_row.seed].lattice->sites[state_row.site_id].can_adsorb) {
+                temp_seed_state_map[state_row.seed].lattice->edges[state_row.site_id] = 'd';
+            }
         }
     }
 
-
-    while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
-        read_interupt_states = true;
-
-        assert(false);
-    }
 
     return read_interupt_states;  
 
@@ -1295,10 +1326,41 @@ bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_rea
 /* ---------------------------------------------------------------------- */
 
 void LatticeReactionNetwork::read_trajectories(SqlReader<LatticeReadTrajectoriesSql> trajectory_reader, 
-                           std::map<int, std::vector<int>> &temp_seed_state_map, 
+                           std::map<int, LatticeState> &temp_seed_state_map, 
                            std::map<int, int> &temp_seed_step_map, 
-                           std::map<int, double> &temp_seed_time_map) {
+                           std::map<int, double> &temp_seed_time_map,
+                           LatticeReactionNetwork &lattice_reaction_network) {
 
                             assert(false);
+
+}
+
+void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistoryElement> &state_packet,
+    LatticeState &state, LatticeReactionNetwork &lattice_reaction_network, unsigned long int &seed) {
+
+    // Lattice site
+    for (auto site : state.lattice->sites) {
+        
+        state_packet.push_back(LatticeStateHistoryElement{
+            .seed = seed,
+            .species_id = site.second.species,
+            .quantity = 1,
+            .site_id = site.first
+        });
+    }
+
+
+    // Homogeneous region
+    std::vector<int> homogeneous = *state.homogeneous;
+    for (unsigned int i = 0; i < homogeneous.size(); i++) {
+        state_packet.push_back(LatticeStateHistoryElement{
+            .seed = seed,
+            .species_id = static_cast<int>(i),
+            .quantity = homogeneous[i],
+            .site_id = SITE_GILLESPIE
+        });
+    }
+
+
 
 }

@@ -137,7 +137,8 @@ struct NanoParticle {
 
     bool read_state(SqlReader<NanoReadStateSql> state_reader, 
                     std::map<int, std::vector<int>> &temp_seed_state_map,
-                    NanoParticle &nano_particle);
+                    NanoParticle &nano_particle, 
+                    SeedQueue &temp_seed_queue);
 
     void read_trajectories(SqlReader<NanoReadTrajectoriesSql> trajectory_reader, 
                            std::map<int, std::vector<int>> &temp_seed_state_map, 
@@ -147,8 +148,7 @@ struct NanoParticle {
 
     void store_state_history(std::vector<NanoStateHistoryElement> &state_packet,
     std::vector<int> &state, NanoParticle &nano_particle,
-    unsigned long int &seed);
-                
+    unsigned long int &seed);        
 };
 
 NanoParticle::NanoParticle(
@@ -660,15 +660,17 @@ WriteCutoffSql NanoParticle::cutoff_history_element_to_sql(
 
 bool NanoParticle::read_state(SqlReader<NanoReadStateSql> state_reader, 
                               std::map<int, std::vector<int>> &temp_seed_state_map,
-                              NanoParticle &nano_particle) {
+                              NanoParticle &nano_particle,
+                              SeedQueue &temp_seed_queue) {
     
     bool read_interupt_states = false;
+    std::vector<int> default_state = nano_particle.initial_state;
 
-    // resize all state vectors 
-    for(auto it = temp_seed_state_map.begin(); it != temp_seed_state_map.end(); it++) {
-        it->second.resize(nano_particle.sites.size());
-    }
-
+    while (std::optional<unsigned long int> maybe_seed =
+        temp_seed_queue.get_seed()){
+        unsigned long int seed = maybe_seed.value();
+        temp_seed_state_map.insert(std::make_pair(seed, default_state));
+    }       
 
     while (std::optional<NanoReadStateSql> maybe_state_row = state_reader.next()){
         read_interupt_states = true;

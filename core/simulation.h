@@ -203,7 +203,10 @@ class LatticeSimulation : public Simulation<LatSolver> {
     LatSolver latSolver;
     Lattice *lattice;
     LatticeReactionNetwork &lattice_network;
-    std::vector<int> state;
+    std::vector<int> state_homogeneous;
+    LatticeState state;
+
+
     std::function<void(LatticeUpdate, std::unordered_map<std::string,                     
                 std::vector< std::pair<double, int> > > &)> lattice_update_function;
     std::function<void(Update)> update_function;
@@ -213,7 +216,7 @@ class LatticeSimulation : public Simulation<LatSolver> {
 
 
     LatticeSimulation(LatticeReactionNetwork &lattice_network, unsigned long int seed, int step,
-               double time, std::vector<int> state, int history_chunk_size,
+               double time, LatticeState state, int history_chunk_size,
                HistoryQueue<HistoryPacket<LatticeTrajectoryHistoryElement>> &history_queue) :
                Simulation<LatSolver>(seed, history_chunk_size, step, time),
                latSolver (seed, std::ref(lattice_network.initial_propensities)),
@@ -224,11 +227,13 @@ class LatticeSimulation : public Simulation<LatSolver> {
                  {latSolver.update(lattice_update, props);}), 
                update_function ([&] (Update update) {latSolver.update(update);}),
                history_queue(history_queue),
-               state(state)
+               state_homogeneous(*state.homogeneous),
+               lattice(state.lattice)
                 { 
                     history.reserve(this->history_chunk_size);
+                    state = {&state_homogeneous, lattice};
+     
                 };
-
 
     bool execute_step();
     void init(); 
@@ -237,11 +242,9 @@ class LatticeSimulation : public Simulation<LatSolver> {
 };
 
 void LatticeSimulation::init() {
-    
-    lattice = new  Lattice(*lattice_network.initial_lattice);
    
     lattice_network.update_adsorp_state(this->lattice, this->props, latSolver.propensity_sum, latSolver.number_of_active_indices);
-    lattice_network.update_adsorp_props(this->lattice, lattice_update_function, this->state, std::ref(props));
+    lattice_network.update_adsorp_props(this->lattice, lattice_update_function, this->state_homogeneous, std::ref(props));
     
 }
 
@@ -303,12 +306,12 @@ bool LatticeSimulation::execute_step() {
         this->step++;
 
         // update_state
-        lattice_network.update_state(lattice, std::ref(props), std::ref(this->state), next_reaction, 
+        lattice_network.update_state(lattice, std::ref(props), std::ref(this->state_homogeneous), next_reaction, 
                     event.site_one, event.site_two, latSolver.propensity_sum, latSolver.number_of_active_indices);
 
 
         // update_propensities 
-        lattice_network.update_propensities(lattice, std::ref(this->state), this->update_function, 
+        lattice_network.update_propensities(lattice, std::ref(this->state_homogeneous), this->update_function, 
                                         lattice_update_function, next_reaction, 
                                         event.site_one, event.site_two, props);
 

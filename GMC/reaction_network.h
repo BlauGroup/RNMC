@@ -60,6 +60,8 @@ struct ReactionNetwork {
         int next_reaction
         );
 
+    void compute_initial_propensities();
+
     // convert a history element as found a simulation to history
     // to a SQL type.
     ReactionNetworkWriteTrajectoriesSql history_element_to_sql(
@@ -76,7 +78,8 @@ struct ReactionNetwork {
 
     bool read_state(SqlReader<ReactionNetworkReadStateSql> state_reader, 
                     std::map<int, std::vector<int>> &temp_seed_state_map,
-                    ReactionNetwork &reaction_network);
+                    ReactionNetwork &reaction_network,
+                    SeedQueue &temp_seed_queue);
 
     void read_trajectories(SqlReader<ReactionNetworkReadTrajectoriesSql> trajectory_reader, 
                            std::map<int, std::vector<int>> &temp_seed_state_map, 
@@ -84,11 +87,8 @@ struct ReactionNetwork {
                            std::map<int, double> &temp_seed_time_map,
                            ReactionNetwork &reaction_network);
 
-    void compute_initial_propensities();
-
     void store_state_history(std::vector<ReactionNetworkStateHistoryElement> &state_packet,
     std::vector<int> &state, ReactionNetwork &reaction_network, unsigned long int &seed);
-
 
 };
 
@@ -349,13 +349,16 @@ WriteCutoffSql ReactionNetwork::cutoff_history_element_to_sql(
 
 bool ReactionNetwork::read_state(SqlReader<ReactionNetworkReadStateSql> state_reader, 
                 std::map<int, std::vector<int>> &temp_seed_state_map,
-                ReactionNetwork &reaction_network) {
+                ReactionNetwork &reaction_network,
+                SeedQueue &temp_seed_queue) {
     
     bool read_interupt_states = false;
+    std::vector<int> default_state = reaction_network.initial_state;
 
-    // resize all state vectors 
-    for(auto it = temp_seed_state_map.begin(); it != temp_seed_state_map.end(); it++) {
-        it->second.resize(reaction_network.initial_state.size());
+    while (std::optional<unsigned long int> maybe_seed =
+               temp_seed_queue.get_seed()){
+                unsigned long int seed = maybe_seed.value();
+                temp_seed_state_map.insert(std::make_pair(seed, default_state));
     }
 
     while (std::optional<ReactionNetworkReadStateSql> maybe_state_row = state_reader.next()){

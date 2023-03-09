@@ -229,7 +229,8 @@ int main(int argc, char **argv) {
     LatticeStateHistoryElement, 
     LatticeTrajectoryHistoryElement, 
     CutoffHistoryElement, 
-    LatticeSimulation>
+    LatticeSimulation, 
+    LatticeState>
 
         dispatcher (
         reaction_database,

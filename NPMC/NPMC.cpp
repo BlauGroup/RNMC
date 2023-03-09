@@ -112,7 +112,8 @@ int main(int argc, char **argv) {
     NanoStateHistoryElement, 
     NanoTrajectoryHistoryElement, 
     CutoffHistoryElement,
-    NanoParticleSimulation>
+    NanoParticleSimulation, 
+    std::vector<int>>
 
         dispatcher (
             nano_particle_database,
