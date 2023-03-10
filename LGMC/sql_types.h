@@ -150,7 +150,7 @@ struct LatticeWriteStateSql {
 };
 
 std::string LatticeWriteStateSql::sql_statement =
-    "INSERT INTO interupt_state VALUES (?1,?2,?3, ?4);";
+    "INSERT INTO interupt_state VALUES (?1, ?2, ?3, ?4);";
 
 void LatticeWriteStateSql::action(LatticeWriteStateSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 1, r.seed);
