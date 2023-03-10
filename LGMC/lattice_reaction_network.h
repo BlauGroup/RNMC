@@ -14,9 +14,6 @@
 #include <string>
 #include <assert.h>
 
-
-const int SPECIES_EMPTY = 0;
-
 const int SITE_SELF_REACTION = -3;
 const int SITE_GILLESPIE = -2;
 

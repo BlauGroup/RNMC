@@ -130,7 +130,7 @@ struct LatticeReadStateSql {
 };
 
 std::string LatticeReadStateSql::sql_statement =
-    "SELECT seed, site_1, site_2, reaction_id FROM interupt_state;";
+    "SELECT seed, site_id, species_id, quantity FROM interupt_state;";
 
 void LatticeReadStateSql::action(LatticeReadStateSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);

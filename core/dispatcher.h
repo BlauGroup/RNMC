@@ -90,7 +90,7 @@ struct SimulatorPayload {
             // Make a vector of StateHistoryElements for the current state
             std::vector<StateHistory> state_packet;
 
-            model.store_state_history(state_packet,simulation.state, model , seed);
+            model.store_state_history(state_packet, simulation.state, model , seed);
 
             // Construct a history packet from the history elements and add it to the queue
             state_history_queue.insert_history(

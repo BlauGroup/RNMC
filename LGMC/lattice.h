@@ -17,8 +17,8 @@
 #define DELTALOCAL 10000
 #define DELTA 32768
 #define EPSILON 0.0001
+#define SPECIES_EMPTY 0
 
-// universal defines inside namespace
 
 #define FLERR __FILE__,__LINE__
 
@@ -508,7 +508,7 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     idneigh[nsites]= neighi;
 
     // initially empty site, species = 0
-    sites[nsites] = Site{i_in, j_in, k_in, x_in, y_in, z_in, 0, can_adsorb_in};
+    sites[nsites] = Site{i_in, j_in, k_in, x_in, y_in, z_in, SPECIES_EMPTY, can_adsorb_in};
     
     loc_map[key] = nsites;
     
