@@ -15,7 +15,7 @@
 #include <assert.h>
 
 const int SITE_SELF_REACTION = -3;
-const int SITE_GILLESPIE = -2;
+const int SITE_HOMOGENEOUS = -2;
 
 const double KB = 8.6173e-5;           // In eV/K
 const double PLANCK = 4.1357e-15;      // In eV s
@@ -298,7 +298,7 @@ void LatticeReactionNetwork::update_state(Lattice *lattice,
     }
     
     else {
-        // gillespie event happens
+        // homogeneous event happens
         update_state(state, next_reaction);
 
     }
@@ -325,7 +325,7 @@ void LatticeReactionNetwork::update_propensities(Lattice *lattice, std::vector<i
     }
     
     else {
-        // gillespie event happens
+        // homoegenous event happens
         update_propensities(update_function, state, next_reaction, lattice);
 
     }
@@ -343,7 +343,7 @@ void LatticeReactionNetwork::update_adsorp_state(Lattice *lattice, std::unordere
         int site = it->first;
         if(lattice->edges[site] == 'a') {
              assert(lattice->sites[site].species == SPECIES_EMPTY);
-             clear_site_helper(props, site, SITE_GILLESPIE, prop_sum, active_indices);
+             clear_site_helper(props, site, SITE_HOMOGENEOUS, prop_sum, active_indices);
         }
        
     }
@@ -382,7 +382,7 @@ std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props)>
                             .index = reaction_id,
                             .propensity = new_propensity,
                             .site_one = site,
-                            .site_two = SITE_GILLESPIE}, props); 
+                            .site_two = SITE_HOMOGENEOUS}, props); 
 
                     }
                     
@@ -471,13 +471,13 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
         assert(lattice->edges.find(site_one) != lattice->edges.end());
         assert(lattice->edges[site_one] == 'a');
         assert(lattice->sites[site_one].species == SPECIES_EMPTY);
-        assert(site_two == SITE_GILLESPIE);
+        assert(site_two == SITE_HOMOGENEOUS);
         // TODO: The below might be a slow operation
 
         // update site
         lattice->sites[site_one].species = reaction.products[0];
         clear_site(lattice, props, site_one, std::optional<int> (), prop_sum, active_indices);
-        clear_site_helper(props, site_one, SITE_GILLESPIE, prop_sum, active_indices);
+        clear_site_helper(props, site_one, SITE_HOMOGENEOUS, prop_sum, active_indices);
 
         if(is_add_sites) {
             // TODO: make general for all types of periodicity (add_site coordinates)
@@ -503,7 +503,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
         
         assert(lattice->edges.find(site_one) != lattice->edges.end());
         assert(lattice->sites[site_one].species == reaction.reactants[0]);
-        assert(site_two == SITE_GILLESPIE);
+        assert(site_two == SITE_HOMOGENEOUS);
 
         lattice->sites[site_one].species = SPECIES_EMPTY;
         clear_site(lattice, props, site_one, std::optional<int> (), prop_sum, active_indices);
@@ -531,7 +531,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
 
             if((lattice->edges.find(site_one) != lattice->edges.end()) && (lattice->edges[site_one] == 'd')) {
                 
-                clear_site_helper(props, site_one, SITE_GILLESPIE, prop_sum, active_indices);
+                clear_site_helper(props, site_one, SITE_HOMOGENEOUS, prop_sum, active_indices);
                
             }
 
@@ -552,7 +552,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                 
                 if((lattice->edges[site_one] == 'a') && (lattice->sites[site_one].species != SPECIES_EMPTY)) {
                     lattice->edges[site_one] = 'd';
-                    clear_site_helper(props, site_one, SITE_GILLESPIE, prop_sum, active_indices);
+                    clear_site_helper(props, site_one, SITE_HOMOGENEOUS, prop_sum, active_indices);
                 }
                 if(lattice->edges[site_one] == 'd') {
                     if(lattice->sites[site_one].species == SPECIES_EMPTY) {
@@ -564,11 +564,11 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                             int site_above = lattice->loc_map[key];
 
                             lattice->edges.erase(site_above);
-                            clear_site_helper(props, site_above, SITE_GILLESPIE, prop_sum, active_indices);
+                            clear_site_helper(props, site_above, SITE_HOMOGENEOUS, prop_sum, active_indices);
                         }
                     }
                     else {
-                        clear_site_helper(props, site_one, SITE_GILLESPIE, prop_sum, active_indices);
+                        clear_site_helper(props, site_one, SITE_HOMOGENEOUS, prop_sum, active_indices);
                     }
                 }
                
@@ -578,7 +578,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                 
                 if((lattice->edges[site_two] == 'a') && (lattice->sites[site_two].species != SPECIES_EMPTY)) {
                     lattice->edges[site_two] = 'd';
-                    clear_site_helper(props, site_two, SITE_GILLESPIE, prop_sum, active_indices);
+                    clear_site_helper(props, site_two, SITE_HOMOGENEOUS, prop_sum, active_indices);
                 }
                 if(lattice->edges[site_two] == 'd') {
                     if(lattice->sites[site_two].species == SPECIES_EMPTY) {
@@ -590,11 +590,11 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                             int site_above = lattice->loc_map[key];
 
                             lattice->edges.erase(site_above);
-                            clear_site_helper(props, site_above, SITE_GILLESPIE, prop_sum, active_indices);
+                            clear_site_helper(props, site_above, SITE_HOMOGENEOUS, prop_sum, active_indices);
                         }
                     }
                     else {
-                        clear_site_helper(props, site_two, SITE_GILLESPIE, prop_sum, active_indices);
+                        clear_site_helper(props, site_two, SITE_PIE, prop_sum, active_indices);
                     }
                 }
                
@@ -637,7 +637,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                 
                 if(lattice->edges[empty_site] == 'a'){
                    lattice->edges[empty_site] = 'd';
-                    clear_site_helper(props, empty_site, SITE_GILLESPIE, prop_sum, active_indices);
+                    clear_site_helper(props, empty_site, SITE_HOMOGENEOUS, prop_sum, active_indices);
                 }      
         }
 
@@ -652,7 +652,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                         int site_above = lattice->loc_map[key];
 
                         lattice->edges.erase(site_above);
-                        clear_site_helper(props, site_above, SITE_GILLESPIE, prop_sum, active_indices);
+                        clear_site_helper(props, site_above, SITE_HOMOGENEOUS, prop_sum, active_indices);
                    }
                    
                 }      
@@ -680,7 +680,7 @@ bool LatticeReactionNetwork::update_propensities(Lattice *lattice,
 
         // state already updated
         assert(lattice->sites[site_one].species == reaction.products[0]);
-        assert(site_two == SITE_GILLESPIE);
+        assert(site_two == SITE_HOMOGENEOUS);
 
         relevant_react(lattice, update_function, site_one, std::optional<int> (), props);
 
@@ -699,7 +699,7 @@ bool LatticeReactionNetwork::update_propensities(Lattice *lattice,
         
         // reaction already happended
         assert(lattice->sites[site_one].species == SPECIES_EMPTY);
-        assert(site_two == SITE_GILLESPIE);
+        assert(site_two == SITE_HOMOGENEOUS);
 
         relevant_react(lattice, update_function, site_one, std::optional<int> (), props);
 
@@ -753,7 +753,7 @@ void LatticeReactionNetwork::clear_site(Lattice *lattice, std::unordered_map<std
                         long double &prop_sum, int &active_indices) {
 
     
-    assert(site != SITE_GILLESPIE);
+    assert(site != SITE_HOMOGENEOUS);
     // reset or initiate site combos
     for(uint32_t neigh = 0; neigh < lattice->numneigh[site]; neigh++ ) {
         int neighbor = lattice->idneigh[site][neigh];
@@ -829,7 +829,7 @@ void LatticeReactionNetwork::relevant_react(Lattice *lattice, std::function<void
                     .index = reaction_id,
                     .propensity = new_propensity,
                     .site_one = site,
-                    .site_two = SITE_GILLESPIE}, props); 
+                    .site_two = SITE_HOMOGENEOUS}, props); 
                 }
             }
             else {
@@ -1300,7 +1300,7 @@ bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_rea
 
         LatticeReadStateSql state_row = maybe_state_row.value();
         // determine if in lattice or homogeneous region
-        if(state_row.site_id == SITE_GILLESPIE) {
+        if(state_row.site_id == SITE_HOMOGENEOUS) {
             // set the quantity of the homogeneous region vector associated with that seed
             temp_seed_state_map[state_row.seed].homogeneous[state_row.species_id] = state_row.quantity;
         }
@@ -1353,7 +1353,7 @@ void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistory
             .seed = seed,
             .species_id = static_cast<int>(i),
             .quantity = state.homogeneous[i],
-            .site_id = SITE_GILLESPIE
+            .site_id = SITE_HOMOGENEOUS
         });
     }
 
