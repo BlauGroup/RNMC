@@ -122,50 +122,60 @@ void LatticeWriteTrajectoriesSql::action (LatticeWriteTrajectoriesSql& t, sqlite
 
 struct LatticeReadStateSql {
     int seed;
-    int site_id;
     int species_id;
     int quantity;
+    int i;
+    int j;
+    int k;
     static std::string sql_statement;
     static void action(LatticeReadStateSql &r, sqlite3_stmt *stmt);
 };
 
 std::string LatticeReadStateSql::sql_statement =
-    "SELECT seed, site_id, species_id, quantity FROM interupt_state;";
+    "SELECT seed, species_id, quantity, i, j, k FROM interupt_state;";
 
 void LatticeReadStateSql::action(LatticeReadStateSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
-    r.site_id = sqlite3_column_int(stmt, 1);
-    r.species_id = sqlite3_column_int(stmt, 2);
-    r.quantity = sqlite3_column_int(stmt, 3);
+    r.species_id = sqlite3_column_int(stmt, 1);
+    r.quantity = sqlite3_column_int(stmt, 2);
+    r.i = sqlite3_column_int(stmt, 3);
+    r.j = sqlite3_column_int(stmt, 4);
+    r.k = sqlite3_column_int(stmt, 5);
 }
 
 /* --------- Write State SQL ---------*/
 struct LatticeWriteStateSql {
     int seed;
-    int site_id;
     int species_id;
     int quantity;
+    int i;
+    int j;
+    int k;
     static std::string sql_statement;
     static void action(LatticeWriteStateSql &r, sqlite3_stmt *stmt);
 };
 
 std::string LatticeWriteStateSql::sql_statement =
-    "INSERT INTO interupt_state VALUES (?1, ?2, ?3, ?4);";
+    "INSERT INTO interupt_state VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);";
 
 void LatticeWriteStateSql::action(LatticeWriteStateSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 1, r.seed);
-    sqlite3_bind_int(stmt, 2, r.site_id);
     sqlite3_bind_int(stmt, 3, r.species_id);
     sqlite3_bind_int(stmt, 4, r.quantity);
+    sqlite3_bind_int(stmt, 2, r.i);
+    sqlite3_bind_int(stmt, 2, r.j);
+    sqlite3_bind_int(stmt, 2, r.k);
 }
 
 /* --------- State and Trajectory History Elements ---------*/
 
 struct LatticeStateHistoryElement{
     unsigned long int seed; //seed
-    int site_id;
     int species_id;
     int quantity;
+    int i;
+    int j;
+    int k;
 };
 
 struct LatticeTrajectoryHistoryElement {

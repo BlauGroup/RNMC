@@ -594,7 +594,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                         }
                     }
                     else {
-                        clear_site_helper(props, site_two, SITE_PIE, prop_sum, active_indices);
+                        clear_site_helper(props, site_two, SITE_HOMOGENEOUS, prop_sum, active_indices);
                     }
                 }
                
@@ -1247,9 +1247,11 @@ LatticeWriteStateSql LatticeReactionNetwork::state_history_element_to_sql(
 
     return LatticeWriteStateSql {
         .seed = seed,
-        .site_id = state_history_element.site_id,
         .species_id = state_history_element.species_id,
-        .quantity = state_history_element.quantity
+        .quantity = state_history_element.quantity,
+        .i = state_history_element.i,
+        .j = state_history_element.j,
+        .k = state_history_element.k
     };
 }
 
@@ -1294,23 +1296,25 @@ bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_rea
 
     }
 
-
+    // TODO: add in for dynamic lattice
     while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
         read_interupt_states = true;
 
         LatticeReadStateSql state_row = maybe_state_row.value();
         // determine if in lattice or homogeneous region
-        if(state_row.site_id == SITE_HOMOGENEOUS) {
+        if(state_row.i == SITE_HOMOGENEOUS) {
             // set the quantity of the homogeneous region vector associated with that seed
             temp_seed_state_map[state_row.seed].homogeneous[state_row.species_id] = state_row.quantity;
         }
         else {
             // update occupancy of that lattice site
-            temp_seed_state_map[state_row.seed].lattice->sites[state_row.site_id].species = state_row.species_id;
+            std::tuple<uint32_t, uint32_t, uint32_t> key = {state_row.i, state_row.j, state_row.k};
+            int site_id = temp_seed_state_map[state_row.seed].lattice->loc_map[key];
+            temp_seed_state_map[state_row.seed].lattice->sites[site_id].species = state_row.species_id;
 
             // check if can absorb, if so make sure edges now 'd'
-            if(temp_seed_state_map[state_row.seed].lattice->sites[state_row.site_id].can_adsorb) {
-                temp_seed_state_map[state_row.seed].lattice->edges[state_row.site_id] = 'd';
+            if(temp_seed_state_map[state_row.seed].lattice->sites[site_id].can_adsorb) {
+                temp_seed_state_map[state_row.seed].lattice->edges[site_id] = 'd';
             }
         }
     }
@@ -1342,7 +1346,9 @@ void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistory
             .seed = seed,
             .species_id = site.second.species,
             .quantity = 1,
-            .site_id = site.first
+            .i = static_cast<int> (site.second.i),
+            .j = static_cast<int> (site.second.j),
+            .k = static_cast<int> (site.second.k)
         });
     }
 
@@ -1353,7 +1359,9 @@ void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistory
             .seed = seed,
             .species_id = static_cast<int>(i),
             .quantity = state.homogeneous[i],
-            .site_id = SITE_HOMOGENEOUS
+            .i = SITE_HOMOGENEOUS,
+            .j = SITE_HOMOGENEOUS,
+            .k = SITE_HOMOGENEOUS
         });
     }
 
