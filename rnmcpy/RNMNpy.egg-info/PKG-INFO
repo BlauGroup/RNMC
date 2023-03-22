@@ -1,0 +1,8 @@
+Metadata-Version: 2.1
+Name: RNMNpy
+Version: 0.1
+Summary: Reaction Network Monte Carlo - Python
+Home-page: https://github.com/BlauGroup/RNMC
+Author: Daniel Barter
+Author-email: danielbarter@gmail.com
+License: LBNL

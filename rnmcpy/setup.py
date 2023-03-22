@@ -1,6 +1,6 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
-package_dir = {'': 'src'}
+package_dir = {'rnmcpy': 'src'}
 
 setup(name='RNMNpy',
       version='0.1',
@@ -9,7 +9,7 @@ setup(name='RNMNpy',
       author='Daniel Barter',
       author_email='danielbarter@gmail.com',
       license='LBNL',
-      packages=['rnmcpy'],
+      packages=find_packages(),
       install_requires=[
         "setuptools",
         "pymatgen>=2022.3.7",
