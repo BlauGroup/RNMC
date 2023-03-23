@@ -3,3 +3,4 @@ result
 .envrc
 .cache
 compile_commands.json
+__pycache__
