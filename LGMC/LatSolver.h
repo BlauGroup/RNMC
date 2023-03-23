@@ -121,21 +121,6 @@ void LatSolver::update(LatticeUpdate lattice_update, std::unordered_map<std::str
     std::string hash = make_string(lattice_update.site_one, lattice_update.site_two);
     props[hash].push_back(std::make_pair(lattice_update.propensity, lattice_update.index));
 
-    double sum = 0;
-    for(auto it : props){
-        for(int i = 0; i < it.second.size(); i++){
-            sum += it.second[i].first;
-        }
-    }
-    for(int i = 0; i < propensities.size(); i++){
-        sum += propensities[i];
-    }
-
-    if(sum != propensity_sum){
-        std::cout << "ERROR" << std::endl;
-        propensity_sum = sum;
-    }
-
 };
 
 /* ---------------------------------------------------------------------- */

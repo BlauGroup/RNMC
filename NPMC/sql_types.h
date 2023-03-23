@@ -204,7 +204,7 @@ struct NanoReadStateSql {
 };
 
 std::string NanoReadStateSql::sql_statement =
-    "SELECT seed, site_id, degree_of_freedom FROM interupt_state;";
+    "SELECT seed, site_id, degree_of_freedom FROM interrupt_state;";
 
 void NanoReadStateSql::action(NanoReadStateSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
@@ -222,7 +222,7 @@ struct NanoWriteStateSql {
 };
 
 std::string NanoWriteStateSql::sql_statement =
-    "INSERT INTO interupt_state VALUES (?1,?2,?3);";
+    "INSERT INTO interrupt_state VALUES (?1,?2,?3);";
 
 void NanoWriteStateSql::action(NanoWriteStateSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 1, r.seed);

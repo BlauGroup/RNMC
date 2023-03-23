@@ -19,7 +19,7 @@ struct ReadCutoffSql {
 };
 
 std::string ReadCutoffSql::sql_statement =
-    "SELECT seed, step, time FROM interupt_cutoff;";
+    "SELECT seed, step, time FROM interrupt_cutoff;";
 
 void ReadCutoffSql::action(ReadCutoffSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
@@ -38,7 +38,7 @@ struct WriteCutoffSql {
 };
 
 std::string WriteCutoffSql::sql_statement =
-    "INSERT INTO interupt_cutoff VALUES (?1,?2,?3);";
+    "INSERT INTO interrupt_cutoff VALUES (?1,?2,?3);";
 
 void WriteCutoffSql::action(WriteCutoffSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 1, r.seed);

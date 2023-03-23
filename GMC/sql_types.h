@@ -115,7 +115,7 @@ struct ReactionNetworkReadStateSql {
 };
 
 std::string ReactionNetworkReadStateSql::sql_statement =
-    "SELECT seed, species_id, count FROM interupt_state;";
+    "SELECT seed, species_id, count FROM interrupt_state;";
 
 void ReactionNetworkReadStateSql::action(ReactionNetworkReadStateSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
@@ -135,7 +135,7 @@ struct ReactionNetworkWriteStateSql {
 };
 
 std::string ReactionNetworkWriteStateSql::sql_statement =
-    "INSERT INTO interupt_state VALUES (?1,?2,?3);";
+    "INSERT INTO interrupt_state VALUES (?1,?2,?3);";
 
 void ReactionNetworkWriteStateSql::action(ReactionNetworkWriteStateSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 1, r.seed);

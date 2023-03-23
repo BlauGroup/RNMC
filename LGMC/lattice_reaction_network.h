@@ -1274,7 +1274,7 @@ bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_rea
                 LatticeReactionNetwork &lattice_reaction_network,
                 SeedQueue &temp_seed_queue) {
     
-    bool read_interupt_states = false;
+    bool read_interrupt_states = false;
     Lattice *initial_lattice = lattice_reaction_network.initial_lattice;
     int initial_latconst = initial_lattice->latconst;
 
@@ -1298,7 +1298,7 @@ bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_rea
 
     // TODO: add in for dynamic lattice
     while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
-        read_interupt_states = true;
+        read_interrupt_states = true;
 
         LatticeReadStateSql state_row = maybe_state_row.value();
         // determine if in lattice or homogeneous region
@@ -1320,7 +1320,7 @@ bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_rea
     }
 
 
-    return read_interupt_states;  
+    return read_interrupt_states;  
 
 }
 
@@ -1332,7 +1332,7 @@ void LatticeReactionNetwork::read_trajectories(SqlReader<LatticeReadTrajectories
                            std::map<int, double> &temp_seed_time_map,
                            LatticeReactionNetwork &lattice_reaction_network) {
 
-                            assert(false);
+                            std::cout << 'Inside read_trajectories' << std::endl;
 
 }
 

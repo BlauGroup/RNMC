@@ -132,7 +132,7 @@ struct LatticeReadStateSql {
 };
 
 std::string LatticeReadStateSql::sql_statement =
-    "SELECT seed, species_id, quantity, i, j, k FROM interupt_state;";
+    "SELECT seed, species_id, quantity, i, j, k FROM interrupt_state;";
 
 void LatticeReadStateSql::action(LatticeReadStateSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
@@ -156,7 +156,7 @@ struct LatticeWriteStateSql {
 };
 
 std::string LatticeWriteStateSql::sql_statement =
-    "INSERT INTO interupt_state VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);";
+    "INSERT INTO interrupt_state VALUES (?1, ?2, ?3, ?4, ?5, ?6);";
 
 void LatticeWriteStateSql::action(LatticeWriteStateSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 1, r.seed);

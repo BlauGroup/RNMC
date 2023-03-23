@@ -663,7 +663,7 @@ bool NanoParticle::read_state(SqlReader<NanoReadStateSql> state_reader,
                               NanoParticle &nano_particle,
                               SeedQueue &temp_seed_queue) {
     
-    bool read_interupt_states = false;
+    bool read_interrupt_states = false;
     std::vector<int> default_state = nano_particle.initial_state;
 
     while (std::optional<unsigned long int> maybe_seed =
@@ -673,13 +673,13 @@ bool NanoParticle::read_state(SqlReader<NanoReadStateSql> state_reader,
     }       
 
     while (std::optional<NanoReadStateSql> maybe_state_row = state_reader.next()){
-        read_interupt_states = true;
+        read_interrupt_states = true;
 
         NanoReadStateSql state_row = maybe_state_row.value();
         temp_seed_state_map[state_row.seed][state_row.site_id] = state_row.degree_of_freedom;
     }
 
-    return read_interupt_states;
+    return read_interrupt_states;
 }
 
 void NanoParticle::read_trajectories(SqlReader<NanoReadTrajectoriesSql> trajectory_reader, 

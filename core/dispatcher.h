@@ -76,6 +76,7 @@ struct SimulatorPayload {
 
             Sim simulation(model, seed, step, time, state, 
                            history_chunk_size, history_queue);
+                simulation.init();
 
 
             switch(cutoff.type_of_cutoff) {
@@ -90,7 +91,7 @@ struct SimulatorPayload {
             // Make a vector of StateHistoryElements for the current state
             std::vector<StateHistory> state_packet;
 
-            model.store_state_history(state_packet, simulation.state, model , seed);
+            model.store_state_history(state_packet, simulation.state, model, seed);
 
             // Construct a history packet from the history elements and add it to the queue
             state_history_queue.insert_history(
@@ -223,7 +224,7 @@ struct Dispatcher {
             SqlStatement<ReadStateSql> state_statement(initial_state_database);
             SqlReader<ReadStateSql> state_reader(state_statement);
 
-            bool read_interupt_states = model.read_state(state_reader, temp_seed_state_map, model,
+            bool read_interrupt_states = model.read_state(state_reader, temp_seed_state_map, model,
                                                          temp_seed_queue);
 
             SqlStatement<ReadCutoffSql> cutoff_statement(initial_state_database);
@@ -236,9 +237,9 @@ struct Dispatcher {
             }
 
             // bool read_trajectory_states = false;
-            if (read_interupt_states == false) {
+            if (read_interrupt_states == false) {
 
-                // If the interupt_state table doesn't have entries, try to read from the trajectories table
+                // If the interrupt_state table doesn't have entries, try to read from the trajectories table
                 SqlStatement<ReadTrajectoriesSql> trajectory_statement(initial_state_database);
                 SqlReader<ReadTrajectoriesSql> trajectory_reader(trajectory_statement);
 
@@ -384,7 +385,7 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
 
         if (maybe_state_history_packet) {
             HistoryPacket<StateHistory> state_history_packet = std::move(maybe_state_history_packet.value());
-            // record_state(std::move(state_history_packet));
+            record_state(std::move(state_history_packet));
         };
 
         std::optional<HistoryPacket<CutoffHistory>>
@@ -402,8 +403,8 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
         "DELETE FROM trajectories WHERE rowid NOT IN"
         "(SELECT MIN(rowid) FROM trajectories GROUP BY seed, step);");
 
-    initial_state_database.close();
-    model_database.close();
+    //initial_state_database.close();
+    //model_database.close();
     std::cerr << time_stamp()
               << "removing duplicate trajectories...\n";
 
@@ -471,7 +472,7 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
     CutoffHistory, Sim, State>::record_state(HistoryPacket<StateHistory> state_history_packet) {
 
     // Wipe the database of the states corresponding to this seed. This gets rid of the previously written states
-    std::string delete_statement = "DELETE FROM interupt_state WHERE seed = " + std::to_string(state_history_packet.seed) + ";";
+    std::string delete_statement = "DELETE FROM interrupt_state WHERE seed = " + std::to_string(state_history_packet.seed) + ";";
     
     initial_state_database.exec(delete_statement);
     
@@ -514,7 +515,7 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
     CutoffHistory, Sim, State>::record_cutoff(HistoryPacket<CutoffHistory> cutoff_history_packet) {
 
     // Wipe the database of the states corresponding to this seed. This gets rid of the previously written states
-    std::string delete_statement = "DELETE FROM interupt_cutoff WHERE seed = " + std::to_string(cutoff_history_packet.seed) + ";";
+    std::string delete_statement = "DELETE FROM interrupt_cutoff WHERE seed = " + std::to_string(cutoff_history_packet.seed) + ";";
     
     initial_state_database.exec(delete_statement);
     

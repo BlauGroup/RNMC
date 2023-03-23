@@ -352,7 +352,7 @@ bool ReactionNetwork::read_state(SqlReader<ReactionNetworkReadStateSql> state_re
                 ReactionNetwork &reaction_network,
                 SeedQueue &temp_seed_queue) {
     
-    bool read_interupt_states = false;
+    bool read_interrupt_states = false;
     std::vector<int> default_state = reaction_network.initial_state;
 
     while (std::optional<unsigned long int> maybe_seed =
@@ -362,13 +362,13 @@ bool ReactionNetwork::read_state(SqlReader<ReactionNetworkReadStateSql> state_re
     }
 
     while (std::optional<ReactionNetworkReadStateSql> maybe_state_row = state_reader.next()){
-        read_interupt_states = true;
+        read_interrupt_states = true;
 
         ReactionNetworkReadStateSql state_row = maybe_state_row.value();
         temp_seed_state_map[state_row.seed][state_row.species_id] = state_row.count;
     }
 
-    return read_interupt_states;
+    return read_interrupt_states;
 }
 
 void ReactionNetwork::read_trajectories(SqlReader<ReactionNetworkReadTrajectoriesSql> trajectory_reader, 
