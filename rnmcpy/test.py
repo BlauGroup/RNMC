@@ -221,87 +221,77 @@ def li_test():
     return True
 
 
-# def mg_test():
-#     folder = './scratch/mg_test'
-#     subprocess.run(['mkdir', folder ])
+def mg_test():
+    folder = './scratch/mg_test'
+    subprocess.run(['mkdir', folder])
 
-#     mol_json = './data/sam_G2.json'
-#     species_decision_tree = mg_species_decision_tree
+    mol_entries = pickle.load("../data/mg_mol_entries.pickle")
 
-#     database_entries = loadfn(mol_json)
+    c2h4_id = find_mol_entry_from_xyz_and_charge(
+        mol_entries,
+        '../test_materials/xyz_files/c2h4.xyz',
+        0)
 
-#     mol_entries = pickle.load(None) # TODO
+    c2h6_id = find_mol_entry_from_xyz_and_charge(
+        mol_entries,
+        '../test_materials/xyz_files/c2h6.xyz',
+        0)
 
-#     mg_g2_plus_plus_id = find_mol_entry_from_xyz_and_charge(
-#         mol_entries,
-#         '../test_materials/xyz_files/mgg2.xyz',
-#         2)
+    initial_state = {
+        33: 30,
+        81: 30
+    }
 
-#     c2h4_id = find_mol_entry_from_xyz_and_charge(
-#         mol_entries,
-#         '../test_materials/xyz_files/c2h4.xyz',
-#         0)
+    insert_initial_state(initial_state, mol_entries, folder + '/initial_state.sqlite')
 
-#     c2h6_id = find_mol_entry_from_xyz_and_charge(
-#         mol_entries,
-#         '../test_materials/xyz_files/c2h6.xyz',
-#         0)
+    subprocess.run([
+        'GMC',
+        '--reaction_database=' + '../data/mg_rn.sqlite',
+        '--initial_state_database=' + folder + '/initial_state.sqlite',
+        '--number_of_simulations=1000',
+        '--base_seed=1000',
+        '--thread_count=' + number_of_threads,
+        '--step_cutoff=200'
+    ])
 
-#     initial_state = {
-#         33: 30,
-#         81: 30
-#     }
+    network_loader = NetworkLoader(
+        '../data/mg_rn.sqlite',
+        '../data/mg_mol_entries.pickle',
+        folder + '/initial_state.sqlite'
+        )
 
-#     insert_initial_state(initial_state, mol_entries, folder + '/initial_state.sqlite')
+    network_loader.load_trajectories()
+    network_loader.load_initial_state()
 
-#     subprocess.run([
-#         'GMC',
-#         '--reaction_database=' + folder + '/rn.sqlite',
-#         '--initial_state_database=' + folder + '/initial_state.sqlite',
-#         '--number_of_simulations=1000',
-#         '--base_seed=1000',
-#         '--thread_count=' + number_of_threads,
-#         '--step_cutoff=200'
-#     ])
+    report_generator = ReportGenerator(
+        network_loader.mol_entries,
+        folder + '/dummy.tex',
+        rebuild_mol_pictures=True)
 
-#     network_loader = NetworkLoader(
-#         folder + '/rn.sqlite',
-#         folder + '/mol_entries.pickle',
-#         folder + '/initial_state.sqlite'
-#         )
+    reaction_tally_report(
+        network_loader,
+        folder + '/reaction_tally.tex'
+    )
 
-#     network_loader.load_trajectories()
-#     network_loader.load_initial_state()
+    pathfinding = Pathfinding(network_loader)
 
-#     report_generator = ReportGenerator(
-#         network_loader.mol_entries,
-#         folder + '/dummy.tex',
-#         rebuild_mol_pictures=True)
+    generate_pathway_report(
+        pathfinding,
+        c2h6_id,
+        folder + '/C2H6_pathways.tex',
+        sort_by_frequency=False
+    )
 
-#     reaction_tally_report(
-#         network_loader,
-#         folder + '/reaction_tally.tex'
-#     )
+    generate_pathway_report(
+        pathfinding,
+        c2h4_id,
+        folder + '/C2H4_pathways.tex',
+        sort_by_frequency=False
+    )
 
-#     pathfinding = Pathfinding(network_loader)
+    species_report(network_loader, folder + '/species_report.tex')
 
-#     generate_pathway_report(
-#         pathfinding,
-#         c2h6_id,
-#         folder + '/C2H6_pathways.tex',
-#         sort_by_frequency=False
-#     )
-
-#     generate_pathway_report(
-#         pathfinding,
-#         c2h4_id,
-#         folder + '/C2H4_pathways.tex',
-#         sort_by_frequency=False
-#     )
-
-#     species_report(network_loader, folder + '/species_report.tex')
-
-#     return True
+    return True
 
 
 # def flicho_test():
