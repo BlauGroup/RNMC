@@ -565,6 +565,9 @@ void Lattice::delete_site(int id) {
     assert(sites.find(id) != sites.end());
 
     // update neighbors
+    if(id == 31347) {
+        assert(true);
+    }
     update_neighbors(id, true);
 
     // delete from other hashes

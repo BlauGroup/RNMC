@@ -99,9 +99,19 @@ void LatSolver::update(Update update) {
         number_of_active_indices++;
     }
 
+    if(propensity_sum < 0) {
+        assert(false);
+    }
 
     propensity_sum -= propensities[update.index];
+    if(propensity_sum < 0) {
+        assert(false);
+    }
     propensity_sum += update.propensity;
+    if(propensity_sum < 0) {
+        assert(false);
+    }
+
     propensities[update.index] = update.propensity;
 
     if(propensity_sum < 0) {
@@ -120,6 +130,10 @@ void LatSolver::update(LatticeUpdate lattice_update, std::unordered_map<std::str
 
     std::string hash = make_string(lattice_update.site_one, lattice_update.site_two);
     props[hash].push_back(std::make_pair(lattice_update.propensity, lattice_update.index));
+
+    if(propensity_sum < 0) {
+        assert(false);
+    }
 
 };
 
@@ -144,6 +158,9 @@ void LatSolver::update(std::vector<Update> updates) {
 
 std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props) {
+    if(propensity_sum < 0) {
+        assert(false);
+    }
     if (number_of_active_indices == 0) {
         propensity_sum == 0.0;
         return std::optional<LatticeEvent> ();

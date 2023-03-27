@@ -158,13 +158,13 @@ struct LatticeWriteStateSql {
 std::string LatticeWriteStateSql::sql_statement =
     "INSERT INTO interrupt_state VALUES (?1, ?2, ?3, ?4, ?5, ?6);";
 
-void LatticeWriteStateSql::action(LatticeWriteStateSql &r, sqlite3_stmt *stmt) {
-    sqlite3_bind_int(stmt, 1, r.seed);
-    sqlite3_bind_int(stmt, 3, r.species_id);
-    sqlite3_bind_int(stmt, 4, r.quantity);
-    sqlite3_bind_int(stmt, 2, r.i);
-    sqlite3_bind_int(stmt, 2, r.j);
-    sqlite3_bind_int(stmt, 2, r.k);
+void LatticeWriteStateSql::action(LatticeWriteStateSql& t, sqlite3_stmt* stmt) {
+    sqlite3_bind_int(stmt, 1, t.seed);
+    sqlite3_bind_int(stmt, 2, t.species_id);
+    sqlite3_bind_int(stmt, 3, t.quantity);
+    sqlite3_bind_int(stmt, 4, t.i);
+    sqlite3_bind_int(stmt, 5, t.j);
+    sqlite3_bind_int(stmt, 6, t.k);
 }
 
 /* --------- State and Trajectory History Elements ---------*/

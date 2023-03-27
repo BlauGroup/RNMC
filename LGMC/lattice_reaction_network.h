@@ -30,7 +30,6 @@ struct LatticeState {
     Lattice *lattice;
 };
 
-
 struct LatticeParameters {
     float latconst;                               
     float boxxlo,boxxhi,boxylo,                   
@@ -451,7 +450,7 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
                 * k;
     }
 
-    assert(p != 0);
+    assert(p > 0);
 
     return p;
     
@@ -788,6 +787,11 @@ void LatticeReactionNetwork::clear_site_helper(std::unordered_map<std::string,
         // already exists, clear vector to update
         std::vector<std::pair<double, int>> vec = props[combo];
         prop_sum -= sum_row(combo, props);
+
+        if(prop_sum < 0) {
+            assert(false);
+        }
+
         active_indices -= props[combo].size();
 
         props[combo].clear();
@@ -1090,10 +1094,13 @@ void LatticeReactionNetwork::compute_dependents() {
     for ( unsigned int reaction_id = 0; reaction_id <  reactions.size(); reaction_id++ ) {
         LatticeReaction reaction = reactions[reaction_id]; 
 
-        for ( int i = 0; i < reaction.number_of_reactants; i++ ) {
-            int reactant_id = reaction.reactants[i];
-            dependents[reactant_id].push_back(reaction_id);
+        if(reaction.type != 'L') {
+            for ( int i = 0; i < reaction.number_of_reactants; i++ ) {
+                int reactant_id = reaction.reactants[i];
+                dependents[reactant_id].push_back(reaction_id);
+            }
         }
+
     }
 
 };
@@ -1221,7 +1228,13 @@ double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int r
     if(p < 0){
         assert(false);
     }
-    return p;
+    if(p < 1e-6) {
+        return 0;
+    }
+    else {
+        return p;
+    }
+
 }
 
 /* ---------------------------------------------------------------------- */
@@ -1364,7 +1377,6 @@ void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistory
             .k = SITE_HOMOGENEOUS
         });
     }
-
 
 
 }

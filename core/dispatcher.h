@@ -24,7 +24,7 @@ struct Cutoff {
 // 20000 is a good value. Only change this if you fully understand the
 // performance implications
 
-constexpr int history_chunk_size = 20000;
+constexpr int history_chunk_size = 500;
 
 template <typename Solver, typename Model, typename StateHistory, 
 typename TrajHistory, typename CutoffHistory, typename Sim, typename State>
@@ -154,8 +154,10 @@ struct Dispatcher {
     Model model;
     SqlStatement<WriteTrajectoriesSql> trajectories_stmt;
     SqlWriter<WriteTrajectoriesSql> trajectories_writer;
+    
     SqlStatement<WriteStateSql> state_stmt;
     SqlWriter<WriteStateSql> state_writer;
+    
     SqlStatement<WriteCutoffSql> cutoff_stmt;
     SqlWriter<WriteCutoffSql> cutoff_writer;
 
