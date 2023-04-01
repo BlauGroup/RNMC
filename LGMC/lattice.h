@@ -567,16 +567,25 @@ void Lattice::delete_site(int id) {
     // update neighbors
     if(id == 31347) {
         assert(true);
+        std::cout << "deleting site 31347" << std::endl;
     }
     update_neighbors(id, true);
+
+    // remove from sites 
+    loc_map.erase({sites[id].i, sites[id].j, sites[id].k});
+    sites.erase(id);
+
+    // update neighbors
+    for(int i = 0; i < numneigh[id]; i++) {
+        update_neighbors(idneigh[id][i], false);
+    }
+    
 
     // delete from other hashes
     numneigh.erase(id);
     sfree(idneigh[id]);
     idneigh.erase(id);
 
-    // remove from sites 
-    sites.erase(id);
     
 
 }
@@ -639,9 +648,7 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
     ijk[5] = {sites[n].i, sites[n].j, up};
     
 
-    std::map<std::tuple<uint32_t,uint32_t,uint32_t>, int>::iterator it;
-
-    // rest numneigh, and idneigh
+    // reset numneigh, and idneigh
     numneigh[n] = 0;
     uint32_t* neighi;
     create(neighi, maxneigh, "create:neighi");
@@ -657,10 +664,6 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
             }
 
         }
-    }
-
-    if(numneigh[n] == 0) {
-        delete_site(n);
     }
 
 } // update_neighbors()

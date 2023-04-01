@@ -986,6 +986,9 @@ void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_netwo
 
     // computing initial propensities
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
+        if(i == 69) {
+            assert(true);
+        }
         initial_propensities[i] = compute_propensity(initial_state, i, lattice);
     }
 
