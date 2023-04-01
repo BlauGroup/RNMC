@@ -436,14 +436,6 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
 
     // two reactants
     else {
-        if (reaction.reactants[0] == reaction.reactants[1])
-            p = factor_duplicate
-                * factor_two
-                * num_one
-                * (num_one - 1)
-                * k;
-
-        else
             p = factor_two
                 * num_one
                 * num_two
@@ -986,9 +978,6 @@ void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_netwo
 
     // computing initial propensities
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
-        if(i == 69) {
-            assert(true);
-        }
         initial_propensities[i] = compute_propensity(initial_state, i, lattice);
     }
 
