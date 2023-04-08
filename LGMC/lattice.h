@@ -585,6 +585,7 @@ void Lattice::delete_site(int id) {
     numneigh.erase(id);
     sfree(idneigh[id]);
     idneigh.erase(id);
+    edges.erase(id);
 
     
 

@@ -99,24 +99,10 @@ void LatSolver::update(Update update) {
         number_of_active_indices++;
     }
 
-    if(propensity_sum < 0) {
-        assert(false);
-    }
-
     propensity_sum -= propensities[update.index];
-    if(propensity_sum < 0) {
-        assert(false);
-    }
     propensity_sum += update.propensity;
-    if(propensity_sum < 0) {
-        assert(false);
-    }
 
     propensities[update.index] = update.propensity;
-
-    if(propensity_sum < 0) {
-        assert(false);
-    }
 
 };
 

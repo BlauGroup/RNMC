@@ -441,7 +441,9 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
                 * num_two
                 * k;
     }
-
+    if(p < 1e-6) {
+        return 0;
+    }
     assert(p > 0);
 
     return p;
@@ -463,7 +465,6 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
         assert(lattice->edges[site_one] == 'a');
         assert(lattice->sites[site_one].species == SPECIES_EMPTY);
         assert(site_two == SITE_HOMOGENEOUS);
-        // TODO: The below might be a slow operation
 
         // update site
         lattice->sites[site_one].species = reaction.products[0];
@@ -483,10 +484,13 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
 
             // new site can adsorb
             lattice->edges[site_new] = 'a';
+            lattice->edges.erase(site_one);
 
         }
-
-        lattice->edges[site_one] = 'd';
+        else {
+            lattice->edges[site_one] = 'd';
+        }
+        
 
         return true;
     } // ADSORPTION 
@@ -498,10 +502,21 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
 
         lattice->sites[site_one].species = SPECIES_EMPTY;
         clear_site(lattice, props, site_one, std::optional<int> (), prop_sum, active_indices);
+        clear_site_helper(props, site_one, SITE_HOMOGENEOUS, prop_sum, active_indices);
 
         lattice->edges[site_one] = 'a';
         
         if(is_add_sites) {
+
+            // site behind can now adsorb or desorb
+            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, lattice->sites[site_one].j, lattice->sites[site_one].k - 1};
+            int id = lattice->loc_map[key];
+            if(lattice->sites[id].species == SPECIES_EMPTY) {
+                lattice->edges[id] = 'a'; 
+            }
+            else {
+                lattice->edges[id] = 'd'; 
+            }
             // delete site
             lattice->delete_site(site_one);            
         }
