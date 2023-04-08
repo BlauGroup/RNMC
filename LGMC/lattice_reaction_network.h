@@ -1269,6 +1269,7 @@ LatticeWriteStateSql LatticeReactionNetwork::state_history_element_to_sql(
         .seed = seed,
         .species_id = state_history_element.species_id,
         .quantity = state_history_element.quantity,
+        .site_id = state_history_element.site_id,
         .i = state_history_element.i,
         .j = state_history_element.j,
         .k = state_history_element.k
@@ -1366,6 +1367,7 @@ void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistory
             .seed = seed,
             .species_id = site.second.species,
             .quantity = 1,
+            .site_id = static_cast<int> (site.first),
             .i = static_cast<int> (site.second.i),
             .j = static_cast<int> (site.second.j),
             .k = static_cast<int> (site.second.k)
@@ -1379,6 +1381,7 @@ void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistory
             .seed = seed,
             .species_id = static_cast<int>(i),
             .quantity = state.homogeneous[i],
+            .site_id = SITE_HOMOGENEOUS,
             .i = SITE_HOMOGENEOUS,
             .j = SITE_HOMOGENEOUS,
             .k = SITE_HOMOGENEOUS

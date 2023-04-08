@@ -165,10 +165,10 @@ void LatticeWriteStateSql::action(LatticeWriteStateSql& t, sqlite3_stmt* stmt) {
     sqlite3_bind_int(stmt, 1, t.seed);
     sqlite3_bind_int(stmt, 2, t.species_id);
     sqlite3_bind_int(stmt, 3, t.quantity);
-    sqlite3_bind_int(stmt, 3, t.site_id);
-    sqlite3_bind_int(stmt, 4, t.i);
-    sqlite3_bind_int(stmt, 5, t.j);
-    sqlite3_bind_int(stmt, 6, t.k);
+    sqlite3_bind_int(stmt, 4, t.site_id);
+    sqlite3_bind_int(stmt, 5, t.i);
+    sqlite3_bind_int(stmt, 6, t.j);
+    sqlite3_bind_int(stmt, 7, t.k);
 }
 
 /* --------- State and Trajectory History Elements ---------*/
@@ -177,6 +177,7 @@ struct LatticeStateHistoryElement{
     unsigned long int seed; //seed
     int species_id;
     int quantity;
+    int site_id;
     int i;
     int j;
     int k;
