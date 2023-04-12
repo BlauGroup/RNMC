@@ -1,20 +1,12 @@
 import os
 import sys
 import subprocess
-import sqlite3
 import pickle
 
 from HiPRGen.network_loader import NetworkLoader
 from HiPRGen.initial_state import find_mol_entry_from_xyz_and_charge
-from monty.serialization import loadfn, dumpfn
 from HiPRGen.report_generator import ReportGenerator
 from HiPRGen.initial_state import insert_initial_state
-from HiPRGen.constants import ROOM_TEMP
-
-from HiPRGen.species_questions import (
-    mg_species_decision_tree,
-    li_species_decision_tree,
-)
 
 from rnmcpy.analysis.gmc_analysis import (
     reaction_tally_report,
@@ -24,8 +16,6 @@ from rnmcpy.analysis.gmc_analysis import (
     generate_pathway_report,
     sink_report,
     consumption_report,
-    coordination_report,
-    decoordination_report
 )
 
 # Since HiPRGen uses an end-to-end testing approach rather than testing
