@@ -75,11 +75,6 @@ def li_test():
     folder = './scratch/li_test'
     subprocess.run(['mkdir', folder])
 
-    # The initial input to the pipeline is a list of LIBE or MADEIRA
-    # dataset entries. We provide two examples in the data foloder.
-    mol_json = '../data/ronald_LIBE.json'
-    database_entries = loadfn(mol_json)
-
     # There is one non-local part of species filtering: we consider two
     # molecules to be equivalent if they have the same total charge,
     # composition, and covalent bonds, even if they have different metal
@@ -152,7 +147,7 @@ def li_test():
 
     # This report is empty, but we use it to generate the molecule pictures.
     # This is an expensive operation, so we only want do do it once.
-    report_generator = ReportGenerator(
+    _ = ReportGenerator(
         network_loader.mol_entries,
         folder + '/dummy.tex',
         rebuild_mol_pictures=True)
@@ -263,7 +258,7 @@ def mg_test():
     network_loader.load_trajectories()
     network_loader.load_initial_state()
 
-    report_generator = ReportGenerator(
+    _ = ReportGenerator(
         network_loader.mol_entries,
         folder + '/dummy.tex',
         rebuild_mol_pictures=True)
@@ -294,82 +289,11 @@ def mg_test():
     return True
 
 
-# def flicho_test():
+tests = [
+    mg_test,
+    li_test,
+]
 
-#     folder = './scratch/flicho_test'
-#     subprocess.run(['mkdir', folder])
-
-#     mol_json = './data/flicho_test.json'
-#     database_entries = loadfn(mol_json)
-#     species_decision_tree = li_species_decision_tree
-
-#     mol_entries = pickle.load(None)
-
-#     params = {
-#         'temperature': ROOM_TEMP,
-#         'electron_free_energy': -1.4
-#     }
-
-#     Li_plus_id = find_mol_entry_from_xyz_and_charge(
-#         mol_entries,
-#         '../test_materials/xyz_files/Li.xyz',
-#         1)
-
-#     EC_id = find_mol_entry_from_xyz_and_charge(
-#         mol_entries,
-#         '../test_materials/xyz_files/EC.xyz',
-#         0)
-
-#     initial_state = {
-#         Li_plus_id : 30,
-#         EC_id : 30
-#     }
-
-#     insert_initial_state(initial_state, mol_entries, folder + '/initial_state.sqlite')
-
-#     subprocess.run([
-#         'GMC',
-#         '--reaction_database=' + folder + '/rn.sqlite',
-#         '--initial_state_database=' + folder + '/initial_state.sqlite',
-#         '--number_of_simulations=1000',
-#         '--base_seed=1000',
-#         '--thread_count=' + number_of_threads,
-#         '--step_cutoff=200'
-#     ])
-
-#     network_loader = NetworkLoader(
-#         folder + '/rn.sqlite',
-#         folder + '/mol_entries.pickle',
-#         folder + '/initial_state.sqlite'
-#         )
-
-#     network_loader.load_trajectories()
-#     network_loader.load_initial_state()
-
-#     report_generator = ReportGenerator(
-#         network_loader.mol_entries,
-#         folder + '/dummy.tex',
-#         rebuild_mol_pictures=True)
-
-#     coordination_report(
-#         network_loader,
-#         folder + '/coodination_report.tex',
-#         'Li1',
-#         1)
-
-#     decoordination_report(
-#         network_loader,
-#         folder + '/decoodination_report.tex',
-#         'Li1',
-#         1)
-
-
-# tests = [
-#     mg_test,
-#     li_test,
-#     flicho_test
-# ]
-
-# for test in tests:
-#     if not test():
-#         exit(1)
+for test in tests:
+    if not test():
+        exit(1)
