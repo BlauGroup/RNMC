@@ -218,6 +218,24 @@ std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::str
         }
         
         dt = - std::log(r2) / propensity_sum;
+
+        // check if found, if not propensity sum is incorrect
+        if(!isFound) {
+            int sum = 0;
+            for(int i = 0; i < propensities.size(); i++ ) {
+                sum += propensities[i];
+            }
+            for(auto it = props.begin(); it != props.end(); it ++) {
+                for(int i = 0; i < int(it->second.size()); i++ ) {
+                    sum += it->second[i].first;
+                }
+                
+            }
+            propensity_sum = sum;
+            std::cout << 'ERROR' << std::endl;
+
+        }
+
     }
 
     return std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id, .dt = dt,
