@@ -1334,7 +1334,7 @@ bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_rea
             temp_seed_state_map[state_row.seed].lattice->sites[site_id].species = state_row.species_id;
 
             // check if can absorb, if so make sure edges now 'd'
-            if(temp_seed_state_map[state_row.seed].lattice->sites[site_id].can_adsorb) {
+            if(temp_seed_state_map[state_row.seed].lattice->sites[site_id].can_adsorb && state_row.species_id != SPECIES_EMPTY) {
                 temp_seed_state_map[state_row.seed].lattice->edges[site_id] = 'd';
             }
         }

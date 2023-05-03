@@ -283,9 +283,6 @@ bool LatticeSimulation::execute_step() {
             .site_1 = site_1,
             .site_2 = site_2
             });
-        /*if(history.size() == 1000) {
-            std::cout << "1000 events\n" ;
-        }*/
 
         if (history.size() == this->history_chunk_size ) {
             history_queue.insert_history(

@@ -145,7 +145,18 @@ void LatSolver::update(std::vector<Update> updates) {
 std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props) {
     if(propensity_sum < 0) {
-        assert(false);
+        int sum = 0;
+        for(int i = 0; i < propensities.size(); i++ ) {
+            sum += propensities[i];
+        }
+        for(auto it = props.begin(); it != props.end(); it ++) {
+            for(int i = 0; i < int(it->second.size()); i++ ) {
+                sum += it->second[i].first;
+            }
+            
+        }
+        propensity_sum = sum;
+        std::cout << 'ERROR' << std::endl;
     }
     if (number_of_active_indices == 0) {
         propensity_sum == 0.0;
@@ -153,68 +164,65 @@ std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::str
     }
     
     bool isFound = false;
-    unsigned long m;
-    unsigned long int reaction_id = 0;
-    std::optional<int> site_one = std::optional<int>();
-    std::optional<int> site_two = std::optional<int>();
-    std::string hash;
-    double dt = 0.;
+    while(!isFound) {
+
+        unsigned long m;
+        unsigned long int reaction_id = 0;
+        std::optional<int> site_one = std::optional<int>();
+        std::optional<int> site_two = std::optional<int>();
+        std::string hash;
+        double dt = 0.;
 
 
-    double r1 = sampler.generate();
-    double r2 = sampler.generate();
-    double fraction = propensity_sum * r1;
-    long double partial = 0.0;
+        double r1 = sampler.generate();
+        double r2 = sampler.generate();
+        double fraction = propensity_sum * r1;
+        long double partial = 0.0;
 
-    // start with Gillespie propensities
-    for (m = 0; m < propensities.size(); m++) {
-        partial += propensities[m];
-        if (partial > fraction) {
-            isFound = true;
-            reaction_id = m;
-            break;
-        }
-    }
-
-    // go through lattice propensities if not found 
-    if(!isFound) {
-        auto it = props.begin();
-        while(!isFound && it != props.end()) {
-            for(int i = 0; i < int(it->second.size()); i++ ) {
-                
-                partial += it->second[i].first;
-
-                if(partial > fraction) {
-
-                    isFound = true;
-                    hash = it->first;
-                    reaction_id = it->second[i].second;
-
-                    std::size_t pos = hash.find(".");
-                    site_one = std::optional<int>(stoi(hash.substr(0, pos)));
-                    site_two = std::optional<int>(stoi(hash.substr(pos+1)));
-                    if(site_one < site_two) {
-                        assert(false);
-                    }
-                    isFound = true;
-                    break;
-                }
+        // start with Gillespie propensities
+        for (m = 0; m < propensities.size(); m++) {
+            partial += propensities[m];
+            if (partial > fraction) {
+                isFound = true;
+                reaction_id = m;
+                break;
             }
-            it++;
         }
+
+        // go through lattice propensities if not found 
+        if(!isFound) {
+            auto it = props.begin();
+            while(!isFound && it != props.end()) {
+                for(int i = 0; i < int(it->second.size()); i++ ) {
+                    
+                    partial += it->second[i].first;
+
+                    if(partial > fraction) {
+
+                        isFound = true;
+                        hash = it->first;
+                        reaction_id = it->second[i].second;
+
+                        std::size_t pos = hash.find(".");
+                        site_one = std::optional<int>(stoi(hash.substr(0, pos)));
+                        site_two = std::optional<int>(stoi(hash.substr(pos+1)));
+                        if(site_one < site_two) {
+                            assert(false);
+                        }
+                        isFound = true;
+                        break;
+                    }
+                }
+                it++;
+            }
+        }
+        
+        dt = - std::log(r2) / propensity_sum;
     }
-    
-    dt = - std::log(r2) / propensity_sum;
 
-
-    if(isFound) {
-        return std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id, .dt = dt,
+    return std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id, .dt = dt,
                                                            .site_one = site_one, .site_two = site_two});
-    }
-    else {
-
-        return std::optional<LatticeEvent> ();
-    }
+                        
         
 }
 
