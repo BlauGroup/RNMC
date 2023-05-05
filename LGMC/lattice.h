@@ -96,6 +96,8 @@ public:
     std::map<std::tuple<uint32_t, uint32_t, uint32_t>, int> loc_map;  // Mapping from site location (i,j,k) to site ID
     bool isCheckpoint;
 
+    Lattice(float latconst_in, bool is_xperiodic_in, 
+        bool is_yperiodic_in, bool is_zperiodic_in);
 
     Lattice(float latconst_in, 
         int ilo_in, int ihi_in, int jlo_in,
@@ -129,6 +131,35 @@ public:
     void fill(std::string filename);
 
 };
+
+/* ---------------------------------------------------------------------- */
+
+Lattice::Lattice(float latconst_in, bool is_xperiodic_in, 
+        bool is_yperiodic_in, bool is_zperiodic_in) {
+
+    isCheckpoint = true;
+    latconst = latconst_in;
+    
+    // region of simulation input * lattice spacing
+    xlo = 1 * latconst;
+    xhi = 1 * latconst;
+    ylo = 1 * latconst;
+    yhi = 1 * latconst;
+    zlo = 1 * latconst;
+    zhi = 1 * latconst;
+    
+    // 0 = non-periodic, 1 = periodic
+    is_xperiodic = is_xperiodic_in;
+    is_yperiodic = is_yperiodic_in;
+    is_zperiodic = is_zperiodic_in;
+    
+    nsites = 0;
+    maxz = 0;
+    nmax = DELTA;
+
+    maxneigh = 6;
+        
+} // Lattice()
 
 /* ---------------------------------------------------------------------- */
 

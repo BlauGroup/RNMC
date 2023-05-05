@@ -1294,59 +1294,128 @@ bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_rea
                     std::map<int, LatticeState> &temp_seed_state_map,
                 LatticeReactionNetwork &lattice_reaction_network,
                 SeedQueue &temp_seed_queue) {
-    
+
     bool read_interrupt_states = false;
-    Lattice *initial_lattice = lattice_reaction_network.initial_lattice;
-    int initial_latconst = initial_lattice->latconst;
+    // static lattice
+    if(!is_add_sites) {
 
-    // create a default lattice for each simulation
-    while (std::optional<unsigned long int> maybe_seed =
-        temp_seed_queue.get_seed()){
-        unsigned long int seed = maybe_seed.value();
+        Lattice *initial_lattice = lattice_reaction_network.initial_lattice;
+        int initial_latconst = initial_lattice->latconst;
 
-        // Each LatticeState must have its own lattice to point to
-        Lattice *default_lattice = new Lattice(initial_latconst, 
-        initial_lattice->xlo/initial_latconst, initial_lattice->xhi/initial_latconst, 
-        initial_lattice->ylo/initial_latconst, initial_lattice->yhi/initial_latconst, 
-        initial_lattice->zlo/initial_latconst, initial_lattice->zhi/initial_latconst,
-        initial_lattice->is_xperiodic, initial_lattice->is_yperiodic, initial_lattice->is_zperiodic);
+        // create a default lattice for each simulation
+        while (std::optional<unsigned long int> maybe_seed =
+            temp_seed_queue.get_seed()){
+            unsigned long int seed = maybe_seed.value();
 
-        LatticeState default_state = {lattice_reaction_network.initial_state, default_lattice};
+            // Each LatticeState must have its own lattice to point to
+            Lattice *default_lattice = new Lattice(initial_latconst, 
+            initial_lattice->xlo/initial_latconst, initial_lattice->xhi/initial_latconst, 
+            initial_lattice->ylo/initial_latconst, initial_lattice->yhi/initial_latconst, 
+            initial_lattice->zlo/initial_latconst, initial_lattice->zhi/initial_latconst,
+            initial_lattice->is_xperiodic, initial_lattice->is_yperiodic, initial_lattice->is_zperiodic);
 
-        temp_seed_state_map.insert(std::make_pair(seed, default_state));
+            LatticeState default_state = {lattice_reaction_network.initial_state, default_lattice};
 
-    }
+            temp_seed_state_map.insert(std::make_pair(seed, default_state));
 
-    // TODO: add in for dynamic lattice
-    while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
-        read_interrupt_states = true;
-
-        LatticeReadStateSql state_row = maybe_state_row.value();
-        // determine if in lattice or homogeneous region
-        if(state_row.i == SITE_HOMOGENEOUS) {
-            // set the quantity of the homogeneous region vector associated with that seed
-            temp_seed_state_map[state_row.seed].homogeneous[state_row.species_id] = state_row.quantity;
         }
-        else {
-            // update occupancy of that lattice site
-            std::tuple<uint32_t, uint32_t, uint32_t> key = {state_row.i, state_row.j, state_row.k};
-            int site_id = temp_seed_state_map[state_row.seed].lattice->loc_map[key];
-            temp_seed_state_map[state_row.seed].lattice->sites[site_id].species = state_row.species_id;
 
-            // check if can absorb, if so make sure edges now 'd'
-            if(temp_seed_state_map[state_row.seed].lattice->sites[site_id].can_adsorb && state_row.species_id != SPECIES_EMPTY) {
-                temp_seed_state_map[state_row.seed].lattice->edges[site_id] = 'd';
+        while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
+            read_interrupt_states = true;
+
+            LatticeReadStateSql state_row = maybe_state_row.value();
+            // determine if in lattice or homogeneous region
+            if(state_row.i == SITE_HOMOGENEOUS) {
+                // set the quantity of the homogeneous region vector associated with that seed
+                temp_seed_state_map[state_row.seed].homogeneous[state_row.species_id] = state_row.quantity;
+            }
+            else {
+                // update occupancy of that lattice site
+                std::tuple<uint32_t, uint32_t, uint32_t> key = {state_row.i, state_row.j, state_row.k};
+                int site_id = temp_seed_state_map[state_row.seed].lattice->loc_map[key];
+                temp_seed_state_map[state_row.seed].lattice->sites[site_id].species = state_row.species_id;
+
+                // if can adsorb, check if species occupies the site
+                if(temp_seed_state_map[state_row.seed].lattice->sites[site_id].can_adsorb && state_row.species_id != SPECIES_EMPTY) {
+                    temp_seed_state_map[state_row.seed].lattice->edges[site_id] = 'd';
+                }
             }
         }
-    }
 
-    // set checkpoint flag for each lattice
-    if(read_interrupt_states) {
-        for(auto it = temp_seed_state_map.begin(); it != temp_seed_state_map.end(); it++) {
-            it->second.lattice->isCheckpoint = true;
+         // set checkpoint flag for each lattice, dynamic lattice default constructor 
+         // automatically does this
+        if(read_interrupt_states) {
+            for(auto it = temp_seed_state_map.begin(); it != temp_seed_state_map.end(); it++) {
+                it->second.lattice->isCheckpoint = true;
+            }
         }
-    }
 
+    }
+    // dynamic lattice
+    else {
+        // start with empty lattice
+        bool read_interrupt_states = false;
+        Lattice *initial_lattice = lattice_reaction_network.initial_lattice;
+        int initial_latconst = initial_lattice->latconst;
+
+        // create a default lattice for each simulation
+        while (std::optional<unsigned long int> maybe_seed =
+            temp_seed_queue.get_seed()){
+            unsigned long int seed = maybe_seed.value();
+
+            // Each LatticeState must have its own lattice to point to
+            Lattice *default_lattice = new Lattice(initial_latconst, initial_lattice->is_xperiodic, 
+                                    initial_lattice->is_yperiodic, initial_lattice->is_zperiodic);
+
+            LatticeState default_state = {lattice_reaction_network.initial_state, default_lattice};
+
+            temp_seed_state_map.insert(std::make_pair(seed, default_state));
+
+        }
+
+        // go through interrupt_state and add each site one by one or update homogeneous region
+        while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
+            read_interrupt_states = true;
+
+            LatticeReadStateSql state_row = maybe_state_row.value();
+            // determine if in lattice or homogeneous region
+            if(state_row.i == SITE_HOMOGENEOUS) {
+                // set the quantity of the homogeneous region vector associated with that seed
+                temp_seed_state_map[state_row.seed].homogeneous[state_row.species_id] = state_row.quantity;
+            }
+            else {
+                // only not able to absorb if there is not a site with a higher z value but same x and y
+                bool can_adsorb = true;
+                for(int k_new = state_row.k + 1; k_new != temp_seed_state_map[state_row.seed].lattice->get_maxz()/initial_latconst; k_new++) {
+                    
+                    std::tuple<uint32_t, uint32_t, uint32_t> key = {state_row.i, state_row.j, k_new};
+                    if(temp_seed_state_map[state_row.seed].lattice->loc_map.find(key) != temp_seed_state_map[state_row.seed].lattice->loc_map.end()) {
+                    // site above exists, can not adsorb and exit
+                        can_adsorb = false;
+                        break;
+                    }
+                }
+
+                // add site
+                temp_seed_state_map[state_row.seed].lattice->add_site(state_row.i, state_row.j, state_row.k,
+                state_row.i*initial_latconst, state_row.j*initial_latconst, state_row.k*initial_latconst,
+                can_adsorb, true, false);
+                
+                // update site occupancy
+                std::tuple<uint32_t, uint32_t, uint32_t> key = {state_row.i, state_row.j, state_row.k};
+                int site_id = temp_seed_state_map[state_row.seed].lattice->loc_map[key];
+                temp_seed_state_map[state_row.seed].lattice->sites[site_id].species = state_row.species_id;
+
+                // if can adsorb, check if species occupies the site
+                if(temp_seed_state_map[state_row.seed].lattice->sites[site_id].can_adsorb && state_row.species_id != SPECIES_EMPTY) {
+                    temp_seed_state_map[state_row.seed].lattice->edges[site_id] = 'd';
+                }
+
+            }
+        }
+
+    }
+    
     return read_interrupt_states;  
 
 }
