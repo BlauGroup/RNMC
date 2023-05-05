@@ -117,9 +117,6 @@ void LatSolver::update(LatticeUpdate lattice_update, std::unordered_map<std::str
     std::string hash = make_string(lattice_update.site_one, lattice_update.site_two);
     props[hash].push_back(std::make_pair(lattice_update.propensity, lattice_update.index));
 
-    if(propensity_sum < 0) {
-        assert(false);
-    }
 
 };
 
@@ -156,7 +153,7 @@ std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::str
             
         }
         propensity_sum = sum;
-        std::cout << 'ERROR' << std::endl;
+        std::cout << "ERROR" << std::endl;
     }
     if (number_of_active_indices == 0) {
         propensity_sum == 0.0;
@@ -164,14 +161,19 @@ std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::str
     }
     
     bool isFound = false;
+    unsigned long m;
+    unsigned long int reaction_id;
+    std::optional<int> site_one;
+    std::optional<int> site_two;
+    std::string hash;
+    double dt;
+
     while(!isFound) {
 
-        unsigned long m;
-        unsigned long int reaction_id = 0;
-        std::optional<int> site_one = std::optional<int>();
-        std::optional<int> site_two = std::optional<int>();
-        std::string hash;
-        double dt = 0.;
+        reaction_id = 0;
+        site_one = std::optional<int>();
+        site_two = std::optional<int>();
+        dt = 0.;
 
 
         double r1 = sampler.generate();
@@ -232,7 +234,11 @@ std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::str
                 
             }
             propensity_sum = sum;
-            std::cout << 'ERROR' << std::endl;
+            std::cout << "ERROR" << std::endl;
+
+            if(!(propensity_sum > 0)) {
+                return std::optional<LatticeEvent> ();
+            }
 
         }
 

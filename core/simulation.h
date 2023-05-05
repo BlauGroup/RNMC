@@ -138,6 +138,7 @@ template <typename Solver>
 void ReactionNetworkSimulation<Solver>::init() {
     reaction_network.compute_initial_propensities();
     solver = Solver(this->seed, std::ref(reaction_network.initial_propensities));
+    this->update_function = [&] (Update update) {solver.update(update);};
 
 }
 
@@ -217,13 +218,7 @@ class LatticeSimulation : public Simulation<LatSolver> {
                double time, LatticeState state_in, int history_chunk_size,
                HistoryQueue<HistoryPacket<LatticeTrajectoryHistoryElement>> &history_queue) :
                Simulation<LatSolver>(seed, history_chunk_size, step, time),
-               latSolver (seed, std::ref(lattice_network.initial_propensities)),
                lattice_network(lattice_network),
-               lattice_update_function ([&] (LatticeUpdate lattice_update, 
-               std::unordered_map<std::string,                     
-                std::vector< std::pair<double, int> > > &props) 
-                 {latSolver.update(lattice_update, props);}), 
-               update_function ([&] (Update update) {latSolver.update(update);}),
                history_queue(history_queue)
                 { 
                     state.homogeneous = state_in.homogeneous;
@@ -240,9 +235,18 @@ class LatticeSimulation : public Simulation<LatSolver> {
 };
 
 void LatticeSimulation::init() {
-   
+    lattice_network.compute_initial_propensities(this->state.lattice);
     lattice_network.update_adsorp_state(this->state.lattice, this->props, latSolver.propensity_sum, latSolver.number_of_active_indices);
     lattice_network.update_adsorp_props(this->state.lattice, lattice_update_function, this->state.homogeneous, std::ref(props));
+
+    latSolver = LatSolver(seed, std::ref(lattice_network.initial_propensities));
+    this->update_function = [&] (Update update) {latSolver.update(update);};
+    lattice_update_function = [&] (LatticeUpdate lattice_update, 
+               std::unordered_map<std::string,                     
+                std::vector< std::pair<double, int> > > &props) 
+                 {latSolver.update(lattice_update, props);};
+
+               
     
 }
 
@@ -271,9 +275,9 @@ bool LatticeSimulation::execute_step() {
             site_2 = event.site_two.value();
         }
 
-        //if(site_1 == 5758) {
-        //    std::cout << "next reaction: " << next_reaction << ", step: " << this->step << ", site 1: " << site_1 << ", site_2: " << site_2 << std::endl;
-        //}
+        if(history.size() == 1000) {
+            std::cout << "1000 events" << std::endl;
+        }
         // record what happened
         history.push_back(LatticeTrajectoryHistoryElement {
             .seed = this->seed,

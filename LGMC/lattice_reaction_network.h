@@ -151,6 +151,8 @@ class LatticeReactionNetwork {
         
         void update_state(std::vector<int> &state, int reaction_index);
 
+        void compute_initial_propensities(Lattice *lattice);
+
         /* -------------------------------------------------------------------------------- */
         
         std::vector<double> initial_propensities;
@@ -795,10 +797,6 @@ void LatticeReactionNetwork::clear_site_helper(std::unordered_map<std::string,
         std::vector<std::pair<double, int>> vec = props[combo];
         prop_sum -= sum_row(combo, props);
 
-        if(prop_sum < 0) {
-            assert(false);
-        }
-
         active_indices -= props[combo].size();
 
         props[combo].clear();
@@ -992,9 +990,7 @@ void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_netwo
     assert(reactions.size() == metadata_row.number_of_reactions);
 
     // computing initial propensities
-    for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
-        initial_propensities[i] = compute_propensity(initial_state, i, lattice);
-    }
+    compute_initial_propensities(lattice);
 
     std::cerr << time_stamp() << "computing dependency graph...\n";
     compute_dependents();
@@ -1353,9 +1349,9 @@ void LatticeReactionNetwork::read_trajectories(SqlReader<LatticeReadTrajectories
                            std::map<int, double> &temp_seed_time_map,
                            LatticeReactionNetwork &lattice_reaction_network) {
 
-                            std::cout << 'Inside read_trajectories' << std::endl;
+                            std::cout << "Inside read_trajectories" << std::endl;
 
-}
+} // read_trajectories()
 
 void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistoryElement> &state_packet,
     LatticeState &state, LatticeReactionNetwork &lattice_reaction_network, unsigned long int &seed) {
@@ -1389,4 +1385,13 @@ void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistory
     }
 
 
-}
+} 
+
+/* ---------------------------------------------------------------------- */
+
+ void LatticeReactionNetwork::compute_initial_propensities(Lattice *lattice) {
+
+    for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
+        initial_propensities[i] = compute_propensity(initial_state, i, lattice);
+    }
+ } // computer_initial_propensities
