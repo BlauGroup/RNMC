@@ -234,10 +234,8 @@ class LatticeSimulation : public Simulation<LatSolver> {
 };
 
 void LatticeSimulation::init() {
+
     lattice_network.compute_initial_propensities(state.homogeneous, state.lattice);
-    
-    lattice_network.update_adsorp_state(state.lattice, this->props, latSolver.propensity_sum, latSolver.number_of_active_indices);
-    lattice_network.update_adsorp_props(state.lattice, lattice_update_function, state.homogeneous, std::ref(props));
 
     latSolver = LatSolver(seed, std::ref(lattice_network.initial_propensities));
     this->update_function = [&] (Update update) {latSolver.update(update);};
@@ -246,14 +244,17 @@ void LatticeSimulation::init() {
                 std::vector< std::pair<double, int> > > &props) 
                  {latSolver.update(lattice_update, props);};
 
+    
+
+    lattice_network.update_adsorp_state(state.lattice, this->props, latSolver.propensity_sum, latSolver.number_of_active_indices);
+    lattice_network.update_adsorp_props(state.lattice, lattice_update_function, state.homogeneous, std::ref(props));
+
         // only call if checkpointing 
     if(state.lattice->isCheckpoint) {
         lattice_network.update_all_propensities(state.lattice, props, latSolver.propensity_sum, 
                                                 latSolver.number_of_active_indices, lattice_update_function);
     }
-
                
-    
 }
 
 bool LatticeSimulation::execute_step() {
