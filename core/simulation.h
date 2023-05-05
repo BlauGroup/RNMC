@@ -51,7 +51,6 @@ class Simulation {
     unsigned long int history_chunk_size; 
     std::function<void(Update)> update_function;
 
-
     Simulation(unsigned long int seed,
                int history_chunk_size,
                int step,
@@ -136,7 +135,7 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
 
 template <typename Solver>
 void ReactionNetworkSimulation<Solver>::init() {
-    reaction_network.compute_initial_propensities();
+    reaction_network.compute_initial_propensities(state);
     solver = Solver(this->seed, std::ref(reaction_network.initial_propensities));
     this->update_function = [&] (Update update) {solver.update(update);};
 
@@ -235,9 +234,10 @@ class LatticeSimulation : public Simulation<LatSolver> {
 };
 
 void LatticeSimulation::init() {
-    lattice_network.compute_initial_propensities(this->state.lattice);
-    lattice_network.update_adsorp_state(this->state.lattice, this->props, latSolver.propensity_sum, latSolver.number_of_active_indices);
-    lattice_network.update_adsorp_props(this->state.lattice, lattice_update_function, this->state.homogeneous, std::ref(props));
+    lattice_network.compute_initial_propensities(state.homogeneous, state.lattice);
+    
+    lattice_network.update_adsorp_state(state.lattice, this->props, latSolver.propensity_sum, latSolver.number_of_active_indices);
+    lattice_network.update_adsorp_props(state.lattice, lattice_update_function, state.homogeneous, std::ref(props));
 
     latSolver = LatSolver(seed, std::ref(lattice_network.initial_propensities));
     this->update_function = [&] (Update update) {latSolver.update(update);};
@@ -245,6 +245,12 @@ void LatticeSimulation::init() {
                std::unordered_map<std::string,                     
                 std::vector< std::pair<double, int> > > &props) 
                  {latSolver.update(lattice_update, props);};
+
+        // only call if checkpointing 
+    if(state.lattice->isCheckpoint) {
+        lattice_network.update_all_propensities(state.lattice, props, latSolver.propensity_sum, 
+                                                latSolver.number_of_active_indices, lattice_update_function);
+    }
 
                
     

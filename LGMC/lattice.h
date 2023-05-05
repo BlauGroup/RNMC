@@ -94,6 +94,7 @@ public:
     std::unordered_map<int, uint32_t> numneigh;                         // # of neighbors of each site
     std::unordered_map<int, char> edges;
     std::map<std::tuple<uint32_t, uint32_t, uint32_t>, int> loc_map;  // Mapping from site location (i,j,k) to site ID
+    bool isCheckpoint;
 
 
     Lattice(float latconst_in, 
@@ -135,7 +136,8 @@ Lattice::Lattice(float latconst_in,
         int ilo_in, int ihi_in, int jlo_in,
         int jhi_in, int klo_in, int khi_in, 
         bool is_xperiodic_in, bool is_yperiodic_in, bool is_zperiodic_in)  {
-
+    
+    isCheckpoint = false;
     latconst = latconst_in;
     
     // region of simulation input * lattice spacing

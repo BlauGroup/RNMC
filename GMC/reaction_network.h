@@ -60,7 +60,7 @@ struct ReactionNetwork {
         int next_reaction
         );
 
-    void compute_initial_propensities();
+    void compute_initial_propensities(std::vector<int> state);
 
     // convert a history element as found a simulation to history
     // to a SQL type.
@@ -192,7 +192,7 @@ ReactionNetwork::ReactionNetwork(
     std::cerr << time_stamp() << "finished computing dependency graph\n";
 };
 
-void ReactionNetwork::compute_initial_propensities() {
+void ReactionNetwork::compute_initial_propensities(std::vector<int> state) {
     // computing initial propensities
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
         initial_propensities[i] = compute_propensity(initial_state, i);

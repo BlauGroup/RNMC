@@ -135,6 +135,13 @@ class LatticeReactionNetwork {
         double sum_row(std::string hash, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props);
         
+        void update_all_propensities(Lattice *lattice, std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props, 
+                        long double &prop_sum, int &active_indices,
+                        std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props)> 
+                        update_function);
+
         /* -------------------------- Updates Reaction Network ----------------------------- */
 
         void init_reaction_network(SqlConnection &reaction_network_database,
@@ -151,7 +158,7 @@ class LatticeReactionNetwork {
         
         void update_state(std::vector<int> &state, int reaction_index);
 
-        void compute_initial_propensities(Lattice *lattice);
+        void compute_initial_propensities(std::vector<int> state, Lattice *lattice);
 
         /* -------------------------------------------------------------------------------- */
         
@@ -989,9 +996,6 @@ void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_netwo
     fill_reactions(reaction_network_database);
     assert(reactions.size() == metadata_row.number_of_reactions);
 
-    // computing initial propensities
-    compute_initial_propensities(lattice);
-
     std::cerr << time_stamp() << "computing dependency graph...\n";
     compute_dependents();
     std::cerr << time_stamp() << "finished computing dependency graph\n";
@@ -1336,6 +1340,12 @@ bool LatticeReactionNetwork::read_state(SqlReader<LatticeReadStateSql> state_rea
         }
     }
 
+    // set checkpoint flag for each lattice
+    if(read_interrupt_states) {
+        for(auto it = temp_seed_state_map.begin(); it != temp_seed_state_map.end(); it++) {
+            it->second.lattice->isCheckpoint = true;
+        }
+    }
 
     return read_interrupt_states;  
 
@@ -1385,13 +1395,34 @@ void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistory
     }
 
 
-} 
+} // store_state_history()
 
 /* ---------------------------------------------------------------------- */
 
- void LatticeReactionNetwork::compute_initial_propensities(Lattice *lattice) {
+ void LatticeReactionNetwork::compute_initial_propensities(std::vector<int> state, Lattice *lattice) {
 
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
-        initial_propensities[i] = compute_propensity(initial_state, i, lattice);
+        initial_propensities[i] = compute_propensity(state, i, lattice);
     }
  } // computer_initial_propensities
+
+
+/* ---------------------------------------------------------------------- */
+
+void LatticeReactionNetwork::update_all_propensities(Lattice *lattice, std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props, 
+                        long double &prop_sum, int &active_indices,
+                        std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props)> 
+                        update_function) {
+
+    // Go through all lattice sites and update their propensities 
+    for(auto it = lattice->sites.begin(); it != lattice->sites.end(); it++) {
+        std::tuple<uint32_t, uint32_t, uint32_t> key = {it->second.i, it->second.j, it->second.k};
+        int site_id = lattice->loc_map[key];
+
+        clear_site(lattice, props, site_id, std::optional<int>(), prop_sum, active_indices);
+        relevant_react(lattice, update_function, site_id, std::optional<int> (), props);
+    }
+
+} // update_all_propensities()

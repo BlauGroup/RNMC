@@ -176,7 +176,6 @@ struct Dispatcher {
     std::map<int, State> seed_state_map;
     std::map<int, int> seed_step_map;
     std::map<int, double> seed_time_map;
-
     
     Dispatcher(
         std::string model_database_file,
