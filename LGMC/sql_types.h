@@ -73,22 +73,22 @@ struct LatticeReadTrajectoriesSql {
     int step;
     double time;
     int reaction_id;
-    int site_1;
-    int site_2;
+    int site_1_mapping;
+    int site_2_mapping;
     static std::string sql_statement;
     static void action(LatticeReadTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
 std::string LatticeReadTrajectoriesSql::sql_statement =
-    "SELECT seed, step, time, reaction_id, site_1, site_2 FROM trajectories;";
+    "SELECT seed, step, time, reaction_id, site_1_mapping, site_2_mapping FROM trajectories;";
 
 void LatticeReadTrajectoriesSql::action (LatticeReadTrajectoriesSql& r, sqlite3_stmt* stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
     r.step = sqlite3_column_int(stmt, 1);
     r.time = sqlite3_column_double(stmt, 2);
     r.reaction_id = sqlite3_column_int(stmt, 3);
-    r.site_1 = sqlite3_column_int(stmt, 4);
-    r.site_2 = sqlite3_column_int(stmt, 5);
+    r.site_1_mapping = sqlite3_column_int(stmt, 4);
+    r.site_2_mapping = sqlite3_column_int(stmt, 5);
     
 };
 
@@ -99,8 +99,8 @@ struct LatticeWriteTrajectoriesSql {
     int step;
     double time;
     int reaction_id;
-    int site_1;
-    int site_2;
+    int site_1_mapping;
+    int site_2_mapping;
     static std::string sql_statement;
     static void action(LatticeWriteTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
@@ -113,8 +113,8 @@ void LatticeWriteTrajectoriesSql::action (LatticeWriteTrajectoriesSql& t, sqlite
     sqlite3_bind_int(stmt, 2, t.step);
     sqlite3_bind_double(stmt, 3, t.time);
     sqlite3_bind_int(stmt, 4, t.reaction_id);
-    sqlite3_bind_int(stmt, 5, t.site_1);
-    sqlite3_bind_int(stmt, 6, t.site_2);
+    sqlite3_bind_int(stmt, 5, t.site_1_mapping);
+    sqlite3_bind_int(stmt, 6, t.site_2_mapping);
     
 };
 
@@ -124,25 +124,21 @@ struct LatticeReadStateSql {
     int seed;
     int species_id;
     int quantity;
-    int site_id;
-    int i;
-    int j;
-    int k;
+    int site_mapping;
+    int edge;
     static std::string sql_statement;
     static void action(LatticeReadStateSql &r, sqlite3_stmt *stmt);
 };
 
 std::string LatticeReadStateSql::sql_statement =
-    "SELECT seed, species_id, quantity, site_id, i, j, k FROM interrupt_state;";
+    "SELECT seed, species_id, quantity, site_mapping, edge FROM interrupt_state;";
 
 void LatticeReadStateSql::action(LatticeReadStateSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
     r.species_id = sqlite3_column_int(stmt, 1);
     r.quantity = sqlite3_column_int(stmt, 2);
-    r.site_id = sqlite3_column_int(stmt, 3);
-    r.i = sqlite3_column_int(stmt, 4);
-    r.j = sqlite3_column_int(stmt, 5);
-    r.k = sqlite3_column_int(stmt, 6);
+    r.site_mapping = sqlite3_column_int(stmt, 4);
+    r.edge = sqlite3_column_int(stmt, 5);
 }
 
 /* --------- Write State SQL ---------*/
@@ -150,25 +146,21 @@ struct LatticeWriteStateSql {
     int seed;
     int species_id;
     int quantity;
-    int site_id;
-    int i;
-    int j;
-    int k;
+    int site_mapping;
+    int edge;
     static std::string sql_statement;
     static void action(LatticeWriteStateSql &r, sqlite3_stmt *stmt);
 };
 
 std::string LatticeWriteStateSql::sql_statement =
-    "INSERT INTO interrupt_state VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7);";
+    "INSERT INTO interrupt_state VALUES (?1, ?2, ?3, ?4, ?5);";
 
 void LatticeWriteStateSql::action(LatticeWriteStateSql& t, sqlite3_stmt* stmt) {
     sqlite3_bind_int(stmt, 1, t.seed);
     sqlite3_bind_int(stmt, 2, t.species_id);
     sqlite3_bind_int(stmt, 3, t.quantity);
-    sqlite3_bind_int(stmt, 4, t.site_id);
-    sqlite3_bind_int(stmt, 5, t.i);
-    sqlite3_bind_int(stmt, 6, t.j);
-    sqlite3_bind_int(stmt, 7, t.k);
+    sqlite3_bind_int(stmt, 4, t.site_mapping);
+    sqlite3_bind_int(stmt, 5, t.edge);
 }
 
 /* --------- State and Trajectory History Elements ---------*/
@@ -177,10 +169,8 @@ struct LatticeStateHistoryElement{
     unsigned long int seed; //seed
     int species_id;
     int quantity;
-    int site_id;
-    int i;
-    int j;
-    int k;
+    int site_mapping;
+    int edge;
 };
 
 struct LatticeTrajectoryHistoryElement {
@@ -189,7 +179,56 @@ struct LatticeTrajectoryHistoryElement {
     int step;
     double time;  // time after reaction has occoured.
     int reaction_id; // reaction which fired
-    int site_1;
-    int site_2;
+    int site_1_mapping;
+    int site_2_mapping;
 
 };
+
+struct LatticeCutoffHistoryElement{
+    unsigned long int seed;
+    int step;
+    double time;
+    int maxz;
+};
+
+/* --------- Read Cutoff SQL ---------*/
+
+struct LatticeReadCutoffSql {
+    int seed;
+    int step;
+    double time;
+    int maxz;
+    static std::string sql_statement;
+    static void action(LatticeReadCutoffSql &r, sqlite3_stmt *stmt);
+};
+
+std::string LatticeReadCutoffSql::sql_statement =
+    "SELECT seed, step, time, maxz FROM interrupt_cutoff;";
+
+void LatticeReadCutoffSql::action(LatticeReadCutoffSql &r, sqlite3_stmt *stmt) {
+    r.seed = sqlite3_column_int(stmt, 0);
+    r.step = sqlite3_column_int(stmt, 1);
+    r.time = sqlite3_column_double(stmt, 2);
+    r.maxz = sqlite3_column_int(stmt, 3);
+}
+
+/* --------- WriteCutoff SQL ---------*/
+
+struct LatticeWriteCutoffSql {
+    int seed;
+    int step;
+    double time;
+    int maxz;
+    static std::string sql_statement;
+    static void action(LatticeWriteCutoffSql &r, sqlite3_stmt *stmt);
+};
+
+std::string LatticeWriteCutoffSql::sql_statement =
+    "INSERT INTO interrupt_cutoff VALUES (?1,?2,?3, ?4);";
+
+void LatticeWriteCutoffSql::action(LatticeWriteCutoffSql &r, sqlite3_stmt *stmt) {
+    sqlite3_bind_int(stmt, 1, r.seed);
+    sqlite3_bind_int(stmt, 2, r.step);
+    sqlite3_bind_double(stmt, 3, r.time);
+    sqlite3_bind_int(stmt, 4, r.maxz);
+}

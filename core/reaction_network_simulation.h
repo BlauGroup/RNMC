@@ -1,0 +1,41 @@
+#ifndef RNMC_REACTION_NETWORK_SIMULATION_H
+#define RNMC_REACTION_NETWORK_SIMULATION_H
+
+#include "../GMC/reaction_network.h"
+#include "simulation.h"
+
+template <typename Solver>
+class ReactionNetworkSimulation : public Simulation<Solver> {
+    private: 
+        Solver solver;
+    public:
+    ReactionNetwork &reaction_network;
+    std::vector<int> state;
+    std::vector<ReactionNetworkTrajectoryHistoryElement> history;
+    HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue; 
+
+    ReactionNetworkSimulation(ReactionNetwork &reaction_network, 
+            unsigned long int seed,
+            int step,
+            double time,
+            std::vector<int> state,
+            int history_chunk_size,
+            HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue
+        ) : 
+        Simulation<Solver>(seed, history_chunk_size, step, time),
+        history_queue(history_queue),
+        reaction_network (reaction_network),
+        state (state)
+        { 
+            history.reserve(this->history_chunk_size);
+        };
+
+    void init();
+    bool execute_step();
+    void print_output() {assert(false);};
+
+};
+
+#include "reaction_network_simulation.cpp"
+
+#endif 

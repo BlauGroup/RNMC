@@ -1,58 +1,7 @@
-#pragma once
-#include "../core/sampler.h"
-#include <vector>
-#include <unordered_map>
-#include "../core/solvers.h"
-#include <string>
-#include <numeric>
+#include "lattice_solver.h"
+#include <iostream>
 
-struct LatticeUpdate {
-    unsigned long int index;
-    double propensity;
-    int site_one;
-    int site_two;
-};
-
-struct LatticeEvent {
-    std::optional<int> site_one;
-    std::optional<int> site_two;
-    unsigned long int index;
-    double dt;
-};
-
-class LatSolver {
-    public:
-        LatSolver() : sampler(Sampler(0)) {}; // defualt constructor
-        LatSolver(unsigned long int seed, std::vector<double> &&initial_propensities);
-        LatSolver(unsigned long int seed, std::vector<double> &initial_propensities);
-
-        void update(Update update);
-        void update(std::vector<Update> updates);
-
-        void update(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props);
-        void update(std::vector<LatticeUpdate> lattice_updates, std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props);
-
-        std::optional<LatticeEvent> event_lattice(std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props);
-
-        std::string make_string(int site_one, int site_two);
-
-        long double propensity_sum;
-        int number_of_active_indices;               // end simulation of no sites with non zero propensity   
-
-    private:
-        Sampler sampler;
-        std::vector<double> propensities;                   // Gillepsie propensities            
-
-};
-
-/* ---------------------------------------------------------------------- */
-
-// LinearSolver implementation
-// LinearSolver can opperate directly on the passed propensities using a move
-LatSolver::LatSolver(unsigned long int seed,
+LatticeSolver::LatticeSolver(unsigned long int seed,
     std::vector<double> &&initial_propensities) :
     propensity_sum (0.0),
     sampler (Sampler(seed)),
@@ -69,11 +18,11 @@ LatSolver::LatSolver(unsigned long int seed,
             }
 
         }
-};
+} // LatticeSolver()
 
 /* ---------------------------------------------------------------------- */
 
-LatSolver::LatSolver( unsigned long int seed,
+LatticeSolver::LatticeSolver( unsigned long int seed,
     std::vector<double> &initial_propensities) :
     propensity_sum (0.0),
     sampler (Sampler(seed)),
@@ -87,11 +36,11 @@ LatSolver::LatSolver( unsigned long int seed,
             }
 
         }
-    };
+    } // LatticeSolver()
 
 /* ---------------------------------------------------------------------- */
 
-void LatSolver::update(Update update) {
+void LatticeSolver::update(Update update) {
 
     if (propensities[update.index] > 0.0) number_of_active_indices--;
 
@@ -104,11 +53,11 @@ void LatSolver::update(Update update) {
 
     propensities[update.index] = update.propensity;
 
-};
+} // update()
 
 /* ---------------------------------------------------------------------- */
 
-void LatSolver::update(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
+void LatticeSolver::update(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props) {
     
     propensity_sum += lattice_update.propensity;
@@ -118,32 +67,32 @@ void LatSolver::update(LatticeUpdate lattice_update, std::unordered_map<std::str
     props[hash].push_back(std::make_pair(lattice_update.propensity, lattice_update.index));
 
 
-};
+} // update()
 
 /* ---------------------------------------------------------------------- */
 
-void LatSolver::update(std::vector<LatticeUpdate> lattice_updates, std::unordered_map<std::string,                     
+void LatticeSolver::update(std::vector<LatticeUpdate> lattice_updates, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props) {
     for (LatticeUpdate u : lattice_updates) {
         update(u, props);
     }
-};
+} // update()
 
 /* ---------------------------------------------------------------------- */
 
-void LatSolver::update(std::vector<Update> updates) {
+void LatticeSolver::update(std::vector<Update> updates) {
     for (Update u : updates) {
         update(u);
     }
-};
+} // update()
 
 /* ---------------------------------------------------------------------- */
 
-std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::string,                     
+std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props) {
     if(propensity_sum < 0) {
         int sum = 0;
-        for(int i = 0; i < propensities.size(); i++ ) {
+        for(int i = 0; i < int(propensities.size()); i++ ) {
             sum += propensities[i];
         }
         for(auto it = props.begin(); it != props.end(); it ++) {
@@ -156,7 +105,7 @@ std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::str
         std::cout << "ERROR" << std::endl;
     }
     if (number_of_active_indices == 0) {
-        propensity_sum == 0.0;
+        propensity_sum = 0.0;
         return std::optional<LatticeEvent> ();
     }
     
@@ -247,15 +196,14 @@ std::optional<LatticeEvent> LatSolver::event_lattice(std::unordered_map<std::str
     return std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id, .dt = dt,
                                                            .site_one = site_one, .site_two = site_two});
                         
-        
-}
+} // event_lattice()
 
 /* ---------------------------------------------------------------------- */
 
-std::string LatSolver::make_string(int site_one, int site_two) {
+std::string LatticeSolver::make_string(int site_one, int site_two) {
 
     return (site_one > site_two) ? std::to_string(site_one) + "." + 
     std::to_string(site_two) : std::to_string(site_two) + "." + std::to_string(site_one);
 
-} // make_string
+} // make_string()
 

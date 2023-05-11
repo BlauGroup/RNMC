@@ -1,4 +1,6 @@
-#pragma once
+#ifndef RNMC_SOLVERS_H
+#define RNMC_SOLVERS_H
+
 #include "sampler.h"
 #include <vector>
 #include <optional>
@@ -9,16 +11,6 @@
 // it decides what will occour next.  for now, we have the linear
 // solver and a tree solver ported from spparks:
 // https://spparks.sandia.gov/
-
-struct Update {
-    unsigned long int index;
-    double propensity;
-};
-
-struct Event {
-    unsigned long int index;
-    double dt;
-};
 
 class LinearSolver {
 private:
@@ -356,3 +348,5 @@ double SparseSolver::get_propensity(int index) {
 
 
 double SparseSolver::get_propensity_sum() { return propensity_sum;};
+
+#endif

@@ -1,0 +1,17 @@
+Begin Print Homogeneous Propensities
+Reaction: 0propensity: 0
+Reaction: 1propensity: 0
+Reaction: 2propensity: 0
+Reaction: 3propensity: 0
+Reaction: 4propensity: 0
+Reaction: 5propensity: 0
+Reaction: 6propensity: 0
+Reaction: 7propensity: 0
+Reaction: 8propensity: 0
+Begin Print Homogeneous State
+Species: 0quantity: 0
+Species: 1quantity: 0
+Species: 2quantity: 327
+Species: 3quantity: 0
+Species: 4quantity: 14185
+total propensity_sum1.46839e+07

@@ -2,6 +2,8 @@
 #include <sqlite3.h>
 #include <string>
 
+#include "nano_solver.h"
+
 /* --------- Species SQL ---------*/
 struct SpeciesSql {
     int species_id;
@@ -121,8 +123,6 @@ void NanoFactorsSql::action(NanoFactorsSql &r, sqlite3_stmt *stmt) {
     const char *distance_factor_type_raw = (char *) sqlite3_column_text(stmt, 3);
     std::string distance_factor_type ( distance_factor_type_raw );
     r.distance_factor_type = std::move(distance_factor_type);
-
-
 }
 
 /* --------- Initial State SQL ---------*/
@@ -229,6 +229,8 @@ void NanoWriteStateSql::action(NanoWriteStateSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 2, r.site_id);
     sqlite3_bind_int(stmt, 3, r.degree_of_freedom);
 }
+
+
 
 /* --------- State and Trajectory History Elements ---------*/
 // Each Element will be stored in a History Packet which will be stored 

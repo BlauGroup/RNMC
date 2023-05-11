@@ -1,4 +1,6 @@
-#pragma once
+#ifndef RNMC_SQL_H
+#define RNMC_SQL_H
+
 #include <sqlite3.h>
 #include <string>
 #include <vector>
@@ -198,8 +200,6 @@ public:
         done (false),
         statement (statement)
         {};
-
-
     // TODO: write a reset method so we can reloop without needing to
     // create a new object
     std::optional<T> next() {
@@ -239,9 +239,9 @@ public:
         statement.reset();
         statement.action(row);
         statement.step();
-
-        // TODO: error handling
     };
 
 
 };
+
+#endif

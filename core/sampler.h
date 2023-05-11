@@ -1,4 +1,6 @@
-#pragma once
+#ifndef RNMC_SAMPLER_H
+#define RNMC_SAMPLER_H
+
 #include <gsl/gsl_rng.h>
 #include <utility>
 
@@ -51,3 +53,5 @@ public:
     };
 
 };
+
+#endif

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef RNMC_QUEUES_H
+#define RNMC_QUEUES_H
+
 #include <queue>
 #include <mutex>
 #include <optional>
@@ -73,3 +75,5 @@ struct HistoryQueue {
     };
 
 };
+
+#endif

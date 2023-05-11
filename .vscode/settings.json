@@ -108,5 +108,5 @@
         "gmc": "cpp",
         "format": "cpp"
     },
-    "C_Cpp.errorSquiggles": "EnabledIfIncludesResolve"
+    "C_Cpp.errorSquiggles": "enabled"
 }
