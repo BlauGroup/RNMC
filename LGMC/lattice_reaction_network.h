@@ -191,8 +191,10 @@ class LatticeReactionNetwork {
                                         std::map<int, double> &temp_seed_time_map, 
                                         LatticeReactionNetwork &model);
 
-        void store_state_history(std::vector<LatticeStateHistoryElement> &state_packet,
-        LatticeState &state, LatticeReactionNetwork &lattice_reaction_network, unsigned long int &seed);
+        void store_checkpoint(std::vector<LatticeStateHistoryElement> &state_packet,
+        LatticeState &state, LatticeReactionNetwork &lattice_reaction_network, unsigned long int &seed, 
+        int step, double time, std::vector<LatticeCutoffHistoryElement> &cutoff_packet);
+
 
         double get_butler_volmer_rate_coefficient(double base_dg, double prefactor, double charge_transfer_coefficient,
                                           double electron_tunneling_coefficient, double e_free, double distance,

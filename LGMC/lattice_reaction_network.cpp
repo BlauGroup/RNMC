@@ -1046,7 +1046,7 @@ LatticeWriteCutoffSql LatticeReactionNetwork::cutoff_history_element_to_sql(
             .seed = seed,
             .step = cutoff_history_element.step,
             .time = cutoff_history_element.time,
-            .maxz = cutoff_history_element.maxz
+            .maxk = cutoff_history_element.maxk
         };
 }
 
@@ -1062,7 +1062,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 
     bool read_interrupt_states = false;
     
-    std::unordered_map<int, int> seed_maxz_map;
+    std::unordered_map<int, int> seed_maxk_map;
     std::unordered_map<int, std::unordered_map<int, std::tuple<uint32_t,uint32_t,uint32_t>>> seed_ijk_map;
 
     while (std::optional<LatticeReadCutoffSql> maybe_cutoff_row = cutoff_reader.next()){
@@ -1071,12 +1071,12 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 
         temp_seed_step_map[cutoff_row.seed] = cutoff_row.step;
         temp_seed_time_map[cutoff_row.seed] = cutoff_row.time;
-        seed_maxz_map[cutoff_row.seed] = cutoff_row.maxz;
+        seed_maxk_map[cutoff_row.seed] = cutoff_row.maxk;
 
         // create mapping from szudzik id to i,j,k values
         Lattice *initial_lattice = model.initial_lattice;
         std::unordered_map<int, std::tuple<uint32_t,uint32_t,uint32_t>> mapping = 
-        szudzik_mapping(initial_lattice->xhi/initial_lattice->latconst, initial_lattice->yhi/initial_lattice->latconst, cutoff_row.maxz);
+        szudzik_mapping(initial_lattice->xhi/initial_lattice->latconst, initial_lattice->yhi/initial_lattice->latconst, cutoff_row.maxk);
         seed_ijk_map[cutoff_row.seed] = mapping;
     }
     
@@ -1195,9 +1195,9 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistoryElement> &state_packet,
-    LatticeState &state, LatticeReactionNetwork &lattice_reaction_network, unsigned long int &seed) {
-
+ void LatticeReactionNetwork::store_checkpoint(std::vector<LatticeStateHistoryElement> &state_packet,
+        LatticeState &state, LatticeReactionNetwork &lattice_reaction_network, unsigned long int &seed, 
+        int step, double time, std::vector<LatticeCutoffHistoryElement> &cutoff_packet) {
     // Lattice site
     for (auto site : state.lattice->sites) {
 
@@ -1227,7 +1227,15 @@ void LatticeReactionNetwork::store_state_history(std::vector<LatticeStateHistory
         });
     }
 
+    // cutoff information
+    cutoff_packet.push_back(LatticeCutoffHistoryElement {
+        .seed = seed,
+        .step = step,
+        .time = time,
+        .maxk = int(state.lattice->get_maxz()/state.lattice->get_latconst())
+    });
 
+    
 } // store_state_history()
 
 /* ---------------------------------------------------------------------- */

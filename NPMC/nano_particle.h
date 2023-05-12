@@ -123,17 +123,19 @@ struct NanoParticle {
         CutoffHistoryElement cutoff_history_element);
 
     void checkpoint(SqlReader<NanoReadStateSql> state_reader, 
-                    SqlReader<ReadCutoffSql> cutoff_reader, 
-                    SqlReader<NanoReadTrajectoriesSql> trajectory_reader, 
-                    std::map<int, std::vector<int>> &temp_seed_state_map, 
-                    std::map<int, int> &temp_seed_step_map, 
-                    SeedQueue &temp_seed_queue, 
-                    std::map<int, double> &temp_seed_time_map, 
-                    NanoParticle &model);
+        SqlReader<ReadCutoffSql> cutoff_reader, 
+        SqlReader<NanoReadTrajectoriesSql> trajectory_reader, 
+        std::map<int, std::vector<int>> &temp_seed_state_map, 
+        std::map<int, int> &temp_seed_step_map, 
+        SeedQueue &temp_seed_queue, 
+        std::map<int, double> &temp_seed_time_map, 
+        NanoParticle &model);
 
-    void store_state_history(std::vector<NanoStateHistoryElement> &state_packet,
-    std::vector<int> &state, NanoParticle &nano_particle,
-    unsigned long int &seed);       
+
+    void store_checkpoint(std::vector<NanoStateHistoryElement> &state_packet,
+        std::vector<int> &state, NanoParticle &nano_particle,
+        unsigned long int &seed, int step, double time, 
+        std::vector<CutoffHistoryElement> &cutoff_packet);    
 };
 
 

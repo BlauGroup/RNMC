@@ -188,7 +188,7 @@ struct LatticeCutoffHistoryElement{
     unsigned long int seed;
     int step;
     double time;
-    int maxz;
+    int maxk;
 };
 
 /* --------- Read Cutoff SQL ---------*/
@@ -197,19 +197,19 @@ struct LatticeReadCutoffSql {
     int seed;
     int step;
     double time;
-    int maxz;
+    int maxk;
     static std::string sql_statement;
     static void action(LatticeReadCutoffSql &r, sqlite3_stmt *stmt);
 };
 
 std::string LatticeReadCutoffSql::sql_statement =
-    "SELECT seed, step, time, maxz FROM interrupt_cutoff;";
+    "SELECT seed, step, time, maxk FROM interrupt_cutoff;";
 
 void LatticeReadCutoffSql::action(LatticeReadCutoffSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
     r.step = sqlite3_column_int(stmt, 1);
     r.time = sqlite3_column_double(stmt, 2);
-    r.maxz = sqlite3_column_int(stmt, 3);
+    r.maxk = sqlite3_column_int(stmt, 3);
 }
 
 /* --------- WriteCutoff SQL ---------*/
@@ -218,7 +218,7 @@ struct LatticeWriteCutoffSql {
     int seed;
     int step;
     double time;
-    int maxz;
+    int maxk;
     static std::string sql_statement;
     static void action(LatticeWriteCutoffSql &r, sqlite3_stmt *stmt);
 };
@@ -230,5 +230,5 @@ void LatticeWriteCutoffSql::action(LatticeWriteCutoffSql &r, sqlite3_stmt *stmt)
     sqlite3_bind_int(stmt, 1, r.seed);
     sqlite3_bind_int(stmt, 2, r.step);
     sqlite3_bind_double(stmt, 3, r.time);
-    sqlite3_bind_int(stmt, 4, r.maxz);
+    sqlite3_bind_int(stmt, 4, r.maxk);
 }

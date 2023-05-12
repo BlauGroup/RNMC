@@ -592,9 +592,12 @@ void NanoParticle::checkpoint(SqlReader<NanoReadStateSql> state_reader,
 
 /*---------------------------------------------------------------------------*/
 
-void NanoParticle::store_state_history(std::vector<NanoStateHistoryElement> &state_packet,
-    std::vector<int> &state, NanoParticle &nano_particle, unsigned long int &seed) {
-    
+void NanoParticle::store_checkpoint(std::vector<NanoStateHistoryElement> &state_packet,
+    std::vector<int> &state, NanoParticle &nano_particle,
+    unsigned long int &seed, int step, double time, 
+    std::vector<CutoffHistoryElement> &cutoff_packet) {   
+
+    // state information
     for (unsigned int i = 0; i < nano_particle.sites.size(); i++) {
                 state_packet.push_back(NanoStateHistoryElement{
                     .seed = seed,
@@ -602,6 +605,13 @@ void NanoParticle::store_state_history(std::vector<NanoStateHistoryElement> &sta
                     .degree_of_freedom = state[i]
                 });
     }
+
+    // cutoff information
+    cutoff_packet.push_back(CutoffHistoryElement {
+        .seed = seed,
+        .step = step,
+        .time = time
+    });
 } // store_state_history()
 
 /*---------------------------------------------------------------------------*/
