@@ -22,8 +22,8 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
             int history_chunk_size,
             HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue
         ) : 
-        Simulation<Solver>(seed, history_chunk_size, step, time),
         history_queue(history_queue),
+        Simulation<Solver>(seed, history_chunk_size, step, time),
         reaction_network (reaction_network),
         state (state)
         { 
@@ -37,5 +37,6 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
 };
 
 #include "reaction_network_simulation.cpp"
+#include "../GMC/tree_solver.cpp"
 
 #endif 

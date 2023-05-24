@@ -10,6 +10,7 @@
 
 #include "../core/sampler.h"
 #include "../core/RNMC_types.h"
+#include "sql_types.h"
 
 struct NanoParticleParameters {
 };

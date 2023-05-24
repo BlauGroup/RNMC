@@ -90,7 +90,7 @@ void LatticeSolver::update(std::vector<Update> updates) {
 
 std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props) {
-    if(propensity_sum < 0) {
+    if(!(propensity_sum > 0)) {
         int sum = 0;
         for(int i = 0; i < int(propensities.size()); i++ ) {
             sum += propensities[i];
@@ -170,8 +170,12 @@ std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std:
         
         dt = - std::log(r2) / propensity_sum;
 
+        if(dt > 1e30) {
+            assert(true);
+        }
+
         // check if found, if not propensity sum is incorrect
-        if(!isFound) {
+        if(!isFound || !(propensity_sum > 0)) {
             int sum = 0;
             for(int i = 0; i < propensities.size(); i++ ) {
                 sum += propensities[i];

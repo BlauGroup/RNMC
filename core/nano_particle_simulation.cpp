@@ -1,4 +1,5 @@
 #include "nano_particle_simulation.h"
+#include "../NPMC/sql_types.h"
 
 void NanoParticleSimulation::init() {
     std::vector<std::set<int>> seed_site_reaction_dependency;

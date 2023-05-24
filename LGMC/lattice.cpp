@@ -1,23 +1,22 @@
 #include "lattice.h"
 
-Lattice::Lattice(float latconst_in, bool is_xperiodic_in, 
-        bool is_yperiodic_in, bool is_zperiodic_in) {
+Lattice::Lattice(float latconst_in) {
 
     isCheckpoint = true;
     latconst = latconst_in;
     
     // region of simulation input * lattice spacing
-    xlo = 1 * latconst;
+    xlo = 0;
     xhi = 1 * latconst;
-    ylo = 1 * latconst;
+    ylo = 0;
     yhi = 1 * latconst;
-    zlo = 1 * latconst;
+    zlo = 0;
     zhi = 1 * latconst;
     
     // 0 = non-periodic, 1 = periodic
-    is_xperiodic = is_xperiodic_in;
-    is_yperiodic = is_yperiodic_in;
-    is_zperiodic = is_zperiodic_in;
+    is_xperiodic = true;
+    is_yperiodic = true;
+    is_zperiodic = false;
     
     nsites = 0;
     maxz = 0;
@@ -29,26 +28,24 @@ Lattice::Lattice(float latconst_in, bool is_xperiodic_in,
 
 /* ---------------------------------------------------------------------- */
 
-Lattice::Lattice(float latconst_in, 
-        int ilo_in, int ihi_in, int jlo_in,
-        int jhi_in, int klo_in, int khi_in, 
-        bool is_xperiodic_in, bool is_yperiodic_in, bool is_zperiodic_in)  {
+Lattice::Lattice(float latconst_in, int ihi_in, 
+        int jhi_in, int khi_in)  {
     
     isCheckpoint = false;
     latconst = latconst_in;
     
     // region of simulation input * lattice spacing
-    xlo = ilo_in * latconst;
+    xlo = 0;
     xhi = ihi_in * latconst;
-    ylo = jlo_in * latconst;
+    ylo = 0;
     yhi = jhi_in * latconst;
-    zlo = klo_in * latconst;
+    zlo = 0;
     zhi = khi_in * latconst;
     
     // 0 = non-periodic, 1 = periodic
-    is_xperiodic = is_xperiodic_in;
-    is_yperiodic = is_yperiodic_in;
-    is_zperiodic = is_zperiodic_in;
+    is_xperiodic = true;
+    is_yperiodic = true;
+    is_zperiodic = false;
     
     nsites = 0;
     maxz = 0;
@@ -61,11 +58,6 @@ Lattice::Lattice(float latconst_in,
     
     // set neighbors of each site
     structured_connectivity();
-    
-    /*for(int n = 0; n < nsites; ++n) {
-        std::cout << "id: " << n << " [" << sites[n].x << ", " <<
-        sites[n].y << ", " << sites[n].z << "]" << std::endl;
-    }*/
 
 } // Lattice()
 
@@ -107,7 +99,7 @@ Lattice::Lattice(const Lattice& other) {
         edges[it->first] = it->second;
     }                       
 
-    for(int i = 0; i < numneigh.size(); i++) {
+    for(int i = 0; i < int(numneigh.size()); i++) {
         uint32_t* neighi;
         create(neighi, maxneigh, "create:neighi");
  
@@ -322,11 +314,6 @@ void Lattice::structured_connectivity() {
             gid = ((kneigh-klo)*(jhi-jlo+1)*(ihi-ilo+1)) +
                   ((jneigh-jlo)*(ihi-ilo+1)) + ((ineigh-ilo));
             
-            
-        /*std::cout << "neighbor: (" << sites[gid].x << ", " << sites[gid].y << ", " 
-                  << sites[gid].z << ") for: " << "[" << sites[i].x << ", " << 
-                  sites[i].y << ", " << sites[i].z << "]" << std::endl;*/
-            
         // add gid to neigh list of site i
         idneigh[i][numneigh[i]++] = gid;
       }
@@ -446,12 +433,7 @@ void Lattice::delete_site(int id) {
     loc_map.erase({sites[id].i, sites[id].j, sites[id].k});
 
     assert(sites.find(id) != sites.end());
-
-    // update neighbors
-    if(id == 31347) {
-        assert(true);
-        std::cout << "deleting site 31347" << std::endl;
-    }
+    
     update_neighbors(id, true);
 
     // remove from sites 
@@ -459,7 +441,7 @@ void Lattice::delete_site(int id) {
     sites.erase(id);
 
     // update neighbors
-    for(int i = 0; i < numneigh[id]; i++) {
+    for(int i = 0; i < int(numneigh[id]); i++) {
         update_neighbors(idneigh[id][i], false);
     }
     
@@ -480,9 +462,9 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
     float yprd = yhi - ylo;
     float zprd = zhi - zlo;
     
-    int nx = static_cast<int> (xprd / latconst);
-    int ny = static_cast<int> (yprd / latconst);
-    int nz = static_cast<int> (zprd / latconst);
+    uint32_t nx = static_cast<int> (xprd / latconst);
+    uint32_t ny = static_cast<int> (yprd / latconst);
+    uint32_t nz = static_cast<int> (zprd / latconst);
 
     uint32_t left, right, backward, forward, down, up;
     
@@ -673,86 +655,3 @@ void Lattice::fill(std::string filename) {
     }
 
 } // fill()
-
-/* ---------------------------------------------------------------------- */
-
-/*
-int main(int argc, char **argv) {
-    
-    Lattice *lattice = new Lattice(1, 0, 3, 0, 3, 0, 3, false, false, false);
-
-    std::ofstream myfile;
-    myfile.open ("test.txt");
-    myfile << lattice->sites.size() << std::endl;
-
-    for(auto it = lattice->sites.begin(); it != lattice->sites.end(); it++) {
-        myfile << "[" << it->second.x << ", " <<
-        it->second.y << ", " << it->second.z << "]" << ":";
-
-        std::tuple<uint32_t, uint32_t, uint32_t> key = {it->second.x, it->second.y, it->second.z};
-        int i = lattice->loc_map[key];  
-
-        for(int j = 0; j < lattice->numneigh[i]; j++) {
-            int id = lattice->idneigh[i][j];
-            myfile << "(" << lattice->sites[id].x << ", " <<
-            lattice->sites[id].y << ", " << lattice->sites[id].z << ")" << ",";
-        }
-        myfile << std::endl;
-    }
-    
-    lattice->add_site(3, 3, 4, 3, 3, 4, true, true, true);
-    lattice->add_site(2, 3, 4, 2, 3, 4, true, true, true);
-    
-    myfile << std::endl;
-    myfile << "added ... " << std::endl;
-    myfile << std::endl;
-    myfile << lattice->sites.size() << std::endl;
-
-    for(auto it = lattice->sites.begin(); it != lattice->sites.end(); it++) {
-        myfile << "[" << it->second.x << ", " <<
-        it->second.y << ", " << it->second.z << "]" << ":";
-
-        std::tuple<uint32_t, uint32_t, uint32_t> key = {it->second.x, it->second.y, it->second.z};
-        int i = lattice->loc_map[key];  
-
-        for(int j = 0; j < lattice->numneigh[i]; j++) {
-            int id = lattice->idneigh[i][j];
-            myfile << "(" << lattice->sites[id].x << ", " <<
-            lattice->sites[id].y << ", " << lattice->sites[id].z << ")" << ",";
-        }
-        myfile << std::endl;
-    }
-    
-    std::tuple<uint32_t, uint32_t, uint32_t> key = {3, 3, 4};
-    int id = lattice->loc_map[key];    
-    lattice->delete_site(id);
-
-    key = {2, 3, 4};
-    id = lattice->loc_map[key];    
-    lattice->delete_site(id);
-    myfile << std::endl;
-    myfile << "deleting ... " << std::endl;
-    myfile << std::endl;
-
-    myfile << lattice->sites.size() << std::endl;
-
-    for(auto it = lattice->sites.begin(); it != lattice->sites.end(); it++) {
-        myfile << "[" << it->second.x << ", " <<
-        it->second.y << ", " << it->second.z << "]" << ":";
-
-        std::tuple<uint32_t, uint32_t, uint32_t> key = {it->second.x, it->second.y, it->second.z};
-        int i = lattice->loc_map[key];  
-
-        for(int j = 0; j < lattice->numneigh[i]; j++) {
-            int id = lattice->idneigh[i][j];
-            myfile << "(" << lattice->sites[id].x << ", " <<
-            lattice->sites[id].y << ", " << lattice->sites[id].z << ")" << ",";
-        }
-        myfile << std::endl;
-    }
-
-    myfile.close();
-    delete lattice;
-
-    
-}*/

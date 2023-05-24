@@ -50,14 +50,25 @@ bool LatticeSimulation::execute_step() {
 
         if(event.site_one) {
             int site_1 = event.site_one.value();
-            site_1_mapping = lattice_network.combine(state.lattice->sites[site_1].i, 
-                                state.lattice->sites[site_1].j, state.lattice->sites[site_1].k);
+
+            if(site_1 == -2) {
+                site_1_mapping = -2;
+            }
+            else {
+                site_1_mapping = lattice_network.combine(state.lattice->sites[site_1].i, 
+                    state.lattice->sites[site_1].j, state.lattice->sites[site_1].k);
+            }
+
         }
         if(event.site_two) {
             int site_2 = event.site_two.value();
-
-            site_1_mapping = lattice_network.combine(state.lattice->sites[site_2].i, 
-                                state.lattice->sites[site_2].j, state.lattice->sites[site_2].k);
+            if(site_2 == -2) {
+                site_2_mapping = -2;
+            }
+            else {
+                site_2_mapping = lattice_network.combine(state.lattice->sites[site_2].i, 
+                                    state.lattice->sites[site_2].j, state.lattice->sites[site_2].k);
+            }
         }
 
         if(history.size() == 1000) {

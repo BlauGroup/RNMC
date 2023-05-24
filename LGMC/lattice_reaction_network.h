@@ -35,9 +35,7 @@ struct LatticeState {
 
 struct LatticeParameters {
     float latconst;                               
-    float boxxlo,boxxhi,boxylo,                   
-          boxyhi,boxzlo,boxzhi;                       
-    bool xperiodic, yperiodic, zperiodic;
+    float boxxhi, boxyhi, boxzhi;                       
     float temperature;
     float g_e;
     bool is_add_sites;

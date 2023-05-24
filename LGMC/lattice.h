@@ -98,13 +98,10 @@ public:
     std::map<std::tuple<uint32_t, uint32_t, uint32_t>, int> loc_map;  // Mapping from site location (i,j,k) to site ID
     bool isCheckpoint;
 
-    Lattice(float latconst_in, bool is_xperiodic_in, 
-        bool is_yperiodic_in, bool is_zperiodic_in);
+    Lattice(float latconst_in);
 
-    Lattice(float latconst_in, 
-        int ilo_in, int ihi_in, int jlo_in,
-        int jhi_in, int klo_in, int khi_in, 
-        bool xperiodic_in, bool yperiodic_in, bool zperiodic_in);   
+    Lattice(float latconst_in, int ihi_in,
+        int jhi_in, int khi_in);   
     
     Lattice(const Lattice& other);                          // copy constructor
 
@@ -126,7 +123,6 @@ public:
 
     float get_latconst();
 
-    // TODO: make general for all types of periodicity 
     float get_maxz();
 
     // fill lattice with specified values from file

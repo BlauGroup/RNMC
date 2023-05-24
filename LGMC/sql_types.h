@@ -137,8 +137,8 @@ void LatticeReadStateSql::action(LatticeReadStateSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
     r.species_id = sqlite3_column_int(stmt, 1);
     r.quantity = sqlite3_column_int(stmt, 2);
-    r.site_mapping = sqlite3_column_int(stmt, 4);
-    r.edge = sqlite3_column_int(stmt, 5);
+    r.site_mapping = sqlite3_column_int(stmt, 3);
+    r.edge = sqlite3_column_int(stmt, 4);
 }
 
 /* --------- Write State SQL ---------*/

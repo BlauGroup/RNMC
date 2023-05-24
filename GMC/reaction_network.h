@@ -12,7 +12,7 @@
 #include "../core/RNMC_types.h"
 #include "../core/sql_types.h"
 #include "../core/queues.h"
-#include "../core/tree_solver.h"
+#include "tree_solver.h"
 
 struct Reaction {
     // we assume that each reaction has zero, one or two reactants

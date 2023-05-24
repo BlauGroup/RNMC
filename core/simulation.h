@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <cstring>
 
-#include "tree_solver.h"
+#include "../GMC/tree_solver.h"
 
 
 // In the GNUC Library, sig_atomic_t is a typedef for int,

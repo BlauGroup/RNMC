@@ -1,5 +1,4 @@
-#include <cstring>
-
+#include <string>
 #include "simulation.h"
 
 template <typename Solver>

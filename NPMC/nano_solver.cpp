@@ -1,5 +1,5 @@
 #include "nano_solver.h"
-
+#include "sql_types.h"
 
 NanoSolver::NanoSolver(
     unsigned long int seed,

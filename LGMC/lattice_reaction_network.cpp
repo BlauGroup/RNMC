@@ -13,11 +13,10 @@ LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection
                         parameters) : sampler (Sampler(0)) {
 
     // create lattice
-    initial_lattice = new Lattice(parameters.latconst, parameters.boxxlo, 
-                                parameters.boxxhi, parameters.boxylo,
-                                parameters.boxyhi, parameters.boxzlo, 
-                                parameters.boxzhi, parameters.xperiodic, 
-                                parameters.yperiodic, parameters.zperiodic);
+    initial_lattice = new Lattice(parameters.latconst,
+                                parameters.boxxhi, 
+                                parameters.boxyhi,
+                                parameters.boxzhi);
 
 
     if(parameters.lattice_fill.compare("none") != 0) {
@@ -1091,8 +1090,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
             unsigned long int seed = maybe_seed.value();
 
             // Each LatticeState must have its own lattice to point to
-            Lattice *default_lattice = new Lattice(initial_latconst, initial_lattice->is_xperiodic, 
-                                    initial_lattice->is_yperiodic, initial_lattice->is_zperiodic);
+            Lattice *default_lattice = new Lattice(initial_latconst);
 
             LatticeState default_state = {model.initial_state, default_lattice};
             temp_seed_state_map.insert(std::make_pair(seed, default_state));
@@ -1145,10 +1143,9 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 
             // Each LatticeState must have its own lattice to point to
             Lattice *default_lattice = new Lattice(initial_latconst, 
-            initial_lattice->xlo/initial_latconst, initial_lattice->xhi/initial_latconst, 
-            initial_lattice->ylo/initial_latconst, initial_lattice->yhi/initial_latconst, 
-            initial_lattice->zlo/initial_latconst, initial_lattice->zhi/initial_latconst,
-            initial_lattice->is_xperiodic, initial_lattice->is_yperiodic, initial_lattice->is_zperiodic);
+                initial_lattice->xhi/initial_latconst, 
+                initial_lattice->yhi/initial_latconst, 
+                initial_lattice->zhi/initial_latconst);
 
             LatticeState default_state = {model.initial_state, default_lattice};
 
@@ -1393,15 +1390,9 @@ void print_usage_LGMC_parameters() {
  
      std::cout << "Usage: specify the following in the input file\n"
               << "lattice constant\n"
-              << "box x lower boundary\n"
               << "box x upper boundary\n"
-              << "box y lower boundary\n"
               << "box y upper boundary\n"
-              << "box z lower boundary\n"
               << "box z upper boundary\n"
-              << "Periodicity in x dimension (T/F)\n"
-              << "Periodicity in y dimension (T/F)\n"
-              << "Periodicity in z dimension (T/F)\n"
               << "Temperature\n"
               << "Electron free energy\n"
               << "Is Add Site (T/F)\n"
@@ -1509,10 +1500,7 @@ int main(int argc, char **argv) {
     }
 
     float latconst;                              
-    float boxxlo,boxxhi,boxylo,                   
-          boxyhi,boxzlo,boxzhi;                       
-    char xperiod, yperiod, zperiod;
-    bool xperiodic, yperiodic, zperiodic;
+    float boxxhi, boxyhi, boxzhi;                       
     float temperature;
     float g_e;
     bool is_add_site;
@@ -1521,8 +1509,8 @@ int main(int argc, char **argv) {
     char ct_style;
     std::string fill_lattice;
 
-    fin >> latconst >> boxxlo >> boxxhi >> boxylo >> boxyhi >> boxzlo >> boxzhi
-    >> xperiod >> yperiod >> zperiod >> temperature >> g_e >> add_site >> ct_style
+    fin >> latconst >> boxxhi >> boxyhi >> boxzhi
+    >> temperature >> g_e >> add_site >> ct_style
     >> fill_lattice;
 
     if(add_site == 'T') {
@@ -1532,36 +1520,6 @@ int main(int argc, char **argv) {
         is_add_site = false;
     }else {
         std::cout << "Incorrect parameter file argument for add site.\n";
-        exit(EXIT_FAILURE);
-    }
-
-    if(xperiod == 'T') {
-        xperiodic = true;
-    }
-    else if (xperiod == 'F') {
-        xperiodic = false;
-    }else {
-        std::cout << "Incorrect parameter file argument for x periodicity.\n";
-        exit(EXIT_FAILURE);
-    }
-
-    if(yperiod == 'T') {
-        yperiodic = true;
-    }
-    else if (yperiod == 'F') {
-        yperiodic = false;
-    }else {
-        std::cout << "Incorrect parameter file argument for y periodicity.\n";
-        exit(EXIT_FAILURE);
-    }
-
-    if(zperiod == 'T') {
-        zperiodic = true;
-    }
-    else if (zperiod == 'F') {
-        zperiodic = false;
-    }else {
-        std::cout << "Incorrect parameter file argument for z periodicity.\n";
         exit(EXIT_FAILURE);
     }
 
@@ -1577,15 +1535,15 @@ int main(int argc, char **argv) {
 
 
     LatticeParameters parameters{.latconst = latconst, 
-                              .boxxlo = boxxlo, .boxxhi = boxxhi, 
-                              .boxylo = boxylo, .boxyhi = boxyhi,
-                              .boxzlo = boxzlo, .boxzhi = boxzhi, 
-                              .xperiodic = xperiodic, .yperiodic = yperiodic, .zperiodic = zperiodic, 
-                              .temperature = temperature, .g_e = g_e, .is_add_sites = is_add_site,
-                              .charge_transfer_style = charge_transfer_style,
-                              .lattice_fill = fill_lattice};                               
+                            .boxxhi = boxxhi, 
+                            .boxyhi = boxyhi,
+                            .boxzhi = boxzhi, 
+                            .temperature = temperature, 
+                            .g_e = g_e, .is_add_sites = is_add_site,
+                            .charge_transfer_style = charge_transfer_style,
+                            .lattice_fill = fill_lattice};                               
 
- 
+
     Dispatcher<LatticeSolver,
     LatticeReactionNetwork,
     LatticeParameters,
