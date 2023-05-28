@@ -8,7 +8,7 @@
             "program": "${workspaceFolder}/LGMC/LGMC_debug",
             "args": ["-r", "../test_materials/LGMC/SEI(dynamic)/network.sqlite", "-i",
             "../test_materials/LGMC/SEI(dynamic)/state.sqlite", "-n", "1", "-c",
-            "1", "-b", "0", "-s", "600000",  "-p", "../test_materials/LGMC/SEI(dynamic)/LGMC_params.txt"],
+            "1", "-b", "0", "-s", "40000",  "-p", "../test_materials/LGMC/SEI(dynamic)/LGMC_params.txt"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/LGMC",
             "environment": [],

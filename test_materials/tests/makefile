@@ -58,7 +58,6 @@ clean :
 
 # Usually you shouldn't tweak such internal variables, indicated by a
 # trailing _.
-# GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 GTEST_SRCS_ = $(GTEST_DIR)/src/*.cc $(GTEST_DIR)/src/*.h $(GTEST_HEADERS)
 
 # For simplicity and to avoid depending on Google Test's
@@ -79,9 +78,7 @@ gtest.a : gtest-all.o
 gtest_main.a : gtest-all.o gtest_main.o
 	$(AR) $(ARFLAGS) $@ $^
 
-# Builds a sample test.  A test should link with either gtest.a or
-# gtest_main.a, depending on whether it defines its own main()
-# function.
+# build each test
 
 $(LGMC_DIR)/Lattice.cpp: $(LGMC_DIR)/Lattice.h
 
@@ -93,5 +90,3 @@ lattice_test.o : $(LGMC_DIR)/lattice.cpp $(GTEST_HEADERS)
 
 lattice_test : lattice_test.o $(LGMC_DIR)/Lattice.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
-
-	

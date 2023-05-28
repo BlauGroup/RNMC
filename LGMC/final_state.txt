@@ -93,16 +93,16 @@ Reaction: 90propensity: 0
 Reaction: 91propensity: 0
 Reaction: 92propensity: 0
 Reaction: 93propensity: 0
-Reaction: 94propensity: 0.603407
+Reaction: 94propensity: 0
 Reaction: 95propensity: 0
 Reaction: 96propensity: 0
 Reaction: 97propensity: 0
 Reaction: 98propensity: 0
 Begin Print Homogeneous State
 Species: 0quantity: 0
-Species: 1quantity: 3939
+Species: 1quantity: 4323
 Species: 2quantity: 0
-Species: 3quantity: 897
+Species: 3quantity: 0
 Species: 4quantity: 0
 Species: 5quantity: 0
 Species: 6quantity: 0
@@ -111,7 +111,7 @@ Species: 8quantity: 0
 Species: 9quantity: 0
 Species: 10quantity: 0
 Species: 11quantity: 0
-Species: 12quantity: 4549
+Species: 12quantity: 5000
 Species: 13quantity: 0
 Species: 14quantity: 0
-total propensity_sum0
+total propensity_sum22058.4

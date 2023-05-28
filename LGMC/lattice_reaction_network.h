@@ -84,7 +84,7 @@ class LatticeReactionNetwork {
         void update_state(Lattice *lattice, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props,
                         std::vector<int> &state, int next_reaction, 
-                        std::optional<int> site_one, std::optional<int> site_two, 
+                        std::optional<int> &site_one, std::optional<int> &site_two, 
                         long double &prop_sum, int &active_indices);
 
         void update_propensities(Lattice *lattice, std::vector<int> &state, std::function<void(Update update)> update_function, 
@@ -104,7 +104,7 @@ class LatticeReactionNetwork {
 
         bool update_state(Lattice *lattice, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props, 
-                        int next_reaction, int site_one, int site_two, 
+                        int next_reaction, int &site_one, int &site_two, 
                         long double &prop_sum, int &active_indices);
 
         void clear_site(Lattice *lattice, std::unordered_map<std::string,                     

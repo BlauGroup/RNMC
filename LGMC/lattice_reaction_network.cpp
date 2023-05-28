@@ -47,8 +47,8 @@ void LatticeReactionNetwork::update_state(Lattice *lattice,
                             std::unordered_map< std::string, 
                             std::vector< std::pair< double, int > > > &props,
                             std::vector<int> &state, int next_reaction, 
-                            std::optional<int> site_one, 
-                            std::optional<int> site_two, long double &prop_sum, 
+                            std::optional<int> &site_one, 
+                            std::optional<int> &site_two, long double &prop_sum, 
                             int &active_indices) {
     
     if(site_one) {
@@ -229,7 +229,7 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
 bool LatticeReactionNetwork::update_state(Lattice *lattice, 
                             std::unordered_map<std::string, 
                             std::vector< std::pair<double, int>>> &props, 
-                            int next_reaction, int site_one, int site_two, 
+                            int next_reaction, int &site_one, int &site_two, 
                             long double &prop_sum, int &active_indices) {
 
     LatticeReaction reaction = reactions[next_reaction]; 
@@ -327,6 +327,13 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
             else {
                 lattice->sites[site_one].species = reaction.products[1];
                 lattice->sites[site_two].species = reaction.products[0];
+
+                // for trajectories, make sure order of products corresponds
+                // to the order of sites
+
+                int temp = site_one; 
+                site_one = site_two;
+                site_two = temp;
             }
 
             if(lattice->edges.find(site_one) != lattice->edges.end()) {
@@ -629,10 +636,6 @@ void LatticeReactionNetwork::relevant_react(Lattice *lattice, std::function<void
         } // single reactant
         // two reactants (oxidation / reduction / homogeneous solid)
         else if(reaction.number_of_reactants == 2 && reaction.type != Type::ADSORPTION) {
-
-            if(reaction.type == Type::OXIDATION && lattice->sites[site].species == 3) {
-                assert(true);
-            }
             
             int site_reactant_id; 
             int other_reactant_id; 
@@ -664,7 +667,7 @@ void LatticeReactionNetwork::relevant_react(Lattice *lattice, std::function<void
                                             .site_one = site,
                                             .site_two = neighbor}, props); 
                         }
-                    } // igore_neighbor
+                    } // ignore_neighbor
 
                 } // for neigh
             }

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef RNMC_LGMC_SQL_TYPES_H
+#define RNMC_LGMC_SQL_TYPES_H
+
 #include <sqlite3.h>
 #include <string>
 
@@ -232,3 +234,5 @@ void LatticeWriteCutoffSql::action(LatticeWriteCutoffSql &r, sqlite3_stmt *stmt)
     sqlite3_bind_double(stmt, 3, r.time);
     sqlite3_bind_int(stmt, 4, r.maxk);
 }
+
+#endif

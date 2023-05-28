@@ -4,7 +4,6 @@
 #include "simulation.h"
 #include "RNMC_types.h"
 #include "../NPMC/nano_solver.h"
-#include "../NPMC/sql_types.h"
 #include "../NPMC/nano_particle.h"
 #include "queues.h"
 

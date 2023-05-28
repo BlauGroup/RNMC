@@ -1,4 +1,6 @@
-#pragma once
+#ifndef RNMC_GMC_SQL_TYPES_H
+#define RNMC_GMC_SQL_TYPES_H
+
 #include <sqlite3.h>
 #include <string>
 
@@ -129,3 +131,5 @@ struct ReactionNetworkTrajectoryHistoryElement {
     double time;  // time after reaction has occoured.
     int step;
 };
+
+#endif

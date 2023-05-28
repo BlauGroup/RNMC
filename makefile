@@ -1,16 +1,20 @@
-# Clean all subdirectories
+GMC: 
+	+$(MAKE) -C GMC
+
+clean_LGMC:
+	+$(MAKE) -C LGMC clean
+
 clean-all:
-	@for dir in */; do \
+	@for dir in LGMC NPMC GMC; do \
 		$(MAKE) -C $$dir clean; \
 	done
 
-GMC: 
-	$(MAKE) -C GMC clean
+debug-all:
+	@for dir in LGMC NPMC GMC; do \
+		$(MAKE) -C $$dir debug; \
+	done
 
-(%_clean):
-	+$(MAKE) -C LGMC clean
-
-
-# Build all executables
-all:
-	+$(MAKE) -C LGMC
+make-all:
+	@for dir in LGMC NPMC GMC; do \
+		$(MAKE) -C $$dir; \
+	done 

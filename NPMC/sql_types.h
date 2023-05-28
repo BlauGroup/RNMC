@@ -1,8 +1,10 @@
-#pragma once
+#ifndef RNMC_NPMC_SQL_TYPES_H
+#define RNMC_NPMC_SQL_TYPES_H
+
 #include <sqlite3.h>
 #include <string>
 
-#include "nano_solver.h"
+#include "NPMC_types.h"
 
 /* --------- Species SQL ---------*/
 struct SpeciesSql {
@@ -230,8 +232,6 @@ void NanoWriteStateSql::action(NanoWriteStateSql &r, sqlite3_stmt *stmt) {
     sqlite3_bind_int(stmt, 3, r.degree_of_freedom);
 }
 
-
-
 /* --------- State and Trajectory History Elements ---------*/
 // Each Element will be stored in a History Packet which will be stored 
 // in a history queue to be dumped to SQL database in batches
@@ -249,3 +249,5 @@ struct NanoTrajectoryHistoryElement {
     double time;  // time after reaction has occoured.
     int step;
 };
+
+#endif

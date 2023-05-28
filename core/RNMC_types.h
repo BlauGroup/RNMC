@@ -1,5 +1,5 @@
-#ifndef RNMC_TYPES_H
-#define RNMC_TYPES_H
+#ifndef RNMC_RNMC_TYPES_H
+#define RNMC_RNMC_TYPES_H
 
 enum TypeOfCutoff {step_termination, time_termination };
 

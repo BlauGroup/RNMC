@@ -37,6 +37,5 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
 };
 
 #include "reaction_network_simulation.cpp"
-#include "../GMC/tree_solver.cpp"
 
 #endif 

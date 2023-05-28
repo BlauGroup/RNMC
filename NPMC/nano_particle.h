@@ -2,7 +2,6 @@
 #define RNMC_NANO_PARTICLE_H
 
 #include "../core/sql.h"
-#include "../core/simulation.h"
 #include "../core/sql_types.h"
 #include "../core/queues.h"
 #include "sql_types.h"
@@ -12,7 +11,6 @@
 #include <functional>
 #include <csignal>
 #include <set>
-
 
 struct NanoParticle {
     // maps a species index to the number of degrees of freedom
