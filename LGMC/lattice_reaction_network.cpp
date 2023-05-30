@@ -314,7 +314,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                 
                 clear_site_helper(props, site_one, SITE_HOMOGENEOUS, prop_sum, active_indices);
                
-            }
+            }v
 
         }
         else {

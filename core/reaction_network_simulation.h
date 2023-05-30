@@ -22,10 +22,10 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
             int history_chunk_size,
             HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue
         ) : 
-        history_queue(history_queue),
         Simulation<Solver>(seed, history_chunk_size, step, time),
         reaction_network (reaction_network),
-        state (state)
+        state (state),
+        history_queue(history_queue)
         { 
             history.reserve(this->history_chunk_size);
         };
