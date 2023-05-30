@@ -563,6 +563,13 @@ void NanoParticle::checkpoint(SqlReader<NanoReadStateSql> state_reader,
         temp_seed_state_map.insert(std::make_pair(seed, default_state));
     } 
 
+    while (std::optional<ReadCutoffSql> maybe_cutoff_row = cutoff_reader.next()){
+        ReadCutoffSql cutoff_row = maybe_cutoff_row.value();
+
+        temp_seed_step_map[cutoff_row.seed] = cutoff_row.step;
+        temp_seed_time_map[cutoff_row.seed] = cutoff_row.time;
+    }
+
     // try reading from state
     while (std::optional<NanoReadStateSql> maybe_state_row = state_reader.next()){
         read_interrupt_states = true;
@@ -572,20 +579,22 @@ void NanoParticle::checkpoint(SqlReader<NanoReadStateSql> state_reader,
     }
 
     // try reading from trajectory
-    while (std::optional<NanoReadTrajectoriesSql> maybe_trajectory_row = trajectory_reader.next()) {
-                        // read_trajectory_states = true;
+    if(!read_interrupt_states) {
+        while (std::optional<NanoReadTrajectoriesSql> maybe_trajectory_row = trajectory_reader.next()) {
+                            // read_trajectory_states = true;
 
-        NanoReadTrajectoriesSql trajectory_row = maybe_trajectory_row.value();
-        
-        Interaction *interaction = &model.all_interactions[trajectory_row.interaction_id];
-        temp_seed_state_map[trajectory_row.seed][trajectory_row.site_id_1] = interaction->right_state[0];
-        if (interaction->number_of_sites == 2) {
-            temp_seed_state_map[trajectory_row.seed][trajectory_row.site_id_2] = interaction->right_state[1];
-        }
+            NanoReadTrajectoriesSql trajectory_row = maybe_trajectory_row.value();
+            
+            Interaction *interaction = &model.all_interactions[trajectory_row.interaction_id];
+            temp_seed_state_map[trajectory_row.seed][trajectory_row.site_id_1] = interaction->right_state[0];
+            if (interaction->number_of_sites == 2) {
+                temp_seed_state_map[trajectory_row.seed][trajectory_row.site_id_2] = interaction->right_state[1];
+            }
 
-        if (trajectory_row.step > temp_seed_step_map[trajectory_row.seed]) {
-            temp_seed_step_map[trajectory_row.seed] = trajectory_row.step;
-            temp_seed_time_map[trajectory_row.seed] = trajectory_row.time;
+            if (trajectory_row.step > temp_seed_step_map[trajectory_row.seed]) {
+                temp_seed_step_map[trajectory_row.seed] = trajectory_row.step;
+                temp_seed_time_map[trajectory_row.seed] = trajectory_row.time;
+            }
         }
     }
 } // checkpoint()

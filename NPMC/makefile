@@ -11,11 +11,6 @@ EXECUTABLE  = NPMC
 # designate which compiler to use
 CXX         = g++
 
-# list of test drivers (with main()) for development
-TESTSOURCES = $(wildcard *test.cpp)
-# names of test executables
-TESTS       = $(TESTSOURCES:%.cpp=%)
-
 # list of sources used
 SOURCES     = $(wildcard *.cpp)
 SOURCES     := $(filter-out $(TESTSOURCES), $(SOURCES))

@@ -5,12 +5,14 @@
 #include "../core/sql_types.h"
 #include "../core/queues.h"
 #include "sql_types.h"
+#include "NPMC_types.h"
 
 #include <vector>
 #include <cmath>
 #include <functional>
 #include <csignal>
 #include <set>
+#include <map>
 
 struct NanoParticle {
     // maps a species index to the number of degrees of freedom

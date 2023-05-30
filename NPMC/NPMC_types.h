@@ -1,6 +1,6 @@
 
-#ifndef RNMC_NANO_PARTICLE_H
-#define RNMC_NANO_PARTICLE_H
+#ifndef RNMC_NPMC_TYPES_H
+#define RNMC_NPMC_TYPES_H
 
 struct NanoParticleParameters {
 };
