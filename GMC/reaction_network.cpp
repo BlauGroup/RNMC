@@ -336,7 +336,7 @@ void ReactionNetwork::checkpoint(SqlReader<ReactionNetworkReadStateSql> state_re
 /*---------------------------------------------------------------------------*/
 
 void ReactionNetwork::store_checkpoint(std::vector<ReactionNetworkStateHistoryElement> 
-    &state_packet, std::vector<int> &state, ReactionNetwork &reaction_network, 
+    &state_packet, std::vector<int> &state,
     unsigned long int &seed, int step, double time, 
     std::vector<CutoffHistoryElement> &cutoff_packet) {
     

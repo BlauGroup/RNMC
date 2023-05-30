@@ -23,8 +23,7 @@ LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection
         // fill lattice
         initial_lattice->fill(parameters.lattice_fill);
     }
-    init_reaction_network(reaction_network_database, initial_state_database, 
-                        initial_lattice);
+    init_reaction_network(reaction_network_database, initial_state_database);
 
     is_add_sites = parameters.is_add_sites;
     temperature = parameters.temperature;
@@ -145,7 +144,7 @@ void LatticeReactionNetwork::update_adsorp_props(Lattice *lattice,
             // graph will point to all adsorption reactions
             std::vector<int> &potential_reactions = dependents[lattice->sites[site].species]; 
 
-            for(unsigned long int i = 0; i < static_cast<int> (potential_reactions.size()); i++ ) {
+            for(int i = 0; i < static_cast<int> (potential_reactions.size()); i++ ) {
 
                 unsigned long int reaction_id = potential_reactions[i];
                 LatticeReaction reaction = reactions[reaction_id]; 
@@ -314,7 +313,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                 
                 clear_site_helper(props, site_one, SITE_HOMOGENEOUS, prop_sum, active_indices);
                
-            }v
+            }
 
         }
         else {
@@ -691,7 +690,7 @@ std::string LatticeReactionNetwork::make_string(std::vector<int> vec) {
     std::sort(vec.begin(), vec.end());
     std::string hash = "";
     
-    for(int i = 0; i < vec.size(); i++) {
+    for(int i = 0; i < static_cast<int>(vec.size()); i++) {
         hash = hash + std::to_string(vec[i]);
     }
     
@@ -714,7 +713,7 @@ double LatticeReactionNetwork::sum_row(std::string hash, std::unordered_map<std:
 /* ---------------------------------------------------------------------- */
 
 void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_network_database,
-     SqlConnection &initial_state_database, Lattice *lattice)
+     SqlConnection &initial_state_database)
 
     {
     // collecting reaction network metadata
@@ -871,7 +870,7 @@ void LatticeReactionNetwork::compute_dependents() {
     for ( unsigned int reaction_id = 0; reaction_id <  reactions.size(); reaction_id++ ) {
         LatticeReaction reaction = reactions[reaction_id]; 
 
-        if(reaction.type != 'L') {
+        if(reaction.type != Type::HOMOGENEOUS_SOLID) {
             for ( int i = 0; i < reaction.number_of_reactants; i++ ) {
                 int reactant_id = reaction.reactants[i];
                 dependents[reactant_id].push_back(reaction_id);
@@ -1165,7 +1164,6 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
                 temp_seed_state_map[state_row.seed].homogeneous[state_row.species_id] = state_row.quantity;
             }
             else {
-                bool can_adsorb = state_row.edge == 1 ? true : false;
                 int i = std::get<0>(seed_ijk_map[state_row.seed][state_row.site_mapping]);
                 int j = std::get<1>(seed_ijk_map[state_row.seed][state_row.site_mapping]);
                 int k = std::get<2>(seed_ijk_map[state_row.seed][state_row.site_mapping]);
@@ -1196,7 +1194,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 /* ---------------------------------------------------------------------- */
 
  void LatticeReactionNetwork::store_checkpoint(std::vector<LatticeStateHistoryElement> &state_packet,
-        LatticeState &state, LatticeReactionNetwork &lattice_reaction_network, unsigned long int &seed, 
+        LatticeState &state, unsigned long int &seed, 
         int step, double time, std::vector<LatticeCutoffHistoryElement> &cutoff_packet) {
     // Lattice site
     for (auto site : state.lattice->sites) {
@@ -1242,7 +1240,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 
 void LatticeReactionNetwork::compute_initial_propensities(std::vector<int> state, Lattice *lattice) {
 
-    for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
+    for (int i = 0; i < static_cast<int> (initial_propensities.size()); i++) {
         initial_propensities[i] = compute_propensity(state, i, lattice);
     }
 } // computer_initial_propensities

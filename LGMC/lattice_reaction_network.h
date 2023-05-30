@@ -146,7 +146,7 @@ class LatticeReactionNetwork {
         /* -------------------------- Updates Reaction Network ----------------------------- */
 
         void init_reaction_network(SqlConnection &reaction_network_database,
-        SqlConnection &initial_state_database, Lattice *lattice);
+        SqlConnection &initial_state_database);
 
         void fill_reactions(SqlConnection &reaction_network_database);
 
@@ -190,7 +190,7 @@ class LatticeReactionNetwork {
                                         LatticeReactionNetwork &model);
 
         void store_checkpoint(std::vector<LatticeStateHistoryElement> &state_packet,
-        LatticeState &state, LatticeReactionNetwork &lattice_reaction_network, unsigned long int &seed, 
+        LatticeState &state, unsigned long int &seed, 
         int step, double time, std::vector<LatticeCutoffHistoryElement> &cutoff_packet);
 
 

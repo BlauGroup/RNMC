@@ -4,12 +4,12 @@
 LatticeSolver::LatticeSolver(unsigned long int seed,
     std::vector<double> &&initial_propensities) :
     propensity_sum (0.0),
-    sampler (Sampler(seed)),
+    number_of_active_indices (0),
     // if this move isn't here, the semantics is that initial
     // propensities gets moved into a stack variable for the function
     // call and that stack variable is copied into the object.
     propensities (std::move(initial_propensities)),
-    number_of_active_indices (0)
+    sampler (Sampler(seed))
 {
     for (unsigned long i = 0; i < propensities.size(); i++) {
             propensity_sum += propensities[i];
@@ -25,9 +25,9 @@ LatticeSolver::LatticeSolver(unsigned long int seed,
 LatticeSolver::LatticeSolver( unsigned long int seed,
     std::vector<double> &initial_propensities) :
     propensity_sum (0.0),
-    sampler (Sampler(seed)),
+    number_of_active_indices (0),
     propensities (initial_propensities),
-    number_of_active_indices (0)
+    sampler (Sampler(seed))
     {
         for (unsigned long i = 0; i < propensities.size(); i++) {
             propensity_sum += propensities[i];
@@ -181,7 +181,7 @@ std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std:
         // check if found, if not propensity sum is incorrect
         if(!isFound || !(propensity_sum > 0)) {
             double sum = 0;
-            for(int i = 0; i < propensities.size(); i++ ) {
+            for(int i = 0; i < static_cast<int> (propensities.size()); i++ ) {
                 sum += propensities[i];
             }
             for(auto it = props.begin(); it != props.end(); it ++) {

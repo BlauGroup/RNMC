@@ -87,7 +87,7 @@ class SimulatorPayload {
             // Make a vector of CutoffHistories for the current time and step
             std::vector<CutoffHistory> cutoff_packet;
 
-            model.store_checkpoint(state_packet, simulation.state, model, seed, simulation.step, simulation.time, cutoff_packet);
+            model.store_checkpoint(state_packet, simulation.state, seed, simulation.step, simulation.time, cutoff_packet);
 
             // Construct a history packet from the history elements and add it to the queue
             state_history_queue.insert_history(

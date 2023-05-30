@@ -133,7 +133,7 @@ struct NanoParticle {
 
 
     void store_checkpoint(std::vector<NanoStateHistoryElement> &state_packet,
-        std::vector<int> &state, NanoParticle &nano_particle,
+        std::vector<int> &state,
         unsigned long int &seed, int step, double time, 
         std::vector<CutoffHistoryElement> &cutoff_packet);    
 };
