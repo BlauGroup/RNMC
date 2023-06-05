@@ -33,7 +33,7 @@ NanoParticle::NanoParticle(
         metadata_reader.next();
 
     if (! maybe_metadata_row.has_value()) {
-        std::cerr << time_stamp()
+        std::cerr << sql_types::time_stamp()
                   << "no metadata row\n";
 
         std::abort();
@@ -47,7 +47,7 @@ NanoParticle::NanoParticle(
         factors_reader.next();
 
     if (! maybe_factor_row.has_value()) {
-        std::cerr << time_stamp()
+        std::cerr << sql_types::time_stamp()
                   << "no factor row\n";
 
         std::abort();
@@ -68,7 +68,7 @@ NanoParticle::NanoParticle(
             return  1 / ( pow(distance,6)); };
 
     } else {
-        std::cerr << time_stamp()
+        std::cerr << sql_types::time_stamp()
                   << "unexpected distance_factor_type: "
                   << factor_row.distance_factor_type << '\n'
                   << "expecting linear or inverse_cubic" << '\n';
@@ -193,7 +193,7 @@ NanoParticle::NanoParticle(
 
 } // NanoParticle()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 double NanoParticle::site_distance_squared(NanoSite s1, NanoSite s2) {
     double x_diff = s1.x - s2.x;
@@ -206,7 +206,7 @@ double NanoParticle::site_distance_squared(NanoSite s1, NanoSite s2) {
 
 } // site_distance_squared()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 void NanoParticle::compute_reactions(
     const std::vector<int> &state,
@@ -273,7 +273,7 @@ void NanoParticle::compute_reactions(
     }
 } // compute_reactions()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 void NanoParticle::compute_distance_matrix() {
     distance_matrix.resize(sites.size());
@@ -285,7 +285,7 @@ void NanoParticle::compute_distance_matrix() {
     }
 } // compute_distance_matrix()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 void NanoParticle::update_state(
     std::vector<int> &state,
@@ -309,7 +309,7 @@ void NanoParticle::update_state(
     }
 } // update_state()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 void NanoParticle::compute_new_reactions(
     const int site_0_id,
@@ -373,7 +373,7 @@ void NanoParticle::compute_new_reactions(
     }
 } // compute_new_reactions()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 void NanoParticle::update_reactions(
     const std::vector<int>& state,
@@ -501,7 +501,7 @@ void NanoParticle::update_reactions(
 
 } // update_reactions()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 NanoWriteTrajectoriesSql NanoParticle::history_element_to_sql(
     int seed,
@@ -518,7 +518,7 @@ NanoWriteTrajectoriesSql NanoParticle::history_element_to_sql(
     };
 } // history_element_to_sql()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 NanoWriteStateSql NanoParticle::state_history_element_to_sql(
     int seed,
@@ -531,7 +531,7 @@ NanoWriteStateSql NanoParticle::state_history_element_to_sql(
     };
 } // state_history_element_to_sql()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 WriteCutoffSql NanoParticle::cutoff_history_element_to_sql(
     int seed,
@@ -543,7 +543,7 @@ WriteCutoffSql NanoParticle::cutoff_history_element_to_sql(
         };
 } // cutoff_history_element_to_sql()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 void NanoParticle::checkpoint(SqlReader<NanoReadStateSql> state_reader, 
                     SqlReader<ReadCutoffSql> cutoff_reader, 
@@ -599,7 +599,7 @@ void NanoParticle::checkpoint(SqlReader<NanoReadStateSql> state_reader,
     }
 } // checkpoint()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 void NanoParticle::store_checkpoint(std::vector<NanoStateHistoryElement> &state_packet,
     std::vector<int> &state,
@@ -607,7 +607,7 @@ void NanoParticle::store_checkpoint(std::vector<NanoStateHistoryElement> &state_
     std::vector<CutoffHistoryElement> &cutoff_packet) {   
 
     // state information
-    for (unsigned int i = 0; i < nano_particle.sites.size(); i++) {
+    for (unsigned int i = 0; i < state.size(); i++) {
                 state_packet.push_back(NanoStateHistoryElement{
                     .seed = seed,
                     .site_id = static_cast<int>(i),
@@ -623,7 +623,7 @@ void NanoParticle::store_checkpoint(std::vector<NanoStateHistoryElement> &state_
     });
 } // store_state_history()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 void print_usage() {
     std::cout << "Usage: specify the following options" << std::endl
@@ -636,7 +636,7 @@ void print_usage() {
 
 } // print_usage()
 
-/*---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------- */
 
 int main(int argc, char **argv) {
     if (argc != 7) {

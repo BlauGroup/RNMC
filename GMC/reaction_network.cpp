@@ -23,7 +23,7 @@ ReactionNetwork::ReactionNetwork(
     std::optional<MetadataSql> maybe_metadata_row = metadata_reader.next();
 
     if (! maybe_metadata_row.has_value()) {
-        std::cerr << time_stamp()
+        std::cerr << sql_types::time_stamp()
                   << "no metadata row\n";
 
         std::abort();
@@ -98,13 +98,13 @@ ReactionNetwork::ReactionNetwork(
     if ( metadata_row.number_of_reactions != reaction_id + 1 ||
          metadata_row.number_of_reactions != reactions.size() ) {
         // TODO: improve logging
-        std::cerr << time_stamp() <<  "reaction loading failed\n";
+        std::cerr << sql_types::time_stamp() <<  "reaction loading failed\n";
         std::abort();
     }
 
-    std::cerr << time_stamp() << "computing dependency graph...\n";
+    std::cerr << sql_types::time_stamp() << "computing dependency graph...\n";
     compute_dependents();
-    std::cerr << time_stamp() << "finished computing dependency graph\n";
+    std::cerr << sql_types::time_stamp() << "finished computing dependency graph\n";
 
 } // ReactionNetwork()
 

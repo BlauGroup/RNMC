@@ -6,7 +6,7 @@
 */
 
 #include <gtest/gtest.h>
-#include "../../LGMC/lattice.h"
+#include "../LGMC/lattice.h"
 
 // test that lattice has correct dimensions
 TEST(create_basic_lattice, Lattice) {

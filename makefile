@@ -18,3 +18,6 @@ make-all:
 	@for dir in LGMC NPMC GMC; do \
 		$(MAKE) -C $$dir; \
 	done 
+
+clean:
+	find . -name "*.o" -type f -delete

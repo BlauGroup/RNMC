@@ -18,37 +18,14 @@
 // action. The action is the C code required to link the attributes to
 // the sql statement.
 
-auto time_stamp() {
-    auto time = std::time(nullptr);
-    return std::put_time(std::localtime(&time), "[%T] ");
+class sql_types {
+    public:
+    static auto time_stamp() {
+        auto time = std::time(nullptr);
+        return std::put_time(std::localtime(&time), "[%T] ");
+    };
+
 };
-
-struct ExampleSelectSql {
-    int foo;
-    double bar;
-    static std::string sql_statement;
-    static void action(ExampleSelectSql &r, sqlite3_stmt *stmt);
-};
-
-
-struct ExampleInsertSql {
-    int foo;
-    double bar;
-    static std::string sql_statement;
-    static void action(ExampleInsertSql &r, sqlite3_stmt *stmt);
-};
-
-std::string ExampleSelectSql::sql_statement = "SELECT foo, bar FROM table;";
-void ExampleSelectSql::action(ExampleSelectSql &r, sqlite3_stmt *stmt) {
-    r.foo = sqlite3_column_int(stmt, 0);
-    r.bar = sqlite3_column_double(stmt, 1);
-}
-
-std::string ExampleInsertSql::sql_statement = "INSERT INTO table VALUES (?1, ?2);";
-void ExampleInsertSql::action(ExampleInsertSql &r, sqlite3_stmt *stmt) {
-    sqlite3_bind_int(stmt, 1, r.foo);
-    sqlite3_bind_double(stmt, 2, r.bar);
-}
 
 class SqlConnection {
 public:
@@ -88,7 +65,7 @@ public:
                 );
 
             if (rc != SQLITE_OK) {
-                std::cerr << time_stamp()
+                std::cerr << sql_types::time_stamp()
                           << "sqlite: "
                           << sqlite3_errmsg(connection)
                           << '\n';
@@ -121,8 +98,6 @@ public:
     };
 };
 
-
-
 template <typename T>
 class SqlStatement {
 private:
@@ -152,7 +127,7 @@ public:
                 );
 
             if (rc != SQLITE_OK) {
-                std::cerr << time_stamp()
+                std::cerr << sql_types::time_stamp()
                           << "sqlite: "
                           << sqlite3_errmsg(sql_connection.connection)
                           << '\n';
@@ -185,7 +160,6 @@ public:
         return *this;
     };
 };
-
 
 
 template <typename T>
@@ -222,7 +196,6 @@ public:
         }
     };
 };
-
 
 
 template <typename T>

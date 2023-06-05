@@ -22,10 +22,10 @@ GTEST_DIR = /Users/laurazichi/googletest/googletest
 
 # Where to find user code
 # USER_DIR = ../samples
-GMC_DIR = ../../GMC
-NPMC_DIR = ../../NPMC
-LGMC_DIR = ../../LGMC
-core_DIR = ../../core
+GMC_DIR = ../GMC
+NPMC_DIR = ../NPMC
+LGMC_DIR = ../LGMC
+core_DIR = ../core
 
 CXX = g++ -std=c++20
 
@@ -35,12 +35,12 @@ CXX = g++ -std=c++20
 CPPFLAGS = -isystem $(GTEST_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS = -std=c++20 -g -Wall -Wextra -pthread
+CXXFLAGS = -std=c++20 -g -Wall -Wextra -pthread $(shell gsl-config --cflags) $(shell gsl-config --libs) -lsqlite3 -lpthread
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 # TESTS = sample1_unittest
-TESTS = lattice_test
+TESTS = lattice_test lattice_reaction_network_test
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -53,6 +53,10 @@ all : $(TESTS)
 
 clean :
 	rm -f $(TESTS) gtest.a gtest_main.a *.o
+
+# rule for creating objects
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $(dir $@)$(notdir $@)
 
 # Builds gtest.a and gtest_main.a.
 
@@ -78,6 +82,7 @@ gtest.a : gtest-all.o
 gtest_main.a : gtest-all.o gtest_main.o
 	$(AR) $(ARFLAGS) $@ $^
 
+
 # build each test
 
 $(LGMC_DIR)/Lattice.cpp: $(LGMC_DIR)/Lattice.h
@@ -85,8 +90,8 @@ $(LGMC_DIR)/Lattice.cpp: $(LGMC_DIR)/Lattice.h
 $(LGMC_DIR)/Lattice.o : $(LGMC_DIR)/Lattice.cpp
 	$(CXX) -c -I$(LGMC_DIR) $^ -o $@
 
-lattice_test.o : $(LGMC_DIR)/lattice.cpp $(GTEST_HEADERS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c lattice_test.cpp 
-
 lattice_test : lattice_test.o $(LGMC_DIR)/Lattice.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
+
+lattice_reaction_network_test : $(LGMC_DIR)/lattice_reaction_network.o $(LGMC_DIR)/lattice_solver.o $(LGMC_DIR)/Lattice.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
