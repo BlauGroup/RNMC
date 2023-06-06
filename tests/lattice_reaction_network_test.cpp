@@ -15,12 +15,8 @@
 // check initalization
 TEST(create_lattice_reaction_network, LatticeReactionNetwork) {
 
-   std::cout << "I am here!" << std::endl;
-
    std::string model_database_file = "../examples/LGMC/CO_oxidation(static)/network.sqlite";
    std::string initial_state_database_file = "../examples/LGMC/CO_oxidation(static)/state.sqlite";
-
-   std::cout << "I am here!" << std::endl;
 
    SqlConnection model_database = SqlConnection(model_database_file,
                                SQLITE_OPEN_READWRITE);

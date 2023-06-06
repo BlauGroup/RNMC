@@ -18,7 +18,7 @@
 // action. The action is the C code required to link the attributes to
 // the sql statement.
 
-class sql_types {
+class time {
     public:
     static auto time_stamp() {
         auto time = std::time(nullptr);
@@ -65,7 +65,7 @@ public:
                 );
 
             if (rc != SQLITE_OK) {
-                std::cerr << sql_types::time_stamp()
+                std::cerr << time::time_stamp()
                           << "sqlite: "
                           << sqlite3_errmsg(connection)
                           << '\n';
@@ -127,7 +127,7 @@ public:
                 );
 
             if (rc != SQLITE_OK) {
-                std::cerr << sql_types::time_stamp()
+                std::cerr << time::time_stamp()
                           << "sqlite: "
                           << sqlite3_errmsg(sql_connection.connection)
                           << '\n';

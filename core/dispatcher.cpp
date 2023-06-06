@@ -247,7 +247,7 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
         "DELETE FROM trajectories WHERE rowid NOT IN"
         "(SELECT MIN(rowid) FROM trajectories GROUP BY seed, step);");
 
-    std::cerr << sql_types::time_stamp()
+    std::cerr << time::time_stamp()
               << "removing duplicate trajectories...\n";
 
 } //run_dispatcher()
@@ -285,7 +285,7 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
     }
     initial_state_database.exec("COMMIT;");
 
-    std::cerr << sql_types::time_stamp()
+    std::cerr << time::time_stamp()
               << "wrote "
               << history_packet.history.size()
               << " events from trajectory "
@@ -331,7 +331,7 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
     }
     initial_state_database.exec("COMMIT;");
 
-    std::cerr << sql_types::time_stamp()
+    std::cerr << time::time_stamp()
               << "wrote "
               << state_history_packet.history.size()
               << " states for trajectory "
@@ -376,7 +376,7 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
     }
     initial_state_database.exec("COMMIT;");
 
-    std::cerr << sql_types::time_stamp()
+    std::cerr << time::time_stamp()
               << "wrote cutoff for trajectory "
               << cutoff_history_packet.seed
               << " to database\n";

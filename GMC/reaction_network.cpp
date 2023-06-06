@@ -1,9 +1,4 @@
-#include <getopt.h>
-
 #include "reaction_network.h"
-#include "../core/dispatcher.h"
-#include "../core/reaction_network_simulation.h"
-
 
 ReactionNetwork::ReactionNetwork() {} // ReactionNetwork()
 
@@ -23,7 +18,7 @@ ReactionNetwork::ReactionNetwork(
     std::optional<MetadataSql> maybe_metadata_row = metadata_reader.next();
 
     if (! maybe_metadata_row.has_value()) {
-        std::cerr << sql_types::time_stamp()
+        std::cerr << time::time_stamp()
                   << "no metadata row\n";
 
         std::abort();
@@ -98,24 +93,15 @@ ReactionNetwork::ReactionNetwork(
     if ( metadata_row.number_of_reactions != reaction_id + 1 ||
          metadata_row.number_of_reactions != reactions.size() ) {
         // TODO: improve logging
-        std::cerr << sql_types::time_stamp() <<  "reaction loading failed\n";
+        std::cerr << time::time_stamp() <<  "reaction loading failed\n";
         std::abort();
     }
 
-    std::cerr << sql_types::time_stamp() << "computing dependency graph...\n";
+    std::cerr << time::time_stamp() << "computing dependency graph...\n";
     compute_dependents();
-    std::cerr << sql_types::time_stamp() << "finished computing dependency graph\n";
+    std::cerr << time::time_stamp() << "finished computing dependency graph\n";
 
 } // ReactionNetwork()
-
-/*---------------------------------------------------------------------------*/
-
-void ReactionNetwork::compute_initial_propensities(std::vector<int> state) {
-    // computing initial propensities
-    for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
-        initial_propensities[i] = compute_propensity(state, i);
-    }
-} // compute_initial_propensities()
 
 /*---------------------------------------------------------------------------*/
 
@@ -130,13 +116,14 @@ void ReactionNetwork::compute_dependents() {
 
         for ( int i = 0; i < reaction.number_of_reactants; i++ ) {
             int reactant_id = reaction.reactants[i];
-            dependents[reactant_id].push_back(reaction_id);
-        }
-
-
-        for ( int j = 0; j < reaction.number_of_products; j++ ) {
-            int product_id = reaction.products[j];
-            dependents[product_id].push_back(reaction_id);
+            if(reaction.number_of_reactants == 1 || (reaction.reactants[0] != reaction.reactants[1])) {
+                dependents[reactant_id].push_back(reaction_id);
+            }
+            else if (i == 0) {
+                // if i = 1 then duplicate reactant and don't add dependency twice
+                dependents[reactant_id].push_back(reaction_id);
+            }
+            
         }
     }
 } // compute_dependents()
@@ -236,6 +223,15 @@ void ReactionNetwork::update_propensities(
         }
     }
 } // update_propensities()
+
+/*---------------------------------------------------------------------------*/
+
+void ReactionNetwork::compute_initial_propensities(std::vector<int> state) {
+    // computing initial propensities
+    for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
+        initial_propensities[i] = compute_propensity(state, i);
+    }
+} // compute_initial_propensities()
 
 /*---------------------------------------------------------------------------*/
 
@@ -358,134 +354,5 @@ void ReactionNetwork::store_checkpoint(std::vector<ReactionNetworkStateHistoryEl
 
 
 } // store_state_history()
-
-/*---------------------------------------------------------------------------*/
-
-void print_usage() {
-    std::cout << "Usage: specify the following options\n"
-              << "--reaction_database\n"
-              << "--initial_state_database\n"
-              << "--number_of_simulations\n"
-              << "--base_seed\n"
-              << "--thread_count\n"
-              << "--step_cutoff|time_cutoff\n";
-} // print_usage()
-
-/*---------------------------------------------------------------------------*/
-
-int main(int argc, char **argv) {
-    if (argc != 7) {
-        print_usage();
-        exit(EXIT_FAILURE);
-    }
-
-
-    struct option long_options[] = {
-        {"reaction_database", required_argument, NULL, 1},
-        {"initial_state_database", required_argument, NULL, 2},
-        {"number_of_simulations", required_argument, NULL, 3},
-        {"base_seed", required_argument, NULL, 4},
-        {"thread_count", required_argument, NULL, 5},
-        {"step_cutoff", optional_argument, NULL, 6},
-        {"time_cutoff", optional_argument, NULL, 7},
-        {NULL, 0, NULL, 0}
-        // last element of options array needs to be filled with zeros
-    };
-
-    int c;
-    int option_index = 0;
-
-    char *reaction_database = nullptr;
-    char *initial_state_database = nullptr;
-    int number_of_simulations = 0;
-    int base_seed = 0;
-    int thread_count = 0;
-    
-    Cutoff cutoff = {
-        .bound =  { .step =  0 },
-        .type_of_cutoff = step_termination
-    };
-
-
-    while ((c = getopt_long_only(
-                argc, argv, "",
-                long_options,
-                &option_index)) != -1) {
-
-        switch (c) {
-
-        case 1:
-            reaction_database = optarg;
-            break;
-
-        case 2:
-            initial_state_database = optarg;
-            break;
-
-        case 3:
-            number_of_simulations = atoi(optarg);
-            break;
-
-        case 4:
-            base_seed = atoi(optarg);
-            break;
-
-        case 5:
-            thread_count = atoi(optarg);
-            break;
-
-        case 6:
-            cutoff.bound.step = atoi(optarg);
-            cutoff.type_of_cutoff = step_termination;
-            break;
-
-        case 7:
-            cutoff.bound.time = atof(optarg);
-            cutoff.type_of_cutoff = time_termination;
-            break;
-
-
-        default:
-            // if an unexpected argument is passed, exit
-            print_usage();
-            exit(EXIT_FAILURE);
-            break;
-
-        }
-
-    }
-
-    ReactionNetworkParameters parameters;
-    
-    Dispatcher<
-    TreeSolver,
-    ReactionNetwork,
-    ReactionNetworkParameters,
-    ReactionNetworkWriteTrajectoriesSql,
-    ReactionNetworkReadTrajectoriesSql,
-    ReactionNetworkWriteStateSql,
-    ReactionNetworkReadStateSql,
-    WriteCutoffSql,
-    ReadCutoffSql, 
-    ReactionNetworkStateHistoryElement, 
-    ReactionNetworkTrajectoryHistoryElement, 
-    CutoffHistoryElement, 
-    ReactionNetworkSimulation<TreeSolver>, 
-    std::vector<int>>
-
-    dispatcher (
-    reaction_database,
-    initial_state_database,
-    number_of_simulations,
-    base_seed,
-    thread_count,
-    cutoff,
-    parameters
-    );
-
-    dispatcher.run_dispatcher();
-    exit(EXIT_SUCCESS);
-
-}
 
 /*---------------------------------------------------------------------------*/

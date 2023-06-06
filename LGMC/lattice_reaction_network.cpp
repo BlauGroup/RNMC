@@ -719,7 +719,7 @@ void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_netwo
     std::optional<MetadataSql> maybe_metadata_row = metadata_reader.next();
 
     if (! maybe_metadata_row.has_value()) {
-        std::cerr << sql_types::time_stamp()
+        std::cerr << time::time_stamp()
                   << "no metadata row\n";
 
         std::abort();
@@ -761,9 +761,9 @@ void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_netwo
     fill_reactions(reaction_network_database);
     assert(reactions.size() == metadata_row.number_of_reactions);
 
-    std::cerr << sql_types::time_stamp() << "computing dependency graph...\n";
+    std::cerr << time::time_stamp() << "computing dependency graph...\n";
     compute_dependents();
-    std::cerr << sql_types::time_stamp() << "finished computing dependency graph\n";
+    std::cerr << time::time_stamp() << "finished computing dependency graph\n";
 
 }
 
@@ -869,7 +869,14 @@ void LatticeReactionNetwork::compute_dependents() {
         if(reaction.type != Type::HOMOGENEOUS_SOLID) {
             for ( int i = 0; i < reaction.number_of_reactants; i++ ) {
                 int reactant_id = reaction.reactants[i];
-                dependents[reactant_id].push_back(reaction_id);
+                
+                if(reaction.number_of_reactants == 1 || (reaction.reactants[0] != reaction.reactants[1])) {
+                    dependents[reactant_id].push_back(reaction_id);
+                }
+                else if (i == 0) {
+                    // if i = 1 then duplicate reactant and don't add dependency twice
+                    dependents[reactant_id].push_back(reaction_id);
+                }
             }
         }
 

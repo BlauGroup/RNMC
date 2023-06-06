@@ -9,21 +9,21 @@
 #include "../LGMC/lattice.h"
 
 // test that lattice has correct dimensions
-TEST(create_basic_lattice, Lattice) {
+TEST(lattice_test, InitalizationWorks) {
   
    // create pointer to simple lattice
    Lattice *lattice = new Lattice(1, 3, 5, 7);
-   ASSERT_EQ(lattice->xlo, 0);
-   ASSERT_EQ(lattice->xhi, 3);
-   ASSERT_EQ(lattice->ylo, 0);
-   ASSERT_EQ(lattice->yhi, 5);
-   ASSERT_EQ(lattice->zlo, 0);
-   ASSERT_EQ(lattice->zhi, 7);
-   ASSERT_EQ(lattice->latconst, 1);
+   EXPECT_EQ(lattice->xlo, 0);
+   EXPECT_EQ(lattice->xhi, 3);
+   EXPECT_EQ(lattice->ylo, 0);
+   EXPECT_EQ(lattice->yhi, 5);
+   EXPECT_EQ(lattice->zlo, 0);
+   EXPECT_EQ(lattice->zhi, 7);
+   EXPECT_EQ(lattice->latconst, 1);
    
    // x, y periodic and z non-periodic
-   ASSERT_EQ(static_cast<int>(lattice->sites.size()), 3*5*(7 + 1));
-   ASSERT_EQ(static_cast<int>(lattice->edges.size()), 3*5);
+   EXPECT_EQ(static_cast<int>(lattice->sites.size()), 3*5*(7 + 1));
+   EXPECT_EQ(static_cast<int>(lattice->edges.size()), 3*5);
 
 
 }
@@ -31,9 +31,8 @@ TEST(create_basic_lattice, Lattice) {
 
 // test that each site has the correct neighbors
 
-
 // test add site
-TEST(add_site, add_site) {
+TEST(lattice_test, AddSite) {
    Lattice *lattice = new Lattice(1, 3, 5, 7);
 
    // z dimension grows
@@ -56,7 +55,7 @@ TEST(add_site, add_site) {
 
 
 // test delete site
-TEST(delete_site, delete_site) {
+TEST(lattice_test, DeleteSite) {
    Lattice *lattice = new Lattice(1, 3, 5, 7);
 
    std::tuple<uint32_t, uint32_t, uint32_t> key = {2, 4, 7};

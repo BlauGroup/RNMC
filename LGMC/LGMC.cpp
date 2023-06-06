@@ -35,6 +35,10 @@ void print_usage_LGMC_parameters() {
 /* ---------------------------------------------------------------------- */
 
 int main(int argc, char **argv) {
+    if (argc != 8) {
+        print_usage();
+        exit(EXIT_FAILURE);
+    }
 
     struct option long_options[] = {
         {"reaction_database", required_argument, NULL, 'r'},

@@ -30,7 +30,7 @@ NanoParticle::NanoParticle(
         metadata_reader.next();
 
     if (! maybe_metadata_row.has_value()) {
-        std::cerr << sql_types::time_stamp()
+        std::cerr << time::time_stamp()
                   << "no metadata row\n";
 
         std::abort();
@@ -44,7 +44,7 @@ NanoParticle::NanoParticle(
         factors_reader.next();
 
     if (! maybe_factor_row.has_value()) {
-        std::cerr << sql_types::time_stamp()
+        std::cerr << time::time_stamp()
                   << "no factor row\n";
 
         std::abort();
@@ -65,7 +65,7 @@ NanoParticle::NanoParticle(
             return  1 / ( pow(distance,6)); };
 
     } else {
-        std::cerr << sql_types::time_stamp()
+        std::cerr << time::time_stamp()
                   << "unexpected distance_factor_type: "
                   << factor_row.distance_factor_type << '\n'
                   << "expecting linear or inverse_cubic" << '\n';
