@@ -46,7 +46,7 @@ class LatticeSolver {
         int number_of_active_indices;               // end simulation of no sites with non zero propensity   
 
         std::vector<double> propensities;                   // Gillepsie propensities 
-        
+
     private:
         Sampler sampler;           
 

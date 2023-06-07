@@ -15,11 +15,10 @@
 #include <iostream>
 #include <iostream>
 
-
+#define SPECIES_EMPTY 0
 #define DELTALOCAL 10000
 #define DELTA 32768
 #define EPSILON 0.0001
-#define SPECIES_EMPTY 0
 
 
 #define FLERR __FILE__,__LINE__

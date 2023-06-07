@@ -1,6 +1,3 @@
-#include <string>
-#include <fstream>
-#include <iostream>
 #include "lattice_reaction_network.h"
 
 LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection 
@@ -42,24 +39,24 @@ void LatticeReactionNetwork::update_state(Lattice *lattice,
                             std::unordered_map< std::string, 
                             std::vector< std::pair< double, int > > > &props,
                             std::vector<int> &state, int next_reaction, 
-                            std::optional<int> &site_one, 
-                            std::optional<int> &site_two, long double &prop_sum, 
-                            int &active_indices) {
+                            std::optional<int> site_one, 
+                            std::optional<int> site_two, long double &prop_sum, 
+                            int &active_indices, bool &flip_sites) {
     
     if(site_one) {
         // update lattice state
-        bool update_gillepsie = update_state(lattice, props, next_reaction, 
+        bool update_solution = update_state_lattice(lattice, props, next_reaction, 
                                 site_one.value(), site_two.value(), 
-                                prop_sum, active_indices);
+                                prop_sum, active_indices, flip_sites);
         
-        if(update_gillepsie) {
-            update_state(state, next_reaction);
+        if(update_solution) {
+            update_state_solution(state, next_reaction);
         }
     }
     
     else {
         // homogeneous event happens
-        update_state(state, next_reaction);
+        update_state_solution(state, next_reaction);
 
     }
 
@@ -221,11 +218,12 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
 
 /* ---------------------------------------------------------------------- */
 
-bool LatticeReactionNetwork::update_state(Lattice *lattice, 
+bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice, 
                             std::unordered_map<std::string, 
                             std::vector< std::pair<double, int>>> &props, 
-                            int next_reaction, int &site_one, int &site_two, 
-                            long double &prop_sum, int &active_indices) {
+                            int next_reaction, int site_one, int site_two, 
+                            long double &prop_sum, int &active_indices,
+                            bool &flip_sites) {
 
     LatticeReaction reaction = reactions[next_reaction]; 
 
@@ -294,7 +292,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
         return true;
 
     } // DESORPTION
-    else if((reaction.type == Type::HOMOGENEOUS_SOLID) || 
+    else if((reaction.type == Type::HOMOGENEOUS_LATTICE) || 
              (reaction.type == Type::REDUCTION) ||
              (reaction.type == Type::OXIDATION)){
         
@@ -323,12 +321,7 @@ bool LatticeReactionNetwork::update_state(Lattice *lattice,
                 lattice->sites[site_one].species = reaction.products[1];
                 lattice->sites[site_two].species = reaction.products[0];
 
-                // for trajectories, make sure order of products corresponds
-                // to the order of sites
-
-                int temp = site_one; 
-                site_one = site_two;
-                site_two = temp;
+                flip_sites = true;
             }
 
             if(lattice->edges.find(site_one) != lattice->edges.end()) {
@@ -499,7 +492,7 @@ bool LatticeReactionNetwork::update_propensities(Lattice *lattice,
 
         return true;
     } // DESORPTION
-    else if((reaction.type == Type::HOMOGENEOUS_SOLID) || 
+    else if((reaction.type == Type::HOMOGENEOUS_LATTICE) || 
              (reaction.type == Type::REDUCTION) ||
              (reaction.type == Type::OXIDATION)) {
         
@@ -631,6 +624,10 @@ void LatticeReactionNetwork::relevant_react(Lattice *lattice, std::function<void
         } // single reactant
         // two reactants (oxidation / reduction / homogeneous solid)
         else if(reaction.number_of_reactants == 2 && reaction.type != Type::ADSORPTION) {
+
+            if(reaction.type == Type::OXIDATION && lattice->sites[site].species == 3) {
+                assert(true);
+            }
             
             int site_reactant_id; 
             int other_reactant_id; 
@@ -662,7 +659,7 @@ void LatticeReactionNetwork::relevant_react(Lattice *lattice, std::function<void
                                             .site_one = site,
                                             .site_two = neighbor}, props); 
                         }
-                    } // ignore_neighbor
+                    } // igore_neighbor
 
                 } // for neigh
             }
@@ -686,7 +683,7 @@ std::string LatticeReactionNetwork::make_string(std::vector<int> vec) {
     std::sort(vec.begin(), vec.end());
     std::string hash = "";
     
-    for(int i = 0; i < static_cast<int>(vec.size()); i++) {
+    for(int i = 0; i < static_cast<int> (vec.size()); i++) {
         hash = hash + std::to_string(vec[i]);
     }
     
@@ -761,9 +758,9 @@ void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_netwo
     fill_reactions(reaction_network_database);
     assert(reactions.size() == metadata_row.number_of_reactions);
 
-    std::cerr << time::time_stamp() << "computing dependency graph...\n";
+    //std::cerr << time::time_stamp() << "computing dependency graph...\n";
     compute_dependents();
-    std::cerr << time::time_stamp() << "finished computing dependency graph\n";
+    //std::cerr << time::time_stamp() << "finished computing dependency graph\n";
 
 }
 
@@ -840,10 +837,10 @@ void LatticeReactionNetwork::fill_reactions(SqlConnection &reaction_network_data
             reaction.type = Type::DIFFUSION;
         }
         else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "L") == 0) {
-            reaction.type =  Type::HOMOGENEOUS_SOLID;
+            reaction.type =  Type::HOMOGENEOUS_LATTICE;
         }
         else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "S") == 0) {
-            reaction.type =  Type::HOMOGENEOUS_ELYTE;
+            reaction.type =  Type::HOMOGENEOUS_SOLUTION;
         }
         else if (strcmp(reinterpret_cast<const char *>(reaction_row.type), "D") == 0) {
             reaction.type =  Type::DESORPTION;
@@ -866,27 +863,17 @@ void LatticeReactionNetwork::compute_dependents() {
     for ( unsigned int reaction_id = 0; reaction_id <  reactions.size(); reaction_id++ ) {
         LatticeReaction reaction = reactions[reaction_id]; 
 
-        if(reaction.type != Type::HOMOGENEOUS_SOLID) {
-            for ( int i = 0; i < reaction.number_of_reactants; i++ ) {
-                int reactant_id = reaction.reactants[i];
-                
-                if(reaction.number_of_reactants == 1 || (reaction.reactants[0] != reaction.reactants[1])) {
-                    dependents[reactant_id].push_back(reaction_id);
-                }
-                else if (i == 0) {
-                    // if i = 1 then duplicate reactant and don't add dependency twice
-                    dependents[reactant_id].push_back(reaction_id);
-                }
-            }
+        for ( int i = 0; i < reaction.number_of_reactants; i++ ) {
+            int reactant_id = reaction.reactants[i];
+            dependents[reactant_id].push_back(reaction_id);
         }
-
     }
-
 }
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::update_state(std::vector<int> &state, int reaction_index) {
+void LatticeReactionNetwork::update_state_solution(std::vector<int> &state, 
+                                                int reaction_index) {
     
     LatticeReaction reaction = reactions[reaction_index];
 
@@ -1199,9 +1186,9 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
  void LatticeReactionNetwork::store_checkpoint(std::vector<LatticeStateHistoryElement> &state_packet,
         LatticeState &state, unsigned long int &seed, 
         int step, double time, std::vector<LatticeCutoffHistoryElement> &cutoff_packet) {
-    
     // Lattice site
     for (auto site : state.lattice->sites) {
+
         int edge = 0;
         if(state.lattice->edges.find(site.first) != state.lattice->edges.end()) {
             edge = 1;
@@ -1215,6 +1202,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
             .edge = edge
         });
     }
+
 
     // Homogeneous region
     for (unsigned int i = 0; i < state.homogeneous.size(); i++) {
@@ -1242,7 +1230,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 
 void LatticeReactionNetwork::compute_initial_propensities(std::vector<int> state, Lattice *lattice) {
 
-    for (int i = 0; i < static_cast<int> (initial_propensities.size()); i++) {
+    for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
         initial_propensities[i] = compute_propensity(state, i, lattice);
     }
 } // computer_initial_propensities

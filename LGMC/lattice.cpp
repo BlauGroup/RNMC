@@ -377,7 +377,7 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     create(neighi, maxneigh, "create:neighi");
     idneigh[nsites]= neighi;
 
-    // initially empty site, species = 0
+    // initially empty site
     sites[nsites] = Site{i_in, j_in, k_in, x_in, y_in, z_in, SPECIES_EMPTY, can_adsorb_in};
     
     loc_map[key] = nsites;
@@ -433,7 +433,7 @@ void Lattice::delete_site(int id) {
     loc_map.erase({sites[id].i, sites[id].j, sites[id].k});
 
     assert(sites.find(id) != sites.end());
-    
+
     update_neighbors(id, true);
 
     // remove from sites 
