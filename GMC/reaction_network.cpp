@@ -97,9 +97,9 @@ ReactionNetwork::ReactionNetwork(
         std::abort();
     }
 
-    std::cerr << time::time_stamp() << "computing dependency graph...\n";
+    //std::cerr << time::time_stamp() << "computing dependency graph...\n";
     compute_dependents();
-    std::cerr << time::time_stamp() << "finished computing dependency graph\n";
+    //std::cerr << time::time_stamp() << "finished computing dependency graph\n";
 
 } // ReactionNetwork()
 

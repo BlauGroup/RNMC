@@ -624,10 +624,6 @@ void LatticeReactionNetwork::relevant_react(Lattice *lattice, std::function<void
         } // single reactant
         // two reactants (oxidation / reduction / homogeneous solid)
         else if(reaction.number_of_reactants == 2 && reaction.type != Type::ADSORPTION) {
-
-            if(reaction.type == Type::OXIDATION && lattice->sites[site].species == 3) {
-                assert(true);
-            }
             
             int site_reactant_id; 
             int other_reactant_id; 

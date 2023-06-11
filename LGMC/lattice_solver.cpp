@@ -174,10 +174,6 @@ std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std:
         
         dt = - std::log(r2) / propensity_sum;
 
-        if(dt > 1e30) {
-            assert(true);
-        }
-
         // check if found, if not propensity sum is incorrect
         if(!isFound || !(propensity_sum > 0)) {
             double sum = 0;

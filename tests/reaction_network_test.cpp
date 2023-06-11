@@ -7,6 +7,7 @@
 
 #include "../core/sql.h"
 #include "../GMC/reaction_network.h"
+#include "../GMC/tree_solver.h"
 
 #include "gtest/gtest.h"
 #include <string>
@@ -29,6 +30,8 @@ class ReactionNetworkTest : public ::testing::Test {
       reaction_network_ = ReactionNetwork(model_database,
                                           initial_state_database,
                                           parameters);
+
+      reaction_network_.compute_initial_propensities(reaction_network_.initial_state);
    }
 
    ReactionNetwork reaction_network_;
@@ -38,9 +41,9 @@ class ReactionNetworkTest : public ::testing::Test {
 TEST_F(ReactionNetworkTest, InitializeMembers) {
    
    // check basic member variables
-   EXPECT_EQ(reaction_network_.reactions.size(), 7);
-   EXPECT_EQ(reaction_network_.initial_state.size(), 7);
-   EXPECT_EQ(reaction_network_.initial_propensities.size(), 7);
+   EXPECT_EQ(int(reaction_network_.reactions.size()), 7);
+   EXPECT_EQ(int(reaction_network_.initial_state.size()), 7);
+   EXPECT_EQ(int(reaction_network_.initial_propensities.size()), 7);
    EXPECT_EQ(reaction_network_.factor_zero, 1);
    EXPECT_EQ(reaction_network_.factor_two, 1);
    EXPECT_EQ(reaction_network_.factor_duplicate, 0.5);
@@ -96,47 +99,143 @@ TEST_F(ReactionNetworkTest, InitializeState) {
 }
 
 TEST_F(ReactionNetworkTest, ComputeDependents) {
-   EXPECT_EQ(reaction_network_.dependents.size(), 7);
+   EXPECT_EQ(int(reaction_network_.dependents.size()), 7);
    
-   EXPECT_EQ(reaction_network_.dependents[0].size(), 3);
+   EXPECT_EQ(int(reaction_network_.dependents[0].size()), 3);
    EXPECT_EQ(reaction_network_.dependents[0][0], 0);
    EXPECT_EQ(reaction_network_.dependents[0][1], 1);
    EXPECT_EQ(reaction_network_.dependents[0][2], 5);
 
 
-   EXPECT_EQ(reaction_network_.dependents[1].size(), 3);
+   EXPECT_EQ(int(reaction_network_.dependents[1].size()), 3);
    EXPECT_EQ(reaction_network_.dependents[1][0], 1);
    EXPECT_EQ(reaction_network_.dependents[1][1], 2);
    EXPECT_EQ(reaction_network_.dependents[1][2], 3);
    
-   EXPECT_EQ(reaction_network_.dependents[2].size(), 1);
+   EXPECT_EQ(int(reaction_network_.dependents[2].size()), 1);
    EXPECT_EQ(reaction_network_.dependents[2][0], 3);
    
-   EXPECT_EQ(reaction_network_.dependents[3].size(), 2);
+   EXPECT_EQ(int(reaction_network_.dependents[3].size()), 2);
    EXPECT_EQ(reaction_network_.dependents[3][0], 5);
    EXPECT_EQ(reaction_network_.dependents[3][1], 6);
 
-   EXPECT_EQ(reaction_network_.dependents[4].size(), 0);
-   EXPECT_EQ(reaction_network_.dependents[5].size(), 1);
+   EXPECT_EQ(int(reaction_network_.dependents[4].size()), 0);
+
+   EXPECT_EQ(int(reaction_network_.dependents[5].size()), 1);
    EXPECT_EQ(reaction_network_.dependents[5][0], 4);
 
-   EXPECT_EQ(reaction_network_.dependents[6].size(), 1);
+   EXPECT_EQ(int(reaction_network_.dependents[6].size()), 1);
    EXPECT_EQ(reaction_network_.dependents[6][0], 4);
 
 }
 
-
 TEST_F(ReactionNetworkTest, InitializePropensities) {
    
+   std::vector<double> expected_propensities = {0, 0, 50000, 6e6, 6e4, 0, 760};
    for(int i = 0; i < 7; i++) {
-      EXPECT_EQ(reaction_network_.initial_propensities[i], 0);
+      EXPECT_EQ(reaction_network_.initial_propensities[i], expected_propensities[i]);
    }
    
 }
 
-// compute propensity 
-// update_state 
-// update_propensities
+TEST_F(ReactionNetworkTest, ComputePropensity) {
+   
+   std::vector<double> expected_propensities = {0, 0, 50000, 6e6, 6e4, 0, 760};
+   for(int i = 0; i < 7; i++) {
+      EXPECT_EQ(reaction_network_.compute_propensity(
+               reaction_network_.initial_state, i), expected_propensities[i]);
+   }
+   
+}
+
+TEST_F(ReactionNetworkTest, UpdateState) {
+   std::vector<int> state = {100, 200, 300, 400, 500, 600, 700};
+   reaction_network_.update_state(std::ref(state), 0);
+
+   EXPECT_EQ(state[0], 99);
+   EXPECT_EQ(state[1], 200);
+   EXPECT_EQ(state[2], 301);
+   EXPECT_EQ(state[3], 400);
+   EXPECT_EQ(state[4], 500);
+   EXPECT_EQ(state[5], 600);
+   EXPECT_EQ(state[6], 700);
+   
+   reaction_network_.update_state(std::ref(state), 1);
+   
+   EXPECT_EQ(state[0], 98);
+   EXPECT_EQ(state[1], 199);
+   EXPECT_EQ(state[2], 301);
+   EXPECT_EQ(state[3], 401);
+   EXPECT_EQ(state[4], 500);
+   EXPECT_EQ(state[5], 600);
+   EXPECT_EQ(state[6], 700);
+
+   reaction_network_.update_state(std::ref(state), 2);
+
+   EXPECT_EQ(state[0], 98);
+   EXPECT_EQ(state[1], 198);
+   EXPECT_EQ(state[2], 302);
+   EXPECT_EQ(state[3], 402);
+   EXPECT_EQ(state[4], 500);
+   EXPECT_EQ(state[5], 600);
+   EXPECT_EQ(state[6], 700);
+
+   reaction_network_.update_state(std::ref(state), 3);
+
+   EXPECT_EQ(state[0], 98);
+   EXPECT_EQ(state[1], 197);
+   EXPECT_EQ(state[2], 301);
+   EXPECT_EQ(state[3], 403);
+   EXPECT_EQ(state[4], 501);
+   EXPECT_EQ(state[5], 600);
+   EXPECT_EQ(state[6], 700);
+
+
+   reaction_network_.update_state(std::ref(state), 4);
+
+   EXPECT_EQ(state[0], 99);
+   EXPECT_EQ(state[1], 198);
+   EXPECT_EQ(state[2], 301);
+   EXPECT_EQ(state[3], 403);
+   EXPECT_EQ(state[4], 501);
+   EXPECT_EQ(state[5], 599);
+   EXPECT_EQ(state[6], 699);
+
+   reaction_network_.update_state(std::ref(state), 5);
+
+   EXPECT_EQ(state[0], 98);
+   EXPECT_EQ(state[1], 198);
+   EXPECT_EQ(state[2], 302);
+   EXPECT_EQ(state[3], 402);
+   EXPECT_EQ(state[4], 501);
+   EXPECT_EQ(state[5], 599);
+   EXPECT_EQ(state[6], 699);
+
+   reaction_network_.update_state(std::ref(state), 6);
+
+   EXPECT_EQ(state[0], 98);
+   EXPECT_EQ(state[1], 198);
+   EXPECT_EQ(state[2], 303);
+   EXPECT_EQ(state[3], 400);
+   EXPECT_EQ(state[4], 501);
+   EXPECT_EQ(state[5], 599);
+   EXPECT_EQ(state[6], 699);
+}
+
+TEST_F(ReactionNetworkTest, UpdatePropensities) {
+   TreeSolver tree_solver = TreeSolver(1, reaction_network_.initial_propensities);
+   
+   std::vector<int> state = {0, 10000, 200, 20, 500, 200, 100};
+
+   std::function<void(Update)> update_function = [&] (Update update) {tree_solver.update(update);};
+   reaction_network_.update_state(std::ref(state), 4);
+   reaction_network_.update_propensities(update_function, std::ref(state), 4);
+
+   EXPECT_EQ(tree_solver.get_propensity(0), 2);
+   EXPECT_EQ(tree_solver.get_propensity(1), 40004);
+}
+
+
 // checkpoint
 // store_checkpoint
 

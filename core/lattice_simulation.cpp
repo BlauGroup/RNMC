@@ -32,6 +32,7 @@ void LatticeSimulation::init() {
 
 bool LatticeSimulation::execute_step() {
 
+
     std::optional<LatticeEvent> maybe_event = latSolver.event_lattice(props);
 
     if (!maybe_event) {
@@ -43,10 +44,27 @@ bool LatticeSimulation::execute_step() {
         LatticeEvent event = maybe_event.value();
         int next_reaction = event.index;
 
+        // randomly assign sites when two products
+        // use boolean to determine order for trajectories
+        bool flip_sites = false;
+
+        // update_state
+        lattice_network.update_state(state.lattice, std::ref(props), 
+                    std::ref(this->state.homogeneous), next_reaction, 
+                    event.site_one, event.site_two, latSolver.propensity_sum, 
+                    latSolver.number_of_active_indices, flip_sites);
+
+
+        // update_propensities 
+        lattice_network.update_propensities(state.lattice, 
+                        std::ref(this->state.homogeneous), 
+                        this->update_function, lattice_update_function, 
+                        next_reaction, event.site_one, event.site_two, props);
+
         // update time
         this->time += event.dt;
-        int site_1_mapping = SITE_HOMOGENEOUS;
-        int site_2_mapping = SITE_HOMOGENEOUS;
+        int site_1_mapping;
+        int site_2_mapping;
 
         if(event.site_one) {
             int site_1 = event.site_one.value();
@@ -54,7 +72,11 @@ bool LatticeSimulation::execute_step() {
             if(site_1 == -2) {
                 site_1_mapping = -2;
             }
+            else if (site_1 == -3){
+                site_1_mapping = -3;
+            }
             else {
+
                 site_1_mapping = lattice_network.combine(state.lattice->sites[site_1].i, 
                     state.lattice->sites[site_1].j, state.lattice->sites[site_1].k);
             }
@@ -62,13 +84,22 @@ bool LatticeSimulation::execute_step() {
         }
         if(event.site_two) {
             int site_2 = event.site_two.value();
+
+     
             if(site_2 == -2) {
                 site_2_mapping = -2;
+            }
+            else if (site_2 == -3){
+                site_2_mapping = -3;
             }
             else {
                 site_2_mapping = lattice_network.combine(state.lattice->sites[site_2].i, 
                                     state.lattice->sites[site_2].j, state.lattice->sites[site_2].k);
             }
+        }
+        if(flip_sites) {
+            // order of sites must corrrespond to order of products in reaction
+            std::swap(site_1_mapping, site_2_mapping);
         }
 
         if(history.size() == 1000) {
@@ -99,17 +130,6 @@ bool LatticeSimulation::execute_step() {
 
         // increment step
         this->step++;
-
-        // update_state
-        lattice_network.update_state(state.lattice, std::ref(props), std::ref(this->state.homogeneous), next_reaction, 
-                    event.site_one, event.site_two, latSolver.propensity_sum, latSolver.number_of_active_indices);
-
-
-        // update_propensities 
-        lattice_network.update_propensities(state.lattice, std::ref(this->state.homogeneous), this->update_function, 
-                                        lattice_update_function, next_reaction, 
-                                        event.site_one, event.site_two, props);
-
 
         return true;
     }

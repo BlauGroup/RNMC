@@ -358,6 +358,7 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
                        uint32_t k_in, float x_in, float y_in, float z_in,
                        bool can_adsorb_in, bool update_neighbors_in, bool meta_neighbors_in) {
     
+
     std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
     if(loc_map.find(key) != loc_map.end()) {
         // site already exists

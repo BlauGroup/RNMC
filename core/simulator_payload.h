@@ -13,7 +13,7 @@
     performance implications 
  ---------------------------------------------------------------------- */
 
-constexpr int history_chunk_size = 1000;
+constexpr int history_chunk_size = 20000;
 
 template <typename Solver, typename Model, typename StateHistory, 
 typename TrajHistory, typename CutoffHistory, typename Sim, typename State>
