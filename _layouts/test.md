@@ -1,7 +1,7 @@
 ---
 title: TESTING
 layout: template
-filename: index
+filename: test
 --- 
 
 
