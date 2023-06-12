@@ -1,6 +1,11 @@
+
+# Table of Contents
+1. [Introduction](./index.html)
+2. [How to build](./test.html)
+
 Reaction Network Monte Carlo (RNMC) is a collection of programs for Monte Carlo simulation of statistical mechanical systems heavily inspired by 
 
-[Link to another page](./test.html).
+.
 
 ### Dependencies
 
