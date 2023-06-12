@@ -1,9 +1,3 @@
----
-title: TESTING
-layout: _config
-filename: test
---- 
-
 there are 3 tables in the initial state database:
 ```
 CREATE TABLE initial_state (
