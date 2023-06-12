@@ -1,6 +1,6 @@
 ---
 title: TESTING
-layout: template
+layout: _config
 filename: test
 --- 
 
