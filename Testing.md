@@ -3,11 +3,19 @@
 The `testing` folder contains unit tests using [GoogleTest](https://google.github.io/googletest/primer.html).
 
 ## Makefile 
-```$ cd testing```
+```
+$ cd testing
+```
 
 - Create executables for each test 
-    ```$ make all```
+    ```
+    $ make all
+    ```
 - Create single executables for class foo
-    ```$ make foo_test```
+    ```
+    $ make foo_test
+    ```
 - Clean
-    ```$ make clean```
+    ```
+    $ make clean
+    ```
