@@ -4,5 +4,5 @@ show_downloads: true
 logo: logo.png
 plugins: 
 - jekyll-include-cache
-theme: jekyll-theme-minimal
+remote_theme: chrisrhymes/bulma-clean-theme
 markdown: kramdown
