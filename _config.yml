@@ -2,4 +2,4 @@ title: RNMC
 description: Reaction Network Monte Carlo
 show_downloads: true
 theme: jekyll-theme-minimal
-logo: <img src="./logo.png">
+logo: ./logo.png
