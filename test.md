@@ -1,10 +1,3 @@
----
-toc: true
-toc_label: "Unique Title" # default: Content
-toc_icon: "heart"  # corresponding Font Awesome icon name without the "fa" prefix
-toc_sticky: true   # enables sticky toc
----
-
 there are 3 tables in the initial state database:
 ```
 CREATE TABLE initial_state (
