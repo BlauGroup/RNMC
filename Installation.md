@@ -1,15 +1,17 @@
-### Dependencies
+# Installation
+
+## Dependencies
 RNMC depends on [GSL](https://www.gnu.org/software/gsl/) for pseudo random number generation and [sqlite](https://www.sqlite.org/index.html) for the database interfaces.
 
-### Building
+## Makefile
 
 Inside RNMC is a main makefile which can be used for GMC, NPMC, LGMC, or testing. Alternatively there are individual makefiles inside each folder. 
 
 For GMC, NPMC and LGMC:
 
-'''$ make GMC/NPMC/LGMC'''
+```$ make GMC/NPMC/LGMC```
 
-''' $ make clean'''
+```$ make clean```
 
 
 On a machine with system versions of GSL and sqlite, the executables can be built like this:
