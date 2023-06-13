@@ -1,9 +1,0 @@
-{
-  "lang": "en-US",
-  "name": "RNMC",
-  "short_name": "RNMC",
-  "theme_color": "#24292e",
-  "background_color": "#ffffff",
-  "start_url": "/",
-  "display": "standalone"
-}
