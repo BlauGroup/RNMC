@@ -1,8 +1,7 @@
 title: RNMC
 description: Reaction Network Monte Carlo
 show_downloads: true
-theme: jekyll-theme-minimal
 logo: logo.png
 plugins: 
 - jekyll-include-cache
-remote_theme: "mmistakes/minimal-mistakes@4.24.0"
+remote_theme: daviddarnes/alembic@main

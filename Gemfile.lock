@@ -258,6 +258,7 @@ PLATFORMS
 DEPENDENCIES
   github-pages
   jekyll-include-cache
+  jekyll-remote-theme
 
 BUNDLED WITH
    1.17.2
