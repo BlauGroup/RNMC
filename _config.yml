@@ -4,5 +4,4 @@ show_downloads: true
 logo: logo.png
 plugins: 
 - jekyll-include-cache
-theme: minimal-mistakes-jekyll
-
+remote_theme: "mmistakes/minimal-mistakes@4.24.0"
