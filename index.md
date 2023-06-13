@@ -1,4 +1,3 @@
-# Introduction
 Reaction Network Monte Carlo (RNMC) is a collection of programs for Monte Carlo simulation of statistical mechanical systems heavily inspired by SPPARKS. RNMC is designed to run large numbers of simulations of a fixed system in parallel. The project consists of three monte carlo algorithms for different domains which use 'core' code for shared processes, for example IO, threading logic and model independent simulation logic.
 
 ## Three Modules
