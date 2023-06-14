@@ -2,6 +2,10 @@
 
 Implementation of Gillespie's next reaction simulator appropriate for applications in a homogeneous region or where species are well mixed.
 
+# Table of Contents
+1. [Sqlite IO](#Sqlite IO )
+2. [Running GMC](#Running GMC)
+
 ## Sqlite IO  
 
 Sqlite is used for input, output, and checkpointing. Before running GMC two necessary .sqlite files must be generated - The Reaction Network Database and State Database. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
