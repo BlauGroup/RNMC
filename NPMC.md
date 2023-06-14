@@ -68,7 +68,8 @@ CREATE TABLE trajectories (
     interaction_id     INTEGER NOT NULL
 );
 ```
-
+- <span style="color:#0066CC"> factors </span>:
+    - <span style="color:#006633"> distance_factor_type </span>: specifies how to compute interaction propensities for two site interactions as a function of distance. Currently the accepted values are `linear` and `inverse_cubic`.
 
 ```
 CREATE TABLE factors (
@@ -78,8 +79,6 @@ CREATE TABLE factors (
     distance_factor_type             TEXT NOT NULL
 );
 ```
-
-`distance_factor_type` specifies how to compute interaction propensities for two site interactions as a function of distance. Currently the accepted values are `linear` and `inverse_cubic`.
 
 - <span style="color:#0066CC"> interrupt_state </span>: During checkpointing, the simulation will fill this table with the final state of the simulation. 
 
