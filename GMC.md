@@ -1,4 +1,6 @@
-# GMC (Gillespie Monte Carlo)
+# GMC 
+#### Gillespie Monte Carlo
+
 Implementation of Gillespie's next reaction simulator appropriate for applications in a homogeneous region or where species are well mixed.
 
 ## Sqlite IO  

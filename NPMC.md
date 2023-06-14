@@ -1,5 +1,5 @@
 # NPMC 
-span style="color:#0066CC"> Nano Particle Monte Carlo </span>
+<span> style="color:#0066CC"> Nano Particle Monte Carlo </span>
 
 A three dimensional statistical field theory simulator which supports one and two site interactions. Useful for simulating nano particles.
 
@@ -104,7 +104,13 @@ CREATE TABLE factors (
 
 
 ## Running NPMC
-NPMC is run as follows:
+To run NPMC first create an executable with the makefile. 
+
+```
+$ make NPMC
+```
+
+NPMC requires six input arguments (either step_cutoff or time_cutoff must be specified): 
 
 ```
 NPMC --nano_particle_database=np.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --dependency_threshold=1
