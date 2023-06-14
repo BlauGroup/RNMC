@@ -3,8 +3,8 @@
 Implementation of Gillespie's next reaction simulator appropriate for applications in a homogeneous region or where species are well mixed.
 
 # Table of Contents
-1. [Sqlite IO](#Sqlite IO )
-2. [Running GMC](#Running GMC)
+[Sqlite IO](##Sqlite IO)
+[Running GMC](##Running GMC)
 
 ## Sqlite IO  
 
