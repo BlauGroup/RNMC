@@ -2,7 +2,7 @@
 
 A three dimensional statistical field theory simulator which supports one and two site interactions. Useful for simulating nano particles.
 
-# Sqlite IO
+## Sqlite IO
 
 Sqlite is used for input, output, and checkpointing. Before running NPMC two necessary .sqlite files must be generated - The Nano Particle Database and State Database. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
 
@@ -114,9 +114,9 @@ NPMC requires six input arguments (either step_cutoff or time_cutoff must be spe
 NPMC --nano_particle_database=np.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --dependency_threshold=1
 ```
 
-- `nano_particle_database`: a sqlite database containing the nano particle data and metadata.
-- `initial_state_database` : a sqlite database containing initial state. The simulation trajectories are also written into the database
-- `number_of_simulation`: an integer specifying how many simulations to run
-- `base_seed`: seeds used are `base_seed, base_seed+1, ..., base_seed+number_of_simulations-1`
-- `thread_count`: is how many threads to use.
-- `step_cutoff`: how many steps in each simulation
+- <span style="color:#0066CC"> nano_particle_database </span>: a sqlite database containing the nano particle data and metadata.
+- <span style="color:#0066CC"> initial_state_database </span> : a sqlite database containing initial state. The simulation trajectories are also written into the database
+- <span style="color:#0066CC"> number_of_simulation </span>: an integer specifying how many simulations to run
+-  <span style="color:#0066CC"> base_seed </span>: seeds used are `base_seed, base_seed+1, ..., base_seed+number_of_simulations-1`
+- <span style="color:#0066CC"> thread_count </span>: is how many threads to use.
+- <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation

@@ -1,4 +1,4 @@
-# GMC #### Gillespie Monte Carlo
+# GMC <span style="color: #0066CC"> Gillespie Monte Carlo </span>
 
 Implementation of Gillespie's next reaction simulator appropriate for applications in a homogeneous region or where species are well mixed.
 
