@@ -7,7 +7,7 @@ Implementation of Gillespie's next reaction simulator appropriate for applicatio
 Sqlite is used for input, output, and checkpointing. Before running GMC two necessary .sqlite files must be generated - The Reaction Network Database and State Database. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
 
 ### The Reaction Network Database 
-There are two tables in the reaction network database both of which **must be created and filled in by the user**:
+There are two tables in the lattice reaction network database both of which **must be created and filled in by the user**:
 - <span style="color:#0066CC"> metadata </span> : This table consists of one line for the total number of species and reactions in the simulation.
 
 ```
@@ -19,8 +19,8 @@ There are two tables in the reaction network database both of which **must be cr
 
 - <span style="color:#0066CC"> reactions </span>: This table is how reactions are defined in the simulation. *Only reactions of up to two reactants and products are supported.* Each row in the table represents one reaction with the following attributes. 
     - <span style="color:#006633"> reaction_id </span>: Unique, starts at 0 and must increase in increments of one.
-    - <span style="color:#006633"> number_of_reactants\products </span>: Either 0, 1, or 2.
-    - <span style="color:#006633"> reactant_1\2 </span>: Unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one.
+    - <span style="color:#006633"> number_of_reactants|products </span>: Either 0, 1, or 2.
+    - <span style="color:#006633"> reactant_1|2 </span>: Unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one. If there is only one reactant|product then set the species to -1.
     - <span style="color:#006633"> rate </span>: Rate of the reaction.
 
 ```

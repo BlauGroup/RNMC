@@ -1,6 +1,6 @@
 # LGMC - <span style="color: #0066CC"> Lattice Gillespie Monte Carlo </span>
 
-Implementation of Gillespie's next reaction simulator which couples a lattice and homogeneous region capable of electrochemical reactions.
+Implementation of Gillespie's next reaction simulator which couples a lattice and homogeneous region capable of electrochemical reactions. Either marcus of Butler-Volmer electron transfer theory can be used.
 
 ## Sqlite IO  
 
@@ -8,7 +8,7 @@ Sqlite is used for input, output, and checkpointing. Before running LGMC two nec
 
 ### The Lattice Reaction Network Database 
 
-There are two tables in the reaction network database both of which **must be created and filled in by the user**:
+There are two tables in the lattice reaction network database both of which **must be created and filled in by the user**:
 - <span style="color:#0066CC"> metadata </span> : This table consists of one line for the total number of species and reactions in the simulation.
 
 ```
@@ -19,10 +19,24 @@ There are two tables in the reaction network database both of which **must be cr
 ```
 
 - <span style="color:#0066CC"> reactions </span>: This table is how reactions are defined in the simulation. *Only reactions of up to two reactants and products are supported.* Each row in the table represents one reaction with the following attributes. 
-    - <span style="color:#006633"> reaction_id </span>: Unique, starts at 0 and must increase in increments of one.
-    - <span style="color:#006633"> number_of_reactants\products </span>: Either 0, 1, or 2.
-    - <span style="color:#006633"> reactant_1\2 </span>: Unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one.
+ - <span style="color:#006633"> reaction_id </span>: Unique, starts at 0 and must increase in increments of one.
+    - <span style="color:#006633"> number_of_reactants|products </span>: Either 0, 1, or 2.
+    - <span style="color:#006633"> reactant_1|2 </span>: Unique, positive integer representative of a species. The integer representation of species ** must begin at 1 ** and increase in increments of one. ** The integer 0 is reserved to represent an empty site. ** If there is only one reactant|product then set the species to -1.
+    - <span style="color:#006633"> phase_reactant|product_1|2 </span>: Char representing if the species in the species is in the lattice(spatially resolved), 'L', or solution(homogeneous), 'S', region. If there are not two reactants|products, the phase can be set to 'N'.
+    - <span style="color:#006633"> dG </span>: Gibbs free energy.
+    - <span style="color:#006633"> prefactor </span>: Prefactor applied during calculation of reaction rate.
     - <span style="color:#006633"> rate </span>: Rate of the reaction.
+    - <span style="color:#006633"> electron_tunneling_coefficient </span>: Electron tunneling coefficient used for Butler-Volmer and Marcus calculations.
+    - <span style="color:#006633"> reorganization_energy </span>: Used for Marcus charge transfer.
+    - <span style="color:#006633"> charge_transfer_coefficient </span>: Charge transfer used for Butler-Volmer and Marcus calculations.
+    - <span style="color:#006633"> type </span>: Type of reaction:
+        - `A`: adsorption
+        - `D`: desorption
+        - `F`: diffusion (only possible in lattice region)
+        - `L`: reaction entirely in the lattice (spatially resolved region)
+        - `S`: reaction entirely in the solution (homogeneous region)
+        - `O`: oxidation
+        - `R`: reduction
 
 ```
     CREATE TABLE reactions (
