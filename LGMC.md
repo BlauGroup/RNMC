@@ -12,10 +12,10 @@ There are two tables in the lattice reaction network database both of which **mu
 - <span style="color:#0066CC"> metadata </span> : this table consists of one line for the total number of species and reactions in the simulation.
 
 ```
-     CREATE TABLE metadata (
-            number_of_species   INTEGER NOT NULL,
-            number_of_reactions INTEGER NOT NULL
-    );
+CREATE TABLE metadata (
+    number_of_species   INTEGER NOT NULL,
+    number_of_reactions INTEGER NOT NULL
+);
 ```
 
 - <span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. *Only reactions of up to two reactants and products are supported.* Each row in the table represents one reaction with the following attributes. 
@@ -39,26 +39,26 @@ There are two tables in the lattice reaction network database both of which **mu
         - `R`: reduction
 
 ```
-    CREATE TABLE reactions (
-            reaction_id                     INTEGER NOT NULL PRIMARY KEY,
-            number_of_reactants             INTEGER NOT NULL,
-            number_of_products              INTEGER NOT NULL,
-            reactant_1                      INTEGER NOT NULL,
-            reactant_2                      INTEGER NOT NULL,
-            product_1                       INTEGER NOT NULL,
-            product_2                       INTEGER NOT NULL,
-            phase_reactant_1                CHAR(1) NOT NULL,
-            phase_reactant_2                CHAR(1) NOT NULL,
-            phase_product_1                 CHAR(1) NOT NULL,
-            phase_product_2                 CHAR(1) NOT NULL,
-            dG                              REAL NOT NULL,
-            prefactor                       REAL NOT NULL,
-            rate                            REAL NOT NULL,
-            electron_tunneling_coefficient  REAL NOT NULL,
-            reorganization_energy           REAL NOT NULL,
-            charge_transfer_coefficient     REAL NOT NULL,
-            type                            CHAR(1) NOT NULL
-    );
+CREATE TABLE reactions (
+        reaction_id                     INTEGER NOT NULL PRIMARY KEY,
+        number_of_reactants             INTEGER NOT NULL,
+        number_of_products              INTEGER NOT NULL,
+        reactant_1                      INTEGER NOT NULL,
+        reactant_2                      INTEGER NOT NULL,
+        product_1                       INTEGER NOT NULL,
+        product_2                       INTEGER NOT NULL,
+        phase_reactant_1                CHAR(1) NOT NULL,
+        phase_reactant_2                CHAR(1) NOT NULL,
+        phase_product_1                 CHAR(1) NOT NULL,
+        phase_product_2                 CHAR(1) NOT NULL,
+        dG                              REAL NOT NULL,
+        prefactor                       REAL NOT NULL,
+        rate                            REAL NOT NULL,
+        electron_tunneling_coefficient  REAL NOT NULL,
+        reorganization_energy           REAL NOT NULL,
+        charge_transfer_coefficient     REAL NOT NULL,
+        type                            CHAR(1) NOT NULL
+);
 
 ```
 
@@ -68,32 +68,32 @@ There are five tables in the initial state database all of which **must be creat
 - <span style="color:#0066CC"> initial_state </span>: this table represents the initial concentration of species. Each row consists of a species_id and corresponding quantity. If there is no row for a species, LGMC will initalize its quantity to zero. **This table must be filled in by the user.**
 
 ```
-    CREATE TABLE initial_state (
-            species_id             INTEGER NOT NULL PRIMARY KEY,
-            count                  INTEGER NOT NULL
-    );
+CREATE TABLE initial_state (
+        species_id             INTEGER NOT NULL PRIMARY KEY,
+        count                  INTEGER NOT NULL
+);
 ```
 - <span style="color:#0066CC"> trajectories </span>: this table records each reaction run during the duration of the simulation. For each reaction the seed of the simulation that executed the reaction and corresponding step and time are recorded. 
      - <span style="color:#006633"> site_1/2_mapping </span>: single integer representation of the i,j,k values of the lattice site involved in the reaction calculated with the Szudzik algorithm. The code for creating these mappings is shown in [Examples](./Examples.html). The ordering of the sites corresponds to the ordering of the products in the reaction. If one of the products is in the homogeneous region, site_1/2_mapping is equal to -2. If there is only one site involved in the reaction site_1/2_mapping is equal to -3.
 
 ```
-    CREATE TABLE trajectories (
-            seed                INTEGER NOT NULL,
-            step                INTEGER NOT NULL,
-            time                REAL NOT NULL,
-            reaction_id         INTEGER NOT NULL,
-            site_1_mapping      INTEGER NOT NULL,
-            site_2_mapping      INTEGER NOT NULL
-    );
+CREATE TABLE trajectories (
+        seed                INTEGER NOT NULL,
+        step                INTEGER NOT NULL,
+        time                REAL NOT NULL,
+        reaction_id         INTEGER NOT NULL,
+        site_1_mapping      INTEGER NOT NULL,
+        site_2_mapping      INTEGER NOT NULL
+);
 ```
 - <span style="color:#0066CC"> factors </span>: this table contains factors that can be used to modify rates of reactions which have zero or two reactants, or have duplicate reactants. **This table must be filled in by the user.**
 
 ```
-    CREATE TABLE factors (
-            factor_zero      REAL NOT NULL,
-            factor_two       REAL NOT NULL,
-            factor_duplicate REAL NOT NULL
-    );
+CREATE TABLE factors (
+        factor_zero      REAL NOT NULL,
+        factor_two       REAL NOT NULL,
+        factor_duplicate REAL NOT NULL
+);
 ```
 - <span style="color:#0066CC"> interrupt_state </span>: during checkpointing, the simulation will fill this table with the final state of the simulation. This includes both the species in the lattice and homogeneous region.
     - <span style="color:#006633"> site_mapping </span>: szudzik representation of site's i,j,k if on lattice or -2 if in homogeneous region.
@@ -112,13 +112,13 @@ CREATE TABLE interrupt_state (
 - <span style="color:#0066CC"> interrupt_cutoff </span>: During checkpointing, the simulation will fill in this table.
 
 ```
-    CREATE TABLE interrupt_cutoff (
-            seed                    INTEGER NOT NULL,
-            step                    INTEGER NOT NULL,
-            time                    INTEGER NOT NULL,
-            maxk                    INTEGER NOT NULL
-            
-    );
+CREATE TABLE interrupt_cutoff (
+        seed                    INTEGER NOT NULL,
+        step                    INTEGER NOT NULL,
+        time                    INTEGER NOT NULL,
+        maxk                    INTEGER NOT NULL
+        
+);
 ```
 ## Running LGMC
 
