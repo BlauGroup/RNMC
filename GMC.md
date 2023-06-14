@@ -1,4 +1,4 @@
-# GMC
+# GMC (Gillespie Monte Carlo)
 Implementation of Gillespie's next reaction simulator appropriate for applications in a homogeneous region or where species are well mixed.
 
 ## Sqlite IO  
@@ -6,7 +6,7 @@ Implementation of Gillespie's next reaction simulator appropriate for applicatio
 Sqlite is used for input, output, and checkpointing. Before running GMC two necessary .sqlite files must be generated - The Reaction Network Database and State Database. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
 
 ### The Reaction Network Database 
-There are 2 tables in the reaction network database both of which **must be created and filled in by the user**:
+There are two tables in the reaction network database both of which **must be created and filled in by the user**:
 - <span style="color:#0066CC"> metadata </span> : This table consists of one line for the total number of species and reactions in the simulation.
 
 ```
@@ -37,7 +37,7 @@ There are 2 tables in the reaction network database both of which **must be crea
 ```
 
 ### The State Database 
-There are 5 tables in the initial state database all of which **must be created by the user**: 
+There are five tables in the initial state database all of which **must be created by the user**: 
 
 - <span style="color:#0066CC"> initial_state </span>: This table represents the initial concentration of species. Each row consists of a species_id and corresponding quantity. If there is no row for a species, GMC will initalize its quantity to zero. **This table must be filled in by the user.**
 
@@ -101,7 +101,7 @@ GMC requires six input arguments (either step_cutoff or time_cutoff must be spec
 -  <span style="color:#0066CC">base_seed </span>: seeds used are `base_seed, base_seed+1, ..., base_seed+number_of_simulations-1`.
 - <span style="color:#0066CC"> thread_count </span>: how many threads to use.
 - <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation.
-- <span style="color:#0066CC"> time_cutoff </span>: how much time in each simulation (s).
+- <span style="color:#0066CC"> time_cutoff </span>: how much time in each simulation [s].
 
 GMC can then be run as follows (here step_cutoff is specified):
 

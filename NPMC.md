@@ -1,21 +1,15 @@
-# NPMC
+# NPMC 
+span style="color:#0066CC"> Nano Particle Monte Carlo </span>
 
-## Running NPMC
-NPMC is run as follows:
+A three dimensional statistical field theory simulator which supports one and two site interactions. Useful for simulating nano particles.
 
-```
-NPMC --nano_particle_database=np.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --dependency_threshold=1
-```
+# Sqlite IO
 
-- `nano_particle_database`: a sqlite database containing the nano particle data and metadata.
-- `initial_state_database` : a sqlite database containing initial state. The simulation trajectories are also written into the database
-- `number_of_simulation`: an integer specifying how many simulations to run
-- `base_seed`: seeds used are `base_seed, base_seed+1, ..., base_seed+number_of_simulations-1`
-- `thread_count`: is how many threads to use.
-- `step_cutoff`: how many steps in each simulation
+Sqlite is used for input, output, and checkpointing. Before running NPMC two necessary .sqlite files must be generated - The Nano Particle Database and State Database. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
 
-### The Nano particle Database
-There are 4 tables in the nano particle database:
+### The Nano Particle Database
+There are four tables in the nano particle database all of which **must be created and filled in by the user**:
+
 ```
 CREATE TABLE species (
     species_id          INTEGER NOT NULL PRIMARY KEY,
@@ -54,8 +48,9 @@ CREATE TABLE metadata (
     number_of_interactions              INTEGER NOT NULL
 );
 ```
+## The State Database
+There are five tables in the initial state database all of which **must be created by the user**: 
 
-there are 3 tables in the initial state database:
 ```
 CREATE TABLE initial_state (
     site_id            INTEGER NOT NULL PRIMARY KEY,
@@ -85,3 +80,39 @@ CREATE TABLE factors (
 ```
 
 `distance_factor_type` specifies how to compute interaction propensities for two site interactions as a function of distance. Currently the accepted values are `linear` and `inverse_cubic`.
+
+- <span style="color:#0066CC"> interrupt_state </span>: During checkpointing, the simulation will fill this table with the final state of the simulation. 
+
+```
+    CREATE TABLE interrupt_state (
+            site_id                    INTEGER NOT NULL,
+            degree_of_freedom              INTEGER NOT NULL
+            
+    ); 
+```
+
+- <span style="color:#0066CC"> interrupt_cutoff </span>: During checkpointing, the simulation will fill in this table.
+
+```
+    CREATE TABLE interrupt_cutoff (
+            seed                    INTEGER NOT NULL,
+            step                    INTEGER NOT NULL,
+            time                    INTEGER NOT NULL
+            
+    );
+```
+
+
+## Running NPMC
+NPMC is run as follows:
+
+```
+NPMC --nano_particle_database=np.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --dependency_threshold=1
+```
+
+- `nano_particle_database`: a sqlite database containing the nano particle data and metadata.
+- `initial_state_database` : a sqlite database containing initial state. The simulation trajectories are also written into the database
+- `number_of_simulation`: an integer specifying how many simulations to run
+- `base_seed`: seeds used are `base_seed, base_seed+1, ..., base_seed+number_of_simulations-1`
+- `thread_count`: is how many threads to use.
+- `step_cutoff`: how many steps in each simulation
