@@ -20,7 +20,7 @@ There are two tables in the lattice reaction network database both of which **mu
 - <span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. *Only reactions of up to two reactants and products are supported.* Each row in the table represents one reaction with the following attributes. 
     - <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one.
     - <span style="color:#006633"> number_of_reactants|products </span>: either 0, 1, or 2.
-    - <span style="color:#006633"> reactant_1 2 </span>: unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one. If there is only one reactant|product then set the species to -1.
+    - <span style="color:#006633"> reactant_1|2 </span>: unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one. If there is only one reactant|product then set the species to 1.
     - <span style="color:#006633"> rate </span>: rate of the reaction.
 
 ```
