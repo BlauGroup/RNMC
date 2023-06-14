@@ -1,4 +1,4 @@
-# NPMC : <span style="color: #0066CC"> Nano Particle Monte Carlo </span>
+# NPMC - <span style="color: #0066CC"> Nano Particle Monte Carlo </span>
 
 A three dimensional statistical field theory simulator which supports one and two site interactions. Useful for simulating nano particles.
 
@@ -118,5 +118,6 @@ NPMC --nano_particle_database=np.sqlite --initial_state_database=initial_state.s
 - <span style="color:#0066CC"> initial_state_database </span> : a sqlite database containing initial state. The simulation trajectories are also written into the database
 - <span style="color:#0066CC"> number_of_simulation </span>: an integer specifying how many simulations to run
 -  <span style="color:#0066CC"> base_seed </span>: seeds used are `base_seed, base_seed+1, ..., base_seed+number_of_simulations-1`
-- <span style="color:#0066CC"> thread_count </span>: is how many threads to use.
-- <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation
+- <span style="color:#0066CC"> thread_count </span>: how many threads to use.
+- <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation.
+- <span style="color:#0066CC"> time_cutoff </span>: how much time in each simulation [s].

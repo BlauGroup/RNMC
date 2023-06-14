@@ -1,4 +1,4 @@
-# LGMC : <span style="color: #0066CC"> Lattice Gillespie Monte Carlo </span>
+# LGMC - <span style="color: #0066CC"> Lattice Gillespie Monte Carlo </span>
 
 Implementation of Gillespie's next reaction simulator which couples a lattice and homogeneous region capable of electrochemical reactions.
 
