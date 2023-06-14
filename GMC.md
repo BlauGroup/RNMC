@@ -93,20 +93,18 @@ To run GMC first create an executable with the makefile.
 ```
 $ make GMC
 ```
-GMC requires six input arguments: 
+GMC requires six input arguments (either step_cutoff or time_cutoff must be specified): 
 
 - <span style="color:#0066CC"> reaction_database </span>: a sqlite database containing the reaction network and metadata.
-- <span style="color:#0066CC"> initial_state_database </span>: a sqlite database containing initial state. The simulation trajectories are also written into the database
--  <span style="color:#0066CC">number_of_simulation </span>: an integer specifying how many simulations to run
--  <span style="color:#0066CC">base_seed </span>: seeds used are `base_seed, base_seed+1, ..., base_seed+number_of_simulations-1`
-- <span style="color:#0066CC"> thread_count </span>: is how many threads to use.
-- <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation
+- <span style="color:#0066CC"> initial_state_database </span>: a sqlite database containing initial state. The simulation trajectories are also written into the database.
+-  <span style="color:#0066CC">number_of_simulation </span>: an integer specifying how many simulations to run.
+-  <span style="color:#0066CC">base_seed </span>: seeds used are `base_seed, base_seed+1, ..., base_seed+number_of_simulations-1`.
+- <span style="color:#0066CC"> thread_count </span>: how many threads to use.
+- <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation.
+- <span style="color:#0066CC"> time_cutoff </span>: how much time in each simulation (s).
 
-GMC can then be run as follows:
+GMC can then be run as follows (here step_cutoff is specified):
 
 ```
 ./GMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200
 ```
-
-
-
