@@ -1,17 +1,18 @@
-# GMC : <span style="color: #0066CC"> Gillespie Monte Carlo </span>
+# LGMC : <span style="color: #0066CC"> Lattice Gillespie Monte Carlo </span>
 
-Implementation of Gillespie's next reaction simulator appropriate for applications in a homogeneous region or where species are well mixed.
+Implementation of Gillespie's next reaction simulator which couples a lattice and homogeneous region capable of electrochemical reactions.
 
 ## Sqlite IO  
 
-Sqlite is used for input, output, and checkpointing. Before running GMC two necessary .sqlite files must be generated - The Reaction Network Database and State Database. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
+Sqlite is used for input, output, and checkpointing. Before running LGMC two necessary .sqlite files must be generated - The Lattice Reaction Network Database and State Database. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
 
-### The Reaction Network Database 
+### The Lattice Reaction Network Database 
+
 There are two tables in the reaction network database both of which **must be created and filled in by the user**:
 - <span style="color:#0066CC"> metadata </span> : This table consists of one line for the total number of species and reactions in the simulation.
 
 ```
-    CREATE TABLE metadata (
+     CREATE TABLE metadata (
             number_of_species   INTEGER NOT NULL,
             number_of_reactions INTEGER NOT NULL
     );
@@ -25,14 +26,24 @@ There are two tables in the reaction network database both of which **must be cr
 
 ```
     CREATE TABLE reactions (
-            reaction_id         INTEGER NOT NULL PRIMARY KEY,
-            number_of_reactants INTEGER NOT NULL,
-            number_of_products  INTEGER NOT NULL,
-            reactant_1          INTEGER NOT NULL,
-            reactant_2          INTEGER NOT NULL,
-            product_1           INTEGER NOT NULL,
-            product_2           INTEGER NOT NULL,
-            rate                REAL NOT NULL
+            reaction_id                     INTEGER NOT NULL PRIMARY KEY,
+            number_of_reactants             INTEGER NOT NULL,
+            number_of_products              INTEGER NOT NULL,
+            reactant_1                      INTEGER NOT NULL,
+            reactant_2                      INTEGER NOT NULL,
+            product_1                       INTEGER NOT NULL,
+            product_2                       INTEGER NOT NULL,
+            phase_reactant_1                CHAR(1) NOT NULL,
+            phase_reactant_2                CHAR(1) NOT NULL,
+            phase_product_1                 CHAR(1) NOT NULL,
+            phase_product_2                 CHAR(1) NOT NULL,
+            dG                              REAL NOT NULL,
+            prefactor                       REAL NOT NULL,
+            rate                            REAL NOT NULL,
+            electron_tunneling_coefficient  REAL NOT NULL,
+            reorganization_energy           REAL NOT NULL,
+            charge_transfer_coefficient     REAL NOT NULL,
+            type                            CHAR(1) NOT NULL
     );
 
 ```
@@ -55,7 +66,9 @@ There are five tables in the initial state database all of which **must be creat
             seed                INTEGER NOT NULL,
             step                INTEGER NOT NULL,
             time                REAL NOT NULL,
-            reaction_id         INTEGER NOT NULL
+            reaction_id         INTEGER NOT NULL,
+            site_1_mapping      INTEGER NOT NULL,
+            site_2_mapping      INTEGER NOT NULL
     );
 ```
 - <span style="color:#0066CC"> factors </span>: This table contains factors that can be used to modify rates of reactions which have zero or two reactants, or have duplicate reactants. **This table must be filled in by the user.**
@@ -73,7 +86,9 @@ There are five tables in the initial state database all of which **must be creat
     CREATE TABLE interrupt_state (
             seed                    INTEGER NOT NULL,
             species_id              INTEGER NOT NULL,
-            count                   INTEGER NOT NULL
+            quantity                INTEGER NOT NULL,
+            site_mapping            INTEGER NOT NULL,
+            edge                    INTEGER NOT NULL
             
     );
 ```
@@ -83,7 +98,8 @@ There are five tables in the initial state database all of which **must be creat
     CREATE TABLE interrupt_cutoff (
             seed                    INTEGER NOT NULL,
             step                    INTEGER NOT NULL,
-            time                    INTEGER NOT NULL
+            time                    INTEGER NOT NULL,
+            maxk                    INTEGER NOT NULL
             
     );
 ```
