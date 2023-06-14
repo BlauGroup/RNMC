@@ -8,7 +8,7 @@ Sqlite is used for input, output, and checkpointing. Before running GMC the nece
 
 ### The Reaction Network Database 
 There are 2 tables in the reaction network database:
-- <span style="color:#009900"> metadata: </span> This table includes the total number of species and reactions in the simulation.
+- <span style="color:#0066CC"> metadata </span> : This table includes the total number of species and reactions in the simulation.
 
 ```
     CREATE TABLE metadata (
@@ -17,11 +17,11 @@ There are 2 tables in the reaction network database:
     );
 ```
 
-- `reactions`: This table is how reactions are defined in the simulation. Only reactions of up to two reactants and products are supported. 
-    - `reaction_id`: Unique, starts at 0 and must increase in increments of one
-    - `number_of_reactants\products`: Either 0, 1, or 2.
-    - `reactant_1\2`: Unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one.
-    - `rate`: Rate of the reaction.
+- <span style="color:#0066CC"> reactions </span>: This table is how reactions are defined in the simulation. Only reactions of up to two reactants and products are supported. 
+    - <span style="color:#009900"> reaction_id </span>: Unique, starts at 0 and must increase in increments of one
+    - <span style="color:#009900"> number_of_reactants\products </span>: Either 0, 1, or 2.
+    - <span style="color:#009900"> reactant_1\2 </span>: Unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one.
+    - <span style="color:#009900"> rate </span>: Rate of the reaction.
 
 ```
     CREATE TABLE reactions (
