@@ -98,15 +98,16 @@ There are five tables in the initial state database all of which **must be creat
 - <span style="color:#0066CC"> interrupt_state </span>: during checkpointing, the simulation will fill this table with the final state of the simulation. This includes both the species in the lattice and homogeneous region.
     - <span style="color:#006633"> site_mapping </span>: szudzik representation of site's i,j,k if on lattice or -2 if in homogeneous region.
     - <span style="color:#006633"> edge </span>: 0 or 1 representative of if the site allows adsorption or desorption reactions.
+
 ```
-    CREATE TABLE interrupt_state (
-            seed                    INTEGER NOT NULL,
-            species_id              INTEGER NOT NULL,
-            quantity                INTEGER NOT NULL,
-            site_mapping            INTEGER NOT NULL,
-            edge                    INTEGER NOT NULL
-            
-    );
+CREATE TABLE interrupt_state (
+        seed                    INTEGER NOT NULL,
+        species_id              INTEGER NOT NULL,
+        quantity                INTEGER NOT NULL,
+        site_mapping            INTEGER NOT NULL,
+        edge                    INTEGER NOT NULL
+        
+);
 ```
 - <span style="color:#0066CC"> interrupt_cutoff </span>: During checkpointing, the simulation will fill in this table.
 

@@ -15,7 +15,7 @@ There are two tables in the lattice reaction network database both of which **mu
             number_of_species   INTEGER NOT NULL,
             number_of_reactions INTEGER NOT NULL
     );
-```- <span style="color:#006633"> site_1|2_mapping </span>:
+```
 
 - <span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. *Only reactions of up to two reactants and products are supported.* Each row in the table represents one reaction with the following attributes. 
     - <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one.
