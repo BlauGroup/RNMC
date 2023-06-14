@@ -19,9 +19,9 @@ CREATE TABLE metadata (
 ```
 
 - <span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. *Only reactions of up to two reactants and products are supported.* Each row in the table represents one reaction with the following attributes. 
- - <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one.
+    - <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one.
     - <span style="color:#006633"> number_of_reactants/products </span>: either 0, 1, or 2.
-    - <span style="color:#006633"> reactant_1/2 </span>: unique, positive integer representative of a species. The integer representation of species ** must begin at 1 ** and increase in increments of one. ** The integer 0 is reserved to represent an empty site. ** If there is only one reactant/product then set the species to -1.
+    - <span style="color:#006633"> reactant_1/2 </span>: unique, positive integer representative of a species. The integer representation of species **must begin at 1** and increase in increments of one. **The integer 0 is reserved to represent an empty site.** If there is only one reactant/product then set the species to -1.
     - <span style="color:#006633"> phase_reactant/product_1/2 </span>: char representing if the species in the species is in the lattice(spatially resolved), 'L', or solution(homogeneous), 'S', region. If there are not two reactants/products, the phase can be set to 'N'.
     - <span style="color:#006633"> dG </span>: gibbs free energy.
     - <span style="color:#006633"> prefactor </span>: prefactor applied during calculation of reaction rate.
