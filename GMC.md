@@ -2,13 +2,13 @@
 
 Implementation of Gillespie's next reaction simulator appropriate for applications in a homogeneous region or where species are well mixed.
 
-## Sqlite IO  <span style="color:#009900">some *blue* text</span>.
+## Sqlite IO  
 
 Sqlite is used for input, output, and checkpointing. Before running GMC the necessary .sqlite files must be generated. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. Each .sqlite file **must follow this format exactly**. 
 
-### The Reaction Network Database <span style="color:#0066CC">some *blue* text</span>.
+### The Reaction Network Database 
 There are 2 tables in the reaction network database:
-- `metadata`: This table includes the total number of species and reactions in the simulation.
+- <span style="color:#009900"> metadata: </span> This table includes the total number of species and reactions in the simulation.
 
 ```
     CREATE TABLE metadata (
@@ -19,9 +19,9 @@ There are 2 tables in the reaction network database:
 
 - `reactions`: This table is how reactions are defined in the simulation. Only reactions of up to two reactants and products are supported. 
     - `reaction_id`: Unique, starts at 0 and must increase in increments of one
-    - `number_of_reactants\products`: Either 0, 1, or 2
-    - `reactant_1\2`: Unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one
-    - `rate`: Rate of the reaction
+    - `number_of_reactants\products`: Either 0, 1, or 2.
+    - `reactant_1\2`: Unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one.
+    - `rate`: Rate of the reaction.
 
 ```
     CREATE TABLE reactions (
@@ -48,7 +48,7 @@ There are 5 tables in the initial state database.
             count                  INTEGER NOT NULL
     );
 ```
-- `trajectories`:
+- `trajectories`: Record of each reaction run during the duration of the simulation including the seed of the simulation that executed the reaction and corresponding step and time.
 
 ```
     CREATE TABLE trajectories (
