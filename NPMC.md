@@ -1,5 +1,5 @@
 # NPMC 
-<span> style="color:#0066CC"> Nano Particle Monte Carlo </span>
+<span style="color:#0066CC"> Nano Particle Monte Carlo </span>
 
 A three dimensional statistical field theory simulator which supports one and two site interactions. Useful for simulating nano particles.
 
