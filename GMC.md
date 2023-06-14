@@ -2,11 +2,11 @@
 
 Implementation of Gillespie's next reaction simulator appropriate for applications in a homogeneous region or where species are well mixed.
 
-## Sqlite IO
+## Sqlite IO  <span style="#009900">some *blue* text</span>.
 
 Sqlite is used for input, output, and checkpointing. Before running GMC the necessary .sqlite files must be generated. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. Each .sqlite file **must follow this format exactly**. 
 
-### The Reaction Network Database <span style="color:blue">some *blue* text</span>.
+### The Reaction Network Database <span style="#0066CC">some *blue* text</span>.
 There are 2 tables in the reaction network database:
 - `metadata`: This table includes the total number of species and reactions in the simulation.
 
@@ -40,12 +40,7 @@ There are 2 tables in the reaction network database:
 ### The State Database 
 There are 5 tables in the initial state database. 
 
-- `initial_state`: 
-- `trajectories`:
-- `factors`: The factors can be used to modify rates of reactions which have zero or two reactants, or have duplicate reactants.
-- `interrupt_state`: State of the simulation 
-- `interrupt_cutoff`: 
-
+- `initial_state`: The quantity of each species at the start of the simulation.
 
 ```
     CREATE TABLE initial_state (
@@ -53,6 +48,7 @@ There are 5 tables in the initial state database.
             count                  INTEGER NOT NULL
     );
 ```
+- `trajectories`:
 
 ```
     CREATE TABLE trajectories (
@@ -62,6 +58,7 @@ There are 5 tables in the initial state database.
             reaction_id         INTEGER NOT NULL
     );
 ```
+- `factors`: The factors can be used to modify rates of reactions which have zero or two reactants, or have duplicate reactants.
 
 ```
     CREATE TABLE factors (
@@ -70,6 +67,7 @@ There are 5 tables in the initial state database.
             factor_duplicate REAL NOT NULL
     );
 ```
+- `interrupt_state`: State of the simulation 
 
 ```
     CREATE TABLE interrupt_state (
@@ -79,6 +77,7 @@ There are 5 tables in the initial state database.
             
     );
 ```
+- `interrupt_cutoff`
 
 ```
     CREATE TABLE interrupt_cutoff (
@@ -93,7 +92,7 @@ There are 5 tables in the initial state database.
 GMC is run as follows:
 
 ```
-GMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200
+./GMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200
 ```
 
 - `reaction_database`: a sqlite database containing the reaction network and metadata.
