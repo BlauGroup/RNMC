@@ -79,7 +79,7 @@ CREATE TABLE factors (
 );
 ```
 
-- <span style="color:#0066CC"> interrupt_state </span>: During checkpointing, the simulation will fill this table with the final state of the simulation. 
+- <span style="color:#0066CC"> interrupt_state </span>: during checkpointing, the simulation will fill this table with the final state of the simulation. 
 
 ```
     CREATE TABLE interrupt_state (
@@ -89,7 +89,7 @@ CREATE TABLE factors (
     ); 
 ```
 
-- <span style="color:#0066CC"> interrupt_cutoff </span>: During checkpointing, the simulation will fill in this table.
+- <span style="color:#0066CC"> interrupt_cutoff </span>: during checkpointing, the simulation will fill in this table.
 
 ```
     CREATE TABLE interrupt_cutoff (
