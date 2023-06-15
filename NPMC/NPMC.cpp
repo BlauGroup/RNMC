@@ -43,6 +43,7 @@ int main(int argc, char **argv) {
     int number_of_simulations = 0;
     int base_seed = 0;
     int thread_count = 0;
+    
     Cutoff cutoff = {
         .bound =  { .step =  0 },
         .type_of_cutoff = step_termination

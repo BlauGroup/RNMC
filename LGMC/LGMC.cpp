@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
     int c;
     int option_index = 0;
 
-    char *reaction_database = nullptr;
+    char *lattice_reaction_database = nullptr;
     char *initial_state_database = nullptr;
     int number_of_simulations = 0;
     int base_seed = 0;
@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
         switch (c) {
 
         case 1:
-            reaction_database = optarg;
+            lattice_reaction_database = optarg;
             break;
 
         case 2:
@@ -172,6 +172,7 @@ int main(int argc, char **argv) {
                             .lattice_fill = fill_lattice};                               
 
 
+
     Dispatcher<LatticeSolver,
     LatticeReactionNetwork,
     LatticeParameters,
@@ -188,7 +189,7 @@ int main(int argc, char **argv) {
     LatticeState>
 
     dispatcher (
-    reaction_database,
+    lattice_reaction_database,
     initial_state_database,
     number_of_simulations,
     base_seed,
