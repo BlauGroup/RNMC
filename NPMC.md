@@ -102,17 +102,25 @@ CREATE TABLE factors (
 
 
 ## Running NPMC
-To run NPMC first create an executable with the makefile. 
+To access the makefile, enter the NPMC folder:
+
+```
+$ cd NPMC
+```
+
+Next create an executable with the makefile. The executable will be located in the NPMC folder.
 
 ```
 $ make NPMC
 ```
 
-NPMC requires six input arguments (either step_cutoff or time_cutoff must be specified): 
+For further help on the makefile and to view other commands:
 
 ```
-NPMC --nano_particle_database=np.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --dependency_threshold=1
+$ make help
 ```
+
+NPMC requires six input arguments (either step_cutoff or time_cutoff must be specified): 
 
 - <span style="color:#0066CC"> nano_particle_database </span>: a sqlite database containing the nano particle data and metadata.
 - <span style="color:#0066CC"> initial_state_database </span> : a sqlite database containing initial state. The simulation trajectories are also written into the database
@@ -121,3 +129,9 @@ NPMC --nano_particle_database=np.sqlite --initial_state_database=initial_state.s
 - <span style="color:#0066CC"> thread_count </span>: how many threads to use.
 - <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation.
 - <span style="color:#0066CC"> time_cutoff </span>: how much time in each simulation [s].
+
+When running NPMC ensure that your input file paths are correct considering the executable is inside the NPMC folder. Below is an example of how NPMC can be run using the input files from `examples` (here step_cutoff is specified):
+
+```
+./NPMC --nano_particle_database=../examples/NPMC/np.sqlite --initial_state_database=../examples/NPMC/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 
+```

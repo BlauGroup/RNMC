@@ -121,12 +121,24 @@ CREATE TABLE interrupt_cutoff (
 );
 ```
 ## Running LGMC
+To access the makefile, enter the LGMC folder:
 
-To run LGMC first create an executable with the makefile. 
+```
+$ cd LGMC
+```
+
+Next create an executable with the makefile. The executable will be located in the LGMC folder.
 
 ```
 $ make LGMC
 ```
+
+For further help on the makefile and to view other commands:
+
+```
+$ make help
+```
+
 LGMC requires seven input arguments (either step_cutoff or time_cutoff must be specified): 
 
 - <span style="color:#0066CC"> reaction_database </span>: a sqlite database containing the reaction network and metadata.
@@ -146,8 +158,8 @@ LGMC requires seven input arguments (either step_cutoff or time_cutoff must be s
     - <span style="color:#006633"> Is add site (T/F) </span>
     - <span style="color:#006633"> Charge transfer style (M/B) </span>
 
-LGMC can then be run as follows (here step_cutoff is specified):
+When running LGMC ensure that your input file paths are correct considering the executable is inside the LGMC folder. Below is an example of how LGMC can be run using the input files from `examples` (here step_cutoff is specified):
 
 ```
-./LGMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --parameters=LGMC_params.txt
+./LGMC --lattice_reaction_database=../examples/LGMC/CO_oxidation/rn.sqlite --initial_state_database=../examples/LGMC/CO_oxidation/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --parameters=../examples/LGMC/CO_oxidation/LGMC_params.txt
 ```
