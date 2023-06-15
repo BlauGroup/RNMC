@@ -4,16 +4,18 @@
 RNMC depends on [GSL](https://www.gnu.org/software/gsl/) for pseudo random number generation and [sqlite](https://www.sqlite.org/index.html) for the database interfaces.
 
 ## Makefile
-On a machine with system versions of GSL and sqlite, the executables can be built with a makefile. The executables are placed inside the `GMC`, `NPMC`, or `LGMC` folders.
+On a machine with system versions of GSL and sqlite, the executables can be built with a makefile. There are makefiles inside the `GMC`, `NPMC`, or `LGMC` folders.
 
-For GMC, NPMC and LGMC:
+To make an executable for GMC, NPMC and LGMC:
 
 ```
 $ make GMC/NPMC/LGMC
 ```
 
+For further help on the makefile and to view other commands:
+
 ```
-$ make clean
+$ make help
 ```
 
 Note that the makefile uses the `gsl-config` utility to find headers and libraries for GSL. If you are on a cluster and sqlite is not present, it can be built as follows:
