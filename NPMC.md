@@ -130,7 +130,7 @@ NPMC requires six input arguments (either step_cutoff or time_cutoff must be spe
 - <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation.
 - <span style="color:#0066CC"> time_cutoff </span>: how much time in each simulation [s].
 
-When running NPMC ensure that your input file paths are correct considering the executable is inside the NPMC folder. Below is an example of how NPMC can be run using the input files from `examples` (here step_cutoff is specified):
+When running NPMC ensure that your input file paths are correct considering the executable is inside the NPMC folder. Below is an example of how NPMC can be run using the input files from [Examples](./Examples.html) (here step_cutoff is specified):
 
 ```
 ./NPMC --nano_particle_database=../examples/NPMC/np.sqlite --initial_state_database=../examples/NPMC/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 
