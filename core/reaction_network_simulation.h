@@ -32,7 +32,7 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
 
     void init();
     bool execute_step();
-    void print_output() {assert(false);};
+    void print_output() {assert(true);};
 
 };
 

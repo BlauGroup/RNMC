@@ -1,8 +1,8 @@
 #include <getopt.h>
 
-#include "reaction_network.h"
 #include "../core/dispatcher.h"
 #include "../core/reaction_network_simulation.h"
+#include "reaction_network.h"
 
 void print_usage() {
     std::cout << "Usage: specify the following options\n"
@@ -86,15 +86,12 @@ int main(int argc, char **argv) {
             cutoff.type_of_cutoff = time_termination;
             break;
 
-
         default:
             // if an unexpected argument is passed, exit
             print_usage();
             exit(EXIT_FAILURE);
             break;
-
         }
-
     }
 
     ReactionNetworkParameters parameters;
@@ -127,5 +124,4 @@ int main(int argc, char **argv) {
 
     dispatcher.run_dispatcher();
     exit(EXIT_SUCCESS);
-
 }

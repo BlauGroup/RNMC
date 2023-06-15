@@ -8,7 +8,6 @@ ReactionNetwork::ReactionNetwork(
      SqlConnection &reaction_network_database,
      SqlConnection &initial_state_database,
      ReactionNetworkParameters)
-
     {
 
     // collecting reaction network metadata

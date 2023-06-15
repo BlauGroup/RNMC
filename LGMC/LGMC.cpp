@@ -1,18 +1,17 @@
 #include <getopt.h>
+
 #include "../core/dispatcher.h"
 #include "../core/lattice_simulation.h"
 #include "lattice_reaction_network.h"
 
 void print_usage() {
-    
-    std::cout << "Usage: specify the following in the input file\n"
-              << "reaction_database\n"
-              << "initial_state_database\n"
-              << "number_of_simulations\n"
-              << "thread_count\n"
-              << "base_seed\n"
-              << "step_cutoff\n"
-              << "parameters\n";
+    std::cout << "Usage: specify the following options\n"
+              << "--lattice_reaction_database\n"
+              << "--initial_state_database\n"
+              << "--number_of_simulations\n"
+              << "--base_seed\n"
+              << "--thread_count\n"
+              << "--step_cutoff|time_cutoff\n";
     
 } // print_usage()
 
@@ -35,18 +34,21 @@ void print_usage_LGMC_parameters() {
 /* ---------------------------------------------------------------------- */
 
 int main(int argc, char **argv) {
+    if (argc != 8) {
+        print_usage();
+        exit(EXIT_FAILURE);
+    }
 
     struct option long_options[] = {
-        {"reaction_database", required_argument, NULL, 'r'},
-        {"initial_state_database", required_argument, NULL, 'i'},
-        {"number_of_simulations", required_argument, NULL, 'n'},
-        {"base_seed", required_argument, NULL, 'b'},
-        {"thread_count", required_argument, NULL, 'c'},
-        {"step_cutoff", required_argument, NULL, 's'},
-        {"time_cutoff", required_argument, NULL, 't'},
-        {"parameters", required_argument, NULL, 'p'},
-        {"help", no_argument, NULL, 'h'},
-        {NULL, 0, NULL, '\0'}
+        {"lattice_reaction_database", required_argument, NULL, 1},
+        {"initial_state_database", required_argument, NULL, 2},
+        {"number_of_simulations", required_argument, NULL, 3},
+        {"base_seed", required_argument, NULL, 4},
+        {"thread_count", required_argument, NULL, 5},
+        {"step_cutoff", optional_argument, NULL, 6},
+        {"time_cutoff", optional_argument, NULL, 7},
+        {"parameters", required_argument, NULL, 8},
+        {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };
 
@@ -66,48 +68,43 @@ int main(int argc, char **argv) {
     };
 
     while ((c = getopt_long_only(
-                argc, argv, "hr:i:n:b:c:s:t:p:",
+                argc, argv, "",
                 long_options,
                 &option_index)) != -1) {
 
         switch (c) {
 
-        case 'h': 
-            print_usage();
-            exit(0);
-            break; 
-
-        case 'r':
+        case 1:
             reaction_database = optarg;
             break;
 
-        case 'i':
+        case 2:
             initial_state_database = optarg;
             break;
 
-        case 'n':
+        case 3:
             number_of_simulations = atoi(optarg);
             break;
 
-        case 'b':
+        case 4:
             base_seed = atoi(optarg);
             break;
 
-        case 'c':
+        case 5:
             thread_count = atoi(optarg);
             break;
 
-        case 's':
+        case 6:
             cutoff.bound.step = atoi(optarg);
             cutoff.type_of_cutoff = step_termination;
             break;
 
-        case 't':
+        case 7:
             cutoff.bound.time = atof(optarg);
             cutoff.type_of_cutoff = time_termination;
             break;
 
-        case 'p':
+        case 8:
             LGMC_params_file = optarg;
             break;
 
@@ -116,9 +113,7 @@ int main(int argc, char **argv) {
             print_usage();
             exit(EXIT_FAILURE);
             break;
-
         }
-
     }                    
 
     // read in LGMC parameters from file
@@ -165,7 +160,6 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-
     LatticeParameters parameters{.latconst = latconst, 
                             .boxxhi = boxxhi, 
                             .boxyhi = boxyhi,
@@ -191,17 +185,16 @@ int main(int argc, char **argv) {
     LatticeSimulation, 
     LatticeState>
 
-        dispatcher (
-        reaction_database,
-        initial_state_database,
-        number_of_simulations,
-        base_seed,
-        thread_count,
-        cutoff,
-        parameters
-        );
+    dispatcher (
+    reaction_database,
+    initial_state_database,
+    number_of_simulations,
+    base_seed,
+    thread_count,
+    cutoff,
+    parameters
+    );
 
     dispatcher.run_dispatcher();
     exit(EXIT_SUCCESS);
-
 }

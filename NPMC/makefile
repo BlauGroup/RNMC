@@ -16,9 +16,7 @@ OBJECTS     = $(SOURCES:%.cpp=%.o)
 # name of the perf data file, only used by the clean target
 PERF_FILE = perf.data*
 
-# Default Flags (we prefer -std=c++17 but Mac/Xcode/Clang doesn't support)
-# WARNING: Adding flags like _GLIBCXX_DEBUG or -fsanitize
-# may prevent your project from working properly!
+# flags
 CXXFLAGS = -fno-rtti -fno-exceptions -std=c++20 -Wall -Wextra $(shell gsl-config --cflags) $(shell gsl-config --libs) -lsqlite3 -lpthread
 
 # make debug - will compile sources with $(CXXFLAGS) and the -g3 flag
@@ -39,14 +37,8 @@ gprof:
 # Build all executables
 all: debug profile gprof
 
-$(EXECUTABLE): $(OBJECTS)
-ifeq ($(EXECUTABLE), executable)
-	@echo Edit EXECUTABLE variable in Makefile.
-	@echo Using default a.out.
-	$(CXX) $(CXXFLAGS) $(OBJECTS) 
-else
-	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(EXECUTABLE)
-endif
+$(EXECUTABLE): 
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)
 
 # rule for creating objects
 %.o: %.cpp

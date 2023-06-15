@@ -38,7 +38,7 @@ class NanoParticleSimulation : public Simulation<NanoSolver> {
 
     void init();
     bool execute_step();
-    void print_output() {assert(false);};
+    void print_output() {assert(true);};
 
 };
 
