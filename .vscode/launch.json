@@ -5,7 +5,7 @@
             "name": "(lldb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/LGMC/LGMC_debug",
+            "program": "${workspaceFolder}/LGMC/LGMC",
             "args": ["-r", "../examples/LGMC/CO_oxidation(static)/network.sqlite", "-i",
             "../examples/LGMC/CO_oxidation(static)/state.sqlite", "-n", "1", "-c",
             "1", "-b", "0", "-s", "4000000",  "-p", "../examples/LGMC/CO_oxidation(static)/LGMC_params.txt"],

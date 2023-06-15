@@ -1,4 +1,5 @@
-build
-result
-main
+LGMC
+GMC
+NPMC
+*_debug
 *.o

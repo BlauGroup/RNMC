@@ -1,6 +1,12 @@
 GMC: 
 	+$(MAKE) -C GMC
 
+NPMC: 
+	+$(MAKE) -C NPMC
+
+LGMC: 
+	+$(MAKE) -C LGMC
+
 clean_LGMC:
 	+$(MAKE) -C LGMC clean
 

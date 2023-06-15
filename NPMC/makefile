@@ -63,7 +63,7 @@ Makefile Help
     $$ man make
 
 * General usage
-	1. To make an executable for LGMC $$ make LGMC
+	1. To make an executable for NPMC $$ make NPMC
 	2. You can $$ make debug, profile, gprof, or clean
 	3. To do all at once $$ make all 
 
