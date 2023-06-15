@@ -11,7 +11,7 @@ void print_usage() {
               << "--number_of_simulations\n"
               << "--base_seed\n"
               << "--thread_count\n"
-              << "--step_cutoff|time_cutoff\n"
+              << "--step_cutoff|time_cutoff\n";
 
 } // print_usage()
 
