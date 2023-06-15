@@ -1,13 +1,10 @@
-#include <getopt.h>
-#include <csignal>
-
 #include "nano_particle.h"
 
 NanoParticle::NanoParticle(
     SqlConnection &nano_particle_database,
     SqlConnection &initial_state_database,
-    NanoParticleParameters parameters
-    ) {
+    NanoParticleParameters) 
+    {
 
     // sql statements
     SqlStatement<SpeciesSql> species_statement(nano_particle_database);

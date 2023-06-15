@@ -1040,7 +1040,7 @@ LatticeWriteCutoffSql LatticeReactionNetwork::cutoff_history_element_to_sql(
 /* ---------------------------------------------------------------------- */
 void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_reader, 
                                         SqlReader<LatticeReadCutoffSql> cutoff_reader, 
-                                        SqlReader<LatticeReadTrajectoriesSql> trajectory_reader, 
+                                        SqlReader<LatticeReadTrajectoriesSql>, 
                                         std::map<int, LatticeState> &temp_seed_state_map, 
                                         std::map<int, int> &temp_seed_step_map, 
                                         SeedQueue &temp_seed_queue, 
