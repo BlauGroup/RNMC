@@ -88,12 +88,24 @@ CREATE TABLE interrupt_cutoff (
 );
 ```
 ## Running GMC
+To access the makefile, enter the GMC folder
 
-To run GMC first create an executable with the makefile. 
+```
+$ cd GMC
+```
+
+Next create an executable with the makefile. The executable will be located in the GMC folder.
 
 ```
 $ make GMC
 ```
+
+For further help on the makefile and to view other commands
+
+```
+$ make help
+```
+
 GMC requires six input arguments (either step_cutoff or time_cutoff must be specified): 
 
 - <span style="color:#0066CC"> reaction_database </span>: a sqlite database containing the reaction network and metadata.
@@ -104,7 +116,7 @@ GMC requires six input arguments (either step_cutoff or time_cutoff must be spec
 - <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation.
 - <span style="color:#0066CC"> time_cutoff </span>: how much time in each simulation [s].
 
-GMC can then be run as follows (here step_cutoff is specified):
+When running GMC ensure that your input file paths are correct considering the executable is inside the GMC folder. Below is an example of how GMC can be run using the input files from `examples` (here step_cutoff is specified):
 
 ```
 ./GMC --reaction_database=rn.sqlite --initial_state_database=initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200
