@@ -107,7 +107,6 @@ void NanoWriteTrajectoriesSql::action(NanoWriteTrajectoriesSql &r, sqlite3_stmt 
 
 /* --------- Read State SQL ---------*/
 
-
 std::string NanoReadStateSql::sql_statement =
     "SELECT seed, site_id, degree_of_freedom FROM interrupt_state;";
 
