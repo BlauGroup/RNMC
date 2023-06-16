@@ -14,17 +14,17 @@ All initial sites are empty. The initial state of the solution in contact with t
 
 The allowed reactions and associated rates are as follows:
 
-| Reaction                                                                | Prefactor | Rate ($s^{-1}$) |
-|-------------------------------------------------------------------------|-----------|-----------------|
-| CO~soln~ + * &rarr \text{CO}^*$                   | 1         | $10^5$          |
-| $* + \text{H}_2\text{O}_{(soln)} &rarr \text{H}_2\text{O}^*$ | 1         | $10^2$          |
-| $\text{H}_2\text{O}^* &rarr * + \text{H}_2\text{O}_{(soln)}$ | 1         | $10^2$          |
-| $\text{H}_2\text{O}^* &rarr\text{OH}^* + e^-$               | 0.02      | 0               |
-| $\text{OH}^* + e^- &rarr \text{H}_2\text{O}^*$               | $10^4$    | 0               |
-| $\text{CO}^* + \text{OH}^* &rarr \text{CO}_2^* + e^-$        | 0.8432    | 0               |
-| CO~2~^*^ &rarr * + {\text{CO}_2}_{(soln)}$             | 1         | 10^4^          |
-| CO^*^ + * &rarr * + CO^*^                     | 1         | 1               |
-| OH^*^ + * &rarr * + OH^*^                     | 1         | 1               |
+| Reaction                                 | Prefactor | Rate $s^{-1}$ |
+|------------------------------------------|-----------|---------------|
+| $CO_{soln}$ + * &rarr; $CO^*$            | 1         | $10^5$        |
+| * + $H_2O_{(soln)}$ &rarr; $H_2O^*$      | 1         | $10^2$        |
+| $H_2O^*$ &rarr; * + $H_2O_{(soln)}$      | 1         | $10^2$        |
+| $H_2O^*$   &rarr;  $OH^*$ + $e^-$        | 0.02      | 0             |
+| $OH^*$ + $e^-$ &rarr; $H_2O^*$           | $10^4$    | 0             |
+| $CO^*$ + $OH^*$ &rarr; $CO_2^*$ + $e^-$  | 0.8432    | 0             |
+| $CO_2^*$ &rarr; * + $CO_2_{(soln)}$      | 1         | $10^4$        |
+| $CO^*$ + * &rarr; * + $CO^*$             | 1         | 1             |
+| $OH^*$ + * &rarr; * + $OH^*$             | 1         | 1             |
 
 From this initial state, 200,000 steps of our kMC are run. As the simulation proceeds, CO and H~2~O rapidly adsorbs onto the lattice. The H~2~O on the lattice then oxidizes to form OH which reacts with the CO on the lattice to form CO~2~. This CO ~2~ lattice product then desorbs into the solution. The results of the simulation are shown as the occupancy of the lattice sites.
 
