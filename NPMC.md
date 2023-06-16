@@ -82,22 +82,23 @@ CREATE TABLE factors (
 - <span style="color:#0066CC"> interrupt_state </span>: during checkpointing, the simulation will fill this table with the final state of the simulation. 
 
 ```
-    CREATE TABLE interrupt_state (
-            site_id                    INTEGER NOT NULL,
-            degree_of_freedom              INTEGER NOT NULL
-            
-    ); 
+CREATE TABLE interrupt_state (
+    seed                    INTEGER NOT NULL,
+    site_id                 INTEGER NOT NULL,
+    degree_of_freedom       INTEGER NOT NULL
+        
+); 
 ```
 
 - <span style="color:#0066CC"> interrupt_cutoff </span>: during checkpointing, the simulation will fill in this table.
 
 ```
-    CREATE TABLE interrupt_cutoff (
-            seed                    INTEGER NOT NULL,
-            step                    INTEGER NOT NULL,
-            time                    INTEGER NOT NULL
-            
-    );
+CREATE TABLE interrupt_cutoff (
+        seed                    INTEGER NOT NULL,
+        step                    INTEGER NOT NULL,
+        time                    INTEGER NOT NULL
+        
+);
 ```
 
 
