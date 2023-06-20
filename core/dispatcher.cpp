@@ -191,7 +191,7 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
     // Unset the sigmask so that the parent thread resumes catching errors as normal
     pthread_sigmask(SIG_UNBLOCK, &mask, NULL);
     
-    //action.sa_handler = signalHandler;
+    action.sa_handler = signalHandler;
     sigemptyset(&action.sa_mask);
     action.sa_flags = 0;
     sigaction(SIGINT, &action, NULL);

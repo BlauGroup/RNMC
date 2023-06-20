@@ -72,12 +72,12 @@ public:
         Cutoff cutoff,
         Parameters parameters);
 
-    void signalHandler(int signum);
+    void static signalHandler(int signum);
     void run_dispatcher();
     void record_simulation_history(HistoryPacket<TrajHistory> traj_history_packet);
     void record_state(HistoryPacket<StateHistory> state_history_packet);
     void record_cutoff(HistoryPacket<CutoffHistory> cutoff_history_packet);
-    void write_error_message(std::string s);
+    void static write_error_message(std::string s);
     
 };
 
