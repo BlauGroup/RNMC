@@ -40,11 +40,10 @@ bool NanoParticleSimulation::execute_step() {
 
         if (history.size() == this->history_chunk_size ) {
             history_queue.insert_history(
-                std::move(
-                    HistoryPacket<NanoTrajectoryHistoryElement> {
-                        .history = std::move(this->history),
-                        .seed = this->seed
-                        }));
+                HistoryPacket<NanoTrajectoryHistoryElement> {
+                    .history = std::move(this->history),
+                    .seed = this->seed
+                    });
 
             history = std::vector<NanoTrajectoryHistoryElement> ();
             history.reserve(this->history_chunk_size);

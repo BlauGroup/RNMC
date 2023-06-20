@@ -76,16 +76,13 @@ bool LatticeSimulation::execute_step() {
                 site_1_mapping = -3;
             }
             else {
-
                 site_1_mapping = lattice_network.combine(state.lattice->sites[site_1].i, 
                     state.lattice->sites[site_1].j, state.lattice->sites[site_1].k);
             }
-
         }
         if(event.site_two) {
             int site_2 = event.site_two.value();
 
-     
             if(site_2 == -2) {
                 site_2_mapping = -2;
             }
@@ -94,7 +91,7 @@ bool LatticeSimulation::execute_step() {
             }
             else {
                 site_2_mapping = lattice_network.combine(state.lattice->sites[site_2].i, 
-                                    state.lattice->sites[site_2].j, state.lattice->sites[site_2].k);
+                    state.lattice->sites[site_2].j, state.lattice->sites[site_2].k);
             }
         }
         if(flip_sites) {
@@ -117,11 +114,10 @@ bool LatticeSimulation::execute_step() {
 
         if (history.size() == this->history_chunk_size ) {
             history_queue.insert_history(
-                std::move(
-                    HistoryPacket<LatticeTrajectoryHistoryElement> {
-                        .history = std::move(this->history),
-                        .seed = this->seed
-                        }));
+                HistoryPacket<LatticeTrajectoryHistoryElement> {
+                    .history = std::move(this->history),
+                    .seed = this->seed
+                    });
 
             history = std::vector<LatticeTrajectoryHistoryElement> ();
             history.reserve(this->history_chunk_size);
