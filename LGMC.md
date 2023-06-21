@@ -1,6 +1,6 @@
 # LGMC - <span style="color: #0066CC"> Lattice Gillespie Monte Carlo </span>
 
-Implementation of Gillespie's next reaction simulator which couples a lattice and homogeneous region capable of electrochemical reactions. Either marcus of Butler-Volmer electron transfer theory can be used. The lattice is periodic in the x, y direction and non-periodic in the z direction. The lattice may be static or dynamic.
+A kMC implementation coupling a homogeneous (Gillespie-like) region with a lattice, enabling simulations with reactions occurring in multiple phases and capable of electrochemical reactions. Either marcus of Butler-Volmer electron transfer theory (specified at runtime, see 'Running LGMC' below) can be used when calculating rates for electrochemical reactions. The lattice is periodic in the x, y direction and non-periodic in the z direction. The lattice may be static (no sites can be added or deleted) or dynamic (sites are added through adsorption and deleted through desorption reactions).
 
 ## Sqlite IO  
 
