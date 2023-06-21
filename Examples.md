@@ -14,19 +14,22 @@ All initial sites are empty. The initial state of the solution in contact with t
 
 The allowed reactions and associated rates are as follows:
 
-| Reaction                                 | Prefactor | Rate $s^{-1}$ |
+| Reaction                                 | Prefactor | Rate (s<sup>-1</sup>) |
 |------------------------------------------|-----------|---------------|
-| $CO_{soln}$ + * &rarr; $CO^*$            | 1         | $10^5$        |
-| * + $H_2O_{(soln)}$ &rarr; $H_2O^*$      | 1         | $10^2$        |
-| $H_2O^*$ &rarr; * + $H_2O_{(soln)}$      | 1         | $10^2$        |
+| CO<sub>soln</sub> + * → CO<sup>*</sup>           | 1         | 10<sup>5</sup>       |
+| * + H<sub>2O<sub>(soln)</sub></sub> → H<sub>2O<sup>*</sup></sub>     | 1         | $10^2$        |
+| $H_2O^*$ &rarr; * + $H_2O_{(soln)}$      | 1         | 10<sup>2</sup>        |
 | $H_2O^*$   &rarr;  $OH^*$ + $e^-$        | 0.02      | 0             |
 | $OH^*$ + $e^-$ &rarr; $H_2O^*$           | $10^4$    | 0             |
 | $CO^*$ + $OH^*$ &rarr; $CO_2^*$ + $e^-$  | 0.8432    | 0             |
-| $CO_2^*$ &rarr; * + $CO_2_{(soln)}$      | 1         | $10^4$        |
+| $CO_2^*$ &rarr; * + $CO_2_{(soln)}$      | 1         | 10<sup>4</sup>       |
 | $CO^*$ + * &rarr; * + $CO^*$             | 1         | 1             |
 | $OH^*$ + * &rarr; * + $OH^*$             | 1         | 1             |
 
-From this initial state, 200,000 steps of our kMC are run. As the simulation proceeds, CO and H~2~O rapidly adsorbs onto the lattice. The H<sub>2</sub>O on the lattice then oxidizes to form OH which reacts with the CO on the lattice to form CO~2~. This CO ~2~ lattice product then desorbs into the solution. The results of the simulation are shown as the occupancy of the lattice sites.
+
+
+
+From this initial state, 200,000 steps of our kMC are run. As the simulation proceeds, CO and H<sub>2</sub>O rapidly adsorbs onto the lattice. The H<sub>2</sub>O on the lattice then oxidizes to form OH which reacts with the CO on the lattice to form CO<sub>2</sub>. This CO<sub>2</sub> lattice product then desorbs into the solution. The results of the simulation are shown as the occupancy of the lattice sites.
 
 <figure>
     <img src="valid.png"
