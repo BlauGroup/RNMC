@@ -3,11 +3,11 @@
 The `testing` folder contains unit tests using [GoogleTest](https://google.github.io/googletest/primer.html). Unit tests are available for the following classes: `reaction_network`, `nano_particle`, `lattice_reaction_network`, and `lattice`. The unit tests can be used to help determine if changes to the open-source code introduce bugs but are not completely comprehensive.
 
 ## Makefile 
-- Create executables for each test 
+- Create executables for all tests at once
     ```
     $ make all
     ```
-- Create single executables for class foo
+- Create a single executable for class foo
     ```
     $ make foo_test
     ```
