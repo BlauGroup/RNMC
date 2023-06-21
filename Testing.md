@@ -21,6 +21,7 @@ The `testing` folder contains unit tests using [GoogleTest](https://google.githu
 Each unit test will either fail or pass. GoogleTest can use colors in its terminal output to make it easier to spot the important information:
 
 <pre>...
+... tests that pass ...
 <font color="green">[----------]</font> 1 test from FooTest
 <font color="green">[ RUN      ]</font> FooTest.DoesAbc
 <font color="green">[       OK ]</font> FooTest.DoesAbc
@@ -28,7 +29,8 @@ Each unit test will either fail or pass. GoogleTest can use colors in its termin
 <font color="green">[ RUN      ]</font> BarTest.HasXyzProperty
 <font color="green">[       OK ]</font> BarTest.HasXyzProperty
 <font color="green">[ RUN      ]</font> BarTest.ReturnsTrueOnSuccess
-... some error messages ...
+
+... tests that fail ...
 <font color="red">[   FAILED ]</font> BarTest.ReturnsTrueOnSuccess
 ...
 <font color="green">[==========]</font> 30 tests from 14 test suites ran.
