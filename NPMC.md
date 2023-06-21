@@ -1,13 +1,13 @@
 # NPMC - <span style="color: #0066CC"> Nano Particle Monte Carlo </span>
 
-A three dimensional statistical field theory simulator which supports one and two site interactions. Useful for simulating nano particles.
+A three dimensional statistical field theory simulator which supports one and two site interactions. Useful for simulating nanoparticles.
 
 ## Sqlite IO
 
 Sqlite is used for input, output, and checkpointing. Before running `NPMC` two necessary .sqlite files must be generated - The Nano Particle Database and State Database. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
 
 ### The Nano Particle Database
-There are four tables in the nano particle database all of which **must be created and filled in by the user**:
+There are four tables in the nanoparticle database all of which **must be created and filled in by the user**:
 
 ```
 CREATE TABLE species (
@@ -50,12 +50,15 @@ CREATE TABLE metadata (
 ## The State Database
 There are five tables in the initial state database all of which **must be created by the user**: 
 
+- <span style="color:#0066CC"> initial_state </span>: this table represents the initial species. **This table must be filled in by the user.**
 ```
 CREATE TABLE initial_state (
     site_id            INTEGER NOT NULL PRIMARY KEY,
     degree_of_freedom  INTEGER NOT NULL
 );
 ```
+
+- <span style="color:#0066CC"> trajectories </span>: this table records each interaction executed during the duration of the simulation. For each reaction the seed of the simulation that executed the reaction and corresponding step and time are recorded. 
 
 ```
 CREATE TABLE trajectories (
@@ -67,7 +70,7 @@ CREATE TABLE trajectories (
     interaction_id     INTEGER NOT NULL
 );
 ```
-- <span style="color:#0066CC"> factors </span>:
+- <span style="color:#0066CC"> factors </span>: **This table must be filled in by the user.**
     - <span style="color:#006633"> distance_factor_type </span>: specifies how to compute interaction propensities for two site interactions as a function of distance. Currently the accepted values are `linear` and `inverse_cubic`.
 
 ```
@@ -101,7 +104,6 @@ CREATE TABLE interrupt_cutoff (
 );
 ```
 
-
 ## Running NPMC
 To access the makefile, enter the `NPMC` folder:
 
@@ -123,7 +125,7 @@ $ make help
 
 `NPMC` requires six input arguments (either `step_cutoff` or `time_cutoff` must be specified): 
 
-- <span style="color:#0066CC"> nano_particle_database </span>: a sqlite database containing the nano particle data and metadata.
+- <span style="color:#0066CC"> nano_particle_database </span>: a sqlite database containing the nanoparticle data and metadata.
 - <span style="color:#0066CC"> initial_state_database </span> : a sqlite database containing initial state. The simulation trajectories are also written into the database
 - <span style="color:#0066CC"> number_of_simulation </span>: an integer specifying how many simulations to run
 -  <span style="color:#0066CC"> base_seed </span>: seeds used are `base_seed, base_seed+1, ..., base_seed+number_of_simulations-1`
