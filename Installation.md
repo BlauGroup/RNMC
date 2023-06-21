@@ -6,10 +6,16 @@ RNMC depends on [GSL](https://www.gnu.org/software/gsl/) for pseudo random numbe
 ## Makefile
 On a machine with system versions of GSL and sqlite, the executables can be built with a makefile. There are makefiles inside the `GMC`, `NPMC`, or `LGMC` folders.
 
-To make an executable for GMC, NPMC and LGMC:
+To make an executable for GMC, NPMC or LGMC first enter that folder to use the makefile. To create an executable, use make and then the name of the module. 
+
+For example, to use GMC:
 
 ```
-$ make GMC/NPMC/LGMC
+$ cd GMC
+```
+
+```
+$ make GMC
 ```
 
 For further help on the makefile and to view other commands:
@@ -33,5 +39,5 @@ in which case, the simulators can be built like this:
 ```
 export CPATH=$HOME/sqlite-amalgamation-3360000:$CPATH
 export LIBRARY_PATH=$HOME/sqlite-amalgamation-3360000:$LIBRARY_PATH
-make GMC/NPMC/LGMC
+make GMC
 ```
