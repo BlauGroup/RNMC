@@ -1,11 +1,19 @@
 # Examples
 
 ## GMC
+A simple example of an application of GMC is [homogeneous catalysis](./https://pubs.rsc.org/en/content/articlehtml/2017/sc/c7sc03628k). The following reaction network is employed.
+
+
+<figure>
+    <img src="catalysis.png"
+         alt="homogeneous catalysis">
+    <figcaption> Final reaction network for the hydroformylation reaction obtained at the DFT level. The circles indicate the reactants, products, and intermediates, while the rectangles indicate the transition states. The thick lines and the yellow circles denote the Heck–Breslow mechanism to give the product (P) and the hydrogenation mechanism to form the side product (Pside). The other paths are drawn with dashed lines. The green circles indicate the stereoisomers of the intermediates in the Heck–Breslow mechanism. The numbers in the circles and the rectangles denote the relative energies of intermediates and transition states with respect to that of the reactant (R), respectively. All the energy values are in kcal mol<sup>-1</sup> </figcaption>
+</figure>
 
 ## NPMC
 
 ## LGMC
-Two examples of applications of LGMC, CO Oxidation on Cu with a static lattice and a simple reaction network for the formation and evolution of the solid electrolyte interphase (SEI) in a lithium-ion battery, are provided. The Python code for generating the .sqlite files is in the `examples` folder of the github. 
+Two examples of applications of LGMC, CO Oxidation on Cu with a static lattice and a simple reaction network for the formation and evolution of the solid electrolyte interphase (SEI) in a lithium-ion battery, are provided. The Python code for generating the .sqlite files is in the `examples` folder of the github (`examples/LGMC/CO_oxidation` and `examples/LGMC/SEI`). 
 
 ### CO Oxidation on Cu
 This example simulates electrocatalytic CO oxidation on Cu. We employ a static lattice with 50 sites in each of the x and y dimensions and 2 sites in the z dimension to represent a Cu surface as the catalysis. 
@@ -20,7 +28,7 @@ The allowed reactions and associated rates are as follows:
 | * + H<sub>2</sub>O<sub>(soln)</sub> &rarr; H<sub>2</sub>O<sup>*</sup>   | 1         | 10<sup>2</sup>       |
 | H<sub>2</sub>O<sup>*</sup> → * + H<sub>2</sub>O<sub>(soln)</sub>    | 1         | 10<sup>2</sup>        |
 | H<sub>2</sub>O<sup></sup> → OH<sup></sup> + e<sup>-</sup>      | 0.02      | 0             |
-| OH<sup>*</sup> + e<sup>-</sup> → H<sub>2</sub>O<sup>*</sup>          | $10^4$    | 0             |
+| OH<sup>*</sup> + e<sup>-</sup> → H<sub>2</sub>O<sup>*</sup>          | 10<sup>4</sup>    | 0             |
 | CO<sup>*</sup> + OH<sup>*</sup> → CO<sub>2</sub><sup>*</sup> + e<sup>-</sup>  | 0.8432    | 0             |
 | CO<sub>2</sub><sup>*</sup> → * + CO<sub>2<sub>(soln)</sub></sub>     | 1         | 10<sup>4</sup>       |
 | CO<sup>*</sup> + * → * + CO<sup>*</sup>            | 1         | 1             |
