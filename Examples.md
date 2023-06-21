@@ -26,7 +26,7 @@ The allowed reactions and associated rates are as follows:
 | $CO^*$ + * &rarr; * + $CO^*$             | 1         | 1             |
 | $OH^*$ + * &rarr; * + $OH^*$             | 1         | 1             |
 
-From this initial state, 200,000 steps of our kMC are run. As the simulation proceeds, CO and H~2~O rapidly adsorbs onto the lattice. The H~2~O on the lattice then oxidizes to form OH which reacts with the CO on the lattice to form CO~2~. This CO ~2~ lattice product then desorbs into the solution. The results of the simulation are shown as the occupancy of the lattice sites.
+From this initial state, 200,000 steps of our kMC are run. As the simulation proceeds, CO and H~2~O rapidly adsorbs onto the lattice. The H<sub>2</sub>O on the lattice then oxidizes to form OH which reacts with the CO on the lattice to form CO~2~. This CO ~2~ lattice product then desorbs into the solution. The results of the simulation are shown as the occupancy of the lattice sites.
 
 <figure>
     <img src="valid.png"
