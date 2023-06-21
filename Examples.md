@@ -18,8 +18,8 @@ The allowed reactions and associated rates are as follows:
 |------------------------------------------|-----------|---------------|
 | CO<sub>soln</sub> + * &rarr; CO<sup>*</sup>           | 1         | 10<sup>5</sup>       |
 | * + H<sub>2</sub>O<sub>(soln)</sub> &rarr; H<sub>2</sub>O<sup>*</sup>   | 1         | 10<sup>2</sup>       |
-| H<sub>2O<sup>*</sup></sub> → * + H<sub>2O<sub>(soln)</sub></sub>    | 1         | 10<sup>2</sup>        |
-| H<sub>2O<sup></sup></sub> → OH<sup></sup> + e<sup>-</sup>      | 0.02      | 0             |
+| H<sub>2</sub>O<sup>*</sup> → * + H<sub>2</sub>O<sub>(soln)</sub>    | 1         | 10<sup>2</sup>        |
+| H<sub>2</sub>O<sup></sup> → OH<sup></sup> + e<sup>-</sup>      | 0.02      | 0             |
 | OH<sup>*</sup> + e<sup>-</sup> → H<sub>2</sub>O<sup>*</sup>          | $10^4$    | 0             |
 | CO<sup>*</sup> + OH<sup>*</sup> → CO<sub>2</sub><sup>*</sup> + e<sup>-</sup>  | 0.8432    | 0             |
 | CO<sub>2</sub><sup>*</sup> → * + CO<sub>2<sub>(soln)</sub></sub>     | 1         | 10<sup>4</sup>       |
