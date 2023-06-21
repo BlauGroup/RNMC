@@ -16,15 +16,15 @@ The allowed reactions and associated rates are as follows:
 
 | Reaction                                 | Prefactor | Rate (s<sup>-1</sup>) |
 |------------------------------------------|-----------|---------------|
-| CO<sub>soln</sub> + * → CO<sup>*</sup>           | 1         | 10<sup>5</sup>       |
-| * + H<sub>2O<sub>(soln)</sub></sub> → H<sub>2O<sup>*</sup></sub>     | 1         | $10^2$        |
-| $H_2O^*$ &rarr; * + $H_2O_{(soln)}$      | 1         | 10<sup>2</sup>        |
-| $H_2O^*$   &rarr;  $OH^*$ + $e^-$        | 0.02      | 0             |
-| $OH^*$ + $e^-$ &rarr; $H_2O^*$           | $10^4$    | 0             |
-| $CO^*$ + $OH^*$ &rarr; $CO_2^*$ + $e^-$  | 0.8432    | 0             |
-| $CO_2^*$ &rarr; * + $CO_2_{(soln)}$      | 1         | 10<sup>4</sup>       |
-| $CO^*$ + * &rarr; * + $CO^*$             | 1         | 1             |
-| $OH^*$ + * &rarr; * + $OH^*$             | 1         | 1             |
+| CO<sub>soln</sub> + * &rarr; CO<sup>*</sup>           | 1         | 10<sup>5</sup>       |
+| * + H<sub>2O<sub>(soln)</sub></sub> &rarr; H<sub>2O<sup>*</sup></sub>     | 1         | 10<sup>2</sup>       |
+| H<sub>2O<sup>*</sup></sub> → * + H<sub>2O<sub>(soln)</sub></sub>    | 1         | 10<sup>2</sup>        |
+| H<sub>2O<sup></sup></sub> → OH<sup></sup> + e<sup>-</sup>      | 0.02      | 0             |
+| OH<sup></sup> + e<sup>-</sup> → H<sub>2O<sup></sup></sub>          | $10^4$    | 0             |
+| CO<sup></sup> + OH<sup></sup> → CO<sub>2</sub><sup>*</sup> + e<sup>-</sup>  | 0.8432    | 0             |
+| CO<sub>2</sub><sup>*</sup> → * + CO<sub>2<sub>(soln)</sub></sub>     | 1         | 10<sup>4</sup>       |
+| CO<sup></sup> + * → * + CO<sup></sup>            | 1         | 1             |
+| OH<sup></sup> + * → * + OH<sup></sup>            | 1         | 1             |
 
 
 
