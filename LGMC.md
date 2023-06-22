@@ -26,7 +26,7 @@ CREATE TABLE metadata (
     <ul>
     <li> <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one. </li>
     <li> <span style="color:#006633"> number_of_reactants/products </span>: either 0, 1, or 2. </li>
-    <li> <span style="color:#006633"> reactant_1&#124;2 </span>: unique, positive integer representative of a species. The integer representation of species **must begin at 1** and increase in increments of one. **The integer 0 is reserved to represent an empty site.** If there is only one reactant/product then set the species to -1 </li>
+    <li> <span style="color:#006633"> reactant_1&#124;2 </span>: unique, positive integer representative of a species. The integer representation of species <b>must begin at 1</b> and increase in increments of one. <b>The integer 0 is reserved to represent an empty site.</b> If there is only one reactant/product then set the species to -1 </li>
     <li> <span style="color:#006633"> phase_reactant&#124;product_1&#124;2 </span>: char representing if the species in the species is in the lattice(spatially resolved), 'L', or solution(homogeneous), 'S', region. If there are not two reactants/products, the phase can be set to 'N'. </li>
     <li> <span style="color:#006633"> dG </span>: gibbs free energy. </li>
     <li> <span style="color:#006633"> prefactor </span>: prefactor applied during calculation of reaction rate. </li>
@@ -34,8 +34,8 @@ CREATE TABLE metadata (
     <li> <span style="color:#006633"> electron_tunneling_coefficient </span>: electron tunneling coefficient used for Butler-Volmer and Marcus calculations. </li>
     <li> <span style="color:#006633"> reorganization_energy </span>: used for Marcus charge transfer. </li>
     <li> <span style="color:#006633"> charge_transfer_coefficient </span>: charge transfer used for Butler-Volmer and Marcus calculations. </li>
-    <ul>
     <li> <span style="color:#006633"> type </span>: type of reaction: </li>
+    <ul>
         <li> `A`: adsorption </li>
         <li> `D`: desorption </li>
         <li> `F`: diffusion (only possible in lattice region) </li>
