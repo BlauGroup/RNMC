@@ -19,15 +19,17 @@ CREATE TABLE metadata (
         number_of_reactions INTEGER NOT NULL
 );
 ```
+<ul>
+<li>
+<span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. *Only reactions of up to two reactants and and up to two products are supported.* Each row in the table represents one reaction with the following attributes. </li>
+    <ul>
+    <li> <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one.
+    - <span style="color:#006633"> number_of_reactants/products </span>: either 0, 1, or 2. </li>
+    <li> <span style="color:#006633"> reactant_1\|2 </span>: unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one. If there is only one reactant\|product then set the species to -1. </li>
+    <li> <span style="color:#006633"> rate </span>: rate of the reaction. </li>
+    </ul>
 
-- <span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. *Only reactions of up to two reactants and and up to two products are supported.* Each row in the table represents one reaction with the following attributes. 
-    - <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one.
-    - <span style="color:#006633"> number_of_reactants/products </span>: either 0, 1, or 2.
-    - <span style="color:#006633"> reactant_1\|2 </span>: unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one. If there is only one reactant\|product then set the species to -1.
-    - <span style="color:#006633"> rate </span>: rate of the reaction.
-
-```
-CREATE TABLE reactions (
+<pre><code> CREATE TABLE reactions (
         reaction_id         INTEGER NOT NULL PRIMARY KEY,
         number_of_reactants INTEGER NOT NULL,
         number_of_products  INTEGER NOT NULL,
@@ -37,7 +39,8 @@ CREATE TABLE reactions (
         product_2           INTEGER NOT NULL,
         rate                REAL NOT NULL
 );
-```
+</code></pre>
+</ul>
 
 ### The State Database 
 There are five tables in the initial state database all of which **must be created by the user**: 
