@@ -21,7 +21,7 @@ CREATE TABLE species (
     degrees_of_freedom  INTEGER NOT NULL
 );
 ```
-- <span style="color:#0066CC"> sites </span>: There are no restrictions in the x, y, z sites table. Atoms may be placed anywhere in space, although it is typically restricted to sites on a lattice. Although that lattice is not fixed, since there are many host materials that are used for upconverting nanoparticles.
+- <span style="color:#0066CC"> sites </span>: this table initalizes the sites available in the simulation. There are no restrictions in the x, y, z sites table. Atoms may be placed anywhere in space, although it is typically restricted to sites on a lattice. Although that lattice is not fixed, since there are many host materials that are used for upconverting nanoparticles.
 
 ```
 CREATE TABLE sites (
@@ -37,17 +37,9 @@ CREATE TABLE sites (
     - <span style="color:#006633"> interaction_id </span>: unique, index which monotonically increases starting from 0.
     - <span style="color:#006633"> number_of_sites </span>: number of sites which participate in the event, either 1 or 2.
     - <span style="color:#006633"> species_id_1\|2 </span>: species_id corresponding to definitions provided in species table. If a single site interaction, species_id_2 should be -1.
-    - <span style="color:#006633"> left_state_1\|2 </span>: If a single site interaction, left_state_2 should be -1.
-    - <span style="color:#006633"> right_state_1\|2 </span>: If a single site interaction, right_state_2 should be -1.
+    - <span style="color:#006633"> left_state_1\|2 </span>: corresponds to the initial energy level of a species (analogous to left side of a reaction). If a single site interaction, left_state_2 should be -1.
+    - <span style="color:#006633"> right_state_1\|2 </span>: corresponds to the final energy level of a species (analogous to right side of a reaction). If a single site interaction, right_state_2 should be -1.
     - <span style="color:#006633"> rate </span>: rate for the energy transition event, please refer to [NanoParticleTools](./https://github.com/BlauGroup/NanoParticleTools). 
-
-
-For the rest, it depends on what value number_of_sites was
-
-For 1, these are single site interaction (such as optical transitions, multiphonon relaxation, or magnetic dipole). For these single site reactions, the species_id_2, left_state_2, and right_state_2 will be -1. The species_id_1 here corresponds to the definitions provided in the species table. The left_state_1 corresponds to the energy level which a specie starts at (I think “left_state” is a holdover from GMC, where you have a left side and right side of a reaction). The right_state_1 corresponds to the final state of the specie involved in the event.
-
-
-For 2, these are energy transfer events in which energy is transferred from one specie to another. So now the *_2 fields will be populated with non-trivial values.
 
 ```
 CREATE TABLE interactions (
@@ -62,6 +54,8 @@ CREATE TABLE interactions (
     rate                REAL NOT NULL
 );
 ```
+
+- <span style="color:#0066CC"> metadata </span>: this table consists of one line for the total number of species, sites, and interactions in the simulation.
 
 ```
 CREATE TABLE metadata (
@@ -95,7 +89,7 @@ CREATE TABLE trajectories (
     interaction_id     INTEGER NOT NULL
 );
 ```
-- <span style="color:#0066CC"> factors </span>: **This table must be filled in by the user.**
+- <span style="color:#0066CC"> factors </span>: this table contains factors that can be used to modify the rates of interactions. **This table must be filled in by the user.**
     - <span style="color:#006633"> distance_factor_type </span>: specifies how to compute interaction propensities for two site interactions as a function of distance. Currently the accepted values are `linear` and `inverse_cubic`.
 
 ```

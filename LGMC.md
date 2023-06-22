@@ -90,7 +90,7 @@ CREATE TABLE trajectories (
         site_1_mapping      INTEGER NOT NULL,
         site_2_mapping      INTEGER NOT NULL
 );
-</pre></code>
+</code></pre>
 </ul>
 
 - <span style="color:#0066CC"> factors </span>: this table contains factors that can be used to modify rates of reactions which have zero or two reactants, or have duplicate reactants. **This table must be filled in by the user.**
