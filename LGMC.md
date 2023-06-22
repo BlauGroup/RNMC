@@ -19,25 +19,25 @@ CREATE TABLE metadata (
 );
 ```
 
-<span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. *Only reactions of up to two reactants and products are supported.* Each row in the table represents one reaction with the following attributes. 
-        - <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one.
-        - <span style="color:#006633"> number_of_reactants/products </span>: either 0, 1, or 2.
-        - <span style="color:#006633"> reactant_1/2 </span>: unique, positive integer representative of a species. The integer representation of species **must begin at 1** and increase in increments of one. **The integer 0 is reserved to represent an empty site.** If there is only one reactant/product then set the species to -1.
-        - <span style="color:#006633"> phase_reactant/product_1/2 </span>: char representing if the species in the species is in the lattice(spatially resolved), 'L', or solution(homogeneous), 'S', region. If there are not two reactants/products, the phase can be set to 'N'.
-        - <span style="color:#006633"> dG </span>: gibbs free energy.
-        - <span style="color:#006633"> prefactor </span>: prefactor applied during calculation of reaction rate.
-        - <span style="color:#006633"> rate </span>: rate of the reaction.
-        - <span style="color:#006633"> electron_tunneling_coefficient </span>: electron tunneling coefficient used for Butler-Volmer and Marcus calculations.
-        - <span style="color:#006633"> reorganization_energy </span>: used for Marcus charge transfer.
-        - <span style="color:#006633"> charge_transfer_coefficient </span>: charge transfer used for Butler-Volmer and Marcus calculations.
-        - <span style="color:#006633"> type </span>: type of reaction:
-                - `A`: adsorption
-                - `D`: desorption
-                - `F`: diffusion (only possible in lattice region)
-                - `L`: reaction entirely in the lattice (spatially resolved region)
-                - `S`: reaction entirely in the solution (homogeneous region)
-                - `O`: oxidation
-                - `R`: reduction
+- <span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. *Only reactions of up to two reactants and products are supported.* Each row in the table represents one reaction with the following attributes. 
+    - <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one.
+    - <span style="color:#006633"> number_of_reactants/products </span>: either 0, 1, or 2.
+    - <span style="color:#006633"> reactant_1/2 </span>: unique, positive integer representative of a species. The integer representation of species **must begin at 1** and increase in increments of one. **The integer 0 is reserved to represent an empty site.** If there is only one reactant/product then set the species to -1.
+    - <span style="color:#006633"> phase_reactant/product_1/2 </span>: char representing if the species in the species is in the lattice(spatially resolved), 'L', or solution(homogeneous), 'S', region. If there are not two reactants/products, the phase can be set to 'N'.
+    - <span style="color:#006633"> dG </span>: gibbs free energy.
+    - <span style="color:#006633"> prefactor </span>: prefactor applied during calculation of reaction rate.
+    - <span style="color:#006633"> rate </span>: rate of the reaction.
+    - <span style="color:#006633"> electron_tunneling_coefficient </span>: electron tunneling coefficient used for Butler-Volmer and Marcus calculations.
+    - <span style="color:#006633"> reorganization_energy </span>: used for Marcus charge transfer.
+    - <span style="color:#006633"> charge_transfer_coefficient </span>: charge transfer used for Butler-Volmer and Marcus calculations.
+    - <span style="color:#006633"> type </span>: type of reaction:
+        - `A`: adsorption
+        - `D`: desorption
+        - `F`: diffusion (only possible in lattice region)
+        - `L`: reaction entirely in the lattice (spatially resolved region)
+        - `S`: reaction entirely in the solution (homogeneous region)
+        - `O`: oxidation
+        - `R`: reduction
 
 ```
 CREATE TABLE reactions (
@@ -78,10 +78,10 @@ CREATE TABLE initial_state (
 <ul>
 <li> <span style="color:#0066CC"> trajectories </span>: this table records each reaction run during the duration of the simulation. For each reaction the seed of the simulation that executed the reaction and corresponding step and time are recorded. </li>
      <ul>
-     <li> <span style="color:#006633"> site_1/2_mapping </span>: single integer representation of the i,j,k values of the lattice site involved in the reaction calculated with the Szudzik algorithm. The code for creating these mappings is shown in [Examples](./Examples.html). The ordering of the sites corresponds to the ordering of the products in the reaction. If one of the products is in the homogeneous region, site_1/2_mapping is equal to -2. If there is only one site involved in the reaction site_1/2_mapping is equal to -3. </li>
+     <li> <span style="color:#006633"> site_1/2_mapping </span>: single integer representation of the i,j,k values of the lattice site involved in the reaction calculated with the Szudzik algorithm. The code for creating these mappings is shown in <a href="./Examples.html">Examples</a>. The ordering of the sites corresponds to the ordering of the products in the reaction. If one of the products is in the homogeneous region, site_1/2_mapping is equal to -2. If there is only one site involved in the reaction site_1/2_mapping is equal to -3. </li>
      </ul>
 
-```
+<li> ```
 CREATE TABLE trajectories (
         seed                INTEGER NOT NULL,
         step                INTEGER NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE trajectories (
         site_1_mapping      INTEGER NOT NULL,
         site_2_mapping      INTEGER NOT NULL
 );
-```
+``` </li>
 </ul>
 
 - <span style="color:#0066CC"> factors </span>: this table contains factors that can be used to modify rates of reactions which have zero or two reactants, or have duplicate reactants. **This table must be filled in by the user.**
