@@ -1,6 +1,8 @@
 # NPMC - <span style="color: #0066CC"> Nano Particle Monte Carlo </span>
 
-A three dimensional statistical field theory simulator which supports one and two site interactions. Useful for simulating nanoparticles. Species in this case are dopants to the host matrix. For example, in a nanoparticle composed of a NaYF4 host, any lanthanide such as Yb3+ or Tm3 can be doped onto the Y3+ site. The 4f electrons of these lanthanides give rise to some number of excitation levels. To calculate the rates for the interactions please see [NanoParticleTools](./https://github.com/BlauGroup/NanoParticleTools) as this is a **non-trivial process**. 
+A three dimensional statistical field theory simulator which supports one and two site interactions useful for simulating nanoparticles. Some examples of single site interaction are optical transitions, multiphonon relaxation, or magnetic dipole. Two site interacions represent energy transfer events in which energy is transferred from one species to another.
+
+Species in this case are dopants to the host matrix. For example, in a nanoparticle composed of a NaYF4 host, any lanthanide such as Yb3+ or Tm3 can be doped onto the Y3+ site. The 4f electrons of these lanthanides give rise to some number of excitation levels. Calculating the rates for the interactions is a **non-trivial process**, please refer to [NanoParticleTools](./https://github.com/BlauGroup/NanoParticleTools) for this. 
 
 ## Sqlite IO
 
@@ -34,7 +36,9 @@ CREATE TABLE sites (
 - <span style="color:#0066CC"> interactions </span>: Interactions are the energy transitions which take species from one energy level to another.
     - <span style="color:#006633"> interaction_id </span>: unique, index which monotonically increases starting from 0.
     - <span style="color:#006633"> number_of_sites </span>: number of sites which participate in the event, either 1 or 2.
-
+    - <span style="color:#006633"> species_id_1\|2 </span>: species_id corresponding to definitions provided in species table. If only one species, species_id_2 should be -1.
+    - <span style="color:#006633"> left_state_1\|2 </span>: 
+    - <span style="color:#006633"> right_state_1\|2 </span>: 
     - <span style="color:#006633"> rate </span>: rate for the energy transition event
 
 

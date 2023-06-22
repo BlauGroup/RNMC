@@ -81,7 +81,7 @@ CREATE TABLE initial_state (
      <li> <span style="color:#006633"> site_1/2_mapping </span>: single integer representation of the i,j,k values of the lattice site involved in the reaction calculated with the Szudzik algorithm. The code for creating these mappings is shown in <a href="./Examples.html">Examples</a>. The ordering of the sites corresponds to the ordering of the products in the reaction. If one of the products is in the homogeneous region, site_1/2_mapping is equal to -2. If there is only one site involved in the reaction site_1/2_mapping is equal to -3. </li>
      </ul>
 
-<li> ```
+<pre><code>
 CREATE TABLE trajectories (
         seed                INTEGER NOT NULL,
         step                INTEGER NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE trajectories (
         site_1_mapping      INTEGER NOT NULL,
         site_2_mapping      INTEGER NOT NULL
 );
-``` </li>
+</pre></code>
 </ul>
 
 - <span style="color:#0066CC"> factors </span>: this table contains factors that can be used to modify rates of reactions which have zero or two reactants, or have duplicate reactants. **This table must be filled in by the user.**
