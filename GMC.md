@@ -1,6 +1,8 @@
 # GMC - <span style="color: #0066CC"> Gillespie Monte Carlo </span>
 
-Implementation of Gillespie's next reaction simulator appropriate for applications in a well mixed region. A simple example of using `GMC` for homogeneous catalysis is shown in [Examples](./Examples.html).
+Implementation of Gillespie's next reaction simulator appropriate for applications in a well mixed region. `GMC` has been used to study [solid-electrolyte interphase (SEI) formation in Li-ion batteries](./https://chemrxiv.org/engage/chemrxiv/article-details/61c509e6f52bc461dacb7766).
+
+As a starting point, a simple example of using `GMC` for homogeneous catalysis is shown in [Examples](./Examples.html).
 
 ## Sqlite IO  
 
