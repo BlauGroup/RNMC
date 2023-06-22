@@ -36,10 +36,10 @@ CREATE TABLE sites (
 - <span style="color:#0066CC"> interactions </span>: Interactions are the energy transitions which take species from one energy level to another.
     - <span style="color:#006633"> interaction_id </span>: unique, index which monotonically increases starting from 0.
     - <span style="color:#006633"> number_of_sites </span>: number of sites which participate in the event, either 1 or 2.
-    - <span style="color:#006633"> species_id_1\|2 </span>: species_id corresponding to definitions provided in species table. If only one species, species_id_2 should be -1.
-    - <span style="color:#006633"> left_state_1\|2 </span>: 
-    - <span style="color:#006633"> right_state_1\|2 </span>: 
-    - <span style="color:#006633"> rate </span>: rate for the energy transition event
+    - <span style="color:#006633"> species_id_1\|2 </span>: species_id corresponding to definitions provided in species table. If a single site interaction, species_id_2 should be -1.
+    - <span style="color:#006633"> left_state_1\|2 </span>: If a single site interaction, left_state_2 should be -1.
+    - <span style="color:#006633"> right_state_1\|2 </span>: If a single site interaction, right_state_2 should be -1.
+    - <span style="color:#006633"> rate </span>: rate for the energy transition event, please refer to [NanoParticleTools](./https://github.com/BlauGroup/NanoParticleTools). 
 
 
 For the rest, it depends on what value number_of_sites was

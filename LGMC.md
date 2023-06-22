@@ -22,8 +22,8 @@ CREATE TABLE metadata (
 - <span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. *Only reactions of up to two reactants and products are supported.* Each row in the table represents one reaction with the following attributes. 
     - <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one.
     - <span style="color:#006633"> number_of_reactants/products </span>: either 0, 1, or 2.
-    - <span style="color:#006633"> reactant_1/2 </span>: unique, positive integer representative of a species. The integer representation of species **must begin at 1** and increase in increments of one. **The integer 0 is reserved to represent an empty site.** If there is only one reactant/product then set the species to -1.
-    - <span style="color:#006633"> phase_reactant/product_1/2 </span>: char representing if the species in the species is in the lattice(spatially resolved), 'L', or solution(homogeneous), 'S', region. If there are not two reactants/products, the phase can be set to 'N'.
+    - <span style="color:#006633"> reactant_1\|2 </span>: unique, positive integer representative of a species. The integer representation of species **must begin at 1** and increase in increments of one. **The integer 0 is reserved to represent an empty site.** If there is only one reactant/product then set the species to -1.
+    - <span style="color:#006633"> phase_reactant\|product_1\|2 </span>: char representing if the species in the species is in the lattice(spatially resolved), 'L', or solution(homogeneous), 'S', region. If there are not two reactants/products, the phase can be set to 'N'.
     - <span style="color:#006633"> dG </span>: gibbs free energy.
     - <span style="color:#006633"> prefactor </span>: prefactor applied during calculation of reaction rate.
     - <span style="color:#006633"> rate </span>: rate of the reaction.
@@ -78,7 +78,7 @@ CREATE TABLE initial_state (
 <ul>
 <li> <span style="color:#0066CC"> trajectories </span>: this table records each reaction run during the duration of the simulation. For each reaction the seed of the simulation that executed the reaction and corresponding step and time are recorded. </li>
      <ul>
-     <li> <span style="color:#006633"> site_1/2_mapping </span>: single integer representation of the i,j,k values of the lattice site involved in the reaction calculated with the Szudzik algorithm. The code for creating these mappings is shown in <a href="./Examples.html">Examples</a>. The ordering of the sites corresponds to the ordering of the products in the reaction. If one of the products is in the homogeneous region, site_1/2_mapping is equal to -2. If there is only one site involved in the reaction site_1/2_mapping is equal to -3. </li>
+     <li> <span style="color:#006633"> site_1\|2_mapping </span>: single integer representation of the i,j,k values of the lattice site involved in the reaction calculated with the Szudzik algorithm. The code for creating these mappings is shown in <a href="./Examples.html">Examples</a>. The ordering of the sites corresponds to the ordering of the products in the reaction. If one of the products is in the homogeneous region, site_1\|2_mapping is equal to -2. If there is only one site involved in the reaction site_1\|2_mapping is equal to -3. </li>
      </ul>
 
 <pre><code>
@@ -164,8 +164,8 @@ LGMC requires seven input arguments (either `step_cutoff` or `time_cutoff` must 
     - <span style="color:#006633"> box z upper boundary </span>
     - <span style="color:#006633"> temperature </span>
     - <span style="color:#006633"> Electron free energy </span>
-    - <span style="color:#006633"> Is add site (T/F) </span>
-    - <span style="color:#006633"> Charge transfer style (M/B) </span>
+    - <span style="color:#006633"> Is add site (T\|F) </span>
+    - <span style="color:#006633"> Charge transfer style (M\|B) </span>
 
 When running LGMC ensure that your input file paths are correct considering the executable is inside the LGMC folder. Below is an example of how LGMC can be run using the input files from [Examples](./Examples.html) (here `step_cutoff` is specified):
 
