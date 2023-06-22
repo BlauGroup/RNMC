@@ -2,9 +2,11 @@
 
 A kMC implementation coupling a homogeneous (Gillespie-like) region with a lattice, enabling simulations with reactions occurring in multiple phases and capable of electrochemical reactions. Either marcus of Butler-Volmer electron transfer theory (specified at runtime, see 'Running LGMC' below) can be used when calculating rates for electrochemical reactions. The lattice is periodic in the x, y direction and non-periodic in the z direction. The lattice may be static (no sites can be added or deleted) or dynamic (sites are added through adsorption and deleted through desorption reactions).
 
+As a starting point two examples of `LGMC` uses are shown in [Examples](./Examples.html) - `LGMC` with a static lattice to model CO Oxidation on Cu and `LGMC` with a dynamic lattice to simulate the formation and evolution of the solid electrolyte interphase in a lithium-ion battery.
+
 ## Sqlite IO  
 
-Sqlite is used for input, output, and checkpointing. Before running LGMC two necessary .sqlite files must be generated - The Lattice Reaction Network Database and State Database. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
+Sqlite is used for input, output, and checkpointing. Before running LGMC two necessary .sqlite files must be generated - The Lattice Reaction Network Database and State Database. Examples of Python code used to generate these files are available in [examples directory](./https://github.com/lzichi/RNMC/tree/main/examples). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
 
 ### The Lattice Reaction Network Database 
 
@@ -81,8 +83,7 @@ CREATE TABLE initial_state (
      <li> <span style="color:#006633"> site_1&#124;2_mapping </span>: single integer representation of the i,j,k values of the lattice site involved in the reaction calculated with the  <a href="./Szudzik_algorithm.md">Szudzik algorithm</a> The ordering of the sites corresponds to the ordering of the products in the reaction. If one of the products is in the homogeneous region, site_1&#124;2_mapping is equal to -2. If there is only one site involved in the reaction site_1&#124;2_mapping is equal to -3. 
      </li>
      </ul>
-<pre><code>
-CREATE TABLE trajectories (
+<pre><code> CREATE TABLE trajectories (
         seed                INTEGER NOT NULL,
         step                INTEGER NOT NULL,
         time                REAL NOT NULL,
