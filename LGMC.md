@@ -78,7 +78,7 @@ CREATE TABLE initial_state (
 <ul>
 <li> <span style="color:#0066CC"> trajectories </span>: this table records each reaction run during the duration of the simulation. For each reaction the seed of the simulation that executed the reaction and corresponding step and time are recorded. </li>
      <ul>
-     <li> <span style="color:#006633"> site_1\|2_mapping </span>: single integer representation of the i,j,k values of the lattice site involved in the reaction calculated with the Szudzik algorithm. The code for creating these mappings is shown in <a href="./Examples.html">Examples</a>. The ordering of the sites corresponds to the ordering of the products in the reaction. If one of the products is in the homogeneous region, site_1\|2_mapping is equal to -2. If there is only one site involved in the reaction site_1\|2_mapping is equal to -3. </li>
+     <li> <span style="color:#006633"> site_1&#124;2_mapping </span>: single integer representation of the i,j,k values of the lattice site involved in the reaction calculated with the Szudzik algorithm. The code for creating these mappings is shown in <a href="./Examples.html">Examples</a>. The ordering of the sites corresponds to the ordering of the products in the reaction. If one of the products is in the homogeneous region, site_1&#124;2_mapping is equal to -2. If there is only one site involved in the reaction site_1&#124;2_mapping is equal to -3. </li>
      </ul>
 
 <pre><code>

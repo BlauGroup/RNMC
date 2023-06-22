@@ -1,6 +1,6 @@
 # NPMC - <span style="color: #0066CC"> Nano Particle Monte Carlo </span>
 
-A three dimensional statistical field theory simulator which supports one and two site interactions useful for simulating nanoparticles. Some examples of single site interaction are optical transitions, multiphonon relaxation, or magnetic dipole. Two site interacions represent energy transfer events in which energy is transferred from one species to another.
+A three dimensional statistical field theory simulator which supports one and two site interactions useful for simulating nanoparticles. Some examples of single site interaction are optical transitions, multiphonon relaxation, or magnetic dipole. Two site interactions represent energy transfer events in which energy is transferred from one species to another.
 
 Species in this case are dopants to the host matrix. For example, in a nanoparticle composed of a NaYF4 host, any lanthanide such as Yb3+ or Tm3 can be doped onto the Y3+ site. The 4f electrons of these lanthanides give rise to some number of excitation levels. Calculating the rates for the interactions is a **non-trivial process**, please refer to [NanoParticleTools](./https://github.com/BlauGroup/NanoParticleTools) for this. 
 
