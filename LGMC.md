@@ -20,29 +20,32 @@ CREATE TABLE metadata (
     number_of_reactions INTEGER NOT NULL
 );
 ```
+<ul>
+<li>
+<span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. Only reactions of up to two reactants and products are supported. Each row in the table represents one reaction with the following attributes. </li>
+    <ul>
+    <li> <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one. </li>
+    <li> <span style="color:#006633"> number_of_reactants/products </span>: either 0, 1, or 2. </li>
+    <li> <span style="color:#006633"> reactant_1\|2 </span>: unique, positive integer representative of a species. The integer representation of species **must begin at 1** and increase in increments of one. **The integer 0 is reserved to represent an empty site.** If there is only one reactant/product then set the species to -1 </li>
+    <li> <span style="color:#006633"> phase_reactant\|product_1\|2 </span>: char representing if the species in the species is in the lattice(spatially resolved), 'L', or solution(homogeneous), 'S', region. If there are not two reactants/products, the phase can be set to 'N'. </li>
+    <li> <span style="color:#006633"> dG </span>: gibbs free energy. </li>
+    <li> <span style="color:#006633"> prefactor </span>: prefactor applied during calculation of reaction rate. </li>
+    <li> <span style="color:#006633"> rate </span>: rate of the reaction. </li>
+    <li> <span style="color:#006633"> electron_tunneling_coefficient </span>: electron tunneling coefficient used for Butler-Volmer and Marcus calculations. </li>
+    <li> <span style="color:#006633"> reorganization_energy </span>: used for Marcus charge transfer. </li>
+    <li> <span style="color:#006633"> charge_transfer_coefficient </span>: charge transfer used for Butler-Volmer and Marcus calculations. </li>
+    <ul>
+    - <span style="color:#006633"> type </span>: type of reaction: </li>
+        - `A`: adsorption </li>
+        - `D`: desorption </li>
+        - `F`: diffusion (only possible in lattice region) </li>
+        - `L`: reaction entirely in the lattice (spatially resolved region) </li>
+        - `S`: reaction entirely in the solution (homogeneous region) </li>
+        - `O`: oxidation </li>
+        - `R`: reduction </li>
+    </ul> </ul>
 
-- <span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. *Only reactions of up to two reactants and products are supported.* Each row in the table represents one reaction with the following attributes. 
-    - <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one.
-    - <span style="color:#006633"> number_of_reactants/products </span>: either 0, 1, or 2.
-    - <span style="color:#006633"> reactant_1\|2 </span>: unique, positive integer representative of a species. The integer representation of species **must begin at 1** and increase in increments of one. **The integer 0 is reserved to represent an empty site.** If there is only one reactant/product then set the species to -1.
-    - <span style="color:#006633"> phase_reactant\|product_1\|2 </span>: char representing if the species in the species is in the lattice(spatially resolved), 'L', or solution(homogeneous), 'S', region. If there are not two reactants/products, the phase can be set to 'N'.
-    - <span style="color:#006633"> dG </span>: gibbs free energy.
-    - <span style="color:#006633"> prefactor </span>: prefactor applied during calculation of reaction rate.
-    - <span style="color:#006633"> rate </span>: rate of the reaction.
-    - <span style="color:#006633"> electron_tunneling_coefficient </span>: electron tunneling coefficient used for Butler-Volmer and Marcus calculations.
-    - <span style="color:#006633"> reorganization_energy </span>: used for Marcus charge transfer.
-    - <span style="color:#006633"> charge_transfer_coefficient </span>: charge transfer used for Butler-Volmer and Marcus calculations.
-    - <span style="color:#006633"> type </span>: type of reaction:
-        - `A`: adsorption
-        - `D`: desorption
-        - `F`: diffusion (only possible in lattice region)
-        - `L`: reaction entirely in the lattice (spatially resolved region)
-        - `S`: reaction entirely in the solution (homogeneous region)
-        - `O`: oxidation
-        - `R`: reduction
-
-```
-CREATE TABLE reactions (
+<pre><code> CREATE TABLE reactions (
         reaction_id                     INTEGER NOT NULL PRIMARY KEY,
         number_of_reactants             INTEGER NOT NULL,
         number_of_products              INTEGER NOT NULL,
@@ -62,7 +65,8 @@ CREATE TABLE reactions (
         charge_transfer_coefficient     REAL NOT NULL,
         type                            CHAR(1) NOT NULL
 );
-```
+</code></pre>
+</ul> 
 
 ### The State Database 
 There are five tables in the initial state database all of which **must be created by the user**: 
@@ -104,12 +108,15 @@ CREATE TABLE factors (
         factor_duplicate REAL NOT NULL
 );
 ```
-- <span style="color:#0066CC"> interrupt_state </span>: during checkpointing, the simulation will fill this table with the final state of the simulation. This includes both the species in the lattice and homogeneous region.
-    - <span style="color:#006633"> site_mapping </span>: szudzik representation of site's i,j,k if on lattice or -2 if in homogeneous region.
-    - <span style="color:#006633"> edge </span>: 0 or 1 representative of if the site allows adsorption or desorption reactions.
 
-```
-CREATE TABLE interrupt_state (
+<ul>
+<li> <span style="color:#0066CC"> interrupt_state </span>: during checkpointing, the simulation will fill this table with the final state of the simulation. This includes both the species in the lattice and homogeneous region. </li>
+    <ul>
+    <li> <span style="color:#006633"> site_mapping </span>: szudzik representation of site's i,j,k if on lattice or -2 if in homogeneous region. </li>
+    <li> <span style="color:#006633"> edge </span>: 0 or 1 representative of if the site allows adsorption or desorption reactions. </li>
+</ul> </ul>
+
+<pre><code> CREATE TABLE interrupt_state (
         seed                    INTEGER NOT NULL,
         species_id              INTEGER NOT NULL,
         quantity                INTEGER NOT NULL,
@@ -117,7 +124,9 @@ CREATE TABLE interrupt_state (
         edge                    INTEGER NOT NULL
         
 );
-```
+</code></pre>
+</ul>
+
 - <span style="color:#0066CC"> interrupt_cutoff </span>: During checkpointing, the simulation will fill in this table.
 <br>
 <br>
