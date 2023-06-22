@@ -9,7 +9,6 @@ Sqlite is used for input, output, and checkpointing. Before running `GMC`, two n
 ### The Reaction Network Database 
 There are two tables in the lattice reaction network database both of which **must be created and filled in by the user**:
 - <span style="color:#0066CC"> metadata </span> : this table consists of one line for the total number of species and reactions in the simulation.
-
 ```
 CREATE TABLE metadata (
         number_of_species   INTEGER NOT NULL,
@@ -22,7 +21,6 @@ CREATE TABLE metadata (
     - <span style="color:#006633"> number_of_reactants/products </span>: either 0, 1, or 2.
     - <span style="color:#006633"> reactant_1/2 </span>: unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one. If there is only one reactant/product then set the species to -1.
     - <span style="color:#006633"> rate </span>: rate of the reaction.
-
 ```
 CREATE TABLE reactions (
         reaction_id         INTEGER NOT NULL PRIMARY KEY,
@@ -41,7 +39,6 @@ CREATE TABLE reactions (
 There are five tables in the initial state database all of which **must be created by the user**: 
 
 - <span style="color:#0066CC"> initial_state </span>: this table represents the initial concentration of species. Each row consists of a species_id and corresponding quantity. If there is no row for a species, `GMC` will initalize its quantity to zero. **This table must be filled in by the user.**
-
 ```
 CREATE TABLE initial_state (
         species_id             INTEGER NOT NULL PRIMARY KEY,
@@ -49,7 +46,6 @@ CREATE TABLE initial_state (
 );
 ```
 - <span style="color:#0066CC"> trajectories </span>: this table records each reaction run during the duration of the simulation. For each reaction the seed of the simulation that executed the reaction and corresponding step and time are recorded. 
-
 ```
 CREATE TABLE trajectories (
         seed                INTEGER NOT NULL,
@@ -59,7 +55,6 @@ CREATE TABLE trajectories (
 );
 ```
 - <span style="color:#0066CC"> factors </span>: this table contains factors that can be used to modify rates of reactions which have zero or two reactants, or have duplicate reactants. **This table must be filled in by the user.**
-
 ```
 CREATE TABLE factors (
         factor_zero      REAL NOT NULL,
@@ -68,7 +63,6 @@ CREATE TABLE factors (
 );
 ```
 - <span style="color:#0066CC"> interrupt_state </span>: during checkpointing, the simulation will fill this table with the final state of the simulation. 
-
 ```
 CREATE TABLE interrupt_state (
         seed                    INTEGER NOT NULL,
@@ -78,7 +72,6 @@ CREATE TABLE interrupt_state (
 );
 ```
 - <span style="color:#0066CC"> interrupt_cutoff </span>: during checkpointing, the simulation will fill in this table.
-
 ```
 CREATE TABLE interrupt_cutoff (
         seed                    INTEGER NOT NULL,
