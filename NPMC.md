@@ -1,6 +1,6 @@
 # NPMC - <span style="color: #0066CC"> Nano Particle Monte Carlo </span>
 
-A three dimensional statistical field theory simulator which supports one and two site interactions. Useful for simulating nanoparticles.
+A three dimensional statistical field theory simulator which supports one and two site interactions. Useful for simulating nanoparticles. Species in this case are dopants to the host matrix. For example, in a nanoparticle composed of a NaYF4 host, any lanthanide such as Yb3+ or Tm3 can be doped onto the Y3+ site. The 4f electrons of these lanthanides give rise to some number of excitation levels. To calculate the rates for the interactions please see [NanoParticleTools](./https://github.com/BlauGroup/NanoParticleTools) as this is a non-trivial process. 
 
 ## Sqlite IO
 
@@ -8,6 +8,10 @@ Sqlite is used for input, output, and checkpointing. Before running `NPMC` two n
 
 ### The Nano Particle Database
 There are four tables in the nanoparticle database all of which **must be created and filled in by the user**:
+
+- <span style="color:#0066CC"> species </span> : this table consists of one line for each species in the simulation.
+    - <span style="color:#006633"> species_id </span>: unique, starts at 0 and must increase in increments of one. Species in this case are dopants to the host matrix.
+    - <span style="color:#006633"> degrees_of_freedom </span>: the number of energy levels that lanthanide dopant can access.
 
 ```
 CREATE TABLE species (
@@ -50,7 +54,9 @@ CREATE TABLE metadata (
 ## The State Database
 There are five tables in the initial state database all of which **must be created by the user**: 
 
-- <span style="color:#0066CC"> initial_state </span>: this table represents the initial species. **This table must be filled in by the user.**
+- <span style="color:#0066CC"> initial_state </span>: this table represents the initial state of the simulation. **This table must be filled in by the user.**
+- <span style="color:#006633"> degree_of_freedom </span>:
+the energy level which a dopant atom of the given species is to be initialized to. This is typically 0 for all atoms if initializing a simulation from ground state.
 ```
 CREATE TABLE initial_state (
     site_id            INTEGER NOT NULL PRIMARY KEY,
