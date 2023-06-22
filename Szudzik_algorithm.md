@@ -1,7 +1,6 @@
 # Site Mapping with Szudzik Algorithm 
 
-<pre><code>
-import numpy as np
+```import numpy as np
 
 def szudzik(a, b):
     if(a >= b):
@@ -22,5 +21,4 @@ def szudzik_mapping(i_max, j_max, k_max):
                 mapping[combine(i, j, k)] = (i, j, k)
     
     return mapping
-
-</code></pre>
+```

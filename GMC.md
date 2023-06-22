@@ -1,10 +1,10 @@
 # GMC - <span style="color: #0066CC"> Gillespie Monte Carlo </span>
 
-Implementation of Gillespie's next reaction simulator appropriate for applications in a well mixed region.
+Implementation of Gillespie's next reaction simulator appropriate for applications in a well mixed region. A simple example of using `GMC` for homogeneous catalysis is shown in [Examples](./Examples.html).
 
 ## Sqlite IO  
 
-Sqlite is used for input, output, and checkpointing. Before running `GMC`, two necessary .sqlite files must be generated - The Reaction Network Database and State Database. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
+Sqlite is used for input, output, and checkpointing. Before running `GMC`, two necessary .sqlite files must be generated - The Reaction Network Database and State Database. An example of Python code used to generate these files is available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
 
 ### The Reaction Network Database 
 There are two tables in the lattice reaction network database both of which **must be created and filled in by the user**:
