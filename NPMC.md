@@ -31,6 +31,20 @@ CREATE TABLE sites (
 );
 ```
 
+- <span style="color:#0066CC"> interactions </span>: Interactions are the energy transitions which take species from one energy level to another.
+    - <span style="color:#006633"> interaction_id </span>: unique, index which monotonically increases starting from 0.
+    - <span style="color:#006633"> number_of_sites </span>: number of sites which participate in the event, either 1 or 2.
+    
+    - <span style="color:#006633"> rate </span>: rate for the energy transition event
+
+
+For the rest, it depends on what value number_of_sites was
+
+For 1, these are single site interaction (such as optical transitions, multiphonon relaxation, or magnetic dipole). For these single site reactions, the species_id_2, left_state_2, and right_state_2 will be -1. The species_id_1 here corresponds to the definitions provided in the species table. The left_state_1 corresponds to the energy level which a specie starts at (I think “left_state” is a holdover from GMC, where you have a left side and right side of a reaction). The right_state_1 corresponds to the final state of the specie involved in the event.
+
+
+For 2, these are energy transfer events in which energy is transferred from one specie to another. So now the *_2 fields will be populated with non-trivial values.
+
 ```
 CREATE TABLE interactions (
     interaction_id      INTEGER NOT NULL PRIMARY KEY,
@@ -56,8 +70,8 @@ CREATE TABLE metadata (
 There are five tables in the initial state database all of which **must be created by the user**: 
 
 - <span style="color:#0066CC"> initial_state </span>: this table represents the initial state of the simulation. **This table must be filled in by the user.**
-- <span style="color:#006633"> degree_of_freedom </span>:
-the energy level which a dopant atom of the given species is to be initialized to. This is typically 0 for all atoms if initializing a simulation from ground state.
+    - <span style="color:#006633"> degree_of_freedom </span>:
+    the energy level which a dopant atom of the given species is to be initialized to. This is typically 0 for all atoms if initializing a simulation from ground state.
 ```
 CREATE TABLE initial_state (
     site_id            INTEGER NOT NULL PRIMARY KEY,
