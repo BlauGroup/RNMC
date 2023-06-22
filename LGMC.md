@@ -6,7 +6,7 @@ As a starting point two examples of `LGMC` uses are shown in [Examples](./Exampl
 
 ## Sqlite IO  
 
-Sqlite is used for input, output, and checkpointing. Before running LGMC two necessary .sqlite files must be generated - The Lattice Reaction Network Database and State Database. Examples of Python code used to generate these files are available in [examples directory](./https://github.com/lzichi/RNMC/tree/main/examples). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
+Sqlite is used for input, output, and checkpointing. Before running LGMC two necessary .sqlite files must be generated - The Lattice Reaction Network Database and State Database. Examples of Python code used to generate these files are available in <a href="{{ site.github.repository_url }}"> examples directory </a>. Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
 
 ### The Lattice Reaction Network Database 
 

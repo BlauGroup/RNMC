@@ -6,7 +6,7 @@ Species in this case are dopants to the host matrix. For example, in a nanoparti
 
 ## Sqlite IO
 
-Sqlite is used for input, output, and checkpointing. Before running `NPMC` two necessary .sqlite files must be generated - The Nano Particle Database and State Database. Examples of Python code used to generate these files are available in [Examples](./Examples.html). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
+Sqlite is used for input, output, and checkpointing. Before running `NPMC` two necessary .sqlite files must be generated - The Nano Particle Database and State Database. An example of the Python code used to generate these files is available in <a href="{{ site.github.repository_url }}"> examples directory </a>. Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
 
 ### The Nano Particle Database
 There are four tables in the nanoparticle database all of which **must be created and filled in by the user**:
