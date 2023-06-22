@@ -10,6 +10,7 @@ Sqlite is used for input, output, and checkpointing. Before running LGMC two nec
 
 There are two tables in the lattice reaction network database both of which **must be created and filled in by the user**:
 - <span style="color:#0066CC"> metadata </span> : this table consists of one line for the total number of species and reactions in the simulation.
+<br>
 ```
 CREATE TABLE metadata (
     number_of_species   INTEGER NOT NULL,
@@ -36,6 +37,7 @@ CREATE TABLE metadata (
         - `S`: reaction entirely in the solution (homogeneous region)
         - `O`: oxidation
         - `R`: reduction
+
 ```
 CREATE TABLE reactions (
         reaction_id                     INTEGER NOT NULL PRIMARY KEY,
@@ -63,6 +65,7 @@ CREATE TABLE reactions (
 There are five tables in the initial state database all of which **must be created by the user**: 
 
 - <span style="color:#0066CC"> initial_state </span>: this table represents the initial concentration of species. Each row consists of a species_id and corresponding quantity. If there is no row for a species, LGMC will initalize its quantity to zero. **This table must be filled in by the user.**
+<br>
 ```
 CREATE TABLE initial_state (
         species_id             INTEGER NOT NULL PRIMARY KEY,
@@ -71,6 +74,8 @@ CREATE TABLE initial_state (
 ```
 - <span style="color:#0066CC"> trajectories </span>: this table records each reaction run during the duration of the simulation. For each reaction the seed of the simulation that executed the reaction and corresponding step and time are recorded. 
      - <span style="color:#006633"> site_1/2_mapping </span>: single integer representation of the i,j,k values of the lattice site involved in the reaction calculated with the Szudzik algorithm. The code for creating these mappings is shown in [Examples](./Examples.html). The ordering of the sites corresponds to the ordering of the products in the reaction. If one of the products is in the homogeneous region, site_1/2_mapping is equal to -2. If there is only one site involved in the reaction site_1/2_mapping is equal to -3.
+
+
 ```
 CREATE TABLE trajectories (
         seed                INTEGER NOT NULL,
@@ -82,6 +87,7 @@ CREATE TABLE trajectories (
 );
 ```
 - <span style="color:#0066CC"> factors </span>: this table contains factors that can be used to modify rates of reactions which have zero or two reactants, or have duplicate reactants. **This table must be filled in by the user.**
+<br>
 ```
 CREATE TABLE factors (
         factor_zero      REAL NOT NULL,
@@ -92,6 +98,7 @@ CREATE TABLE factors (
 - <span style="color:#0066CC"> interrupt_state </span>: during checkpointing, the simulation will fill this table with the final state of the simulation. This includes both the species in the lattice and homogeneous region.
     - <span style="color:#006633"> site_mapping </span>: szudzik representation of site's i,j,k if on lattice or -2 if in homogeneous region.
     - <span style="color:#006633"> edge </span>: 0 or 1 representative of if the site allows adsorption or desorption reactions.
+
 ```
 CREATE TABLE interrupt_state (
         seed                    INTEGER NOT NULL,
@@ -103,6 +110,7 @@ CREATE TABLE interrupt_state (
 );
 ```
 - <span style="color:#0066CC"> interrupt_cutoff </span>: During checkpointing, the simulation will fill in this table.
+<br>
 ```
 CREATE TABLE interrupt_cutoff (
         seed                    INTEGER NOT NULL,
@@ -112,6 +120,7 @@ CREATE TABLE interrupt_cutoff (
         
 );
 ```
+
 ## Running LGMC
 To access the makefile, enter the LGMC folder:
 
