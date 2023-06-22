@@ -25,7 +25,7 @@ CREATE TABLE metadata (
     <ul>
     <li> <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one.
     - <span style="color:#006633"> number_of_reactants/products </span>: either 0, 1, or 2. </li>
-    <li> <span style="color:#006633"> reactant_1\|2 </span>: unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one. If there is only one reactant\|product then set the species to -1. </li>
+    <li> <span style="color:#006633"> reactant_1&#124;2 </span>: unique, positive integer representative of a species. The integer representation of species must begin at 0 and increase in increments of one. If there is only one reactant&#124;product then set the species to -1. </li>
     <li> <span style="color:#006633"> rate </span>: rate of the reaction. </li>
     </ul>
 
