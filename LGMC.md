@@ -10,7 +10,6 @@ Sqlite is used for input, output, and checkpointing. Before running LGMC two nec
 
 There are two tables in the lattice reaction network database both of which **must be created and filled in by the user**:
 - <span style="color:#0066CC"> metadata </span> : this table consists of one line for the total number of species and reactions in the simulation.
-
 ```
 CREATE TABLE metadata (
     number_of_species   INTEGER NOT NULL,
@@ -37,7 +36,6 @@ CREATE TABLE metadata (
         - `S`: reaction entirely in the solution (homogeneous region)
         - `O`: oxidation
         - `R`: reduction
-
 ```
 CREATE TABLE reactions (
         reaction_id                     INTEGER NOT NULL PRIMARY KEY,

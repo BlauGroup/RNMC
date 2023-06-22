@@ -1,6 +1,6 @@
 # NPMC - <span style="color: #0066CC"> Nano Particle Monte Carlo </span>
 
-A three dimensional statistical field theory simulator which supports one and two site interactions. Useful for simulating nanoparticles. Species in this case are dopants to the host matrix. For example, in a nanoparticle composed of a NaYF4 host, any lanthanide such as Yb3+ or Tm3 can be doped onto the Y3+ site. The 4f electrons of these lanthanides give rise to some number of excitation levels. To calculate the rates for the interactions please see [NanoParticleTools](./https://github.com/BlauGroup/NanoParticleTools) as this is a non-trivial process. 
+A three dimensional statistical field theory simulator which supports one and two site interactions. Useful for simulating nanoparticles. Species in this case are dopants to the host matrix. For example, in a nanoparticle composed of a NaYF4 host, any lanthanide such as Yb3+ or Tm3 can be doped onto the Y3+ site. The 4f electrons of these lanthanides give rise to some number of excitation levels. To calculate the rates for the interactions please see [NanoParticleTools](./https://github.com/BlauGroup/NanoParticleTools) as this is a **non-trivial process**. 
 
 ## Sqlite IO
 
@@ -19,6 +19,7 @@ CREATE TABLE species (
     degrees_of_freedom  INTEGER NOT NULL
 );
 ```
+- <span style="color:#0066CC"> sites </span>: There are no restrictions in the x, y, z sites table. Atoms may be placed anywhere in space, although it is typically restricted to sites on a lattice. Although that lattice is not fixed, since there are many host materials that are used for upconverting nanoparticles.
 
 ```
 CREATE TABLE sites (
