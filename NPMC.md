@@ -34,7 +34,7 @@ CREATE TABLE sites (
 - <span style="color:#0066CC"> interactions </span>: Interactions are the energy transitions which take species from one energy level to another.
     - <span style="color:#006633"> interaction_id </span>: unique, index which monotonically increases starting from 0.
     - <span style="color:#006633"> number_of_sites </span>: number of sites which participate in the event, either 1 or 2.
-    
+
     - <span style="color:#006633"> rate </span>: rate for the energy transition event
 
 
@@ -120,8 +120,7 @@ CREATE TABLE interrupt_state (
 CREATE TABLE interrupt_cutoff (
         seed                    INTEGER NOT NULL,
         step                    INTEGER NOT NULL,
-        time                    INTEGER NOT NULL
-        
+        time                    INTEGER NOT NULL   
 );
 ```
 
