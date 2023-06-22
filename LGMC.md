@@ -114,7 +114,7 @@ CREATE TABLE factors (
     <ul>
     <li> <span style="color:#006633"> site_mapping </span>: szudzik representation of site's i,j,k if on lattice or -2 if in homogeneous region. </li>
     <li> <span style="color:#006633"> edge </span>: 0 or 1 representative of if the site allows adsorption or desorption reactions. </li>
-</ul> </ul>
+</ul>
 
 <pre><code> CREATE TABLE interrupt_state (
         seed                    INTEGER NOT NULL,
