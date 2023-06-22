@@ -10,6 +10,7 @@ Sqlite is used for input, output, and checkpointing. Before running `GMC`, two n
 There are two tables in the lattice reaction network database both of which **must be created and filled in by the user**:
 - <span style="color:#0066CC"> metadata </span> : this table consists of one line for the total number of species and reactions in the simulation.
 <br>
+<br>
 ```
 CREATE TABLE metadata (
         number_of_species   INTEGER NOT NULL,
@@ -41,13 +42,16 @@ There are five tables in the initial state database all of which **must be creat
 
 - <span style="color:#0066CC"> initial_state </span>: this table represents the initial concentration of species. Each row consists of a species_id and corresponding quantity. If there is no row for a species, `GMC` will initalize its quantity to zero. **This table must be filled in by the user.**
 <br>
+<br>
 ```
 CREATE TABLE initial_state (
         species_id             INTEGER NOT NULL PRIMARY KEY,
         count                  INTEGER NOT NULL
 );
 ```
+
 - <span style="color:#0066CC"> trajectories </span>: this table records each reaction run during the duration of the simulation. For each reaction the seed of the simulation that executed the reaction and corresponding step and time are recorded. 
+<br>
 <br>
 ```
 CREATE TABLE trajectories (
@@ -57,7 +61,9 @@ CREATE TABLE trajectories (
         reaction_id         INTEGER NOT NULL
 );
 ```
+
 - <span style="color:#0066CC"> factors </span>: this table contains factors that can be used to modify rates of reactions which have zero or two reactants, or have duplicate reactants. **This table must be filled in by the user.**
+<br>
 <br>
 ```
 CREATE TABLE factors (
@@ -66,17 +72,20 @@ CREATE TABLE factors (
         factor_duplicate REAL NOT NULL
 );
 ```
+
 - <span style="color:#0066CC"> interrupt_state </span>: during checkpointing, the simulation will fill this table with the final state of the simulation. 
+<br>
 <br>
 ```
 CREATE TABLE interrupt_state (
         seed                    INTEGER NOT NULL,
         species_id              INTEGER NOT NULL,
         count                   INTEGER NOT NULL
-        
 );
 ```
+
 - <span style="color:#0066CC"> interrupt_cutoff </span>: during checkpointing, the simulation will fill in this table.
+<br>
 <br>
 ```
 CREATE TABLE interrupt_cutoff (
@@ -85,6 +94,7 @@ CREATE TABLE interrupt_cutoff (
         time                    INTEGER NOT NULL       
 );
 ```
+
 ## Running GMC
 To access the makefile, enter the `GMC` folder:
 
