@@ -6,7 +6,7 @@ As a starting point, a simple example of using `GMC` for homogeneous catalysis i
 
 ## Sqlite IO  
 
-Sqlite is used for input, output, and checkpointing. Before running `GMC`, two necessary .sqlite files must be generated - The Reaction Network Database and State Database. An example of Python code used to generate these files is available in the [examples directory](./https://github.com/lzichi/RNMC/tree/main/examples). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
+Sqlite is used for input, output, and checkpointing. Before running `GMC`, two necessary .sqlite files must be generated - The Reaction Network Database and State Database. An example of Python code used to generate these files is available in the [examples directory](./site.github.repository_url). Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
 
 ### The Reaction Network Database 
 There are two tables in the lattice reaction network database both of which **must be created and filled in by the user**:
