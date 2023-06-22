@@ -22,7 +22,7 @@ CREATE TABLE metadata (
 ```
 <ul>
 <li>
-<span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. Only reactions of up to two reactants and products are supported. Each row in the table represents one reaction with the following attributes. </li>
+<span style="color:#0066CC"> reactions </span>: this table is how reactions are defined in the simulation. <b> Only reactions of up to two reactants and products are supported.</b> Each row in the table represents one reaction with the following attributes. </li>
     <ul>
     <li> <span style="color:#006633"> reaction_id </span>: unique, starts at 0 and must increase in increments of one. </li>
     <li> <span style="color:#006633"> number_of_reactants/products </span>: either 0, 1, or 2. </li>
