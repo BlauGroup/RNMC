@@ -1,4 +1,5 @@
 # Site Mapping with Szudzik Algorithm 
+
 <pre><code>
 import numpy as np
 
