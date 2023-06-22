@@ -11,18 +11,21 @@ Sqlite is used for input, output, and checkpointing. Before running `NPMC` two n
 ### The Nano Particle Database
 There are four tables in the nanoparticle database all of which **must be created and filled in by the user**:
 
-- <span style="color:#0066CC"> species </span> : this table consists of one line for each species in the simulation.
-    - <span style="color:#006633"> species_id </span>: unique, starts at 0 and must increase in increments of one. Species in this case are dopants to the host matrix.
-    - <span style="color:#006633"> degrees_of_freedom </span>: the number of energy levels that lanthanide dopant can access.
+<ul>
+<li><span style="color:#0066CC"> species </span> : this table consists of one line for each species in the simulation. </li>
+    <ul>
+    <li> <span style="color:#006633"> species_id </span>: unique, starts at 0 and must increase in increments of one. Species in this case are dopants to the host matrix. </li>
+    <li> <span style="color:#006633"> degrees_of_freedom </span>: the number of energy levels that lanthanide dopant can access. </li>
+    </ul>
 
-```
-CREATE TABLE species (
+<pre><code> CREATE TABLE species (
     species_id          INTEGER NOT NULL PRIMARY KEY,
     degrees_of_freedom  INTEGER NOT NULL
 );
-```
-- <span style="color:#0066CC"> sites </span>: this table initalizes the sites available in the simulation. There are no restrictions in the x, y, z sites table. Atoms may be placed anywhere in space, although it is typically restricted to sites on a lattice. Although that lattice is not fixed, since there are many host materials that are used for upconverting nanoparticles.
+</code></pre>
+</ul>
 
+- <span style="color:#0066CC"> sites </span>: this table initalizes the sites available in the simulation. There are no restrictions in the x, y, z sites table. Atoms may be placed anywhere in space, although it is typically restricted to sites on a lattice. Although that lattice is not fixed, since there are many host materials that are used for upconverting nanoparticles.
 ```
 CREATE TABLE sites (
     site_id             INTEGER NOT NULL PRIMARY KEY,
@@ -33,16 +36,17 @@ CREATE TABLE sites (
 );
 ```
 
-- <span style="color:#0066CC"> interactions </span>: Interactions are the energy transitions which take species from one energy level to another.
-    - <span style="color:#006633"> interaction_id </span>: unique, index which monotonically increases starting from 0.
-    - <span style="color:#006633"> number_of_sites </span>: number of sites which participate in the event, either 1 or 2.
-    - <span style="color:#006633"> species_id_1\|2 </span>: species_id corresponding to definitions provided in species table. If a single site interaction, species_id_2 should be -1.
-    - <span style="color:#006633"> left_state_1\|2 </span>: corresponds to the initial energy level of a species (analogous to left side of a reaction). If a single site interaction, left_state_2 should be -1.
-    - <span style="color:#006633"> right_state_1\|2 </span>: corresponds to the final energy level of a species (analogous to right side of a reaction). If a single site interaction, right_state_2 should be -1.
-    - <span style="color:#006633"> rate </span>: rate for the energy transition event, please refer to [NanoParticleTools](./https://github.com/BlauGroup/NanoParticleTools). 
+<ul>
+<li> <span style="color:#0066CC"> interactions </span>: Interactions are the energy transitions which take species from one energy level to another. </li> 
+    <ul>
+    <li> <span style="color:#006633"> interaction_id </span>: unique, index which monotonically increases starting from 0. </li>
+    <li> <span style="color:#006633"> number_of_sites </span>: number of sites which participate in the event, either 1 or 2. </li>
+    <li> <span style="color:#006633"> species_id_1\|2 </span>: species_id corresponding to definitions provided in species table. If a single site interaction, species_id_2 should be -1. </li>
+    <li> <span style="color:#006633"> left_state_1\|2 </span>: corresponds to the initial energy level of a species (analogous to left side of a reaction). If a single site interaction, left_state_2 should be -1. </li>
+    <li> <span style="color:#006633"> right_state_1\|2 </span>: corresponds to the final energy level of a species (analogous to right side of a reaction). If a single site interaction, right_state_2 should be -1. </li>
+    <li> <span style="color:#006633"> rate </span>: rate for the energy transition event, please refer to [NanoParticleTools](./https://github.com/BlauGroup/NanoParticleTools). </li> </ul>
 
-```
-CREATE TABLE interactions (
+<pre><code> CREATE TABLE interactions (
     interaction_id      INTEGER NOT NULL PRIMARY KEY,
     number_of_sites     INTEGER NOT NULL,
     species_id_1        INTEGER NOT NULL,
@@ -53,10 +57,10 @@ CREATE TABLE interactions (
     right_state_2       INTEGER NOT NULL,
     rate                REAL NOT NULL
 );
-```
+</code></pre>
+</ul>
 
 - <span style="color:#0066CC"> metadata </span>: this table consists of one line for the total number of species, sites, and interactions in the simulation.
-
 ```
 CREATE TABLE metadata (
     number_of_species                   INTEGER NOT NULL,
@@ -67,18 +71,19 @@ CREATE TABLE metadata (
 ## The State Database
 There are five tables in the initial state database all of which **must be created by the user**: 
 
-- <span style="color:#0066CC"> initial_state </span>: this table represents the initial state of the simulation. **This table must be filled in by the user.**
-    - <span style="color:#006633"> degree_of_freedom </span>:
-    the energy level which a dopant atom of the given species is to be initialized to. This is typically 0 for all atoms if initializing a simulation from ground state.
-```
-CREATE TABLE initial_state (
+<ul>
+<li> <span style="color:#0066CC"> initial_state </span>: this table represents the initial state of the simulation. <b>This table must be filled in by the user.</b> </li>
+   <ul>
+    <li> <span style="color:#006633"> degree_of_freedom </span>: </li>
+    the energy level which a dopant atom of the given species is to be initialized to. This is typically 0 for all atoms if initializing a simulation from ground state. </ul>
+<pre><code> CREATE TABLE initial_state (
     site_id            INTEGER NOT NULL PRIMARY KEY,
     degree_of_freedom  INTEGER NOT NULL
 );
-```
+</code></pre>
+</ul>
 
 - <span style="color:#0066CC"> trajectories </span>: this table records each interaction executed during the duration of the simulation. For each reaction the seed of the simulation that executed the reaction and corresponding step and time are recorded. 
-
 ```
 CREATE TABLE trajectories (
     seed               INTEGER NOT NULL,
@@ -89,20 +94,21 @@ CREATE TABLE trajectories (
     interaction_id     INTEGER NOT NULL
 );
 ```
-- <span style="color:#0066CC"> factors </span>: this table contains factors that can be used to modify the rates of interactions. **This table must be filled in by the user.**
-    - <span style="color:#006633"> distance_factor_type </span>: specifies how to compute interaction propensities for two site interactions as a function of distance. Currently the accepted values are `linear` and `inverse_cubic`.
 
-```
-CREATE TABLE factors (
+<ul>
+<li> <span style="color:#0066CC"> factors </span>: this table contains factors that can be used to modify the rates of interactions. <b> This table must be filled in by the user.</b> </li>
+    <ul> <li> <span style="color:#006633"> distance_factor_type </span>: specifies how to compute interaction propensities for two site interactions as a function of distance. Currently the accepted values are `linear` and `inverse_cubic`. </li>
+
+<pre><code> CREATE TABLE factors (
     one_site_interaction_factor      REAL NOT NULL,
     two_site_interaction_factor      REAL NOT NULL,
     interaction_radius_bound         REAL NOT NULL,
     distance_factor_type             TEXT NOT NULL
 );
-```
+</code></pre>
+</ul>
 
 - <span style="color:#0066CC"> interrupt_state </span>: during checkpointing, the simulation will fill this table with the final state of the simulation. 
-
 ```
 CREATE TABLE interrupt_state (
     seed                    INTEGER NOT NULL,
@@ -113,7 +119,6 @@ CREATE TABLE interrupt_state (
 ```
 
 - <span style="color:#0066CC"> interrupt_cutoff </span>: during checkpointing, the simulation will fill in this table.
-
 ```
 CREATE TABLE interrupt_cutoff (
         seed                    INTEGER NOT NULL,
