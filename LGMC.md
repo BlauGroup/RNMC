@@ -36,6 +36,7 @@ CREATE TABLE metadata (
         - `S`: reaction entirely in the solution (homogeneous region)
         - `O`: oxidation
         - `R`: reduction
+
 ```
 CREATE TABLE reactions (
         reaction_id                     INTEGER NOT NULL PRIMARY KEY,
@@ -57,7 +58,6 @@ CREATE TABLE reactions (
         charge_transfer_coefficient     REAL NOT NULL,
         type                            CHAR(1) NOT NULL
 );
-
 ```
 
 ### The State Database 
