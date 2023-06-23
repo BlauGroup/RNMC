@@ -104,8 +104,7 @@ CREATE TABLE trajectories (
 
 <ul>
 <li> <span style="color:#0066CC"> factors </span>: this table contains factors that can be used to modify the rates of interactions. <b> This table must be filled in by the user.</b> </li>
-    <ul> <li> <span style="color:#006633"> distance_factor_type </span>: specifies how to compute interaction propensities for two site interactions as a function of distance. Currently the accepted values are `linear` and `inverse_cubic`. </li>
-
+    <ul> <li> <span style="color:#006633"> distance_factor_type </span>: specifies how to compute interaction propensities for two site interactions as a function of distance. Currently the accepted values are <pre><code>linear</code></pre> and <pre><code>inverse_cubic</code></pre>. </li> </ul>
 <pre><code> CREATE TABLE factors (
     one_site_interaction_factor      REAL NOT NULL,
     two_site_interaction_factor      REAL NOT NULL,
@@ -116,6 +115,8 @@ CREATE TABLE trajectories (
 </ul>
 
 - <span style="color:#0066CC"> interrupt_state </span>: during checkpointing, the simulation will fill this table with the final state of the simulation. 
+<br>
+<br>
 ```
 CREATE TABLE interrupt_state (
     seed                    INTEGER NOT NULL,
