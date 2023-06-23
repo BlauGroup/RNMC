@@ -42,7 +42,7 @@ CXXFLAGS = -std=c++20 -g -Wall -Wextra -pthread \
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
 # TESTS = sample1_unittest
-TESTS = lattice_test lattice_reaction_network_test reaction_network_test
+TESTS = lattice_test lattice_reaction_network_test reaction_network_test nano_particle_test
 
 # All Google Test headers.  Usually you shouldn't change this
 # definition.
@@ -87,7 +87,7 @@ gtest_main.a : gtest-all.o gtest_main.o
 
 # build each test
 
-lattice_test : lattice_test.o $(LGMC_DIR)/Lattice.o 
+lattice_test : lattice_test.o $(LGMC_DIR)/lattice.o 
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
 
 lattice_reaction_network_test : lattice_reaction_network_test.o $(LGMC_DIR)/lattice_reaction_network.o \
@@ -97,4 +97,8 @@ lattice_reaction_network_test : lattice_reaction_network_test.o $(LGMC_DIR)/latt
 
 reaction_network_test : reaction_network_test.o $(GMC_DIR)/reaction_network.o $(GMC_DIR)/sql_types.o \
                                 $(GMC_DIR)/tree_solver.o $(core_DIR)/sql_types.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
+
+nano_particle_test : nano_particle_test.o $(NPMC_DIR)/nano_particle.o $(NPMC_DIR)/sql_types.o \
+                                $(core_DIR)/sql_types.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@

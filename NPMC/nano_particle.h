@@ -62,6 +62,8 @@ struct NanoParticle {
 
     std::function<double(double)> distance_factor_function;
 
+    NanoParticle (); // default constructor
+    
     // constructor
     NanoParticle(
         SqlConnection &nano_particle_database,

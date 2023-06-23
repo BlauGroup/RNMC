@@ -74,6 +74,8 @@ struct LatticeReaction {
 
 class LatticeReactionNetwork {
 public: 
+    LatticeReactionNetwork(); // default constructor
+    
     LatticeReactionNetwork(SqlConnection &reaction_network_database, 
                         SqlConnection &initial_state_database, 
                         LatticeParameters parameters);
@@ -162,11 +164,7 @@ public:
 
     void compute_initial_propensities(std::vector<int> state, Lattice *lattice);
 
-    /* -------------------------------------------------------------------------------- */
-    
-    std::vector<double> initial_propensities;
-    std::vector<int> initial_state;
-    Lattice *initial_lattice;                          
+    /* -------------------------------------------------------------------------------- */                       
 
     // convert a history element as found a simulation to history
     // to a SQL type.
@@ -214,6 +212,10 @@ public:
 
     std::unordered_map<int, std::tuple<uint32_t,uint32_t,uint32_t>>
     szudzik_mapping(int i_max, int j_max, int k_max);
+
+    std::vector<double> initial_propensities;
+    std::vector<int> initial_state;
+    Lattice *initial_lattice;   
     
 private:                                                          
 

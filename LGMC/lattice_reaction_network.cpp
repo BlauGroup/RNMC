@@ -1,5 +1,7 @@
 #include "lattice_reaction_network.h"
 
+LatticeReactionNetwork::LatticeReactionNetwork() {}
+
 LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection 
                         &reaction_network_database, SqlConnection 
                         &initial_state_database, LatticeParameters 

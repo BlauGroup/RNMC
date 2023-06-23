@@ -1,5 +1,7 @@
 #include "nano_particle.h"
 
+NanoParticle::NanoParticle() {};
+
 NanoParticle::NanoParticle(
     SqlConnection &nano_particle_database,
     SqlConnection &initial_state_database,

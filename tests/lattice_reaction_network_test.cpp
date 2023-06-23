@@ -17,15 +17,15 @@ class LatticeReactionNetworkTest : public ::testing::Test {
    void SetUp() override {
       
       // static lattice
-      std::string model_database_file = "../examples/LGMC/CO_oxidation(static)/network.sqlite";
-      std::string initial_state_database_file = "../examples/LGMC/CO_oxidation(static)/state.sqlite";
+      std::string model_database_file = "../examples/LGMC/CO_oxidation/network.sqlite";
+      std::string initial_state_database_file = "../examples/LGMC/CO_oxidation/state.sqlite";
 
       SqlConnection model_database = SqlConnection(model_database_file,
                                  SQLITE_OPEN_READWRITE);
       SqlConnection initial_state_database = SqlConnection(initial_state_database_file,
                                  SQLITE_OPEN_READWRITE);
 
-      LatticeParameters parameters{.latconst = 1,
+      LatticeParameters parameters = {.latconst = 1,
                               .boxxhi = 50,
                               .boxyhi = 50,
                               .boxzhi = 2,
@@ -35,50 +35,59 @@ class LatticeReactionNetworkTest : public ::testing::Test {
                               .lattice_fill = "none"}; 
 
 
-      static_LGMC_ = LatticeReactionNetwork(model_database,
+      LatticeReactionNetwork static_LGMC_ = LatticeReactionNetwork(model_database,
                                           initial_state_database,
                                           parameters);
 
       // dynamic lattice 
-      std::string model_database_file = "../examples/LGMC/SEI(dynamic)/network.sqlite";
-      std::string initial_state_database_file = "../examples/LGMC/SEI(dynamic)/state.sqlite";
+      model_database_file = "../examples/LGMC/SEI/network.sqlite";
+      initial_state_database_file = "../examples/LGMC/SEI/state.sqlite";
 
-      SqlConnection model_database = SqlConnection(model_database_file,
+      model_database = SqlConnection(model_database_file,
                                  SQLITE_OPEN_READWRITE);
-      SqlConnection initial_state_database = SqlConnection(initial_state_database_file,
+      initial_state_database = SqlConnection(initial_state_database_file,
                                  SQLITE_OPEN_READWRITE);
 
-      LatticeParameters parameters{.latconst = 1,
-                              .boxxhi = 100,
-                              .boxyhi = 100,
-                              .boxzhi = 2,
-                              .temperature = 300,
-                              .g_e = -2.1, .is_add_sites = true,
-                              .charge_transfer_style = ChargeTransferStyle::MARCUS,
-                              .lattice_fill = "none"}; 
+      parameters = {.latconst = 1,
+                  .boxxhi = 100,
+                  .boxyhi = 100,
+                  .boxzhi = 2,
+                  .temperature = 300,
+                  .g_e = -2.1, .is_add_sites = true,
+                  .charge_transfer_style = ChargeTransferStyle::MARCUS,
+                  .lattice_fill = "none"}; 
 
 
-      dynamic_LGMC_ = LatticeReactionNetwork(model_database,
+      LatticeReactionNetwork dynamic_LGMC_ = LatticeReactionNetwork(model_database,
                                           initial_state_database,
                                           parameters);
 
    }
 
-   LatticeReactionNetwork static_LGMC_
-   LatticeReactionNetwork dynamic_LGMC_
-}
+};
 
-TEST_F(LatticeReactionNetworkTest, InitializeMembersStatic) {
-
+TEST_F(LatticeReactionNetworkTest, InitialState) {
    
+   // check static lattice
+   EXPECT_EQ(static_LGMC_.initial_state[0], 0);
+   EXPECT_EQ(static_LGMC_.initial_state[1], 2500);
+   EXPECT_EQ(static_LGMC_.initial_state[2], 0);
+   EXPECT_EQ(static_LGMC_.initial_state[3], 0);
+   EXPECT_EQ(static_LGMC_.initial_state[4], 15000);
+
+   // check dynamic lattice
+   for(int i = 0; i < static_cast<int>(dynamic_LGMC_.initial_state.size()); i++) {
+      if(i == 3) {
+         EXPECT_EQ(dynamic_LGMC_.initial_state[3], 10000);
+      }
+      else {
+         EXPECT_EQ(dynamic_LGMC_.initial_state[i], 0);
+      }
+   }
 
 }
 
-TEST_F(LatticeReactionNetworkTest, InitializeMembersDynamic) {
 
-   
-
-}
 
 
 
