@@ -1,7 +1,9 @@
 # Examples
 
+For each module of `RNMC` an simple example of its use in an appropriate application is demonstrated. This includes a description of the example, Python code for generating the necessary .sqlite files, and sample outputs. The Python code and sample outputs are inside the <a href="{{ site.github.repository_url }}"> examples directory </a>.
+
 ## GMC - <span style="color: #0066CC"> Homogeneous Catalysis </span>
-A simple example of an application of GMC is [homogeneous catalysis](./https://pubs.rsc.org/en/content/articlehtml/2017/sc/c7sc03628k). The following reaction network is employed. The circles indicate the reactants, products, and intermediates, while the rectangles indicate the transition states. The thick lines and the yellow circles denote the Heck–Breslow mechanism to give the product (P) and the hydrogenation mechanism to form the side product (Pside). The other paths are drawn with dashed lines. The green circles indicate the stereoisomers of the intermediates in the Heck–Breslow mechanism. The numbers in the circles and the rectangles denote the relative energies of intermediates and transition states with respect to that of the reactant (R), respectively. All the energy values are in kcal mol<sup>-1</sup>. The Python code for generating the .sqlite files is in the `examples` folder of the github (`examples/GMC/Catalysis`). 
+A simple example of an application of GMC is [homogeneous catalysis](./https://pubs.rsc.org/en/content/articlehtml/2017/sc/c7sc03628k). The following reaction network is employed. The circles indicate the reactants, products, and intermediates, while the rectangles indicate the transition states. The thick lines and the yellow circles denote the Heck–Breslow mechanism to give the product (P) and the hydrogenation mechanism to form the side product (Pside). The other paths are drawn with dashed lines. The green circles indicate the stereoisomers of the intermediates in the Heck–Breslow mechanism. The numbers in the circles and the rectangles denote the relative energies of intermediates and transition states with respect to that of the reactant (R), respectively. All the energy values are in kcal mol<sup>-1</sup>. 
 
 <figure>
     <img src="catalysis.png"
@@ -11,10 +13,11 @@ A simple example of an application of GMC is [homogeneous catalysis](./https://p
 
 ## NPMC
 
-## LGMC - <span style="color: #0066CC"> CO Oxidation on Cu and SEI </span>
-Two examples of applications of LGMC, CO Oxidation on Cu with a static lattice and a simple reaction network for the formation and evolution of the solid electrolyte interphase (SEI) in a lithium-ion battery, are provided. The Python code for generating the .sqlite files is in the `examples` folder of the github (`examples/LGMC/CO_oxidation` and `examples/LGMC/SEI`). 
+## LGMC
+Two examples of applications of LGMC, CO Oxidation on Cu with a static lattice and a simple reaction network for the formation and evolution of the solid electrolyte interphase (SEI) in a lithium-ion battery, are provided. 
 
-### CO Oxidation on Cu
+
+## LGMC (static) - <span style="color: #0066CC"> CO Oxidation on Cu </span>
 This example simulates electrocatalytic CO oxidation on Cu. We employ a static lattice with 50 sites in each of the x and y dimensions and 2 sites in the z dimension to represent a Cu surface as the catalysis. 
 
 All initial sites are empty. The initial state of the solution in contact with this surface consists of 2,500 CO molecules and 15,000 H_2O molecules. The reduction and oxidation rates use an electron free energy of -0.5 eV. The system is modeled at 300K. 
@@ -41,9 +44,8 @@ From this initial state, 200,000 steps of our kMC are run. As the simulation pro
     <figcaption>Surface occupancy for CO and OH where empty represents a site that contains neither CO or OH. </figcaption>
 </figure>
 
-### SEI
+## LGMC (dynamic) - <span style="color: #0066CC"> Solid Electrolyte Interphase  </span>
 This example simulates a simplified formation and evolution of the solid electrolyte interphase in a lithium-ion battery.
-
 
 #### Species
 EC0, EC-, LiEC+, LiEC0, LiEC_RO0, LiEC_RO-,
