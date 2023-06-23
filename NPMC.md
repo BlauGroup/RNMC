@@ -47,7 +47,7 @@ CREATE TABLE sites (
     <li> <span style="color:#006633"> left_state_1&#124;2 </span>: corresponds to the initial energy level of a species (analogous to left side of a reaction). If a single site interaction, left_state_2 should be -1. </li>
     <li> <span style="color:#006633"> right_state_1&#124;2 </span>: corresponds to the final energy level of a species (analogous to right side of a reaction). If a single site interaction, right_state_2 should be -1. </li>
     <li> <span style="color:#006633"> rate </span>: rate for the energy transition event, please refer to 
-    <a href="{{ ./https://github.com/BlauGroup/NanoParticleTools }}"> NanoParticleTools </a>. </li> </ul>
+    <a href="{{ ./https://github.com/BlauGroup/NanoParticleTools }}"> NanoParticleTools</a>. </li> </ul>
 
 <pre><code> CREATE TABLE interactions (
     interaction_id      INTEGER NOT NULL PRIMARY KEY,
@@ -104,7 +104,7 @@ CREATE TABLE trajectories (
 
 <ul>
 <li> <span style="color:#0066CC"> factors </span>: this table contains factors that can be used to modify the rates of interactions. <b> This table must be filled in by the user.</b> </li>
-    <ul> <li> <span style="color:#006633"> distance_factor_type </span>: specifies how to compute interaction propensities for two site interactions as a function of distance. Currently the accepted values are <pre><code>linear</code></pre> and <pre><code>inverse_cubic</code></pre>. </li> </ul>
+    <ul> <li> <span style="color:#006633"> distance_factor_type </span>: specifies how to compute interaction propensities for two site interactions as a function of distance. Currently the accepted values are <code>linear</code> and <code>inverse_cubic</code>. </li> </ul>
 <pre><code> CREATE TABLE factors (
     one_site_interaction_factor      REAL NOT NULL,
     two_site_interaction_factor      REAL NOT NULL,
@@ -122,11 +122,12 @@ CREATE TABLE interrupt_state (
     seed                    INTEGER NOT NULL,
     site_id                 INTEGER NOT NULL,
     degree_of_freedom       INTEGER NOT NULL
-        
 ); 
 ```
 
 - <span style="color:#0066CC"> interrupt_cutoff </span>: during checkpointing, the simulation will fill in this table.
+<br>
+<br>
 ```
 CREATE TABLE interrupt_cutoff (
         seed                    INTEGER NOT NULL,
