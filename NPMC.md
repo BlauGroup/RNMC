@@ -26,6 +26,8 @@ There are four tables in the nanoparticle database all of which **must be create
 </ul>
 
 - <span style="color:#0066CC"> sites </span>: this table initalizes the sites available in the simulation. There are no restrictions in the x, y, z sites table. Atoms may be placed anywhere in space, although it is typically restricted to sites on a lattice. Although that lattice is not fixed, since there are many host materials that are used for upconverting nanoparticles.
+<br>
+<br>
 ```
 CREATE TABLE sites (
     site_id             INTEGER NOT NULL PRIMARY KEY,
@@ -41,10 +43,11 @@ CREATE TABLE sites (
     <ul>
     <li> <span style="color:#006633"> interaction_id </span>: unique, index which monotonically increases starting from 0. </li>
     <li> <span style="color:#006633"> number_of_sites </span>: number of sites which participate in the event, either 1 or 2. </li>
-    <li> <span style="color:#006633"> species_id_1\|2 </span>: species_id corresponding to definitions provided in species table. If a single site interaction, species_id_2 should be -1. </li>
-    <li> <span style="color:#006633"> left_state_1\|2 </span>: corresponds to the initial energy level of a species (analogous to left side of a reaction). If a single site interaction, left_state_2 should be -1. </li>
-    <li> <span style="color:#006633"> right_state_1\|2 </span>: corresponds to the final energy level of a species (analogous to right side of a reaction). If a single site interaction, right_state_2 should be -1. </li>
-    <li> <span style="color:#006633"> rate </span>: rate for the energy transition event, please refer to [NanoParticleTools](./https://github.com/BlauGroup/NanoParticleTools). </li> </ul>
+    <li> <span style="color:#006633"> species_id_1&#124;2 </span>: species_id corresponding to definitions provided in species table. If a single site interaction, species_id_2 should be -1. </li>
+    <li> <span style="color:#006633"> left_state_1&#124;2 </span>: corresponds to the initial energy level of a species (analogous to left side of a reaction). If a single site interaction, left_state_2 should be -1. </li>
+    <li> <span style="color:#006633"> right_state_1&#124;2 </span>: corresponds to the final energy level of a species (analogous to right side of a reaction). If a single site interaction, right_state_2 should be -1. </li>
+    <li> <span style="color:#006633"> rate </span>: rate for the energy transition event, please refer to 
+    <a href="{{ ./https://github.com/BlauGroup/NanoParticleTools }}"> NanoParticleTools </a>. </li> </ul>
 
 <pre><code> CREATE TABLE interactions (
     interaction_id      INTEGER NOT NULL PRIMARY KEY,
@@ -61,6 +64,8 @@ CREATE TABLE sites (
 </ul>
 
 - <span style="color:#0066CC"> metadata </span>: this table consists of one line for the total number of species, sites, and interactions in the simulation.
+<br>
+<br>
 ```
 CREATE TABLE metadata (
     number_of_species                   INTEGER NOT NULL,
@@ -84,6 +89,8 @@ There are five tables in the initial state database all of which **must be creat
 </ul>
 
 - <span style="color:#0066CC"> trajectories </span>: this table records each interaction executed during the duration of the simulation. For each reaction the seed of the simulation that executed the reaction and corresponding step and time are recorded. 
+<br>
+<br>
 ```
 CREATE TABLE trajectories (
     seed               INTEGER NOT NULL,
@@ -131,13 +138,13 @@ CREATE TABLE interrupt_cutoff (
 To access the makefile, enter the `NPMC` folder:
 
 ```
-$ cd `NPMC`
+$ cd NPMC
 ```
 
 Next create an executable with the makefile. The executable will be located in the `NPMC` folder.
 
 ```
-$ make `NPMC`
+$ make NPMC
 ```
 
 For further help on the makefile and to view other commands:
