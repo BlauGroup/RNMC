@@ -47,11 +47,11 @@ From this initial state, 200,000 steps of our kMC are run. As the simulation pro
 ## LGMC (dynamic) - <span style="color: #0066CC"> Solid Electrolyte Interphase  </span>
 This example simulates a simplified formation and evolution of the solid electrolyte interphase in a lithium-ion battery.
 
-#### Species
+### Species
 EC0, EC-, LiEC+, LiEC0, LiEC_RO0, LiEC_RO-,
 LiCO3-, Li2CO30, LEDC0, LEDC-, LEDC_minus_Li-, LEDC_plus_Li+, LEDC_plus_Li0, C2H40
 
-#### Overview:
+### Overview:
 - The molecular thermodynamics are in "test_species_thermo.json"
 - Non-electrochemical reactions are in "test_energy_barriers.json" 
 - Inner reorganization energies for reduction reactions are in "test_lambda_inner.json"
