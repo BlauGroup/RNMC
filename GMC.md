@@ -104,13 +104,13 @@ CREATE TABLE interrupt_cutoff (
 To access the makefile, enter the `GMC` folder:
 
 ```
-$ cd `GMC`
+$ cd GMC
 ```
 
 Next create an executable with the makefile. The executable will be located in the `GMC` folder.
 
 ```
-$ make `GMC`
+$ make GMC
 ```
 
 For further help on the makefile and to view other commands:
@@ -129,7 +129,7 @@ $ make help
 - <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation.
 - <span style="color:#0066CC"> time_cutoff </span>: how much time in each simulation [s].
 
-When running `GMC` ensure that your input file paths are correct considering the executable is inside the `GMC` folder. Below is an example of how `GMC` can be run using the input files from [Examples](./Examples.html) (here `step_cutoff` is specified):
+When running `GMC` ensure that your input file paths are correct considering the executable is inside the `GMC` folder. Below is an example of how `GMC` can be run using the input files inside the <a href="{{ site.github.repository_url }}"> examples directory </a>. (here `step_cutoff` is specified):
 
 ```
 ./GMC --reaction_database=../examples/GMC/rn.sqlite --initial_state_database=../examples/GMC/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200
