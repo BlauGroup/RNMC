@@ -44,6 +44,17 @@
   font-size: 15px;
 }
 
+.dropdown {
+  background-color: #bbcced;
+  text-align: left;
+  cursor: pointer;
+  width: 250px;
+  border: none;
+  outline: none;
+  padding: 8px 16px;
+  font-size: 10px;
+}
+
 .active, .collapsible:hover {
   background-color: #7bb2e9;
 }
@@ -92,17 +103,15 @@
       </ul class="TOC">
 
       <body>
-      <ul>
         <button type="button" class="collapsible">Examples</button>
         <div class="content">
           <p>
             <ul class="TOC">
-            <li class="TOC"><a class="TOC" href="GMC_exp.html" class="active"></i>GMC - Homogeneous Catalysis</a></li>
-            <li class="TOC"><a class="TOC" href="LGMC_exp.html" class="active"></i>LGMC - CO Oxidation and SEI</a></li>
+            <li class="TOC"><a class="dropdown" href="GMC_exp.html" class="active"></i>GMC - Homogeneous Catalysis</a></li>
+            <li class="TOC"><a class="dropdown" href="LGMC_exp.html" class="active"></i>LGMC - CO Oxidation and SEI</a></li>
             </ul>
           </p>
         </div>
-      </ul>
         <script>
         var coll = document.getElementsByClassName("collapsible");
         var i;
