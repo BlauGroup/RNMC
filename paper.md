@@ -22,17 +22,17 @@ authors:
     corresponding: false
     equal-contrib: true
     affiliation: 3
-  - name: Evan Spotte-Smith
+  - name: Evan Walter Clark Spotte-Smith
     orcid: 0000-0003-1554-197X
     corresponding: false  
     affiliation: "1, 4"
   - name: Rohith Srinivaas M
     corresponding: false  
     affiliation: "1, 4"
-  - name: Kristin Persson
+  - name: Kristin Aslaug Persson
     corresponding: true  
     affiliation: "4, 5"
-  - name: Sam Blau
+  - name: Samuel M. Blau
     corresponding: true  
     affiliation: 3
 affiliations:
