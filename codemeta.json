@@ -31,6 +31,13 @@
       "affiliation": "Lawrence Berkeley National Laboratory; Univeristy of California - Berkeley"
     },
     {
+      "@id": "",
+      "@type": "Person",
+      "email": "rmohanakrishnan@lbl.gov",
+      "name": "Rohith Srinivaas",
+      "affiliation": "Lawrence Berkeley National Laboratory; Univeristy of California - Berkeley"
+    },
+    {
       "@id": "https://orcid.org/0000-0003-2495-5509",
       "@type": "Person",
       "email": "kapersson@lbl.gov",

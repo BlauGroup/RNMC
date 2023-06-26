@@ -1,5 +1,6 @@
---
-title: 'RNMC: kinetic Monte Carlo implementations for complex reaction networks'
+---
+title: >-
+    RNMC: kinetic Monte Carlo implementations for complex reaction networks
 tags:
   - Python
   - C++
@@ -7,30 +8,33 @@ tags:
   - kinetic Monte Carlo
 authors:
   - name: Laura Zichi
+    orcid: 0000-0003-3897-3097
     equal-contrib: true
     corresponding: false
-    affiliation: 1,2
+    affiliation: "1, 2"
   - name: Daniel Barter
+    orcid: 0000-0002-6408-1255
     corresponding: false
     equal-contrib: true
     affiliation: 3
   - name: Eric Sivonxay
+    orcid: 0000-0002-6408-1255
     corresponding: false
     equal-contrib: true
     affiliation: 3
   - name: Evan Spotte-Smith
+    orcid: 0000-0003-1554-197X
     corresponding: false  
-    affiliation: 1,4
+    affiliation: "1, 4"
   - name: Rohith Srinivaas M
     corresponding: false  
-    affiliation: 1,4
+    affiliation: "1, 4"
   - name: Kristin Persson
     corresponding: true  
-    affiliation: 4, 5
+    affiliation: "4, 5"
   - name: Sam Blau
     corresponding: true  
     affiliation: 3
-
 affiliations:
  - name: Materials Science Division, Lawrence Berkeley National Laboratory, Berkeley, CA, USA 94720
    index: 1
@@ -42,10 +46,9 @@ affiliations:
    index: 4
  - name: Molecular Foundry, Lawrence Berkeley National Laboratory, Berkeley, CA, USA 94720
    index: 5
- 
-date: 30 June 2023
+date: 2023-06-30
 bibliography: paper.bib
-
+---
 
 # Summary
 
