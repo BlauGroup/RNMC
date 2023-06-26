@@ -44,7 +44,7 @@ affiliations:
    index: 5
  
 date: 30 June 2023
-bibliography: paper.bib
+bibliography: paper/paper.bib
 
 
 # Summary
