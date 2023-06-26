@@ -34,18 +34,19 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 .collapsible {
-  background-color: #f1f1f1;
+  background-color: #777;
+  color: white;
   cursor: pointer;
-  padding: 0;
-  width: 250px;
+  padding: 18px;
+  width: 100%;
   border: none;
+  text-align: left;
   outline: none;
   font-size: 15px;
 }
 
 .active, .collapsible:hover {
-  background-color: #7bb2e9;
-  color: #fff;
+  background-color: #555;
 }
 
 .content {
@@ -57,6 +58,12 @@
 </style>
 </head>
 <body>
+
+<p>Collapsible Set:</p>
+<button type="button" class="collapsible">Open Section 1</button>
+<div class="content">
+  <p>Hello Hello Hello</p>
+</div>
 
 <script>
 var coll = document.getElementsByClassName("collapsible");
@@ -74,12 +81,6 @@ for (i = 0; i < coll.length; i++) {
   });
 }
 </script>
-
-
-<button type="button" class="collapsible">Examples</button>
-      <div class="content">
-        hellooo why is this not working
-      </div>
 
 </body>
       
@@ -116,11 +117,6 @@ for (i = 0; i < coll.length; i++) {
           <li class="TOC"><a class="TOC" href="Examples.html" class="active"></i>Examples</a></li>
           <li class="TOC"><a class="TOC" href="Testing.html" class="active"></i>Testing</a></li>
       </ul class="TOC">
-
-      <button type="button" class="collapsible">Examples</button>
-      <div class="content">
-        hellooo why is this not working
-      </div>
 
       </header>
       <section>
