@@ -1,5 +1,7 @@
-#include "dispatcher.h"
 #include <getopt.h>
+#include "../core/dispatcher.h"
+#include "sql_types.h"
+#include "reaction_network.h"
 
 void print_usage() {
     std::cout << "Usage: specify the following options\n"
@@ -8,12 +10,11 @@ void print_usage() {
               << "--number_of_simulations\n"
               << "--base_seed\n"
               << "--thread_count\n"
-              << "--step_cutoff\n"
-              << "--dependency_threshold\n";
+              << "--step_cutoff|time_cutoff\n";
 }
 
 int main(int argc, char **argv) {
-    if (argc != 8) {
+    if (argc != 7) {
         print_usage();
         exit(EXIT_FAILURE);
     }
@@ -25,8 +26,8 @@ int main(int argc, char **argv) {
         {"number_of_simulations", required_argument, NULL, 3},
         {"base_seed", required_argument, NULL, 4},
         {"thread_count", required_argument, NULL, 5},
-        {"step_cutoff", required_argument, NULL, 6},
-        {"dependency_threshold", required_argument, NULL, 7},
+        {"step_cutoff", optional_argument, NULL, 6},
+        {"time_cutoff", optional_argument, NULL, 7},
         {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };
@@ -39,8 +40,11 @@ int main(int argc, char **argv) {
     int number_of_simulations = 0;
     int base_seed = 0;
     int thread_count = 0;
-    int step_cutoff = 0;
-    int dependency_threshold = 0;
+    Cutoff cutoff = {
+        .bound =  { .step =  0 },
+        .type_of_cutoff = step_termination
+    };
+
 
     while ((c = getopt_long_only(
                 argc, argv, "",
@@ -70,12 +74,15 @@ int main(int argc, char **argv) {
             break;
 
         case 6:
-            step_cutoff = atoi(optarg);
+            cutoff.bound.step = atoi(optarg);
+            cutoff.type_of_cutoff = step_termination;
             break;
 
         case 7:
-            dependency_threshold = atoi(optarg);
+            cutoff.bound.time = atof(optarg);
+            cutoff.type_of_cutoff = time_termination;
             break;
+
 
         default:
             // if an unexpected argument is passed, exit
@@ -87,14 +94,23 @@ int main(int argc, char **argv) {
 
     }
 
-    Dispatcher<TreeSolver> dispatcher (
+    ReactionNetworkParameters parameters;
+
+    Dispatcher<
+        TreeSolver,
+        ReactionNetwork,
+        ReactionNetworkParameters,
+        TrajectoriesSql
+        >
+
+        dispatcher (
         reaction_database,
         initial_state_database,
         number_of_simulations,
         base_seed,
         thread_count,
-        step_cutoff,
-        dependency_threshold
+        cutoff,
+        parameters
         );
 
     dispatcher.run_dispatcher();

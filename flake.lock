@@ -1,23 +1,57 @@
 {
   "nodes": {
+    "flake-compat": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1650374568,
+        "narHash": "sha256-Z+s0J8/r907g149rllvwhb4pKi8Wam5ij0st8PwAh+E=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "b4a34015c698c7793d592d66adbab377907a2be8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
+    "mini-compile-commands": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1668364794,
+        "narHash": "sha256-6NmqQOJmKtX3gtc8pOnJd7yfXIWX89hwdsq0te8/NwY=",
+        "owner": "danielbarter",
+        "repo": "mini_compile_commands",
+        "rev": "a609a8cf98e5ea8cafc624e9a5c96f18229c0996",
+        "type": "github"
+      },
+      "original": {
+        "owner": "danielbarter",
+        "repo": "mini_compile_commands",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1637448181,
-        "narHash": "sha256-ujcXli4esmtIHUBjE1BjmMuBWrcNvlHZrVXx56i5B1M=",
+        "lastModified": 1668469466,
+        "narHash": "sha256-IBkBaXJ9ZQ6stveJctd3e8X6KJl9r0wwaI961TNhw9A=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d5b65f812cd4f5a8fa74b406075b59a46f1cfd98",
+        "rev": "d4863da28cc397a1b72c08253cfa38f4c91fc2b7",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-21.05",
+        "ref": "master",
         "repo": "nixpkgs",
         "type": "github"
       }
     },
     "root": {
       "inputs": {
+        "flake-compat": "flake-compat",
+        "mini-compile-commands": "mini-compile-commands",
         "nixpkgs": "nixpkgs"
       }
     }

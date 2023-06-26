@@ -5,6 +5,8 @@
 #include <mutex>
 #include "../core/sql.h"
 #include "sql_types.h"
+#include "../core/solvers.h"
+#include "../core/simulation.h"
 
 struct Reaction {
     // we assume that each reaction has zero, one or two reactants
@@ -17,69 +19,75 @@ struct Reaction {
     double rate;
 };
 
-struct DependentsNode {
 
-    // reactions which depend on current reaction.
-    // dependents will be nothing if it has not been computed.
-    std::optional<std::vector<int>> dependents;
-    std::mutex mutex;
-    int number_of_occurrences; // number of times the reaction has occoured.
 
-    DependentsNode() :
-    dependents (std::optional<std::vector<int>>()),
-    mutex (std::mutex()),
-    number_of_occurrences (0) {};
+// parameters passed to the ReactionNetwork constructor
+// by the dispatcher which are model specific
+struct ReactionNetworkParameters {
 };
 
-struct ReactionNetwork {
 
+struct ReactionNetwork {
     std::vector<Reaction> reactions; // list of reactions
     std::vector<int> initial_state; // initial state for all the simulations
     std::vector<double> initial_propensities; // initial propensities for all the reactions
-
     double factor_zero; // rate modifer for reactions with zero reactants
     double factor_two; // rate modifier for reactions with two reactants
     double factor_duplicate; // rate modifier for reactions of form A + A -> ...
 
-    // number of times a reaction needs to fire before we compute its
-    // node in the dependency graph
-    int dependency_threshold;
-
-    std::vector<DependentsNode> dependency_graph;
+    // maps species to the reactions which involve that species
+    std::vector<std::vector<int>> dependents;
 
     ReactionNetwork(
         SqlConnection &reaction_network_database,
         SqlConnection &initial_state_database,
-        int dependency_threshold);
+        ReactionNetworkParameters parameters);
 
-    std::optional<std::vector<int>> &get_dependency_node(int reaction_index);
-    void compute_dependency_node(int reaction_index);
+    void compute_dependents();
 
     double compute_propensity(
         std::vector<int> &state,
         int reaction_index);
 
+    void update_state(
+        std::vector<int> &state,
+        int reaction_index);
+
+    void update_propensities(
+        std::function<void(Update update)> update_function,
+        std::vector<int> &state,
+        int next_reaction
+        );
+
+    // convert a history element as found a simulation to history
+    // to a SQL type.
+    TrajectoriesSql history_element_to_sql(
+        int seed,
+        HistoryElement history_element);
 
 };
 
 ReactionNetwork::ReactionNetwork(
      SqlConnection &reaction_network_database,
      SqlConnection &initial_state_database,
-     int dependency_threshold) :
+     ReactionNetworkParameters)
 
-    dependency_threshold( dependency_threshold ) {
+    {
 
     // collecting reaction network metadata
     SqlStatement<MetadataSql> metadata_statement (reaction_network_database);
     SqlReader<MetadataSql> metadata_reader (metadata_statement);
 
-    // TODO: make sure this isn't nothing
-    MetadataSql metadata_row = metadata_reader.next().value();
+    std::optional<MetadataSql> maybe_metadata_row = metadata_reader.next();
 
+    if (! maybe_metadata_row.has_value()) {
+        std::cerr << time_stamp()
+                  << "no metadata row\n";
 
-    // can't resize dependency graph because mutexes are not copyable
-    dependency_graph =
-        std::vector<DependentsNode> (metadata_row.number_of_reactions);
+        std::abort();
+    }
+
+    MetadataSql metadata_row = maybe_metadata_row.value();
 
 
 
@@ -157,87 +165,36 @@ ReactionNetwork::ReactionNetwork(
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
         initial_propensities[i] = compute_propensity(initial_state, i);
     }
+
+    std::cerr << time_stamp() << "computing dependency graph...\n";
+    compute_dependents();
+    std::cerr << time_stamp() << "finished computing dependency graph\n";
 };
 
 
-std::optional<std::vector<int>> &ReactionNetwork::get_dependency_node(
-    int reaction_index) {
+void ReactionNetwork::compute_dependents() {
+    // initializing dependency graph
 
-    DependentsNode &node = dependency_graph[reaction_index];
+    dependents.resize(initial_state.size());
 
-    std::lock_guard lock (node.mutex);
 
-    if (! node.dependents &&
-        node.number_of_occurrences >= dependency_threshold ) {
-        compute_dependency_node(reaction_index);
+    for ( unsigned int reaction_id = 0; reaction_id <  reactions.size(); reaction_id++ ) {
+        Reaction &reaction = reactions[reaction_id];
+
+        for ( int i = 0; i < reaction.number_of_reactants; i++ ) {
+            int reactant_id = reaction.reactants[i];
+            dependents[reactant_id].push_back(reaction_id);
+        }
+
+
+        for ( int j = 0; j < reaction.number_of_products; j++ ) {
+            int product_id = reaction.products[j];
+            dependents[product_id].push_back(reaction_id);
+        }
     }
 
-    node.number_of_occurrences++;
-
-    return node.dependents;
 };
 
-
-void ReactionNetwork::compute_dependency_node(int reaction_index) {
-
-    DependentsNode &node = dependency_graph[reaction_index];
-
-    int number_of_dependents_count = 0;
-    unsigned long int j; // reaction index
-    int l, m, n; // reactant and product indices
-
-    for (j = 0; j < reactions.size(); j++) {
-        bool flag = false;
-
-        for (l = 0; l < reactions[j].number_of_reactants; l++) {
-            for (m = 0; m < reactions[reaction_index].number_of_reactants; m++) {
-                if (reactions[j].reactants[l] ==
-                    reactions[reaction_index].reactants[m])
-                    flag = true;
-            }
-
-            for (n = 0; n < reactions[reaction_index].number_of_products; n++) {
-                if (reactions[j].reactants[l] ==
-                    reactions[reaction_index].products[n])
-                    flag = true;
-            }
-        }
-
-        if (flag)
-            number_of_dependents_count++;
-    }
-
-    std::vector<int> dependents (number_of_dependents_count);
-
-    int dependents_counter = 0;
-    int current_reaction = 0;
-    while (dependents_counter < number_of_dependents_count) {
-        bool flag = false;
-        for (l = 0;
-             l < reactions[current_reaction].number_of_reactants;
-             l++) {
-            for (m = 0; m < reactions[reaction_index].number_of_reactants; m++) {
-                if (reactions[current_reaction].reactants[l] ==
-                    reactions[reaction_index].reactants[m])
-                    flag = true;
-            }
-
-            for (n = 0; n < reactions[reaction_index].number_of_products; n++) {
-                if (reactions[current_reaction].reactants[l] ==
-                    reactions[reaction_index].products[n])
-                    flag = true;
-            }
-        }
-
-        if (flag) {
-            dependents[dependents_counter] = current_reaction;
-            dependents_counter++;
-        }
-        current_reaction++;
-    }
-
-    node.dependents = std::optional (std::move(dependents));
-};
 
 double ReactionNetwork::compute_propensity(
     std::vector<int> &state,
@@ -274,3 +231,71 @@ double ReactionNetwork::compute_propensity(
     return p;
 
 };
+
+void ReactionNetwork::update_state(
+    std::vector<int> &state,
+    int reaction_index) {
+
+    for (int m = 0;
+         m < reactions[reaction_index].number_of_reactants;
+         m++) {
+        state[reactions[reaction_index].reactants[m]]--;
+    }
+
+    for (int m = 0;
+         m < reactions[reaction_index].number_of_products;
+         m++) {
+        state[reactions[reaction_index].products[m]]++;
+    }
+
+}
+
+
+void ReactionNetwork::update_propensities(
+    std::function<void(Update update)> update_function,
+    std::vector<int> &state,
+    int next_reaction
+    ) {
+
+    Reaction &reaction = reactions[next_reaction];
+
+    std::vector<int> species_of_interest;
+    species_of_interest.reserve(4);
+
+    for ( int i = 0; i < reaction.number_of_reactants; i++ ) {
+        int reactant_id = reaction.reactants[i];
+        species_of_interest.push_back(reactant_id);
+    }
+
+
+    for ( int j = 0; j < reaction.number_of_products; j++ ) {
+        int product_id = reaction.products[j];
+        species_of_interest.push_back(product_id);
+    }
+
+
+    for ( int species_id : species_of_interest ) {
+        for ( unsigned int reaction_index : dependents[species_id] ) {
+
+            double new_propensity = compute_propensity(
+                state,
+                reaction_index);
+
+            update_function(Update {
+                    .index = reaction_index,
+                    .propensity = new_propensity});
+        }
+    }
+}
+
+
+TrajectoriesSql ReactionNetwork::history_element_to_sql(
+    int seed,
+    HistoryElement history_element) {
+    return TrajectoriesSql {
+        .seed = seed,
+        .step = history_element.step,
+        .reaction_id = history_element.reaction_id,
+        .time = history_element.time
+    };
+}
