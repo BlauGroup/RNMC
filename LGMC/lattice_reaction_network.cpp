@@ -1,6 +1,6 @@
 #include "lattice_reaction_network.h"
 
-LatticeReactionNetwork::LatticeReactionNetwork() {}
+LatticeReactionNetwork::LatticeReactionNetwork() : sampler (Sampler(0)) {}
 
 LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection 
                         &reaction_network_database, SqlConnection 

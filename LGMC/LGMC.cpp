@@ -28,7 +28,7 @@ void print_usage_LGMC_parameters() {
               << "Temperature\n"
               << "Electron free energy\n"
               << "Is Add Site (T/F)\n"
-              << "Charge transfer style (M/B)\n"
+              << "Charge transfer style (M/B)\n";
 } // print_usage_LGMC_parameters()
 
 /* ---------------------------------------------------------------------- */
