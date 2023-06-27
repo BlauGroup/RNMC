@@ -34,7 +34,7 @@ class LatticeReactionNetworkTest : public ::testing::Test {
                               .charge_transfer_style = ChargeTransferStyle::BUTLER_VOLMER}; 
 
 
-      LatticeReactionNetwork static_LGMC_ = LatticeReactionNetwork(model_database,
+      static_LGMC_ = LatticeReactionNetwork(model_database,
                                           initial_state_database,
                                           parameters);
 
@@ -56,11 +56,13 @@ class LatticeReactionNetworkTest : public ::testing::Test {
                   .charge_transfer_style = ChargeTransferStyle::MARCUS}; 
 
 
-      LatticeReactionNetwork dynamic_LGMC_ = LatticeReactionNetwork(model_database,
+      dynamic_LGMC_ = LatticeReactionNetwork(model_database,
                                           initial_state_database,
                                           parameters);
 
    }
+   LatticeReactionNetwork static_LGMC_;
+   LatticeReactionNetwork dynamic_LGMC_;
 
 };
 
