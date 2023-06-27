@@ -1,0 +1,1 @@
+[{"reactants": ["LiEC+"], "products": ["LiEC0"], "lambda_inner": 1.1313074607806808, "dg": -2.1696673860751616}, {"reactants": ["LiEC_RO0"], "products": ["LiEC_RO-"], "lambda_inner": 0.6075228233322811, "dg": -2.8967266062009003}, {"reactants": ["LEDC_plus_Li+"], "products": ["LEDC_plus_Li0"], "lambda_inner": 0.7979878607548017, "dg": -1.4360185341138276}]
