@@ -29,10 +29,11 @@ From this initial state, 200,000 steps of our kMC are run. As the simulation pro
 </figure>
 
 ## LGMC (dynamic) - <span style="color: #0066CC"> Solid Electrolyte Interphase  </span>
-This example simulates a simplified formation and evolution of the solid electrolyte interphase in a lithium-ion battery. 
+This example simulates a simplified formation and evolution of the solid electrolyte interphase in a lithium-ion battery. We employ a dynamic lattice with 100 sites in both the in each of the x and y dimensions and 2 sites in the z dimension to represent the interphase between the elctrode and electrolyte in a lithium-ion battery.
+
+All initial sites are empty. The initial state of the solution in contact with this surface consists of 10000 LiEC+ molecules.The reduction rates use an electron free energy of -2.1 eV. The system is modeled at 300K. Marcus electron transfer theory is used through the simulation.
 
 Because there are 99 total reactions allowed to occur in the simulation, a brief overview is provided instead of a table. To see each reaction see the Python and .sqlite files in <a href="{{ site.github.repository_url }}"> examples directory </a>. 
-
 
 ### Species
 EC0, EC-, LiEC+, LiEC0, LiEC_RO0, LiEC_RO-,

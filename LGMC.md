@@ -1,6 +1,6 @@
 # LGMC - <span style="color: #0066CC"> Lattice Gillespie Monte Carlo </span>
 
-A kMC implementation coupling a homogeneous (Gillespie-like) region with a lattice, enabling simulations with reactions occurring in multiple phases and capable of electrochemical reactions. Either marcus of Butler-Volmer electron transfer theory (specified at runtime, see 'Running LGMC' below) can be used when calculating rates for electrochemical reactions. The lattice is periodic in the x, y direction and non-periodic in the z direction. The lattice may be static (no sites can be added or deleted) or dynamic (sites are added through adsorption and deleted through desorption reactions).
+A kMC implementation coupling a homogeneous (Gillespie-like) region with a lattice, enabling simulations with reactions occurring in multiple phases and capable of electrochemical reactions. Either Marcus of Butler-Volmer electron transfer theory (specified at runtime, see 'Running LGMC' below) can be used when calculating rates for electrochemical reactions. The lattice is periodic in the x, y direction and non-periodic in the z direction. The lattice may be static (no sites can be added or deleted) or dynamic (sites are added through adsorption and deleted through desorption reactions).
 
 As a starting point two examples of `LGMC` uses are shown in [Examples](./Examples.html) - `LGMC` with a static lattice to model CO Oxidation on Cu and `LGMC` with a dynamic lattice to simulate the formation and evolution of the solid electrolyte interphase in a lithium-ion battery.
 
