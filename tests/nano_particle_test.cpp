@@ -4,7 +4,7 @@
 #include "gtest/gtest.h"
 #include <string>
 
-// Using gtest fixture to use same ReactionNetwork 
+// Using gtest fixture to use same NanoParticle 
 
 class NanoParticleTEST : public ::testing::Test {
    protected:
