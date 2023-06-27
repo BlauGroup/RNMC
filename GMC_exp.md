@@ -1,12 +1,11 @@
-# Examples
-
-For each module of `RNMC` an simple example of its use in an appropriate application is demonstrated. This includes a description of the example, Python code for generating the necessary .sqlite files, and sample outputs. The Python code and sample outputs are inside the <a href="{{ site.github.repository_url }}"> examples directory</a>.
-
 # GMC - <span style="color: #0066CC"> Homogeneous Catalysis </span>
-A simple example of an application of GMC is [homogeneous catalysis](./https://pubs.rsc.org/en/content/articlehtml/2017/sc/c7sc03628k). The following reaction network is employed. The circles indicate the reactants, products, and intermediates, while the rectangles indicate the transition states. The thick lines and the yellow circles denote the Heck–Breslow mechanism to give the product (P) and the hydrogenation mechanism to form the side product (Pside). The other paths are drawn with dashed lines. The green circles indicate the stereoisomers of the intermediates in the Heck–Breslow mechanism. The numbers in the circles and the rectangles denote the relative energies of intermediates and transition states with respect to that of the reactant (R), respectively. All the energy values are in kcal mol<sup>-1</sup>. 
+
+We apply our `GMC` module to simulating [cobalt-catalyzed hydroformylation](./https://pubs.rsc.org/en/content/articlehtml/2017/sc/c7sc03628k). This application is choosen as an example because it has widely been studied and is a relatively simple organometallic reaction.
+
+The following diagram outlines the reaction network of cobalt-catalyzed hydroformylation. The circles indicate different species and the solid lines indicate reactions. The numerical values inside the circles correspond to the species IDs used in the Python code to generate the .sqlite files to run `GMC` (see <a href="{{ site.github.repository_url }}"> examples directory</a>).
 
 <figure>
-    <img src="catalysis.png"
+    <img src="catalysis.pdf"
          alt="homogeneous catalysis">
-    <figcaption> Final reaction network for the hydroformylation reaction obtained at the DFT level.  </figcaption>
+    <figcaption> Final reaction network for the hydroformylation reaction.  </figcaption>
 </figure>
