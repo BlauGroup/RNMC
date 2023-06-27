@@ -4,7 +4,7 @@ Two examples of applications of LGMC, CO Oxidation on Cu with a static lattice, 
 ## LGMC (static) - <span style="color: #0066CC"> CO Oxidation on Cu </span>
 This example simulates electrocatalytic CO oxidation on Cu. We employ a static lattice with 50 sites in each of the x and y dimensions and 2 sites in the z dimension to represent a Cu surface as the catalysis. 
 
-All initial sites are empty. The initial state of the solution in contact with this surface consists of 2,500 CO molecules and 15,000 H_2O molecules. The reduction and oxidation rates use an electron free energy of -0.5 eV. The system is modeled at 300K. 
+All initial sites are empty. The initial state of the solution in contact with this surface consists of 2,500 CO molecules and 15,000 H<sub>2O molecules. The reduction and oxidation rates use an electron free energy of -0.5 eV. The system is modeled at 300K. Butler-Volmer electron transfer theory is used through the simulation.
 
 The allowed reactions and associated rates are as follows:
 
@@ -29,20 +29,27 @@ From this initial state, 200,000 steps of our kMC are run. As the simulation pro
 </figure>
 
 ## LGMC (dynamic) - <span style="color: #0066CC"> Solid Electrolyte Interphase  </span>
-This example simulates a simplified formation and evolution of the solid electrolyte interphase in a lithium-ion battery.
+This example simulates a simplified formation and evolution of the solid electrolyte interphase in a lithium-ion battery. 
+
+Because there are 99 total reactions allowed to occur in the simulation, a brief overview is provided instead of a table. To see each reaction see the Python and .sqlite files in <a href="{{ site.github.repository_url }}"> examples directory </a>. 
+
 
 ### Species
 EC0, EC-, LiEC+, LiEC0, LiEC_RO0, LiEC_RO-,
 LiCO3-, Li2CO30, LEDC0, LEDC-, LEDC_minus_Li-, LEDC_plus_Li+, LEDC_plus_Li0, C2H40
 
 ### Overview:
-- The molecular thermodynamics are in "test_species_thermo.json"
-- Non-electrochemical reactions are in "test_energy_barriers.json" 
-- Inner reorganization energies for reduction reactions are in "test_lambda_inner.json"
-- For outer reorganization energies, we use 0.32 eV. 
-- For the hopping reactions (in "test_hopping_reactions.json"), the barrier is based on what Li was hopping from. For LiEC+, for instance, the barrier is 0.27 eV (based on the residence time of Li+ with EC solvation shells), but for LEDC0 it's 0.64 eV (based on values taken from the literature).
 - Each reaction can occur in either phase (lattice or homogeneous)
 - The following solid products have fast adsorption rates: LiCO3-, Li2CO30, LEDC0, LEDC-, LEDC_minus_Li-, LEDC_plus_Li+, LEDC_plus_Li0
 - Technically any of the EC-like species (EC0, EC-, LiEC+, LIEC0, LiEC_RO0, LiEC_RO-) should also be able to adsorb, but to keep the model simple that is not allowed
-- In terms of desorption, the only thing that should desorb fast is C2H4. 
-- Lattice diffusion: Through the hopping reactions, lattice diffusion of Li+ is captured (which is the most important). 
+- The only species that desorbs fast is C2H4. The species LiCO3- is allowed to desorb at a very slow rate  
+- Through the hopping reactions, lattice diffusion of Li+ is captured (which is the most important). 
+
+### Calculating rates
+- The molecular thermodynamics are in "test_species_thermo.json"
+- Non-electrochemical reactions are in "test_energy_barriers.json" 
+- For the hopping reactions (in "test_hopping_reactions.json"), the barrier is based on what Li was hopping from. For LiEC+, for instance, the barrier is 0.27 eV (based on the residence time of Li+ with EC solvation shells), but for LEDC0 it's 0.64 eV (based on values taken from the literature).
+- Inner reorganization energies for reduction reactions are in "test_lambda_inner.json"
+- For outer reorganization energies, we use 0.32 eV. 
+
+
