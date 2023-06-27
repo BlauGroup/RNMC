@@ -29,7 +29,6 @@ void print_usage_LGMC_parameters() {
               << "Electron free energy\n"
               << "Is Add Site (T/F)\n"
               << "Charge transfer style (M/B)\n"
-              << "Filename for lattice fill\n";
 } // print_usage_LGMC_parameters()
 
 /* ---------------------------------------------------------------------- */
@@ -136,11 +135,9 @@ int main(int argc, char **argv) {
     char add_site;
     ChargeTransferStyle charge_transfer_style;
     char ct_style;
-    std::string fill_lattice;
 
     fin >> latconst >> boxxhi >> boxyhi >> boxzhi
-    >> temperature >> g_e >> add_site >> ct_style
-    >> fill_lattice;
+    >> temperature >> g_e >> add_site >> ct_style;
 
     if(add_site == 'T') {
         is_add_site = true;
@@ -168,10 +165,7 @@ int main(int argc, char **argv) {
                             .boxzhi = boxzhi, 
                             .temperature = temperature, 
                             .g_e = g_e, .is_add_sites = is_add_site,
-                            .charge_transfer_style = charge_transfer_style,
-                            .lattice_fill = fill_lattice};                               
-
-
+                            .charge_transfer_style = charge_transfer_style};                               
 
     Dispatcher<LatticeSolver,
     LatticeReactionNetwork,

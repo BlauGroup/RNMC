@@ -31,8 +31,7 @@ class LatticeReactionNetworkTest : public ::testing::Test {
                               .boxzhi = 2,
                               .temperature = 300,
                               .g_e = -0.5, .is_add_sites = false,
-                              .charge_transfer_style = ChargeTransferStyle::BUTLER_VOLMER,
-                              .lattice_fill = "none"}; 
+                              .charge_transfer_style = ChargeTransferStyle::BUTLER_VOLMER}; 
 
 
       LatticeReactionNetwork static_LGMC_ = LatticeReactionNetwork(model_database,
@@ -54,8 +53,7 @@ class LatticeReactionNetworkTest : public ::testing::Test {
                   .boxzhi = 2,
                   .temperature = 300,
                   .g_e = -2.1, .is_add_sites = true,
-                  .charge_transfer_style = ChargeTransferStyle::MARCUS,
-                  .lattice_fill = "none"}; 
+                  .charge_transfer_style = ChargeTransferStyle::MARCUS}; 
 
 
       LatticeReactionNetwork dynamic_LGMC_ = LatticeReactionNetwork(model_database,

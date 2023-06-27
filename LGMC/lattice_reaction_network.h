@@ -40,7 +40,6 @@ struct LatticeParameters {
     float g_e;
     bool is_add_sites;
     ChargeTransferStyle charge_transfer_style;
-    std::string lattice_fill;
 };
 
 

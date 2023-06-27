@@ -124,9 +124,6 @@ public:
 
     float get_maxz();
 
-    // fill lattice with specified values from file
-    void fill(std::string filename);
-
 };
 
 #endif

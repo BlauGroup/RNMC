@@ -13,11 +13,6 @@ LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection
                                 parameters.boxyhi,
                                 parameters.boxzhi);
 
-
-    if(parameters.lattice_fill.compare("none") != 0) {
-        // fill lattice
-        initial_lattice->fill(parameters.lattice_fill);
-    }
     init_reaction_network(reaction_network_database, initial_state_database);
 
     is_add_sites = parameters.is_add_sites;
