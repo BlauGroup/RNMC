@@ -213,16 +213,17 @@ public:
     std::vector<double> initial_propensities;
     std::vector<int> initial_state;
     Lattice *initial_lattice;   
+
+    std::vector<LatticeReaction> reactions;
+    std::vector<std::vector<int>> dependents;
     
 private:                                                          
 
     Sampler sampler;
-    std::vector<LatticeReaction> reactions;
     std::unordered_map<int,int> species_size;           // key: species ID, value: size of the species
 
     double factor_two; // rate modifier for reactions with two reactants
     double factor_duplicate; // rate modifier for reactions of form A + A -> ...
-    std::vector<std::vector<int>> dependents;
     
     ChargeTransferStyle charge_transfer_style;
 

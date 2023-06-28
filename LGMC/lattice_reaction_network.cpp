@@ -857,8 +857,15 @@ void LatticeReactionNetwork::compute_dependents() {
         LatticeReaction reaction = reactions[reaction_id]; 
 
         for ( int i = 0; i < reaction.number_of_reactants; i++ ) {
+
             int reactant_id = reaction.reactants[i];
-            dependents[reactant_id].push_back(reaction_id);
+            if(reaction.number_of_reactants == 1 || (reaction.reactants[0] != reaction.reactants[1])) {
+                dependents[reactant_id].push_back(reaction_id);
+            }
+            else if (i == 0) {
+                // if i = 1 then duplicate reactant and don't add dependency twice
+                dependents[reactant_id].push_back(reaction_id);
+            }
         }
     }
 }
