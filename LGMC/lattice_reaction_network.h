@@ -1,7 +1,6 @@
 #ifndef RNMC_LATTICE_REACTION_NETWORK_H
 #define RNMC_LATTICE_REACTION_NETWORK_H
 
-#include "memory.h"
 #include "lattice.h"
 #include "lattice_solver.h"
 #include "sql_types.h"
@@ -10,7 +9,6 @@
 #include "../core/sampler.h"
 #include "../core/sql_types.h"
 #include "../core/queues.h"
-
 
 #include <list>
 #include <vector>

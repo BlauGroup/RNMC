@@ -91,7 +91,7 @@ lattice_test : lattice_test.o $(LGMC_DIR)/lattice.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
 
 lattice_reaction_network_test : lattice_reaction_network_test.o $(LGMC_DIR)/lattice_reaction_network.o \
-                                $(LGMC_DIR)/lattice_solver.o $(LGMC_DIR)/Lattice.o \
+                                $(LGMC_DIR)/lattice_solver.o $(LGMC_DIR)/lattice.o \
                                 $(LGMC_DIR)/sql_types.o $(core_DIR)/sql_types.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
 
