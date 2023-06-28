@@ -24,9 +24,6 @@ struct NanoParticle {
     // 2D vector representing the pairwise distance between two sites
     std::vector<std::vector<double>> distance_matrix;
 
-    // maps site ids to sites which are within a cutoff distance
-    std::vector<std::vector<int>> site_dependency;
-
     // maps site ids to sit
     std::vector<NanoReaction> initial_reactions;
 

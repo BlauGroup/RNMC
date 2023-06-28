@@ -103,7 +103,6 @@ NanoParticle::NanoParticle(
 
     }
 
-
     // initialize interactions
     // interactions.resize(metadata_row.number_of_interactions);
     int num_species = metadata_row.number_of_species;
@@ -179,14 +178,8 @@ NanoParticle::NanoParticle(
         initial_state[initial_state_row.site_id] = initial_state_row.degree_of_freedom;
     }
 
-    // Here we want to avoid computing reactions, so we only create a dependency list.
-    // Also pre-compute the distance matrix so that it doesn't need to be computed multiple times
+    // Pre-compute the distance matrix so that it doesn't need to be computed multiple times
     compute_distance_matrix();
-
-    // Setup current_state by copying from initial_state
-    current_state = initial_state;
-    compute_reactions(current_state, std::ref(initial_reactions), std::ref(site_reaction_dependency));
-
 } // NanoParticle()
 
 /* ---------------------------------------------------------------------- */
