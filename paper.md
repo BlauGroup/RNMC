@@ -26,7 +26,7 @@ authors:
     orcid: 0000-0003-1554-197X
     corresponding: false  
     affiliation: "1, 4"
-  - name: Rohith Srinivaas M
+  - name: Rohith Srinivaas Mohanakrishnan
     corresponding: false  
     affiliation: "1, 4"
   - name: Kristin Aslaug Persson
