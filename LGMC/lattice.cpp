@@ -467,7 +467,7 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
     uint32_t ny = static_cast<int> (yprd / latconst);
     uint32_t nz = static_cast<int> (zprd / latconst);
 
-    uint32_t left, right, backward, forward, down, up;
+    int left, right, backward, forward, down, up;
     
     left = sites[n].i - 1;
     right = sites[n].i + 1;

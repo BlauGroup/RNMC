@@ -113,7 +113,7 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
             // A SIGINT has been issued, handle this gracefully 
             // by writing current states and trajectories to the db
 
-            write_error_message("SIGINT received. Terminating NPMC run(s) early.\n");
+            write_error_message("SIGINT received. Terminating run(s) early.\n");
             do_shutdown = 1;
             shutdown_requested = true;
 
@@ -123,7 +123,7 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,  ReadTrajectori
             // A SIGTERM has been issued, handle this gracefully 
             // by writing current states and trajectories to the db
 
-            write_error_message("SIGTERM received. Terminating NPMC run(s) early.\n");
+            write_error_message("SIGTERM received. Terminating run(s) early.\n");
             do_shutdown = 1;
             shutdown_requested = true;
 
