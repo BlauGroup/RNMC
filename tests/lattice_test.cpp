@@ -25,7 +25,7 @@ TEST(lattice_test, InitalizationWorks) {
    EXPECT_EQ(static_cast<int>(lattice->sites.size()), 3*5*(7 + 1));
    EXPECT_EQ(static_cast<int>(lattice->edges.size()), 3*5);
 
-
+   delete lattice;
 }
 
 
@@ -51,6 +51,8 @@ TEST(lattice_test, AddSite) {
   
    ASSERT_EQ(int(lattice->numneigh[site_added]), 1);
    ASSERT_EQ(int(lattice->idneigh[site_added][0]), id);
+
+   delete lattice;
 }
 
 
@@ -66,7 +68,7 @@ TEST(lattice_test, DeleteSite) {
    ASSERT_EQ(lattice->zhi, 7);
    ASSERT_EQ(static_cast<int>(lattice->edges.size()), 3*5 - 1);
    ASSERT_EQ(static_cast<int>(lattice->sites.size()), 3*5*(7+1) - 1);
+
+   delete lattice;
 }
 
-
-// test copy constructor
