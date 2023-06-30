@@ -510,6 +510,8 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
     ijk[4] = {sites[n].i, sites[n].j, down};
     ijk[5] = {sites[n].i, sites[n].j, up};
 
+    numneigh[n] = 0;
+
     for (int q = 0; q < 6; q++) {
         auto it = loc_map.find(ijk[q]);
         if (it != loc_map.end()) {
