@@ -187,7 +187,7 @@ void Lattice::structured_lattice() {
     // if non-periodic or style = REGION, IDs may not be contiguous
 
     float x,y,z;
-    bool can_adsorb;
+    bool can_adsorb = false;
 
     for (int k = klo; k <= khi; k++)
         for (int j = jlo; j <= jhi; j++)
@@ -374,10 +374,6 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     // Initialize neighbor information for this new site
     numneigh[nsites] = 0;
 
-    uint32_t* neighi;
-    create(neighi, maxneigh, "create:neighi");
-    idneigh[nsites]= neighi;
-
     // initially empty site
     sites[nsites] = Site{i_in, j_in, k_in, x_in, y_in, z_in, SPECIES_EMPTY, can_adsorb_in};
     
@@ -388,6 +384,9 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     }
 
     if (update_neighbors_in) {
+        uint32_t* neighi;
+        create(neighi, maxneigh, "create:neighi");
+        idneigh[nsites]= neighi;
         update_neighbors(nsites, meta_neighbors_in);
     }
 
@@ -446,7 +445,6 @@ void Lattice::delete_site(int id) {
         update_neighbors(idneigh[id][i], false);
     }
     
-
     // delete from other hashes
     numneigh.erase(id);
     sfree(idneigh[id]);
@@ -511,13 +509,6 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
     ijk[3] = {sites[n].i, forward, sites[n].k};
     ijk[4] = {sites[n].i, sites[n].j, down};
     ijk[5] = {sites[n].i, sites[n].j, up};
-    
-
-    // reset numneigh, and idneigh
-    numneigh[n] = 0;
-    uint32_t* neighi;
-    create(neighi, maxneigh, "create:neighi");
-    idneigh[n] = neighi;
 
     for (int q = 0; q < 6; q++) {
         auto it = loc_map.find(ijk[q]);
