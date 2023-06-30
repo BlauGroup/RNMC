@@ -72,3 +72,27 @@ TEST(lattice_test, DeleteSite) {
    delete lattice;
 }
 
+// test copy constructor
+TEST(lattice_test, CopyConstructor) {
+   Lattice *lattice = new Lattice(1, 3, 5, 7);
+
+   Lattice *new_lattice = nullptr;
+
+   new_lattice = lattice;
+   lattice = nullptr;
+
+   EXPECT_EQ(new_lattice->xlo, 0);
+   EXPECT_EQ(new_lattice->xhi, 3);
+   EXPECT_EQ(new_lattice->ylo, 0);
+   EXPECT_EQ(new_lattice->yhi, 5);
+   EXPECT_EQ(new_lattice->zlo, 0);
+   EXPECT_EQ(new_lattice->zhi, 7);
+   EXPECT_EQ(new_lattice->latconst, 1);
+   
+   // x, y periodic and z non-periodic
+   EXPECT_EQ(static_cast<int>(new_lattice->sites.size()), 3*5*(7 + 1));
+   EXPECT_EQ(static_cast<int>(new_lattice->edges.size()), 3*5);
+
+
+   delete new_lattice;
+}
