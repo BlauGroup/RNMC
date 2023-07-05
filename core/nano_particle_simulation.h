@@ -3,9 +3,11 @@
 
 #include "simulation.h"
 #include "RNMC_types.h"
+#include "queues.h"
+#include <assert.h>
+
 #include "../NPMC/nano_solver.h"
 #include "../NPMC/nano_particle.h"
-#include "queues.h"
 
 class NanoParticleSimulation : public Simulation<NanoSolver> {
 

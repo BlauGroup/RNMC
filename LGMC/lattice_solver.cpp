@@ -1,5 +1,4 @@
 #include "lattice_solver.h"
-#include <iostream>
 
 LatticeSolver::LatticeSolver(unsigned long int seed,
     std::vector<double> &&initial_propensities) :
@@ -197,8 +196,9 @@ std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std:
 
     }
 
-    return std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id, .dt = dt,
-                                                           .site_one = site_one, .site_two = site_two});
+    return std::optional<LatticeEvent> ( LatticeEvent {
+        .site_one = site_one, .site_two = site_two, .index = reaction_id, .dt = dt
+    });
                         
 } // event_lattice()
 

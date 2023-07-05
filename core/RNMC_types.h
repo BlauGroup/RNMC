@@ -1,6 +1,8 @@
 #ifndef RNMC_RNMC_TYPES_H
 #define RNMC_RNMC_TYPES_H
 
+#include <vector>
+
 enum TypeOfCutoff {step_termination, time_termination };
 
 struct Cutoff {
@@ -10,8 +12,8 @@ struct Cutoff {
 
 template <typename T>
 struct HistoryPacket {
-    std::vector<T> history;
     unsigned long int seed;
+    std::vector<T> history;
 };
 
 struct Update {

@@ -6,6 +6,7 @@
 #include <optional>
 #include <mutex>
 #include <map>
+#include <functional>
 
 #include "sql_types.h"
 #include "../core/sql.h"

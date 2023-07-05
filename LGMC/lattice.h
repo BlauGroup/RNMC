@@ -13,7 +13,8 @@
 #include <string>
 #include "math.h"
 #include <iostream>
-#include <iostream>
+#include <stdint.h>
+
 
 #define SPECIES_EMPTY 0
 #define DELTALOCAL 10000

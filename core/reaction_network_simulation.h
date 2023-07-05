@@ -3,6 +3,7 @@
 
 #include "../GMC/reaction_network.h"
 #include "simulation.h"
+#include <assert.h>
 
 template <typename Solver>
 class ReactionNetworkSimulation : public Simulation<Solver> {
@@ -38,4 +39,4 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
 
 #include "reaction_network_simulation.cpp"
 
-#endif 
+#endif

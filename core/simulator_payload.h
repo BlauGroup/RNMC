@@ -4,6 +4,7 @@
 #include "simulation.h"
 #include "RNMC_types.h"
 #include "queues.h"
+#include <stdint.h>
 
 /* ---------------------------------------------------------------------- 
     size of history chunks which we write to the DB.
@@ -109,8 +110,8 @@ class SimulatorPayload {
             history_queue.insert_history(
                 std::move(
                     HistoryPacket<TrajHistory> {
-                        .history = std::move(simulation.history),
-                        .seed = seed
+                        .seed = seed,
+                        .history = std::move(simulation.history)
                         }));
 
         }
@@ -119,4 +120,4 @@ class SimulatorPayload {
     };
 };
 
-#endif 
+#endif

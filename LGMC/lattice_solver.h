@@ -8,6 +8,10 @@
 #include <unordered_map>
 #include <string>
 #include <numeric>
+#include <assert.h>
+#include <optional>
+#include <iostream>
+#include <cmath>
 
 struct LatticeUpdate {
     unsigned long int index;
