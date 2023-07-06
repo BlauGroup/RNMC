@@ -41,3 +41,20 @@ export CPATH=$HOME/sqlite-amalgamation-3360000:$CPATH
 export LIBRARY_PATH=$HOME/sqlite-amalgamation-3360000:$LIBRARY_PATH
 make GMC
 ```
+
+If you need to build [GSL](https://www.gnu.org/software/gsl/) from source: 
+
+```
+wget https://mirror.ibcp.fr/pub/gnu/gsl/gsl-latest.tar.gz
+mkdir gsl
+mv gsl-latest.tar.gz gsl
+tar -xvf gsl-latest.tar.gz
+cd gsl-2.7.1
+./configure --prefix=(desired location of gsl)
+make
+make install
+echo $PKG_CONFIG_PATH 
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:(location of gsl-2.7.1)
+```
+
+Note that if you build from source use `pkg-config gsl` instead of `gsl-config` inside each makefile
