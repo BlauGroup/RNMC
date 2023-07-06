@@ -50,11 +50,11 @@ mkdir gsl
 mv gsl-latest.tar.gz gsl
 tar -xvf gsl-latest.tar.gz
 cd gsl-2.7.1
-./configure --prefix=(desired location of gsl)
+./configure --prefix=/my/path/to/gsl
 make
 make install
 echo $PKG_CONFIG_PATH 
-export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:(location of gsl-2.7.1)
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/my/path/to/gsl-2.7.1
 ```
 
 Note that if you build from source use `pkg-config gsl` instead of `gsl-config` inside each makefile
