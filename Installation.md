@@ -24,7 +24,7 @@ For further help on the makefile and to view other commands:
 $ make help
 ```
 
-Note that the makefile uses the `gsl-config` utility to find headers and libraries for GSL. If you are on a cluster and sqlite is not present, it can be built as follows:
+Note that the makefile uses the `pkg-config gsl` utility to find headers and libraries for GSL. If you are on a cluster and sqlite is not present, it can be built as follows:
 
 ```
 cd $HOME
