@@ -8,7 +8,7 @@ On a machine with system versions of GSL and sqlite, the executables can be buil
 
 To make an executable for `GMC`, `NPMC` or `LGMC` first enter that folder to use the makefile. To create an executable, use make and then the name of the module. 
 
-For example, to use GMC:
+For example, to use `GMC`:
 
 ```
 $ cd GMC
