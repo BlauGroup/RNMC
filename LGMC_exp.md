@@ -2,7 +2,7 @@
 Two examples of applications of LGMC, CO Oxidation on Cu with a static lattice, and a simple reaction network for the formation and evolution of the solid electrolyte interphase (SEI) in a lithium-ion battery, are provided. 
 
 ## LGMC (static) - <span style="color: #0066CC"> CO Oxidation on Cu </span>
-This example simulates electrocatalytic CO oxidation on Cu. We employ a static lattice with 50 sites in each of the x and y dimensions and 2 sites in the z dimension to represent a Cu surface as the catalysis. 
+This example simulates electrocatalytic [CO oxidation on Cu](https://pubs.aip.org/aip/jcp/article/155/16/164701/199778/Effects-of-surface-diffusion-in-electrocatalytic). We employ a static lattice with 50 sites in each of the x and y dimensions and 2 sites in the z dimension to represent a Cu surface as the catalysis. 
 
 All initial sites are empty. The initial state of the solution in contact with this surface consists of 2,500 CO molecules and 15,000 H<sub></sub>O molecules. The reduction and oxidation rates use an electron free energy of -0.5 eV. The system is modeled at 300K. Butler-Volmer electron transfer theory is used through the simulation.
 
