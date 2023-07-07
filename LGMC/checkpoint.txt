@@ -11,7 +11,7 @@ Reaction: 8propensity: 0
 Begin Print Homogeneous State
 Species: 0quantity: 0
 Species: 1quantity: 0
-Species: 2quantity: 2355
+Species: 2quantity: 302
 Species: 3quantity: 0
-Species: 4quantity: 9879
-total propensity_sum52253.5
+Species: 4quantity: 13619
+total propensity_sum837017

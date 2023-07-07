@@ -1,4 +1,5 @@
 #include <getopt.h>
+#include <fstream>
 
 #include "../core/dispatcher.h"
 #include "../core/lattice_simulation.h"

@@ -176,19 +176,18 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
         assert(charge_transfer_style == ChargeTransferStyle::MARCUS || 
         charge_transfer_style == ChargeTransferStyle::BUTLER_VOLMER);
 
-        // TODO: make general for all types of periodicity (distance = .z)
         if (charge_transfer_style == ChargeTransferStyle::MARCUS) {
             k = get_marcus_rate_coefficient(reaction.dG, reaction.prefactor, 
                                     reaction.reorganization_energy,
                                     reaction.electron_tunneling_coefficient, 
-                                    g_e, lattice->sites[site_id].z, 
+                                    g_e, static_cast<float>(lattice->sites[site_id].k) * lattice->latconst, 
                                     temperature, reduction_in);
         } else {
             k = get_butler_volmer_rate_coefficient(reaction.dG, 
                                         reaction.prefactor, 
                                         reaction.charge_transfer_coefficient,
                                         reaction.electron_tunneling_coefficient, 
-                                        g_e, lattice->sites[site_id].z, 
+                                        g_e, static_cast<float>(lattice->sites[site_id].k) * lattice->latconst, 
                                         temperature,reduction_in);    
         }
     } else {
@@ -239,8 +238,7 @@ bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice,
         if(is_add_sites) {
             // TODO: make general for all types of periodicity (add_site coordinates)
             lattice->add_site(lattice->sites[site_one].i, lattice->sites[site_one].j, lattice->sites[site_one].k + 1,
-            lattice->sites[site_one].x, lattice->sites[site_one].y, lattice->sites[site_one].z + lattice->get_latconst(), 
-            true, true, true);
+             true, true, true);
             
             std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, lattice->sites[site_one].j, lattice->sites[site_one].k + 1};
             int site_new = lattice->loc_map[key];
@@ -1106,7 +1104,6 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 
                 // add site
                 temp_seed_state_map[state_row.seed].lattice->add_site(i, j, k,
-                i*initial_latconst, j*initial_latconst, k*initial_latconst,
                 can_adsorb, true, false);
                 
                 // update site occupancy

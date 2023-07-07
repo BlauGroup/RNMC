@@ -186,15 +186,11 @@ void Lattice::structured_lattice() {
     // for style = REGION, check if site is within region
     // if non-periodic or style = REGION, IDs may not be contiguous
 
-    float x,y,z;
     bool can_adsorb = false;
 
     for (int k = klo; k <= khi; k++)
         for (int j = jlo; j <= jhi; j++)
             for (int i = ilo; i <= ihi; i++) {
-                x = i*latconst;
-                y = j*latconst;
-                z = k*latconst;
 
                 if (i == ihi && !is_xperiodic) {
                     can_adsorb = true;
@@ -209,7 +205,7 @@ void Lattice::structured_lattice() {
                 // By default, assume all lattice sites empty
                 // TODO: This should use the global variable EMPTY_SITE
                 // Don't update neighbors, since we'll use the connectivity function next
-                add_site(i,j,k,x,y,z,can_adsorb,false,false);
+                add_site(i,j,k,can_adsorb,false,false);
 
     }
 
@@ -255,9 +251,9 @@ void Lattice::structured_connectivity() {
             // ijkm neigh = indices of neighbor site
             // calculated from siteijk and cmap offsets
 
-            ineigh = static_cast<int> (sites[i].x/latconst) + cmap[neigh][0];
-            jneigh = static_cast<int> (sites[i].y/latconst) + cmap[neigh][1];
-            kneigh = static_cast<int> (sites[i].z/latconst) + cmap[neigh][2];
+            ineigh = static_cast<int> (sites[i].i) + cmap[neigh][0];
+            jneigh = static_cast<int> (sites[i].j) + cmap[neigh][1];
+            kneigh = static_cast<int> (sites[i].k) + cmap[neigh][2];
 
             // xyz neigh = coords of neighbor site
             // calculated in same manner that structured_lattice() generated coords
@@ -354,9 +350,9 @@ void Lattice::offsets_3d(int **cmapin) {
 
 /* ---------------------------------------------------------------------- */
 
-void Lattice::add_site(uint32_t i_in, uint32_t j_in, 
-                       uint32_t k_in, float x_in, float y_in, float z_in,
-                       bool can_adsorb_in, bool update_neighbors_in, bool meta_neighbors_in) {
+void Lattice::add_site(uint32_t i_in, uint32_t j_in, uint32_t k_in, 
+                       bool can_adsorb_in, bool update_neighbors_in, 
+                       bool meta_neighbors_in) {
     
 
     std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
@@ -375,7 +371,7 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
     numneigh[nsites] = 0;
 
     // initially empty site
-    sites[nsites] = Site{i_in, j_in, k_in, x_in, y_in, z_in, SPECIES_EMPTY, can_adsorb_in};
+    sites[nsites] = Site{i_in, j_in, k_in, SPECIES_EMPTY, can_adsorb_in};
     
     loc_map[key] = nsites;
     
@@ -390,38 +386,38 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in,
         update_neighbors(nsites, meta_neighbors_in);
     }
 
-    if (sites[nsites].x < xlo) {
-        xlo = sites[nsites].x;
+    if (static_cast<float>(sites[nsites].i) * latconst < xlo) {
+        xlo = static_cast<float>(sites[nsites].i) * latconst;
         ilo = sites[nsites].i;
     }
-    else if (sites[nsites].x > xhi) {
-        xhi = sites[nsites].x;
+    else if (static_cast<float>(sites[nsites].i) * latconst > xhi) {
+        xhi = static_cast<float>(sites[nsites].i) * latconst;
         ihi = sites[nsites].i;
     }
 
-    if (sites[nsites].y < ylo) {
-        ylo = sites[nsites].y;
+    if (static_cast<float>(sites[nsites].j) * latconst < ylo) {
+        ylo = static_cast<float>(sites[nsites].j) * latconst;
         jlo = sites[nsites].j;
     }
-    else if (sites[nsites].y > yhi) {
-        yhi = sites[nsites].y;
+    else if (static_cast<float>(sites[nsites].j) * latconst > yhi) {
+        yhi = static_cast<float>(sites[nsites].j) * latconst;
         jhi = sites[nsites].j;
     }
 
-    if (sites[nsites].z < zlo) {
-        zlo = sites[nsites].z;
+    if (static_cast<float>(sites[nsites].k) * latconst < zlo) {
+        zlo = static_cast<float>(sites[nsites].k) * latconst;
         klo = sites[nsites].k;
     }
-    else if (sites[nsites].z > zhi) {
-        zhi = sites[nsites].z;
+    else if (static_cast<float>(sites[nsites].k) * latconst > zhi) {
+        zhi = static_cast<float>(sites[nsites].k) * latconst;
         khi = sites[nsites].k;
     }
 
     nsites++;
 
-    // update running max distance // TODO: make general for all types of periodicity 
-    if(z_in > maxz) {
-        maxz = z_in;
+    // update running max distance 
+    if(static_cast<float>(k_in) * latconst > maxz) {
+        maxz = static_cast<float>(k_in) * latconst;
     }
 
 } // add_site()
@@ -461,9 +457,9 @@ void Lattice::update_neighbors(uint32_t n, bool meta_neighbors_in) {
     float yprd = yhi - ylo;
     float zprd = zhi - zlo;
     
-    uint32_t nx = static_cast<int> (xprd / latconst);
-    uint32_t ny = static_cast<int> (yprd / latconst);
-    uint32_t nz = static_cast<int> (zprd / latconst);
+    int nx = static_cast<int> (xprd / latconst);
+    int ny = static_cast<int> (yprd / latconst);
+    int nz = static_cast<int> (zprd / latconst);
 
     int left, right, backward, forward, down, up;
     

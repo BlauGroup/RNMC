@@ -14,6 +14,7 @@
 #include <vector>
 #include <string>
 #include <assert.h>
+#include <fstream>
 
 const int SITE_SELF_REACTION = -3;
 const int SITE_HOMOGENEOUS = -2;
