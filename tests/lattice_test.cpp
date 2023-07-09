@@ -1,14 +1,13 @@
-/* lattice_test.cpp
+/* 
 *
 * Unit tests for the Lattice used for LGMC
-* All tests use catch2 unit test framework
+* All tests use googletest unit test framework
 *
 */
 
 #include <gtest/gtest.h>
 #include "../LGMC/lattice.h"
 
-// test that lattice has correct dimensions
 TEST(lattice_test, InitalizationWorks) {
   
    // create pointer to simple lattice
@@ -36,7 +35,7 @@ TEST(lattice_test, AddSite) {
    Lattice *lattice = new Lattice(1, 3, 5, 7);
 
    // z dimension grows
-   lattice->add_site(2, 4, 8, 2, 4, 8, true, true, true);
+   lattice->add_site(2, 4, 8, true, true, true);
 
    std::tuple<uint32_t, uint32_t, uint32_t> key = {2, 4, 8};
    int site_added = lattice->loc_map[key];

@@ -63,7 +63,6 @@ struct ReactionNetworkStateHistoryElement{
 };
 
 struct ReactionNetworkTrajectoryHistoryElement {
-
     unsigned long int seed; // seed
     int reaction_id; // reaction which fired
     double time;  // time after reaction has occoured.

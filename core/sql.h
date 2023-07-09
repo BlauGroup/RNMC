@@ -24,7 +24,6 @@ class time {
         auto time = std::time(nullptr);
         return std::put_time(std::localtime(&time), "[%T] ");
     };
-
 };
 
 class SqlConnection {
@@ -114,7 +113,6 @@ public:
     void reset() { sqlite3_reset(stmt); };
     int step() { return sqlite3_step(stmt); };
 
-
     SqlStatement(SqlConnection &sql_connection) :
         sql_connection (sql_connection)
         {
@@ -169,7 +167,6 @@ private:
     SqlStatement<T> &statement;
 
 public:
-
     SqlReader(SqlStatement<T> &statement) :
         done (false),
         statement (statement)
@@ -203,7 +200,6 @@ class SqlWriter {
 private:
     SqlStatement<T> &statement;
 
-
 public:
     SqlWriter(SqlStatement<T> &statement) :
         statement (statement) {};
@@ -213,8 +209,6 @@ public:
         statement.action(row);
         statement.step();
     };
-
-
 };
 
 #endif

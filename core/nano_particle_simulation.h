@@ -3,27 +3,22 @@
 
 #include "simulation.h"
 #include "RNMC_types.h"
+#include "queues.h"
 #include "../NPMC/nano_solver.h"
 #include "../NPMC/nano_particle.h"
-#include "queues.h"
 
 class NanoParticleSimulation : public Simulation<NanoSolver> {
-
-    public:
+public:
     NanoParticle &nano_particle;
     std::vector<int> state;
     NanoSolver nanoSolver;
     std::vector<std::set<int>> site_reaction_dependency;
-
     std::vector<NanoTrajectoryHistoryElement> history;
     HistoryQueue<HistoryPacket<NanoTrajectoryHistoryElement>> &history_queue; 
 
-
     NanoParticleSimulation(NanoParticle &nano_particle,
-               unsigned long int seed,
-               int step,
-               double time,
-               std::vector<int> state,
+               unsigned long int seed, int step,
+               double time, std::vector<int> state,
                int history_chunk_size,
                HistoryQueue<HistoryPacket<NanoTrajectoryHistoryElement>> &history_queue
         ) :
@@ -39,7 +34,6 @@ class NanoParticleSimulation : public Simulation<NanoSolver> {
     void init();
     bool execute_step();
     void print_output() {assert(true);};
-
 };
 
 #include "nano_particle_simulation.cpp"

@@ -1,6 +1,5 @@
 #include "lattice_simulation.h"
 
-
 void LatticeSimulation::init() {
 
     lattice_network.compute_initial_propensities(state.homogeneous, state.lattice);
@@ -8,30 +7,31 @@ void LatticeSimulation::init() {
     latSolver = LatticeSolver(seed, std::ref(lattice_network.initial_propensities));
     this->update_function = [&] (Update update) {latSolver.update(update);};
     lattice_update_function = [&] (LatticeUpdate lattice_update, 
-               std::unordered_map<std::string,                     
-                std::vector< std::pair<double, int> > > &props) 
-                 {latSolver.update(lattice_update, props);};
+                                    std::unordered_map<std::string,
+                                    std::vector< std::pair<double, int> > > &props) 
+                                    {latSolver.update(lattice_update, props);};
 
+    lattice_network.update_adsorp_state(state.lattice, this->props, 
+                                        latSolver.propensity_sum, 
+                                        latSolver.number_of_active_indices);
+    lattice_network.update_adsorp_props(state.lattice, lattice_update_function, 
+                                        state.homogeneous, std::ref(props));
 
-
-    lattice_network.update_adsorp_state(state.lattice, this->props, latSolver.propensity_sum, latSolver.number_of_active_indices);
-    lattice_network.update_adsorp_props(state.lattice, lattice_update_function, state.homogeneous, std::ref(props));
-
-        // only call if checkpointing 
+    // only call if checkpointing 
     if(state.lattice->isCheckpoint) {
-        lattice_network.update_all_propensities(state.lattice, props, latSolver.propensity_sum, 
-                                                latSolver.number_of_active_indices, lattice_update_function);
-        lattice_network.print_state_propensities(latSolver.propensity_sum, latSolver.propensities,state.homogeneous, "checkpoint.txt");
-        
+        lattice_network.update_all_propensities(state.lattice, props, 
+                                                latSolver.propensity_sum, 
+                                                latSolver.number_of_active_indices, 
+                                                lattice_update_function);
+        lattice_network.print_state_propensities(latSolver.propensity_sum, 
+                                                 latSolver.propensities, 
+                                                 state.homogeneous, "checkpoint.txt");     
     }
-
-               
 } //init()
 
 /*---------------------------------------------------------------------------*/
 
 bool LatticeSimulation::execute_step() {
-
 
     std::optional<LatticeEvent> maybe_event = latSolver.event_lattice(props);
 
@@ -54,13 +54,12 @@ bool LatticeSimulation::execute_step() {
                     event.site_one, event.site_two, latSolver.propensity_sum, 
                     latSolver.number_of_active_indices, flip_sites);
 
-
-        // update_propensities 
-        lattice_network.update_propensities(state.lattice, 
-                        std::ref(this->state.homogeneous), 
-                        this->update_function, lattice_update_function, 
-                        next_reaction, event.site_one, event.site_two, props);
-
+        if(state.lattice->sites.size() != state.lattice->idneigh.size()) {
+            assert(false);
+        }
+        if(state.lattice->loc_map.size() != state.lattice->idneigh.size()) {
+            assert(false);
+        }
         // update time
         this->time += event.dt;
         int site_1_mapping;
@@ -76,8 +75,10 @@ bool LatticeSimulation::execute_step() {
                 site_1_mapping = -3;
             }
             else {
+                assert(state.lattice->sites.find(site_1) != state.lattice->sites.end());
                 site_1_mapping = lattice_network.combine(state.lattice->sites[site_1].i, 
-                    state.lattice->sites[site_1].j, state.lattice->sites[site_1].k);
+                                                         state.lattice->sites[site_1].j, 
+                                                         state.lattice->sites[site_1].k);
             }
         }
         if(event.site_two) {
@@ -90,8 +91,10 @@ bool LatticeSimulation::execute_step() {
                 site_2_mapping = -3;
             }
             else {
+                assert(state.lattice->sites.find(site_2) != state.lattice->sites.end());
                 site_2_mapping = lattice_network.combine(state.lattice->sites[site_2].i, 
-                    state.lattice->sites[site_2].j, state.lattice->sites[site_2].k);
+                                                         state.lattice->sites[site_2].j, 
+                                                         state.lattice->sites[site_2].k);
             }
         }
         if(flip_sites) {
@@ -99,9 +102,6 @@ bool LatticeSimulation::execute_step() {
             std::swap(site_1_mapping, site_2_mapping);
         }
 
-        if(history.size() == 1000) {
-            std::cout << "1000 events" << std::endl;
-        }
         // record what happened
         history.push_back(LatticeTrajectoryHistoryElement {
             .seed = this->seed,
@@ -123,6 +123,11 @@ bool LatticeSimulation::execute_step() {
             history.reserve(this->history_chunk_size);
         }
 
+        // update_propensities 
+        lattice_network.update_propensities(state.lattice, 
+                        std::ref(this->state.homogeneous), 
+                        this->update_function, lattice_update_function, 
+                        next_reaction, event.site_one, event.site_two, props);
 
         // increment step
         this->step++;
@@ -136,5 +141,7 @@ bool LatticeSimulation::execute_step() {
 /*---------------------------------------------------------------------------*/
 
 void LatticeSimulation::print_output() {
-    lattice_network.print_state_propensities(latSolver.propensity_sum, latSolver.propensities,state.homogeneous, "final_state.txt");
+    lattice_network.print_state_propensities(latSolver.propensity_sum, 
+                                             latSolver.propensities, 
+                                             state.homogeneous, "final_state.txt");
 } // print_output()

@@ -41,12 +41,11 @@ bool ReactionNetworkSimulation<Solver>::execute_step() {
                     HistoryPacket<ReactionNetworkTrajectoryHistoryElement> {
                         .history = std::move(this->history),
                         .seed = this->seed
-                        }));
+                    }));
 
             history = std::vector<ReactionNetworkTrajectoryHistoryElement> ();
             history.reserve(this->history_chunk_size);
         }
-
 
         // increment step
         this->step++;

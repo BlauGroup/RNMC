@@ -9,14 +9,12 @@ LatticeSolver::LatticeSolver(unsigned long int seed,
     // propensities gets moved into a stack variable for the function
     // call and that stack variable is copied into the object.
     propensities (std::move(initial_propensities)),
-    sampler (Sampler(seed))
-{
+    sampler (Sampler(seed)) {
     for (unsigned long i = 0; i < propensities.size(); i++) {
             propensity_sum += propensities[i];
             if (propensities[i] > 0) {
                 number_of_active_indices += 1;
             }
-
         }
 } // LatticeSolver()
 
@@ -27,14 +25,12 @@ LatticeSolver::LatticeSolver( unsigned long int seed,
     propensity_sum (0.0),
     number_of_active_indices (0),
     propensities (initial_propensities),
-    sampler (Sampler(seed))
-    {
+    sampler (Sampler(seed)) {
         for (unsigned long i = 0; i < propensities.size(); i++) {
             propensity_sum += propensities[i];
             if (propensities[i] > 0) {
                 number_of_active_indices += 1;
             }
-
         }
     } // LatticeSolver()
 
@@ -58,7 +54,7 @@ void LatticeSolver::update(Update update) {
 /* ---------------------------------------------------------------------- */
 
 void LatticeSolver::update(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props) {
+                    std::vector< std::pair<double, int> > > &props) {
     
     propensity_sum += lattice_update.propensity;
     number_of_active_indices++;
@@ -66,13 +62,13 @@ void LatticeSolver::update(LatticeUpdate lattice_update, std::unordered_map<std:
     std::string hash = make_string(lattice_update.site_one, lattice_update.site_two);
     props[hash].push_back(std::make_pair(lattice_update.propensity, lattice_update.index));
 
-
 } // update()
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeSolver::update(std::vector<LatticeUpdate> lattice_updates, std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props) {
+void LatticeSolver::update(std::vector<LatticeUpdate> lattice_updates, 
+                    std::unordered_map<std::string,                     
+                    std::vector< std::pair<double, int> > > &props) {
     for (LatticeUpdate u : lattice_updates) {
         update(u, props);
     }
@@ -89,7 +85,7 @@ void LatticeSolver::update(std::vector<Update> updates) {
 /* ---------------------------------------------------------------------- */
 
 std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props) {
+                                            std::vector< std::pair<double, int> > > &props) {
     if(!(propensity_sum > 0)) {
         double sum = 0;
         for(int i = 0; i < int(propensities.size()); i++ ) {
@@ -99,7 +95,6 @@ std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std:
             for(int i = 0; i < int(it->second.size()); i++ ) {
                 sum += it->second[i].first;
             }
-            
         }
         propensity_sum = sum;
         std::cout << "ERROR" << std::endl;
@@ -122,12 +117,10 @@ std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std:
     double dt;
 
     while(!isFound) {
-
         reaction_id = 0;
         site_one = std::optional<int>();
         site_two = std::optional<int>();
         dt = 0.;
-
 
         double r1 = sampler.generate();
         double r2 = sampler.generate();
@@ -184,7 +177,6 @@ std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std:
                 for(int i = 0; i < int(it->second.size()); i++ ) {
                     sum += it->second[i].first;
                 }
-                
             }
             propensity_sum = sum;
             std::cout << "ERROR" << std::endl;
@@ -192,14 +184,11 @@ std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std:
             if(!(propensity_sum > 0)) {
                 return std::optional<LatticeEvent> ();
             }
-
         }
-
     }
 
     return std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id, .dt = dt,
-                                                           .site_one = site_one, .site_two = site_two});
-                        
+                                                           .site_one = site_one, .site_two = site_two});         
 } // event_lattice()
 
 /* ---------------------------------------------------------------------- */

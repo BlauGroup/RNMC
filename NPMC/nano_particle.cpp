@@ -5,8 +5,7 @@ NanoParticle::NanoParticle() {};
 NanoParticle::NanoParticle(
     SqlConnection &nano_particle_database,
     SqlConnection &initial_state_database,
-    NanoParticleParameters) 
-    {
+    NanoParticleParameters) {
 
     // sql statements
     SqlStatement<SpeciesSql> species_statement(nano_particle_database);
@@ -36,7 +35,6 @@ NanoParticle::NanoParticle(
     }
 
     NanoMetadataSql metadata_row = maybe_metadata_row.value();
-
 
     // extracting factors
     std::optional<NanoFactorsSql> maybe_factor_row =
@@ -70,9 +68,7 @@ NanoParticle::NanoParticle(
                   << "expecting linear or inverse_cubic" << '\n';
 
        std::abort();
-
     }
-
 
     // initializing degrees of freedom
     degrees_of_freedom.resize(metadata_row.number_of_species);
@@ -100,7 +96,6 @@ NanoParticle::NanoParticle(
             .y = site_row.y,
             .z = site_row.z,
             .species_id = (int) site_row.species_id };
-
     }
 
     // initialize interactions
@@ -166,7 +161,6 @@ NanoParticle::NanoParticle(
     for (unsigned int i = 0; i < two_site_interactions.size(); i++) {
         Interaction interaction = two_site_interactions[i];
         two_site_interactions_map[interaction.species_id[0]][interaction.species_id[1]][interaction.left_state[0]][interaction.left_state[1]].push_back(interaction);
-
     }
 
     // initialize initial_state
@@ -305,8 +299,8 @@ void NanoParticle::compute_new_reactions(
     const int other_site_id,
     const int site_0_state,
     const std::vector<int> &state,
-    std::vector<NanoReaction> &new_reactions
-){
+    std::vector<NanoReaction> &new_reactions){
+        
     int site_0_species_id = sites[site_0_id].species_id;
 
     // Add one site interactions

@@ -8,11 +8,9 @@ void NanoParticleSimulation::init() {
     nano_particle.compute_reactions(state, std::ref(seed_reactions), std::ref(seed_site_reaction_dependency));
     nanoSolver = NanoSolver(this->seed, std::ref(seed_reactions));
     site_reaction_dependency = seed_site_reaction_dependency;
-    
 } // init()
 
 /* ---------------------------------------------------------------------------------------------- */
-
 
 bool NanoParticleSimulation::execute_step() {
     std::optional<Event> maybe_event = nanoSolver.event();
@@ -36,19 +34,18 @@ bool NanoParticleSimulation::execute_step() {
             .reaction = next_reaction,
             .time = this->time,
             .step = this->step
-            });
+        });
 
         if (history.size() == this->history_chunk_size ) {
             history_queue.insert_history(
                 HistoryPacket<NanoTrajectoryHistoryElement> {
                     .history = std::move(this->history),
                     .seed = this->seed
-                    });
+                });
 
             history = std::vector<NanoTrajectoryHistoryElement> ();
             history.reserve(this->history_chunk_size);
         }
-
 
         // increment step
         this->step++;
@@ -57,7 +54,9 @@ bool NanoParticleSimulation::execute_step() {
         nano_particle.update_state(std::ref(state), next_reaction);
 
         // update list of current available reactions
-        nano_particle.update_reactions(std::cref(state), next_reaction, std::ref(site_reaction_dependency), std::ref(nanoSolver.current_reactions));
+        nano_particle.update_reactions(std::cref(state), next_reaction, 
+                                       std::ref(site_reaction_dependency), 
+                                       std::ref(nanoSolver.current_reactions));
         nanoSolver.update();
 
         return true;

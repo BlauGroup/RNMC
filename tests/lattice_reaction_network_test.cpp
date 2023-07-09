@@ -1,19 +1,15 @@
-/* -------------------------------------------------------------------------
+/* 
 *
 * Unit tests for lattice reaction network
-* All tests use catch2 unit test framework
+* All tests use googletest unit test framework
 *
-------------------------------------------------------------------------- */
+*/
+
+#include <gtest/gtest.h>
+#include <string>
 
 #include "../core/sql.h"
 #include "../LGMC/lattice_reaction_network.h"
-
-#include <gtest/gtest.h>
-
-#include <string>
-
-// To use a mock objects an overloaded '=' operator for lattice_reaction_network
-// would need to be created, for now have duplicate code
 
 TEST(lattice_reaction_network_test, Initialization) {
 

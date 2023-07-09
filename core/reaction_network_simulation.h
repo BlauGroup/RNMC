@@ -6,9 +6,9 @@
 
 template <typename Solver>
 class ReactionNetworkSimulation : public Simulation<Solver> {
-    private: 
-        Solver solver;
-    public:
+private: 
+    Solver solver;
+public:
     ReactionNetwork &reaction_network;
     std::vector<int> state;
     std::vector<ReactionNetworkTrajectoryHistoryElement> history;
@@ -22,6 +22,7 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
             int history_chunk_size,
             HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue
         ) : 
+        // call base class constructor
         Simulation<Solver>(seed, history_chunk_size, step, time),
         reaction_network (reaction_network),
         state (state),
@@ -33,7 +34,6 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
     void init();
     bool execute_step();
     void print_output() {assert(true);};
-
 };
 
 #include "reaction_network_simulation.cpp"

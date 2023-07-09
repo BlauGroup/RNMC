@@ -48,7 +48,6 @@ int main(int argc, char **argv) {
         .type_of_cutoff = step_termination
     };
 
-
     while ((c = getopt_long_only(
                 argc, argv, "",
                 long_options,

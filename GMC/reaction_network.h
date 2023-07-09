@@ -29,7 +29,8 @@ struct Reaction {
 struct ReactionNetworkParameters {
 };
 
-struct ReactionNetwork {
+class ReactionNetwork {
+public:
     std::vector<Reaction> reactions; // list of reactions
     std::vector<int> initial_state; // initial state for all the simulations
     std::vector<double> initial_propensities; // initial propensities for all the reactions
@@ -60,8 +61,7 @@ struct ReactionNetwork {
     void update_propensities(
         std::function<void(Update update)> update_function,
         std::vector<int> &state,
-        int next_reaction
-        );
+        int next_reaction);
 
     void compute_initial_propensities(std::vector<int> state);
 
@@ -92,7 +92,6 @@ struct ReactionNetwork {
         &state_packet, std::vector<int> &state,
         unsigned long int &seed, int step, double time, 
         std::vector<CutoffHistoryElement> &cutoff_packet);
-
 };
 
 #endif

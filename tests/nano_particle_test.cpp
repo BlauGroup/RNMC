@@ -1,10 +1,15 @@
-#include "../core/sql.h"
-#include "../NPMC/nano_particle.h"
+/* 
+*
+* Unit tests for nano particle 
+* All tests use googletest unit test framework
+*
+*/
 
 #include "gtest/gtest.h"
 #include <string>
 
-// Using gtest fixture to use same NanoParticle 
+#include "../core/sql.h"
+#include "../NPMC/nano_particle.h"
 
 class NanoParticleTEST : public ::testing::Test {
    protected:

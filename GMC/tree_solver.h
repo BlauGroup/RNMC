@@ -9,7 +9,6 @@
 #include "../core/sampler.h"
 #include "../core/RNMC_types.h"
 
-
 // the solver is the algorithmic backbone of a monte carlo simulation
 // it decides what will occour next.  for now, we have the linear
 // solver and a tree solver ported from spparks:

@@ -1,6 +1,7 @@
 #include "sparse_solver.h"
 
-SparseSolver::SparseSolver(unsigned long int seed, std::vector<double> &initial_propensities) :
+SparseSolver::SparseSolver(unsigned long int seed, 
+                            std::vector<double> &initial_propensities) :
     sampler (Sampler(seed)) {
 
     for ( int i = 0; i < (int) initial_propensities.size(); i++ ) {
@@ -11,6 +12,8 @@ SparseSolver::SparseSolver(unsigned long int seed, std::vector<double> &initial_
         }
     }
 }
+
+/*---------------------------------------------------------------------------*/
 
 void SparseSolver::update(Update update) {
     propensity_sum -= propensities[update.index];
@@ -23,12 +26,14 @@ void SparseSolver::update(Update update) {
     }
 }
 
+/*---------------------------------------------------------------------------*/
 
 void SparseSolver::update(std::vector<Update> updates) {
     for ( Update update : updates )
         this->update(update);
 }
 
+/*---------------------------------------------------------------------------*/
 
 std::optional<Event> SparseSolver::event() {
 
@@ -41,7 +46,7 @@ std::optional<Event> SparseSolver::event() {
     double fraction = propensity_sum * r1;
     double partial = 0.0;
 
-    std::map<unsigned long int ,double>::iterator it = propensities.begin();
+    std::map<unsigned long int, double>::iterator it = propensities.begin();
 
     for ( it = propensities.begin();
           it != propensities.end();
@@ -58,6 +63,7 @@ std::optional<Event> SparseSolver::event() {
         return std::optional<Event> (Event {.index = std::get<0>(*propensities.rbegin()), .dt = dt});
 }
 
+/*---------------------------------------------------------------------------*/
 
 double SparseSolver::get_propensity(int index) {
     if ( propensities.find(index) != propensities.end() )
@@ -66,5 +72,8 @@ double SparseSolver::get_propensity(int index) {
         return 0;
 }
 
+/*---------------------------------------------------------------------------*/
 
 double SparseSolver::get_propensity_sum() { return propensity_sum;}
+
+/*---------------------------------------------------------------------------*/

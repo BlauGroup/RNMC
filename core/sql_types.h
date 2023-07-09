@@ -18,8 +18,6 @@ struct CutoffHistoryElement{
     double time;
 };
 
-/* --------- Read Cutoff SQL ---------*/
-
 class ReadCutoffSql {
 public:
     int seed;
@@ -29,8 +27,6 @@ public:
     static void action(ReadCutoffSql &r, sqlite3_stmt *stmt);
 };
 
-/* --------- WriteCutoff SQL ---------*/
-
 class WriteCutoffSql {
 public:
     int seed;
@@ -39,8 +35,6 @@ public:
     static std::string sql_statement;
     static void action(WriteCutoffSql &r, sqlite3_stmt *stmt);
 };
-
-/* ------------ Factor Sql ------------*/
 
 class FactorsSql {
 public:

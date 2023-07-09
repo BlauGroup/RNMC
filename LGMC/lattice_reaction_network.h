@@ -22,9 +22,9 @@ const int SITE_HOMOGENEOUS = -2;
 const double KB = 8.6173e-5;           // In eV/K
 const double PLANCK = 4.1357e-15;      // In eV s
 
-
 enum Phase {LATTICE, SOLUTION, NONE};
-enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_SOLUTION, HOMOGENEOUS_LATTICE, DIFFUSION, OXIDATION, REDUCTION};
+enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_SOLUTION, 
+           HOMOGENEOUS_LATTICE, DIFFUSION, OXIDATION, REDUCTION};
 enum ChargeTransferStyle {MARCUS, BUTLER_VOLMER};
 
 struct LatticeState {
@@ -40,7 +40,6 @@ struct LatticeParameters {
     bool is_add_sites;
     ChargeTransferStyle charge_transfer_style;
 };
-
 
 struct LatticeReaction {
     // we assume that each reaction has zero, one or two reactants
@@ -88,25 +87,29 @@ public:
                     std::optional<int> site_one, std::optional<int> site_two, 
                     long double &prop_sum, int &active_indices, bool &flip_sites);
 
-    void update_propensities(Lattice *lattice, std::vector<int> &state, std::function<void(Update update)> update_function, 
-                                    std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
-                    std::vector< std::pair<double, int> > > &props)> lattice_update_function, 
-                                    int next_reaction, std::optional<int> site_one, std::optional<int> site_two, 
-                                    std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props);
+    void update_propensities(Lattice *lattice, std::vector<int> &state, 
+                            std::function<void(Update update)> update_function, 
+                            std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,
+                            std::vector< std::pair<double, int> > > &props)> lattice_update_function, 
+                            int next_reaction, std::optional<int> site_one, std::optional<int> site_two, 
+                            std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props);
 
-    void update_adsorp_state(Lattice *lattice, std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props,
+    void update_adsorp_state(Lattice *lattice, std::unordered_map<std::string, 
+                            std::vector< std::pair<double, int> > > &props,
                             long double &prop_sum, int &active_indices); 
 
-    void update_adsorp_props(Lattice *lattice, std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
-                    std::vector< std::pair<double, int> > > &props)> lattice_update_function, std::vector<int> &state, 
-                    std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props);
+    void update_adsorp_props(Lattice *lattice, std::function<void(LatticeUpdate lattice_update, 
+                            std::unordered_map<std::string,                     
+                            std::vector< std::pair<double, int> > > &props)> lattice_update_function, 
+                            std::vector<int> &state, 
+                            std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props);
 
     /* -------------------------------- Updates Lattice ----------------------------- */
 
     bool update_state_lattice(Lattice *lattice, std::unordered_map<std::string,                     
-                    std::vector< std::pair<double, int> > > &props, 
-                    int next_reaction, int site_one, int site_two, 
-                    long double &prop_sum, int &active_indices, bool &flip_sites);
+                            std::vector< std::pair<double, int> > > &props, 
+                            int next_reaction, int site_one, int site_two, 
+                            long double &prop_sum, int &active_indices, bool &flip_sites);
 
     void clear_site(Lattice *lattice, std::unordered_map<std::string,                     
                     std::vector< std::pair<double, int> > > &props,
@@ -114,22 +117,24 @@ public:
                     long double &prop_sum, int &active_indices);
 
     void clear_site_helper(std::unordered_map<std::string,                     
-                    std::vector< std::pair<double, int> > > &props,
-                    int site_one, int site_two, long double &prop_sum, 
-                    int &active_indices);
+                        std::vector< std::pair<double, int> > > &props,
+                        int site_one, int site_two, long double &prop_sum, 
+                        int &active_indices);
 
-    void relevant_react(Lattice *lattice, std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
+    void relevant_react(Lattice *lattice, std::function<void(LatticeUpdate lattice_update, 
+                    std::unordered_map<std::string,                     
                     std::vector< std::pair<double, int> > > &props)> update_function,
-                                        int site, std::optional<int> ignore_neighbor,
-                                        std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props);
+                    int site, std::optional<int> ignore_neighbor,
+                    std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props);
 
     double compute_propensity(int num_one, int num_two, int react_id, Lattice *lattice, int site_id = 0);
 
     bool update_propensities(Lattice *lattice, 
-                    std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
-                    std::vector< std::pair<double, int> > > &props)> 
-                    update_function, int next_reaction, int site_one, int site_two, 
-                    std::unordered_map<std::string,std::vector< std::pair<double, int> > > &props);
+                        std::function<void(LatticeUpdate lattice_update, 
+                        std::unordered_map<std::string,                     
+                        std::vector< std::pair<double, int> > > &props)> 
+                        update_function, int next_reaction, int site_one, int site_two, 
+                        std::unordered_map<std::string,std::vector< std::pair<double, int> > > &props);
 
     std::string make_string(int site_one, int site_two);
     std::string make_string(std::vector<int> vec);
@@ -138,11 +143,12 @@ public:
                     std::vector< std::pair<double, int> > > &props);
     
     void update_all_propensities(Lattice *lattice, std::unordered_map<std::string,                     
-                    std::vector< std::pair<double, int> > > &props, 
-                    long double &prop_sum, int &active_indices,
-                    std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
-                    std::vector< std::pair<double, int> > > &props)> 
-                    update_function);
+                            std::vector< std::pair<double, int> > > &props, 
+                            long double &prop_sum, int &active_indices,
+                            std::function<void(LatticeUpdate lattice_update, 
+                            std::unordered_map<std::string,                     
+                            std::vector< std::pair<double, int> > > &props)> 
+                            update_function);
 
     /* -------------------------- Updates Reaction Network ----------------------------- */
 
@@ -166,50 +172,52 @@ public:
 
     // convert a history element as found a simulation to history
     // to a SQL type.
-    LatticeWriteTrajectoriesSql history_element_to_sql(
-        int seed,
+    LatticeWriteTrajectoriesSql history_element_to_sql(int seed,
         LatticeTrajectoryHistoryElement history_element);
 
-    LatticeWriteStateSql state_history_element_to_sql
-        (int seed, LatticeStateHistoryElement history_element);
+    LatticeWriteStateSql state_history_element_to_sql(int seed, 
+        LatticeStateHistoryElement history_element);
 
-    LatticeWriteCutoffSql cutoff_history_element_to_sql(
-        int seed,
+    LatticeWriteCutoffSql cutoff_history_element_to_sql(int seed,
         LatticeCutoffHistoryElement cutoff_history_element);
 
     void checkpoint(SqlReader<LatticeReadStateSql> state_reader, 
-                                    SqlReader<LatticeReadCutoffSql> cutoff_reader, 
-                                    SqlReader<LatticeReadTrajectoriesSql> trajectory_reader, 
-                                    std::map<int, LatticeState> &temp_seed_state_map, 
-                                    std::map<int, int> &temp_seed_step_map, 
-                                    SeedQueue &temp_seed_queue, 
-                                    std::map<int, double> &temp_seed_time_map, 
-                                    LatticeReactionNetwork &model);
+                    SqlReader<LatticeReadCutoffSql> cutoff_reader, 
+                    SqlReader<LatticeReadTrajectoriesSql> trajectory_reader, 
+                    std::map<int, LatticeState> &temp_seed_state_map, 
+                    std::map<int, int> &temp_seed_step_map, 
+                    SeedQueue &temp_seed_queue, 
+                    std::map<int, double> &temp_seed_time_map, 
+                    LatticeReactionNetwork &model);
 
     void store_checkpoint(std::vector<LatticeStateHistoryElement> &state_packet,
-        LatticeState &state, unsigned long int &seed, 
-        int step, double time, std::vector<LatticeCutoffHistoryElement> &cutoff_packet);
+                        LatticeState &state, unsigned long int &seed, 
+                        int step, double time, 
+                        std::vector<LatticeCutoffHistoryElement> &cutoff_packet);
 
 
-    double get_butler_volmer_rate_coefficient(double base_dg, double prefactor, double charge_transfer_coefficient,
-                                        double electron_tunneling_coefficient, double e_free, double distance,
-                                        double temperature, bool reduction);
+    double get_butler_volmer_rate_coefficient(double base_dg, double prefactor, 
+                                            double charge_transfer_coefficient,
+                                            double electron_tunneling_coefficient, 
+                                            double e_free, double distance,
+                                            double temperature, bool reduction);
     
-
-    double get_marcus_rate_coefficient(double base_dg, double prefactor, double reorganization_energy,
-                                double electron_tunneling_coefficient, double e_free, double distance,
-                                double temperature, bool reduction);
+    double get_marcus_rate_coefficient(double base_dg, double prefactor, 
+                                    double reorganization_energy,
+                                    double electron_tunneling_coefficient, 
+                                    double e_free, double distance,
+                                    double temperature, bool reduction);
 
     void print_state_propensities(long double propensity_sum,
-                    std::vector<double> &propensities,
-                    std::vector<int> &state, std::string filename);
+                                std::vector<double> &propensities,
+                                std::vector<int> &state, std::string filename);
 
     int szudzik(int a, int b);
 
     int combine(int i, int j, int k);
 
     std::unordered_map<int, std::tuple<uint32_t,uint32_t,uint32_t>>
-    szudzik_mapping(int i_max, int j_max, int k_max);
+        szudzik_mapping(int i_max, int j_max, int k_max);
 
     std::vector<double> initial_propensities;
     std::vector<int> initial_state;
@@ -231,7 +239,6 @@ private:
     bool is_add_sites;
     float temperature;
     float g_e;
-
 };
 
 #endif

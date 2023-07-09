@@ -8,18 +8,17 @@
 #include <fstream>
 #include <map>
 #include <cassert> 
+#include <iostream>
+
 #include "stdio.h"
 #include "stdlib.h"
 #include <string>
 #include "math.h"
-#include <iostream>
-#include <iostream>
 
 #define SPECIES_EMPTY 0
 #define DELTALOCAL 10000
 #define DELTA 32768
 #define EPSILON 0.0001
-
 
 #define FLERR __FILE__,__LINE__
 
@@ -49,7 +48,6 @@ struct Site {
 };
 
 class Lattice {
-
 private:
 
     /* ----------------------- handle memory ---------------------------------- */
@@ -67,8 +65,6 @@ private:
 
     void sfree(void *ptr);                                        // safe free
 
-    
-    
     /* ----------------------- structural information ------------------------ */
     
     int ilo, ihi, klo, khi, jlo, jhi;                // geometry info neighbors
@@ -118,7 +114,6 @@ public:
     float get_latconst();
 
     float get_maxz();
-
 };
 
 #endif

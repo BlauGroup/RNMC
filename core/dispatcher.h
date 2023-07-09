@@ -6,14 +6,13 @@
 #include <csignal>
 #include <iostream>
 #include <string>
-
+#include <map>
 
 #include "sql.h"
 #include "queues.h"
 #include "RNMC_types.h"
 #include "simulation.h"
 #include "simulator_payload.h"
-
 
 template <
     typename Solver,

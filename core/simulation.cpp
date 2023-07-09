@@ -3,7 +3,6 @@
 
 template <typename Solver>
 void Simulation<Solver>::execute_steps(int step_cutoff) {
-
     while(execute_step()) {
         if (step > step_cutoff) {
             break;
@@ -35,7 +34,6 @@ void Simulation<Solver>::execute_time(double time_cutoff) {
 template <typename Solver>
 bool Simulation<Solver>::execute_step() {
     return false;
-
 } // execute_steps()
 
 /* ---------------------------------------------------------------------- */
@@ -46,5 +44,4 @@ void Simulation<Solver>::write_error_message(std::string s){
     strcpy(char_array, s.c_str());
 
     write(STDERR_FILENO, char_array, sizeof(char_array) - 1);
-
 } // write_error_message()

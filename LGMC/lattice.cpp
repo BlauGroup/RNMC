@@ -29,7 +29,7 @@ Lattice::Lattice(float latconst_in) {
 /* ---------------------------------------------------------------------- */
 
 Lattice::Lattice(float latconst_in, int ihi_in, 
-        int jhi_in, int khi_in)  {
+                int jhi_in, int khi_in)  {
     
     isCheckpoint = false;
     latconst = latconst_in;
@@ -108,8 +108,6 @@ Lattice::Lattice(const Lattice& other) {
         }
         idneigh[i] = neighi;
     }                           
-
-
 } // Lattice()
 
 /* ---------------------------------------------------------------------- */
@@ -178,7 +176,6 @@ void Lattice::structured_lattice() {
         khi--;
     }
 
-    
     // generate xyz coords and store them with site ID
     // tile the simulation box from origin, respecting PBC
     // site IDs should be contiguous if style = BOX and fully periodic
@@ -188,8 +185,8 @@ void Lattice::structured_lattice() {
 
     bool can_adsorb = false;
 
-    for (int k = klo; k <= khi; k++)
-        for (int j = jlo; j <= jhi; j++)
+    for (int k = klo; k <= khi; k++) {
+        for (int j = jlo; j <= jhi; j++) {
             for (int i = ilo; i <= ihi; i++) {
 
                 if (i == ihi && !is_xperiodic) {
@@ -201,15 +198,13 @@ void Lattice::structured_lattice() {
                 else if (k == khi && !is_zperiodic) {
                     can_adsorb = true;
                 }
-
                 // By default, assume all lattice sites empty
                 // TODO: This should use the global variable EMPTY_SITE
                 // Don't update neighbors, since we'll use the connectivity function next
                 add_site(i,j,k,can_adsorb,false,false);
-
+            }
+        }
     }
-
-
 } // structered_lattice()
 
 /* ---------------------------------------------------------------------- */
@@ -314,9 +309,7 @@ void Lattice::structured_connectivity() {
         idneigh[i][numneigh[i]++] = gid;
       }
     }
-    
     destroy(cmap);
-
 } // structured_connectivity()
 
 /* ---------------------------------------------------------------------- */
@@ -354,7 +347,6 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in, uint32_t k_in,
                        bool can_adsorb_in, bool update_neighbors_in, 
                        bool meta_neighbors_in) {
     
-
     std::tuple<uint32_t, uint32_t, uint32_t> key = {i_in, j_in, k_in};
     if(loc_map.find(key) != loc_map.end()) {
         // site already exists
@@ -425,8 +417,6 @@ void Lattice::add_site(uint32_t i_in, uint32_t j_in, uint32_t k_in,
 /* ---------------------------------------------------------------------- */
 
 void Lattice::delete_site(int id) {
-
-    loc_map.erase({sites[id].i, sites[id].j, sites[id].k});
 
     assert(sites.find(id) != sites.end());
 

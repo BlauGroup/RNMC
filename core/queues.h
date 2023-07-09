@@ -70,10 +70,8 @@ struct HistoryQueue {
             T result = std::move(history_packets.front());
             history_packets.pop();
             return std::optional<T> (std::move(result));
-
         }
     };
-
 };
 
 #endif

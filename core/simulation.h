@@ -10,7 +10,6 @@
 
 #include "../GMC/tree_solver.h"
 
-
 // In the GNUC Library, sig_atomic_t is a typedef for int,
 // which is atomic on all systems that are supported by the
 // GNUC Library
@@ -21,12 +20,11 @@ std::atomic<bool> shutdown_requested = false;
 static_assert( std::atomic<bool>::is_always_lock_free );
 // or, at runtime: assert( shutdown_requested.is_lock_free() );
 
-
 /*---------------------------------------------------------------------------*/
 
 template <typename Solver>
 class Simulation {
-    public:
+public:
     unsigned long int seed;
     double time;
     int step; // number of reactions which have occoured
@@ -37,19 +35,17 @@ class Simulation {
                int history_chunk_size,
                int step,
                double time
-        ) :
+        ):
         seed (seed),
         time (time),
         step (step),
         history_chunk_size (history_chunk_size)
-        {
-        };
+        {};
 
     void execute_steps(int step_cutoff);
     void execute_time(double time_cutoff);
     virtual bool execute_step();
     void write_error_message(std::string s);
-
 };
 
 #include "simulation.cpp"

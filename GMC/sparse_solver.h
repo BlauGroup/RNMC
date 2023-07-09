@@ -1,13 +1,13 @@
 #ifndef RNMC_SPARSE_SOLVER_H
 #define RNMC_SPARSE_SOLVER_H
 
-#include "../core/sampler.h"
-#include "../core/RNMC_types.h"
-
 #include <vector>
 #include <optional>
 #include <cmath>
 #include <map>
+
+#include "../core/sampler.h"
+#include "../core/RNMC_types.h"
 
 class SparseSolver {
 private:

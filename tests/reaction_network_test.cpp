@@ -1,18 +1,16 @@
-/* -------------------------------------------------------------------------
+/* 
 *
 * Unit tests for reaction network
-* All tests use catch2 unit test framework
+* All tests use googletest unit test framework
 *
-------------------------------------------------------------------------- */
+*/
+
+#include <string>
 
 #include "../core/sql.h"
 #include "../GMC/reaction_network.h"
 #include "../GMC/tree_solver.h"
-
 #include "gtest/gtest.h"
-#include <string>
-
-// Using gtest fixture to use same ReactionNetwork 
 
 class ReactionNetworkTest : public ::testing::Test {
    protected:

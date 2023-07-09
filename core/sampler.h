@@ -51,7 +51,6 @@ public:
         std::swap(internal_rng_state, other.internal_rng_state);
         return *this;
     };
-
 };
 
 #endif

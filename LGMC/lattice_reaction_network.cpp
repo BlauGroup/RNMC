@@ -54,11 +54,9 @@ void LatticeReactionNetwork::update_state(Lattice *lattice,
     else {
         // homogeneous event happens
         update_state_solution(state, next_reaction);
-
     }
 
     update_adsorp_state(lattice, props, prop_sum, active_indices);
-
 } // update_state
 
 /* ---------------------------------------------------------------------- */
@@ -88,7 +86,6 @@ void LatticeReactionNetwork::update_propensities(Lattice *lattice,
     else {
         // homoegenous event happens
         update_propensities(update_function, state, next_reaction, lattice);
-
     }
 
     update_adsorp_props(lattice, lattice_update_function, state, props);
@@ -109,9 +106,7 @@ void LatticeReactionNetwork::update_adsorp_state(Lattice *lattice,
              assert(lattice->sites[site].species == SPECIES_EMPTY);
              clear_site_helper(props, site, SITE_HOMOGENEOUS, prop_sum, active_indices);
         }
-       
     }
-
 } // update_adsorp_state()
 
 /* ---------------------------------------------------------------------- */
@@ -152,7 +147,6 @@ void LatticeReactionNetwork::update_adsorp_props(Lattice *lattice,
                             .propensity = new_propensity,
                             .site_one = site,
                             .site_two = SITE_HOMOGENEOUS}, props); 
-
                     }     
                 }
             }
@@ -163,8 +157,7 @@ void LatticeReactionNetwork::update_adsorp_props(Lattice *lattice,
 /* ---------------------------------------------------------------------- */
 
 double LatticeReactionNetwork::compute_propensity(int num_one, int num_two, 
-                                int react_id, Lattice *lattice, int site_id) 
-                                {   
+                                int react_id, Lattice *lattice, int site_id) {   
 
     LatticeReaction reaction = reactions[react_id]; 
 
@@ -198,18 +191,16 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
     if (reaction.number_of_reactants == 1)
         p = num_one * k;
 
-
     // two reactants
     else {
-            p = factor_two
-                * num_one
-                * num_two
-                * k;
+        p = factor_two
+            * num_one
+            * num_two
+            * k;
     }
     assert(p > 0);
 
     return p;
-    
 } // compute_propensity() 
 
 /* ---------------------------------------------------------------------- */
@@ -226,6 +217,7 @@ bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice,
     if(reaction.type == Type::ADSORPTION) {
 
         assert(lattice->edges.find(site_one) != lattice->edges.end());
+        assert(lattice->sites.find(site_one) != lattice->sites.end());
         assert(lattice->edges[site_one] == 'a');
         assert(lattice->sites[site_one].species == SPECIES_EMPTY);
         assert(site_two == SITE_HOMOGENEOUS);
@@ -236,11 +228,14 @@ bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice,
         clear_site_helper(props, site_one, SITE_HOMOGENEOUS, prop_sum, active_indices);
 
         if(is_add_sites) {
-            // TODO: make general for all types of periodicity (add_site coordinates)
-            lattice->add_site(lattice->sites[site_one].i, lattice->sites[site_one].j, lattice->sites[site_one].k + 1,
+            lattice->add_site(lattice->sites[site_one].i, 
+                              lattice->sites[site_one].j, 
+                              lattice->sites[site_one].k + 1,
              true, true, true);
             
-            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, lattice->sites[site_one].j, lattice->sites[site_one].k + 1};
+            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, 
+                                                            lattice->sites[site_one].j, 
+                                                            lattice->sites[site_one].k + 1};
             int site_new = lattice->loc_map[key];
 
             clear_site(lattice, props, site_new, site_one, prop_sum, active_indices);
@@ -248,18 +243,16 @@ bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice,
             // new site can adsorb
             lattice->edges[site_new] = 'a';
             lattice->edges.erase(site_one);
-
         }
         else {
             lattice->edges[site_one] = 'd';
         }
-        
-
         return true;
     } // ADSORPTION 
     else if(reaction.type == Type::DESORPTION) {
         
         assert(lattice->edges.find(site_one) != lattice->edges.end());
+        assert(lattice->sites.find(site_one) != lattice->sites.end());
         assert(lattice->sites[site_one].species == reaction.reactants[0]);
         assert(site_two == SITE_HOMOGENEOUS);
 
@@ -272,7 +265,9 @@ bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice,
         if(is_add_sites) {
 
             // site behind can now adsorb or desorb
-            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, lattice->sites[site_one].j, lattice->sites[site_one].k - 1};
+            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, 
+                                                            lattice->sites[site_one].j, 
+                                                            lattice->sites[site_one].k - 1};
             int id = lattice->loc_map[key];
             if(lattice->sites[id].species == SPECIES_EMPTY) {
                 lattice->edges[id] = 'a'; 
@@ -280,10 +275,9 @@ bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice,
             else {
                 lattice->edges[id] = 'd'; 
             }
-            // delete site
-            lattice->delete_site(site_one);            
+            // delete site done in propensity update 
+            // so that id can be used to find site below           
         }
-  
         return true;
 
     } // DESORPTION
@@ -293,6 +287,7 @@ bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice,
         
         if(reaction.number_of_reactants == 1) {
             assert(lattice->sites[site_one].species == reaction.reactants[0]);
+            assert(lattice->sites.find(site_one) != lattice->sites.end());
             assert(site_two == SITE_SELF_REACTION);
             lattice->sites[site_one].species = reaction.products[0];
 
@@ -301,12 +296,11 @@ bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice,
             if((lattice->edges.find(site_one) != lattice->edges.end()) && (lattice->edges[site_one] == 'd')) {
                 
                 clear_site_helper(props, site_one, SITE_HOMOGENEOUS, prop_sum, active_indices);
-               
             }
-
         }
         else {
             // randomly assign products to sites 
+            assert(lattice->sites.find(site_two) != lattice->sites.end());
             double r1 = sampler.generate();
             if(r1 <= 0.5) {
                 lattice->sites[site_one].species = reaction.products[0];
@@ -328,21 +322,25 @@ bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice,
                 if(lattice->edges[site_one] == 'd') {
                     if(lattice->sites[site_one].species == SPECIES_EMPTY) {
                         lattice->edges[site_one] = 'a';
-
-                        // remove site above from adsorb
+                        
+                        // remove site above if it exists
                         if(is_add_sites) {
-                            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, lattice->sites[site_one].j, lattice->sites[site_one].k + 1};
-                            int site_above = lattice->loc_map[key];
-
-                            lattice->edges.erase(site_above);
-                            clear_site_helper(props, site_above, SITE_HOMOGENEOUS, prop_sum, active_indices);
+                            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, 
+                                                                            lattice->sites[site_one].j, 
+                                                                            lattice->sites[site_one].k + 1};
+                            if(lattice->loc_map.find(key) != lattice->loc_map.end()) {
+                                int site_above = lattice->loc_map[key];
+                                lattice->delete_site(site_above);
+                                
+                                clear_site(lattice, props, site_above, std::optional<int> (), prop_sum, active_indices);
+                                clear_site_helper(props, site_above, SITE_HOMOGENEOUS, prop_sum, active_indices);
+                            }   
                         }
                     }
                     else {
                         clear_site_helper(props, site_one, SITE_HOMOGENEOUS, prop_sum, active_indices);
                     }
                 }
-               
             }
 
             if(lattice->edges.find(site_two) != lattice->edges.end()) {
@@ -355,31 +353,34 @@ bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice,
                     if(lattice->sites[site_two].species == SPECIES_EMPTY) {
                         lattice->edges[site_two] = 'a';
 
-                        // remove site above from adsorb
+                        // remove site above if it exists
                         if(is_add_sites) {
-                            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_two].i, lattice->sites[site_two].j, lattice->sites[site_two].k + 1};
-                            int site_above = lattice->loc_map[key];
-
-                            lattice->edges.erase(site_above);
-                            clear_site_helper(props, site_above, SITE_HOMOGENEOUS, prop_sum, active_indices);
+                            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_two].i, 
+                                                                            lattice->sites[site_two].j, 
+                                                                            lattice->sites[site_two].k + 1};
+                            if(lattice->loc_map.find(key) != lattice->loc_map.end()) {
+                                int site_above = lattice->loc_map[key];
+                                lattice->delete_site(site_above);
+                                
+                                clear_site(lattice, props, site_above, std::optional<int> (), prop_sum, active_indices);
+                                clear_site_helper(props, site_above, SITE_HOMOGENEOUS, prop_sum, active_indices);
+                            }   
                         }
                     }
                     else {
                         clear_site_helper(props, site_two, SITE_HOMOGENEOUS, prop_sum, active_indices);
                     }
                 }
-               
             }
-
-
             clear_site(lattice, props, site_one, site_two, prop_sum, active_indices);
             clear_site(lattice, props, site_two, std::optional<int> (), prop_sum, active_indices);
-            
         }
 
         return false;
     } // HOMOGENEOUS_SOLID OR REDUCTION OR OXIDATION 
     else if(reaction.type == Type::DIFFUSION) {
+        assert(lattice->sites.find(site_one) != lattice->sites.end());
+        assert(lattice->sites.find(site_two) != lattice->sites.end());
 
         int empty_site;
         int other_site;
@@ -415,17 +416,7 @@ bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice,
         if(lattice->edges.find(other_site) != lattice->edges.end()) {
                 
                 if(lattice->edges[other_site] == 'd'){
-                   lattice->edges[other_site] = 'a';
-
-                    // remove site above from adsorb
-                    if(is_add_sites) {
-                        std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[other_site].i, lattice->sites[other_site].j, lattice->sites[other_site].k + 1};
-                        int site_above = lattice->loc_map[key];
-
-                        lattice->edges.erase(site_above);
-                        clear_site_helper(props, site_above, SITE_HOMOGENEOUS, prop_sum, active_indices);
-                   }
-                   
+                   lattice->edges[other_site] = 'a';   
                 }      
         }       
         
@@ -434,24 +425,23 @@ bool LatticeReactionNetwork::update_state_lattice(Lattice *lattice,
     else {
         assert(false);
     } 
-    
-    
 } // update_state() lattice
 
 /* ---------------------------------------------------------------------- */
 
 bool LatticeReactionNetwork::update_propensities(Lattice *lattice,
-                        std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props)> 
-                        update_function, int next_reaction, int site_one, int site_two, 
-                        std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props) {
+                            std::function<void(LatticeUpdate lattice_update, 
+                            std::unordered_map<std::string,                     
+                            std::vector< std::pair<double, int> > > &props)> 
+                            update_function, int next_reaction, int site_one, int site_two, 
+                            std::unordered_map<std::string,                     
+                            std::vector< std::pair<double, int> > > &props) {
 
     LatticeReaction reaction = reactions[next_reaction]; 
 
     if(reaction.type == Type::ADSORPTION) {
-
         // state already updated
+        assert(lattice->sites.find(site_one) != lattice->sites.end());
         assert(lattice->sites[site_one].species == reaction.products[0]);
         assert(site_two == SITE_HOMOGENEOUS);
 
@@ -459,30 +449,39 @@ bool LatticeReactionNetwork::update_propensities(Lattice *lattice,
 
         if(is_add_sites) {
             // also update new added site
-            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, lattice->sites[site_one].j, lattice->sites[site_one].k + 1};
+            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, 
+                                                            lattice->sites[site_one].j, 
+                                                            lattice->sites[site_one].k + 1};
             int site_new = lattice->loc_map[key];
 
             relevant_react(lattice, update_function, site_new, site_one, props);
-
         }
         
         return true;
     } // ADSORPTION 
     if(reaction.type == Type::DESORPTION) {
-        
-        // reaction already happended
-        assert(lattice->sites[site_one].species == SPECIES_EMPTY);
-        assert(site_two == SITE_HOMOGENEOUS);
 
-        relevant_react(lattice, update_function, site_one, std::optional<int> (), props);
+        if(!is_add_sites) {
+            // reaction already happended
+            assert(lattice->sites.find(site_one) != lattice->sites.end());
+            assert(lattice->sites[site_one].species == SPECIES_EMPTY);
+            assert(site_two == SITE_HOMOGENEOUS);
 
-        if(is_add_sites) {
-            // also update site above it that can no longer adsorb 
-            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, lattice->sites[site_one].j, lattice->sites[site_one].k + 1};
-            int site_new = lattice->loc_map[key];
+            relevant_react(lattice, update_function, site_one, std::optional<int> (), props);
 
-            relevant_react(lattice, update_function, site_new, site_one, props);
-
+        }
+        else if(is_add_sites) {
+            // old site does not exist anymore
+            // update site below it that can now adsorb or desorb
+            std::tuple<uint32_t, uint32_t, uint32_t> key = {lattice->sites[site_one].i, 
+                                                            lattice->sites[site_one].j, 
+                                                            lattice->sites[site_one].k - 1};
+            lattice->delete_site(site_one);
+            if(lattice->loc_map.find(key) != lattice->loc_map.end()) {
+                int site_below = lattice->loc_map[key];
+                assert(lattice->sites.find(site_below) != lattice->sites.end());
+                relevant_react(lattice, update_function, site_below, std::optional<int> (), props);
+            }
         }
 
         return true;
@@ -492,13 +491,14 @@ bool LatticeReactionNetwork::update_propensities(Lattice *lattice,
              (reaction.type == Type::OXIDATION)) {
         
         if(reaction.number_of_reactants == 1) {
+            assert(lattice->sites.find(site_one) != lattice->sites.end());
             assert(lattice->sites[site_one].species == reaction.products[0]);
             assert(site_two == SITE_SELF_REACTION);
 
             relevant_react(lattice, update_function, site_one, std::optional<int> (), props);
         }
         else {
-    
+            assert(lattice->sites.find(site_two) != lattice->sites.end());
             relevant_react(lattice, update_function, site_one, site_two, props);
             relevant_react(lattice, update_function, site_two, std::optional<int> (), props);
         }
@@ -514,18 +514,15 @@ bool LatticeReactionNetwork::update_propensities(Lattice *lattice,
     else {
         assert(false);
     }
-
-
 } //update_propensities()
 
 /* ---------------------------------------------------------------------- */
 
 void LatticeReactionNetwork::clear_site(Lattice *lattice, std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props, 
-                        int site, std::optional<int> ignore_neighbor, 
-                        long double &prop_sum, int &active_indices) {
+                            std::vector< std::pair<double, int> > > &props, 
+                            int site, std::optional<int> ignore_neighbor, 
+                            long double &prop_sum, int &active_indices) {
 
-    
     assert(site != SITE_HOMOGENEOUS);
     // reset or initiate site combos
     for(uint32_t neigh = 0; neigh < lattice->numneigh[site]; neigh++ ) {
@@ -539,16 +536,15 @@ void LatticeReactionNetwork::clear_site(Lattice *lattice, std::unordered_map<std
     // self reactions 
     clear_site_helper(props, site, SITE_SELF_REACTION, prop_sum, active_indices);
     
-
 } // clear_site
 
 /* ---------------------------------------------------------------------- */
 
 // deal with active_indices
 void LatticeReactionNetwork::clear_site_helper(std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props,
-                        int site_one, int site_two, long double &prop_sum,
-                        int &active_indices) {
+                            std::vector< std::pair<double, int> > > &props,
+                            int site_one, int site_two, long double &prop_sum,
+                            int &active_indices) {
 
     std::string combo = make_string(site_one, site_two);
             
@@ -571,13 +567,15 @@ void LatticeReactionNetwork::clear_site_helper(std::unordered_map<std::string,
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::relevant_react(Lattice *lattice, std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props)> update_function,
-                                            int site, std::optional<int> ignore_neighbor, 
-                                            std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props) {
+void LatticeReactionNetwork::relevant_react(Lattice *lattice, 
+                            std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,
+                            std::vector< std::pair<double, int> > > &props)> update_function,
+                            int site, std::optional<int> ignore_neighbor, 
+                            std::unordered_map<std::string,                     
+                            std::vector< std::pair<double, int> > > &props) {
 
     // all reactions related to central site 
+    assert(lattice->sites.find(site) != lattice->sites.end());
     std::vector<int> potential_reactions = dependents[lattice->sites[site].species]; 
 
     // compute and add new propensities 
@@ -622,7 +620,6 @@ void LatticeReactionNetwork::relevant_react(Lattice *lattice, std::function<void
             
             int site_reactant_id; 
             int other_reactant_id; 
-            
             if(lattice->sites[site].species == reaction.reactants[0]) {
                 site_reactant_id = 0;
                 other_reactant_id = 1;
@@ -640,6 +637,7 @@ void LatticeReactionNetwork::relevant_react(Lattice *lattice, std::function<void
                     int neighbor = lattice->idneigh[site][neigh];
                     
                     if(!ignore_neighbor || (ignore_neighbor && neighbor != ignore_neighbor.value())) {
+                        assert(lattice->sites.find(neighbor) != lattice->sites.end());
                         if(lattice->sites[neighbor].species == reaction.reactants[other_reactant_id]) {
 
                             double new_propensity = compute_propensity(1, 1, reaction_id, lattice);
@@ -651,14 +649,10 @@ void LatticeReactionNetwork::relevant_react(Lattice *lattice, std::function<void
                                             .site_two = neighbor}, props); 
                         }
                     } // igore_neighbor
-
                 } // for neigh
             }
-            
         } // two reactants
-
     }
-
 } // relevant_react
 
 /* ---------------------------------------------------------------------- */
@@ -685,7 +679,7 @@ std::string LatticeReactionNetwork::make_string(std::vector<int> vec) {
 /* ---------------------------------------------------------------------- */
 
 double LatticeReactionNetwork::sum_row(std::string hash, std::unordered_map<std::string,                     
-                        std::vector< std::pair<double, int> > > &props) {
+                               std::vector< std::pair<double, int> > > &props) {
     
     double sum = 0;    
     for(auto it = props[hash].begin(); it != props[hash].end(); it++) {
@@ -697,9 +691,7 @@ double LatticeReactionNetwork::sum_row(std::string hash, std::unordered_map<std:
 /* ---------------------------------------------------------------------- */
 
 void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_network_database,
-     SqlConnection &initial_state_database)
-
-    {
+                             SqlConnection &initial_state_database) {
     // collecting reaction network metadata
     SqlStatement<MetadataSql> metadata_statement (reaction_network_database);
     SqlReader<MetadataSql> metadata_reader (metadata_statement);
@@ -882,7 +874,6 @@ void LatticeReactionNetwork::update_state_solution(std::vector<int> &state,
             assert(state[reactions[reaction_index].reactants[m]] != 0);
             state[reactions[reaction_index].reactants[m]]--;
         }
-        
     }
 
     for (int m = 0;
@@ -895,7 +886,7 @@ void LatticeReactionNetwork::update_state_solution(std::vector<int> &state,
 /* ---------------------------------------------------------------------- */
 
 void LatticeReactionNetwork::update_propensities(std::function<void(Update update)> update_function,
-                                                 std::vector<int> &state, int next_reaction, Lattice *lattice) {
+                            std::vector<int> &state, int next_reaction, Lattice *lattice) {
 
     LatticeReaction reaction = reactions[next_reaction]; 
 
@@ -908,7 +899,6 @@ void LatticeReactionNetwork::update_propensities(std::function<void(Update updat
             int reactant_id = reaction.reactants[i];
             species_of_interest.push_back(reactant_id);
         }
-        
     }
 
     for ( int j = 0; j < reaction.number_of_products; j++ ) {
@@ -917,7 +907,6 @@ void LatticeReactionNetwork::update_propensities(std::function<void(Update updat
             int product_id = reaction.products[j];
             species_of_interest.push_back(product_id);
         }
-        
     }
 
     for ( int species_id : species_of_interest ) {
@@ -930,12 +919,12 @@ void LatticeReactionNetwork::update_propensities(std::function<void(Update updat
                     .propensity = new_propensity});
         }
     }
-
 }
 
 /* ---------------------------------------------------------------------- */
 
-double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int reaction_index, Lattice *lattice) {
+double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int 
+                               reaction_index, Lattice *lattice) {
     LatticeReaction reaction = reactions[reaction_index];
 
     double p, k;
@@ -957,12 +946,12 @@ double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int r
 
         if (charge_transfer_style == ChargeTransferStyle::MARCUS) {
             k = get_marcus_rate_coefficient(reaction.dG, reaction.prefactor, reaction.reorganization_energy,
-                                            reaction.electron_tunneling_coefficient, g_e, lattice->get_maxz(), temperature,
-                                            reduction_in);
+                                            reaction.electron_tunneling_coefficient, g_e, lattice->get_maxz(), 
+                                            temperature, reduction_in);
         } else {
             k = get_butler_volmer_rate_coefficient(reaction.dG, reaction.prefactor, reaction.charge_transfer_coefficient,
-                                                   reaction.electron_tunneling_coefficient, g_e, lattice->get_maxz(), temperature,
-                                                   reduction_in);    
+                                                   reaction.electron_tunneling_coefficient, g_e, lattice->get_maxz(), 
+                                                   temperature, reduction_in);    
         }
 
     } else {
@@ -972,7 +961,6 @@ double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int r
     // one reactant
     if (reaction.number_of_reactants == 1)
         p = state[reaction.reactants[0]] * k;
-
 
     // two reactants
     else {
@@ -989,18 +977,16 @@ double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int r
             * state[reaction.reactants[1]]
             * k;
         }
-
     }
     assert(p >= 0);
     return p;
-
 }
 
 /* ---------------------------------------------------------------------- */
 
 LatticeWriteTrajectoriesSql LatticeReactionNetwork::history_element_to_sql(
-    int seed,
-    LatticeTrajectoryHistoryElement history_element) {
+                                                    int seed, 
+                                                    LatticeTrajectoryHistoryElement history_element) {
     return LatticeWriteTrajectoriesSql {
         .seed = seed,
         .step = history_element.step,
@@ -1014,9 +1000,8 @@ LatticeWriteTrajectoriesSql LatticeReactionNetwork::history_element_to_sql(
 /* ---------------------------------------------------------------------- */
 
 LatticeWriteStateSql LatticeReactionNetwork::state_history_element_to_sql(
-    int seed,
-    LatticeStateHistoryElement state_history_element) {
-
+                                            int seed,
+                                            LatticeStateHistoryElement state_history_element) {
     return LatticeWriteStateSql {
         .seed = seed,
         .species_id = state_history_element.species_id,
@@ -1029,14 +1014,14 @@ LatticeWriteStateSql LatticeReactionNetwork::state_history_element_to_sql(
 /* ---------------------------------------------------------------------- */
 
 LatticeWriteCutoffSql LatticeReactionNetwork::cutoff_history_element_to_sql(
-    int seed,
-    LatticeCutoffHistoryElement cutoff_history_element) {
-        return LatticeWriteCutoffSql {
-            .seed = seed,
-            .step = cutoff_history_element.step,
-            .time = cutoff_history_element.time,
-            .maxk = cutoff_history_element.maxk
-        };
+                                            int seed,
+                                            LatticeCutoffHistoryElement cutoff_history_element) {
+    return LatticeWriteCutoffSql {
+        .seed = seed,
+        .step = cutoff_history_element.step,
+        .time = cutoff_history_element.time,
+        .maxk = cutoff_history_element.maxk
+    };
 }
 
 /* ---------------------------------------------------------------------- */
@@ -1065,7 +1050,9 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
         // create mapping from szudzik id to i,j,k values
         Lattice *initial_lattice = model.initial_lattice;
         std::unordered_map<int, std::tuple<uint32_t,uint32_t,uint32_t>> mapping = 
-        szudzik_mapping(initial_lattice->xhi/initial_lattice->latconst, initial_lattice->yhi/initial_lattice->latconst, cutoff_row.maxk);
+        szudzik_mapping(initial_lattice->xhi/initial_lattice->latconst, 
+                        initial_lattice->yhi/initial_lattice->latconst, 
+                        cutoff_row.maxk);
         seed_ijk_map[cutoff_row.seed] = mapping;
     }
     
@@ -1109,16 +1096,15 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
                 // update site occupancy
                 std::tuple<uint32_t, uint32_t, uint32_t> key = {i, j, k};
                 int site_id = temp_seed_state_map[state_row.seed].lattice->loc_map[key];
+                assert(temp_seed_state_map[state_row.seed].lattice->sites.find(site_id) != temp_seed_state_map[state_row.seed].lattice->sites.end());
                 temp_seed_state_map[state_row.seed].lattice->sites[site_id].species = state_row.species_id;
 
                 // if can adsorb, check if species occupies the site
                 if(temp_seed_state_map[state_row.seed].lattice->sites[site_id].can_adsorb && state_row.species_id != SPECIES_EMPTY) {
                     temp_seed_state_map[state_row.seed].lattice->edges[site_id] = 'd';
                 }
-
             }
         }
-
     } // dynamic lattice and reading from state
     else {
         // static lattice or dynamic and not reading from state
@@ -1127,7 +1113,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 
         // create a default lattice for each simulation
         while (std::optional<unsigned long int> maybe_seed =
-            temp_seed_queue.get_seed()){
+            temp_seed_queue.get_seed()) {
             unsigned long int seed = maybe_seed.value();
 
             // Each LatticeState must have its own lattice to point to
@@ -1139,7 +1125,6 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
             LatticeState default_state = {model.initial_state, default_lattice};
 
             temp_seed_state_map.insert(std::make_pair(seed, default_state));
-
         }
 
         while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
@@ -1166,7 +1151,6 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
                 }
             }
         }
-
          // set checkpoint flag for each lattice, dynamic lattice custom constructor 
          // automatically does this
         if(read_interrupt_states) {
@@ -1174,15 +1158,14 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
                 it->second.lattice->isCheckpoint = true;
             }
         }
-
     }
 }
 
 /* ---------------------------------------------------------------------- */
 
  void LatticeReactionNetwork::store_checkpoint(std::vector<LatticeStateHistoryElement> &state_packet,
-        LatticeState &state, unsigned long int &seed, 
-        int step, double time, std::vector<LatticeCutoffHistoryElement> &cutoff_packet) {
+                              LatticeState &state, unsigned long int &seed, int step, double time, 
+                              std::vector<LatticeCutoffHistoryElement> &cutoff_packet) {
     // Lattice site
     for (auto site : state.lattice->sites) {
 
@@ -1199,7 +1182,6 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
             .edge = edge
         });
     }
-
 
     // Homogeneous region
     for (unsigned int i = 0; i < state.homogeneous.size(); i++) {
@@ -1219,8 +1201,6 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
         .time = time,
         .maxk = int(state.lattice->get_maxz()/state.lattice->get_latconst())
     });
-
-    
 } // store_state_history()
 
 /* ---------------------------------------------------------------------- */
@@ -1234,10 +1214,12 @@ void LatticeReactionNetwork::compute_initial_propensities(std::vector<int> state
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::update_all_propensities(Lattice *lattice, std::unordered_map<std::string,                     
+void LatticeReactionNetwork::update_all_propensities(Lattice *lattice, 
+                        std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props, 
                         long double &prop_sum, int &active_indices,
-                        std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,                     
+                        std::function<void(LatticeUpdate lattice_update, 
+                        std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props)> 
                         update_function) {
 
@@ -1249,15 +1231,15 @@ void LatticeReactionNetwork::update_all_propensities(Lattice *lattice, std::unor
         clear_site(lattice, props, site_id, std::optional<int>(), prop_sum, active_indices);
         relevant_react(lattice, update_function, site_id, std::optional<int> (), props);
     }
-
 } // update_all_propensities()
 
 /* ---------------------------------------------------------------------- */
 
-double LatticeReactionNetwork::get_butler_volmer_rate_coefficient(double base_dg, double prefactor, double charge_transfer_coefficient,
-                                          double electron_tunneling_coefficient, double e_free, double distance,
-                                          double temperature, bool reduction) {
-
+double LatticeReactionNetwork::get_butler_volmer_rate_coefficient(double base_dg, 
+                                double prefactor, double charge_transfer_coefficient,
+                                double electron_tunneling_coefficient, 
+                                double e_free, double distance,
+                                double temperature, bool reduction) {
     double dg, kappa;
 
     if (reduction) {
@@ -1269,14 +1251,14 @@ double LatticeReactionNetwork::get_butler_volmer_rate_coefficient(double base_dg
 
     kappa = std::exp(-1 * electron_tunneling_coefficient * distance);
     return kappa * prefactor * std::exp(-1 * charge_transfer_coefficient * dg / (KB * temperature));
-
 } 
 
 /* ---------------------------------------------------------------------- */
 
-double LatticeReactionNetwork::get_marcus_rate_coefficient(double base_dg, double prefactor, double reorganization_energy,
-                                   double electron_tunneling_coefficient, double e_free, double distance,
-                                   double temperature, bool reduction) {
+double LatticeReactionNetwork::get_marcus_rate_coefficient(double base_dg, double prefactor, 
+                               double reorganization_energy, double electron_tunneling_coefficient, 
+                               double e_free, double distance,
+                               double temperature, bool reduction) {
 
     double dg, dg_barrier, squared, kappa;
 
@@ -1301,30 +1283,29 @@ double LatticeReactionNetwork::get_marcus_rate_coefficient(double base_dg, doubl
 /* ---------------------------------------------------------------------- */
 
 void LatticeReactionNetwork::print_state_propensities(long double propensity_sum,
-                        std::vector<double> &propensities,
-                        std::vector<int> &state, std::string filename) {
+                            std::vector<double> &propensities,
+                            std::vector<int> &state, std::string filename) {
 
-                        std::ofstream myfile;
-                        myfile.open (filename);
- 
+    std::ofstream myfile;
+    myfile.open (filename);
 
-                        myfile << "Begin Print Homogeneous Propensities" << std::endl;
-                        
-                        for(int i = 0; i < int(propensities.size()); i++) {
-                            myfile << "Reaction: " << i << "propensity: " << propensities[i] << std::endl;
-                        }
+    myfile << "Begin Print Homogeneous Propensities" << std::endl;
+    
+    for(int i = 0; i < int(propensities.size()); i++) {
+        myfile << "Reaction: " << i << "propensity: " << propensities[i] << std::endl;
+    }
 
-                        myfile << "Begin Print Homogeneous State" << std::endl;
-                        
-                        for(int i = 0; i < int(state.size()); i++) {
-                            myfile << "Species: " << i << "quantity: " << state[i] << std::endl;
-                        }
+    myfile << "Begin Print Homogeneous State" << std::endl;
+    
+    for(int i = 0; i < int(state.size()); i++) {
+        myfile << "Species: " << i << "quantity: " << state[i] << std::endl;
+    }
 
-                        myfile << "total propensity_sum" << propensity_sum;
+    myfile << "total propensity_sum" << propensity_sum;
 
-                         myfile.close();
+    myfile.close();
 
-                        } // print_state_propensities()
+} // print_state_propensities()
 
 /* ---------------------------------------------------------------------- */
 

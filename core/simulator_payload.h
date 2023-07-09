@@ -6,7 +6,7 @@
 #include "queues.h"
 
 /* ---------------------------------------------------------------------- 
-    size of history chunks which we write to the DB.
+    size of history chunks which we write to the database.
     if you make this too small, it will force the dispatcher to
     perform lots of really small DB transactions which is bad.
     20000 is a good value. Only change this if you fully understand the
@@ -15,21 +15,28 @@
 
 constexpr int history_chunk_size = 20000;
 
-template <typename Solver, typename Model, typename StateHistory, 
-typename TrajHistory, typename CutoffHistory, typename Sim, typename State>
+template <
+    typename Solver, 
+    typename Model, 
+    typename StateHistory, 
+    typename TrajHistory, 
+    typename CutoffHistory, 
+    typename Sim, 
+    typename State>
+    
 class SimulatorPayload {
 
-    public: 
-        Model &model;
-        HistoryQueue<HistoryPacket<TrajHistory>> &history_queue;
-        HistoryQueue<HistoryPacket<StateHistory>> &state_history_queue;
-        HistoryQueue<HistoryPacket<CutoffHistory>> &cutoff_history_queue;
-        SeedQueue &seed_queue;
-        Cutoff cutoff;
-        std::vector<bool>::iterator running;
-        std::map<int, State> seed_state_map;
-        std::map<int, int> seed_step_map;
-        std::map<int, double> seed_time_map;
+public: 
+    Model &model;
+    HistoryQueue<HistoryPacket<TrajHistory>> &history_queue;
+    HistoryQueue<HistoryPacket<StateHistory>> &state_history_queue;
+    HistoryQueue<HistoryPacket<CutoffHistory>> &cutoff_history_queue;
+    SeedQueue &seed_queue;
+    Cutoff cutoff;
+    std::vector<bool>::iterator running;
+    std::map<int, State> seed_state_map;
+    std::map<int, int> seed_step_map;
+    std::map<int, double> seed_time_map;
 
     SimulatorPayload(
         Model &model,
@@ -67,8 +74,7 @@ class SimulatorPayload {
 
             Sim simulation(model, seed, step, time, state, 
                            history_chunk_size, history_queue);
-                simulation.init();
-
+            simulation.init();
 
             switch(cutoff.type_of_cutoff) {
             case step_termination :
@@ -87,7 +93,8 @@ class SimulatorPayload {
             // Make a vector of CutoffHistories for the current time and step
             std::vector<CutoffHistory> cutoff_packet;
 
-            model.store_checkpoint(state_packet, simulation.state, seed, simulation.step, simulation.time, cutoff_packet);
+            model.store_checkpoint(state_packet, simulation.state, seed, 
+                                 simulation.step, simulation.time, cutoff_packet);
 
             // Construct a history packet from the history elements and add it to the queue
             state_history_queue.insert_history(

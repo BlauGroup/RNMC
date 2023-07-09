@@ -59,7 +59,6 @@ ReactionNetwork::ReactionNetwork(
     SqlStatement<ReactionSql> reaction_statement (reaction_network_database);
     SqlReader<ReactionSql> reaction_reader (reaction_statement);
 
-
     // reaction_id is lifted so we can do a sanity check after the
     // loop.  Make sure size of reactions vector, last reaction_id and
     // metadata number_of_reactions are all the same
@@ -73,7 +72,6 @@ ReactionNetwork::ReactionNetwork(
         uint8_t number_of_products = reaction_row.number_of_products;
         reaction_id = reaction_row.reaction_id;
 
-
         Reaction reaction = {
             .number_of_reactants = number_of_reactants,
             .number_of_products = number_of_products,
@@ -81,10 +79,8 @@ ReactionNetwork::ReactionNetwork(
             .products = { reaction_row.product_1, reaction_row.product_2},
             .rate = reaction_row.rate
         };
-
         reactions[reaction_id] = reaction;
-
-        }
+    }
      
     initial_propensities.resize(metadata_row.number_of_reactions);
 
@@ -106,9 +102,7 @@ ReactionNetwork::ReactionNetwork(
 
 void ReactionNetwork::compute_dependents() {
     // initializing dependency graph
-
     dependents.resize(initial_state.size());
-
 
     for ( unsigned int reaction_id = 0; reaction_id <  reactions.size(); reaction_id++ ) {
         Reaction &reaction = reactions[reaction_id];
@@ -122,7 +116,6 @@ void ReactionNetwork::compute_dependents() {
                 // if i = 1 then duplicate reactant and don't add dependency twice
                 dependents[reactant_id].push_back(reaction_id);
             }
-            
         }
     }
 } // compute_dependents()
@@ -144,7 +137,6 @@ double ReactionNetwork::compute_propensity(
     else if (reaction.number_of_reactants == 1)
         p = state[reaction.reactants[0]] * reaction.rate;
 
-
     // two reactants
     else {
         if (reaction.reactants[0] == reaction.reactants[1])
@@ -162,7 +154,6 @@ double ReactionNetwork::compute_propensity(
     }
 
     return p;
-
 } //compute_propensity()
 
 /*---------------------------------------------------------------------------*/
@@ -202,12 +193,10 @@ void ReactionNetwork::update_propensities(
         species_of_interest.push_back(reactant_id);
     }
 
-
     for ( int j = 0; j < reaction.number_of_products; j++ ) {
         int product_id = reaction.products[j];
         species_of_interest.push_back(product_id);
     }
-
 
     for ( int species_id : species_of_interest ) {
         for ( unsigned int reaction_index : dependents[species_id] ) {
@@ -259,8 +248,7 @@ ReactionNetworkWriteStateSql ReactionNetwork::state_history_element_to_sql
 /*---------------------------------------------------------------------------*/
 
 WriteCutoffSql ReactionNetwork::cutoff_history_element_to_sql(
-    int seed,
-    CutoffHistoryElement cutoff_history_element) {
+    int seed, CutoffHistoryElement cutoff_history_element) {
         return WriteCutoffSql {
             .seed = seed,
             .step = cutoff_history_element.step,
@@ -271,13 +259,13 @@ WriteCutoffSql ReactionNetwork::cutoff_history_element_to_sql(
 /*---------------------------------------------------------------------------*/
 
 void ReactionNetwork::checkpoint(SqlReader<ReactionNetworkReadStateSql> state_reader, 
-                                        SqlReader<ReadCutoffSql> cutoff_reader, 
-                                        SqlReader<ReactionNetworkReadTrajectoriesSql> trajectory_reader, 
-                                        std::map<int, std::vector<int>> &temp_seed_state_map, 
-                                        std::map<int, int> &temp_seed_step_map, 
-                                        SeedQueue &temp_seed_queue, 
-                                        std::map<int, double> &temp_seed_time_map, 
-                                        ReactionNetwork &model) {
+                                    SqlReader<ReadCutoffSql> cutoff_reader, 
+                                    SqlReader<ReactionNetworkReadTrajectoriesSql> trajectory_reader, 
+                                    std::map<int, std::vector<int>> &temp_seed_state_map, 
+                                    std::map<int, int> &temp_seed_step_map, 
+                                    SeedQueue &temp_seed_queue, 
+                                    std::map<int, double> &temp_seed_time_map, 
+                                    ReactionNetwork &model) {
     
     bool read_interrupt_states = false;
     std::vector<int> default_state = model.initial_state;
@@ -304,7 +292,6 @@ void ReactionNetwork::checkpoint(SqlReader<ReactionNetworkReadStateSql> state_re
 
     if(!read_interrupt_states) {
         while (std::optional<ReactionNetworkReadTrajectoriesSql> maybe_trajectory_row = trajectory_reader.next()) {
-                        // read_trajectory_states = true;
 
             ReactionNetworkReadTrajectoriesSql trajectory_row = maybe_trajectory_row.value();
             
@@ -337,11 +324,11 @@ void ReactionNetwork::store_checkpoint(std::vector<ReactionNetworkStateHistoryEl
     
     // state information
     for (unsigned int i = 0; i < state.size(); i++) {
-                state_packet.push_back(ReactionNetworkStateHistoryElement{
-                    .seed = seed,
-                    .species_id = static_cast<int>(i),
-                    .count = state[i]
-                });
+        state_packet.push_back(ReactionNetworkStateHistoryElement{
+            .seed = seed,
+            .species_id = static_cast<int>(i),
+            .count = state[i]
+        });
     }
 
     // cutoff information
@@ -350,8 +337,6 @@ void ReactionNetwork::store_checkpoint(std::vector<ReactionNetworkStateHistoryEl
         .step = step,
         .time = time
     });
-
-
 } // store_state_history()
 
 /*---------------------------------------------------------------------------*/
