@@ -188,7 +188,7 @@ std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std:
     }
 
     return std::optional<LatticeEvent> ( LatticeEvent {.index = reaction_id, .dt = dt,
-                                                           .site_one = site_one, .site_two = site_two});         
+                                                        .site_one = site_one, .site_two = site_two});         
 } // event_lattice()
 
 /* ---------------------------------------------------------------------- */

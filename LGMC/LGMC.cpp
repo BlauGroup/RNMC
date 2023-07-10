@@ -145,7 +145,7 @@ int main(int argc, char **argv) {
     }
     else if (add_site == 'F') {
         is_add_site = false;
-    }else {
+    } else {
         std::cout << "Incorrect parameter file argument for add site.\n";
         exit(EXIT_FAILURE);
     }
@@ -155,7 +155,7 @@ int main(int argc, char **argv) {
     }
     else if (ct_style == 'B') {
         charge_transfer_style = ChargeTransferStyle::BUTLER_VOLMER;
-    }else {
+    } else {
         std::cout << "Incorrect parameter file argument for charge transfer style.\n";
         exit(EXIT_FAILURE);
     }

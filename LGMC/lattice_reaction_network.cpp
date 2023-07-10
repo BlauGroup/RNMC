@@ -648,7 +648,7 @@ void LatticeReactionNetwork::relevant_react(Lattice *lattice,
                                             .site_one = site,
                                             .site_two = neighbor}, props); 
                         }
-                    } // igore_neighbor
+                    } // ignore_neighbor
                 } // for neigh
             }
         } // two reactants

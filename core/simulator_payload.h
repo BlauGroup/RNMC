@@ -23,7 +23,7 @@ template <
     typename CutoffHistory, 
     typename Sim, 
     typename State>
-    
+
 class SimulatorPayload {
 
 public: 
@@ -49,7 +49,7 @@ public:
         std::map<int, State> seed_state_map,
         std::map<int, int> seed_step_map,
         std::map<int, double> seed_time_map
-        ) :
+        ):
             model (model),
             history_queue (history_queue),
             state_history_queue (state_history_queue),
