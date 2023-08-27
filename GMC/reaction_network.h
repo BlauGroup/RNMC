@@ -13,25 +13,9 @@
 #include "../core/sql_types.h"
 #include "../core/queues.h"
 
-struct Reaction {
-    // we assume that each reaction has zero, one or two reactants
-    uint8_t number_of_reactants;
-    uint8_t number_of_products;
-
-    int reactants[2];
-    int products[2];
-
-    double rate;
-};
-
-// parameters passed to the ReactionNetwork constructor
-// by the dispatcher which are model specific
-struct ReactionNetworkParameters {
-};
 
 class ReactionNetwork {
 public:
-    std::vector<Reaction> reactions; // list of reactions
     std::vector<int> initial_state; // initial state for all the simulations
     std::vector<double> initial_propensities; // initial propensities for all the reactions
     double factor_zero; // rate modifer for reactions with zero reactants
@@ -57,11 +41,6 @@ public:
     void update_state(
         std::vector<int> &state,
         int reaction_index);
-
-    void update_propensities(
-        std::function<void(Update update)> update_function,
-        std::vector<int> &state,
-        int next_reaction);
 
     void compute_initial_propensities(std::vector<int> state);
 

@@ -12,12 +12,16 @@ void print_usage() {
               << "--base_seed\n"
               << "--thread_count\n"
               << "--step_cutoff|time_cutoff\n";
+              << "--energy_budget\n";
 } // print_usage()
 
 /*---------------------------------------------------------------------------*/
 
 int main(int argc, char **argv) {
-    if (argc != 7) {
+    // Here we just check if there are 7 or 8 args.
+    // This is a lazy way to let energy budget be optional.
+    // This could potentially break if both step and time cutoff are specified while energy budget is not
+    if (argc < 7 || argc > 8) {
         print_usage();
         exit(EXIT_FAILURE);
     }
@@ -30,6 +34,7 @@ int main(int argc, char **argv) {
         {"thread_count", required_argument, NULL, 5},
         {"step_cutoff", optional_argument, NULL, 6},
         {"time_cutoff", optional_argument, NULL, 7},
+        {"energy_budget", optional_argument, 0, 8},
         {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };
@@ -42,6 +47,7 @@ int main(int argc, char **argv) {
     int number_of_simulations = 0;
     int base_seed = 0;
     int thread_count = 0;
+    double energy_budget = 0;
     
     Cutoff cutoff = {
         .bound =  { .step =  0 },
@@ -84,6 +90,10 @@ int main(int argc, char **argv) {
             cutoff.bound.time = atof(optarg);
             cutoff.type_of_cutoff = time_termination;
             break;
+        
+        case 8:
+            energy_budget = atof(optarg);
+            break;
 
         default:
             // if an unexpected argument is passed, exit
@@ -93,34 +103,72 @@ int main(int argc, char **argv) {
         }
     }
 
-    ReactionNetworkParameters parameters;
-    
-    Dispatcher<
-    TreeSolver,
-    ReactionNetwork,
-    ReactionNetworkParameters,
-    ReactionNetworkWriteTrajectoriesSql,
-    ReactionNetworkReadTrajectoriesSql,
-    ReactionNetworkWriteStateSql,
-    ReactionNetworkReadStateSql,
-    WriteCutoffSql,
-    ReadCutoffSql, 
-    ReactionNetworkStateHistoryElement, 
-    ReactionNetworkTrajectoryHistoryElement, 
-    CutoffHistoryElement, 
-    ReactionNetworkSimulation<TreeSolver>, 
-    std::vector<int>>
+    if(energy_budget == 0) {
+        ReactionNetworkParameters parameters;
 
-    dispatcher (
-    reaction_database,
-    initial_state_database,
-    number_of_simulations,
-    base_seed,
-    thread_count,
-    cutoff,
-    parameters
-    );
+        Dispatcher<
+            TreeSolver,
+            ReactionNetwork,
+            ReactionNetworkParameters,
+            ReactionNetworkWriteTrajectoriesSql,
+            ReactionNetworkReadTrajectoriesSql,
+            ReactionNetworkWriteStateSql,
+            ReactionNetworkReadStateSql,
+            WriteCutoffSql,
+            ReadCutoffSql, 
+            ReactionNetworkStateHistoryElement, 
+            ReactionNetworkTrajectoryHistoryElement, 
+            CutoffHistoryElement, 
+            ReactionNetworkSimulation<TreeSolver>, 
+            std::vector<int>>
 
-    dispatcher.run_dispatcher();
+        dispatcher (
+        reaction_database,
+        initial_state_database,
+        number_of_simulations,
+        base_seed,
+        thread_count,
+        cutoff,
+        parameters
+        );
+
+        dispatcher.run_dispatcher();
+        
+    }
+    else {
+        EnergyReactionNetworkParameters parameters = {
+            .energy_budget = energy_budget
+        };
+
+        Dispatcher<
+            TreeSolver,
+            ReactionNetwork,
+            EnergyReactionNetworkParameters,
+            ReactionNetworkWriteTrajectoriesSql,
+            ReactionNetworkReadTrajectoriesSql,
+            ReactionNetworkWriteStateSql,
+            ReactionNetworkReadStateSql,
+            WriteCutoffSql,
+            ReadCutoffSql, 
+            ReactionNetworkStateHistoryElement, 
+            ReactionNetworkTrajectoryHistoryElement, 
+            CutoffHistoryElement, 
+            EnergyReactionNetworkSimulation<TreeSolver>, 
+            std::vector<int>>
+
+        dispatcher (
+        reaction_database,
+        initial_state_database,
+        number_of_simulations,
+        base_seed,
+        thread_count,
+        cutoff,
+        parameters
+        );
+
+        dispatcher.run_dispatcher();
+
+    }
+
     exit(EXIT_SUCCESS);
 }
