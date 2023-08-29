@@ -53,6 +53,4 @@ public:
         int next_reaction);
 };
 
-
-
 #endif
