@@ -2,7 +2,7 @@
 
 #include "../core/dispatcher.h"
 #include "../core/reaction_network_simulation.h"
-#include "reaction_network.h"
+#include "../core/energy_reaction_network_simulation.h"
 
 void print_usage() {
     std::cout << "Usage: specify the following options\n"
@@ -11,7 +11,7 @@ void print_usage() {
               << "--number_of_simulations\n"
               << "--base_seed\n"
               << "--thread_count\n"
-              << "--step_cutoff|time_cutoff\n";
+              << "--step_cutoff|time_cutoff\n"
               << "--energy_budget\n";
 } // print_usage()
 
@@ -108,7 +108,7 @@ int main(int argc, char **argv) {
 
         Dispatcher<
             TreeSolver,
-            ReactionNetwork,
+            GillespieReactionNetwork,
             ReactionNetworkParameters,
             ReactionNetworkWriteTrajectoriesSql,
             ReactionNetworkReadTrajectoriesSql,
@@ -136,13 +136,13 @@ int main(int argc, char **argv) {
         
     }
     else {
-        EnergyReactionNetworkParameters parameters = {
+        EnergyReactionNetworkParameters parameters{
             .energy_budget = energy_budget
         };
 
         Dispatcher<
             TreeSolver,
-            ReactionNetwork,
+            EnergyReactionNetwork,
             EnergyReactionNetworkParameters,
             ReactionNetworkWriteTrajectoriesSql,
             ReactionNetworkReadTrajectoriesSql,

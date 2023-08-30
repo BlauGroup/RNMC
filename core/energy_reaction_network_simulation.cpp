@@ -1,5 +1,4 @@
 #include "energy_reaction_network_simulation.h"
-#include "../GMC/energy_reaction_network.h"
 
 template <typename Solver>
 void EnergyReactionNetworkSimulation<Solver>::init() {
@@ -58,7 +57,7 @@ bool EnergyReactionNetworkSimulation<Solver>::execute_step() {
             
         // update propensities
         energy_reaction_network.update_propensities(
-            update_function,
+            this->update_function,
             std::ref(state),
             next_reaction,
             energy_budget);

@@ -18,6 +18,21 @@ public:
     static void action(ReactionSql &r, sqlite3_stmt *stmt);
 };
 
+class EnergyReactionSql {
+public:
+    unsigned long int reaction_id;
+    int number_of_reactants;
+    int number_of_products;
+    int reactant_1;
+    int reactant_2;
+    int product_1;
+    int product_2;
+    double rate;
+    double dG;
+    static std::string sql_statement;
+    static void action(EnergyReactionSql &r, sqlite3_stmt *stmt);
+};
+
 class ReactionNetworkWriteTrajectoriesSql {
 public:
     int seed;

@@ -1,7 +1,7 @@
 #ifndef RNMC_REACTION_NETWORK_SIMULATION_H
 #define RNMC_REACTION_NETWORK_SIMULATION_H
 
-#include "../GMC/reaction_network.h"
+#include "../GMC/gillespie_reaction_network.h"
 #include "simulation.h"
 
 template <typename Solver>
@@ -9,12 +9,12 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
 private: 
     Solver solver;
 public:
-    ReactionNetwork &reaction_network;
+    GillespieReactionNetwork &reaction_network;
     std::vector<int> state;
     std::vector<ReactionNetworkTrajectoryHistoryElement> history;
     HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue; 
 
-    ReactionNetworkSimulation(ReactionNetwork &reaction_network, 
+    ReactionNetworkSimulation(GillespieReactionNetwork &reaction_network, 
             unsigned long int seed,
             int step,
             double time,

@@ -1,7 +1,7 @@
 #ifndef RNMC_ENERGY_REACTION_NETWORK_SIMULATION_H
 #define RNMC_ENERGY_REACTION_NETWORK_SIMULATION_H
 
-#include "../GMC/reaction_network.h"
+#include "../GMC/energy_reaction_network.h"
 #include "simulation.h"
 
 template <typename Solver>
@@ -13,6 +13,7 @@ public:
     std::vector<int> state;
     std::vector<ReactionNetworkTrajectoryHistoryElement> history;
     HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue; 
+    double energy_budget;
 
     EnergyReactionNetworkSimulation(EnergyReactionNetwork &reaction_network, 
             unsigned long int seed,
@@ -24,7 +25,7 @@ public:
         ) : 
         // call base class constructor
         Simulation<Solver>(seed, history_chunk_size, step, time),
-        reaction_network (reaction_network),
+        energy_reaction_network (reaction_network),
         state (state),
         history_queue(history_queue)
         { 
@@ -36,6 +37,6 @@ public:
     void print_output() {assert(true);};
 };
 
-#include "reaction_network_simulation.cpp"
+#include "energy_reaction_network_simulation.cpp"
 
 #endif 

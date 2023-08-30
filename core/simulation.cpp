@@ -4,7 +4,7 @@
 template <typename Solver>
 void Simulation<Solver>::execute_steps(int step_cutoff) {
     while(execute_step()) {
-        if (step > step_cutoff) {
+        if (this->step > step_cutoff) {
             break;
         } else if (do_shutdown || shutdown_requested.load()) {
             // Handle shutdown request from SIGTERM
