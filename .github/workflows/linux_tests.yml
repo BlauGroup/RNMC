@@ -13,3 +13,4 @@ jobs:
       with:
         nix_path: nixpkgs=channel:nixos-21.05
     - run: nix flake check
+    - run: ../tests/test.sh
