@@ -9,7 +9,7 @@ function test_core {
 }
 
 function test_gmc {
-    GMC_TEST_DIR="../examples/GMC/SEI"
+    GMC_TEST_DIR="../examples/GMC"
 
     cp $GMC_TEST_DIR/initial_state.sqlite $GMC_TEST_DIR/initial_state_copy.sqlite
 
@@ -29,9 +29,9 @@ function test_gmc {
         RC=1
     fi
 
-    #rm $GMC_TEST_DIR/initial_state_copy.sqlite
-    #rm $GMC_TEST_DIR/trajectories
-    #rm $GMC_TEST_DIR/copy_trajectories
+    rm $GMC_TEST_DIR/initial_state_copy.sqlite
+    rm $GMC_TEST_DIR/trajectories
+    rm $GMC_TEST_DIR/copy_trajectories
 
 }
 
@@ -42,7 +42,7 @@ function test_npmc {
 
     # to check for leaks with valgrind, you need to use the option --fair-sched=yes
 
-    ./build/NPMC --nano_particle_database=$NPMC_TEST_DIR/np.sqlite --initial_state_database=$NPMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 &> /dev/null
+    ../NPMC/NPMC --nano_particle_database=$NPMC_TEST_DIR/np.sqlite --initial_state_database=$NPMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 &> /dev/null
 
     sql='SELECT seed, step, site_id_1, site_id_2, interaction_id FROM trajectories ORDER BY seed ASC, step ASC;'
 
@@ -58,9 +58,9 @@ function test_npmc {
         RC=1
     fi
 
-    rm $NPMC_TEST_DIR/initial_state_copy.sqlite
-    rm $NPMC_TEST_DIR/trajectories
-    rm $NPMC_TEST_DIR/copy_trajectories
+    #rm $NPMC_TEST_DIR/initial_state_copy.sqlite
+    #rm $NPMC_TEST_DIR/trajectories
+    #rm $NPMC_TEST_DIR/copy_trajectories
 }
 
 function check_result {

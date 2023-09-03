@@ -45,8 +45,8 @@ std::string ReactionNetworkWriteTrajectoriesSql::sql_statement =
 void ReactionNetworkWriteTrajectoriesSql::action (ReactionNetworkWriteTrajectoriesSql& t, sqlite3_stmt* stmt) {
     sqlite3_bind_int(stmt, 1, t.seed);
     sqlite3_bind_int(stmt, 2, t.step);
-    sqlite3_bind_int(stmt, 3, t.time);
-    sqlite3_bind_double(stmt, 4, t.reaction_id);
+    sqlite3_bind_int(stmt, 3, t.reaction_id);
+    sqlite3_bind_double(stmt, 4, t.time);
 };
 
 /* ------------ Read Trajectory ------------*/
@@ -57,8 +57,8 @@ std::string ReactionNetworkReadTrajectoriesSql::sql_statement =
 void ReactionNetworkReadTrajectoriesSql::action(ReactionNetworkReadTrajectoriesSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);
     r.step = sqlite3_column_int(stmt, 1);
-    r.time = sqlite3_column_double(stmt, 2);
-    r.reaction_id = sqlite3_column_int(stmt, 3);
+    r.reaction_id = sqlite3_column_int(stmt, 2);
+    r.time = sqlite3_column_double(stmt, 3);
     
 }
 
