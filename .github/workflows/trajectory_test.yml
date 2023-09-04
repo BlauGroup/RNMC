@@ -1,9 +1,5 @@
-name: "trajectory test"
-on:
-  pull_request:
-  push:
-    branches:
-      - main
 jobs:
-  tests:
-    - run: bash ../../tests/test.sh
+  example-job:
+    steps:
+      - name: Run trajectory test
+        run: ../../tests/test.sh
