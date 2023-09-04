@@ -6,4 +6,4 @@ on:
       - main
 jobs:
   tests:
-    - run: bash ../tests/test.sh
+    - run: bash ../../tests/test.sh

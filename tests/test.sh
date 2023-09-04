@@ -9,6 +9,13 @@ function test_core {
 }
 
 function test_gmc {
+
+    cd ..
+    cd GMC
+    make clean
+    make GMC
+    cd ../tests
+
     GMC_TEST_DIR="../examples/GMC"
 
     cp $GMC_TEST_DIR/initial_state.sqlite $GMC_TEST_DIR/initial_state_copy.sqlite
@@ -38,6 +45,12 @@ function test_gmc {
 function test_npmc {
     NPMC_TEST_DIR="../examples/NPMC"
 
+    cd ..
+    cd NPMC
+    make clean
+    make NPMC
+    cd ../tests
+
     cp $NPMC_TEST_DIR/initial_state.sqlite $NPMC_TEST_DIR/initial_state_copy.sqlite
 
     # to check for leaks with valgrind, you need to use the option --fair-sched=yes
@@ -58,9 +71,9 @@ function test_npmc {
         RC=1
     fi
 
-    #rm $NPMC_TEST_DIR/initial_state_copy.sqlite
-    #rm $NPMC_TEST_DIR/trajectories
-    #rm $NPMC_TEST_DIR/copy_trajectories
+    rm $NPMC_TEST_DIR/initial_state_copy.sqlite
+    rm $NPMC_TEST_DIR/trajectories
+    rm $NPMC_TEST_DIR/copy_trajectories
 }
 
 function check_result {
