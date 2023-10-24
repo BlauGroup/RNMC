@@ -2,6 +2,7 @@
 #define RNMC_LATTICE_SIMULATION_H
 
 #include <map>
+#include <vector>
 
 #include "dispatcher.h"
 #include "simulation.h"

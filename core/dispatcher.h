@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <map>
+#include <vector>
 
 #include "sql.h"
 #include "queues.h"

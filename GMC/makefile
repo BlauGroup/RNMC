@@ -17,7 +17,7 @@ OBJECTS     = $(SOURCES:%.cpp=%.o)
 PERF_FILE = perf.data*
 
 # flags
-CXXFLAGS = -fno-rtti -fno-exceptions -std=c++20 -Wall -Wextra -lsqlite3 -lpthread \
+CXXFLAGS = -fno-rtti -fno-exceptions -std=c++17 -Wall -Wextra -lsqlite3 -lpthread \
 			$(shell gsl-config --cflags) $(shell gsl-config --libs) 
 
 # make debug - will compile sources with $(CXXFLAGS) and the -g3 flag

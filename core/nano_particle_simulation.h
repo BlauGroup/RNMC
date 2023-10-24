@@ -1,6 +1,8 @@
 #ifndef RNMC_NANO_PARTICLE_SIMULATION_H
 #define RNMC_NANO_PARTICLE_SIMULATION_H
 
+#include <vector>
+
 #include "simulation.h"
 #include "RNMC_types.h"
 #include "queues.h"

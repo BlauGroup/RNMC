@@ -6,12 +6,15 @@
 #include <optional>
 #include <mutex>
 #include <map>
+#include <assert.h>
 
 #include "sql_types.h"
 #include "../core/sql.h"
 #include "../core/RNMC_types.h"
 #include "../core/sql_types.h"
 #include "../core/queues.h"
+
+#include <vector>
 
 // parameters passed to the ReactionNetwork constructor
 // by the dispatcher which are model specific

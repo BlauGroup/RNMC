@@ -1,5 +1,6 @@
 #include "lattice_solver.h"
 #include <iostream>
+#include <vector>
 
 LatticeSolver::LatticeSolver(unsigned long int seed,
     std::vector<double> &&initial_propensities) :
