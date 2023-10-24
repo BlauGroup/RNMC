@@ -39,8 +39,8 @@ bool ReactionNetworkSimulation<Solver>::execute_step() {
             history_queue.insert_history(
                 std::move(
                     HistoryPacket<ReactionNetworkTrajectoryHistoryElement> {
-                        .history = std::move(this->history),
-                        .seed = this->seed
+                        .seed = this->seed,
+                        .history = std::move(this->history)
                     }));
 
             history = std::vector<ReactionNetworkTrajectoryHistoryElement> ();

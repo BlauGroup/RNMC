@@ -116,8 +116,8 @@ public:
             history_queue.insert_history(
                 std::move(
                     HistoryPacket<TrajHistory> {
-                        .history = std::move(simulation.history),
-                        .seed = seed
+                        .seed = seed,
+                        .history = std::move(simulation.history)
                         }));
 
         }
