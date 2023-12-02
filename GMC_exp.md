@@ -16,7 +16,7 @@ The following diagram outlines the reaction network of cobalt-catalyzed hydrofor
 
 ## GMC - <span style="color: #0066CC"> Solid-Electrolyte Interphase </span>
 
-We apply the `GMC` module to study the solid-electrolyte interphase formation and evolution. Graph-based CRNs with optimal pathways to two SEI products, lithium ethylene dicarbonate (LEDC) and lithium ethylene monocarbonate (LEMC) and constructed and filted with the High-Performance Reaction Generation (HiPRGen). We then use the `GMC` module to sample the resulting reactive space and determine products of the HiPRGen-constructed network. Further details of this work are outlined[here](https://chemrxiv.org/engage/api-gateway/chemrxiv/assets/orp/resource/item/61c509e6f52bc461dacb7766/original/template-free-reaction-networks-enable-predictive-and-automated-analysis-of-complex-electrochemical-reaction-cascades.pdf).
+We apply the `GMC` module to study the solid-electrolyte interphase formation and evolution. Graph-based CRNs with optimal pathways to two SEI products, lithium ethylene dicarbonate and lithium ethylene monocarbonate and constructed and filted with the High-Performance Reaction Generation (HiPRGen). We then use the `GMC` module to sample the resulting reactive space and determine products of the HiPRGen-constructed network. Further details of this work are outlined[here](https://chemrxiv.org/engage/api-gateway/chemrxiv/assets/orp/resource/item/61c509e6f52bc461dacb7766/original/template-free-reaction-networks-enable-predictive-and-automated-analysis-of-complex-electrochemical-reaction-cascades.pdf).
 
 
 ## GMC - <span style="color: #0066CC"> Energy Budget </span>
