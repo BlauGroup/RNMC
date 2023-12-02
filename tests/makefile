@@ -27,7 +27,7 @@ NPMC_DIR = ../NPMC
 LGMC_DIR = ../LGMC
 core_DIR = ../core
 
-CXX = g++ -std=c++20
+CXX = g++ -std=c++17
 
 # Flags passed to the preprocessor.
 # Set Google Test's header directory as a system directory, such that
@@ -35,7 +35,7 @@ CXX = g++ -std=c++20
 CPPFLAGS = -isystem $(GTEST_DIR)/include
 
 # Flags passed to the C++ compiler.
-CXXFLAGS = -std=c++20 -g -Wall -Wextra -pthread \
+CXXFLAGS = -std=c++17 -g -Wall -Wextra -pthread \
            $(shell gsl-config --cflags) $(shell gsl-config --libs) \
            -lsqlite3 -lpthread
 

@@ -59,12 +59,6 @@ Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,
     seed_step_map (),
     seed_time_map ()
     { 
-        SeedQueue temp_seed_queue = SeedQueue(number_of_simulations, 
-                                            base_seed);
-        
-        std::map<int, State> temp_seed_state_map;
-        std::map<int, int> temp_seed_step_map;
-        std::map<int, double> temp_seed_time_map;
 
         SqlStatement<ReadStateSql> state_statement(initial_state_database);
         SqlReader<ReadStateSql> state_reader(state_statement);
@@ -75,13 +69,24 @@ Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,
         SqlStatement<ReadTrajectoriesSql> trajectory_statement(initial_state_database);
         SqlReader<ReadTrajectoriesSql> trajectory_reader(trajectory_statement);
 
+        SeedQueue temp_seed_queue = SeedQueue(number_of_simulations, 
+                                            base_seed);
+
+    
+        std::map<int, State> temp_seed_state_map;
+        std::map<int, int> temp_seed_step_map;
+        std::map<int, double> temp_seed_time_map;
+
         model.checkpoint(state_reader, cutoff_reader, trajectory_reader, 
-                        temp_seed_state_map, temp_seed_step_map, 
-                        temp_seed_queue, temp_seed_time_map, model);
+            temp_seed_state_map, temp_seed_step_map, 
+            temp_seed_queue, temp_seed_time_map, model);
 
         seed_state_map = temp_seed_state_map;
         seed_step_map = temp_seed_step_map;
         seed_time_map = temp_seed_time_map;
+
+
+
 } // Dispatcher()
 
 /* ---------------------------------------------------------------------- */
@@ -222,21 +227,24 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,
             record_simulation_history(std::move(history_packet));
         }
 
-        std::optional<HistoryPacket<StateHistory>>
-            maybe_state_history_packet = state_history_queue.get_history();
+        if(model.isCheckpoint){
+            std::optional<HistoryPacket<StateHistory>>
+                maybe_state_history_packet = state_history_queue.get_history();
 
-        if (maybe_state_history_packet) {
-            HistoryPacket<StateHistory> state_history_packet = std::move(maybe_state_history_packet.value());
-            record_state(std::move(state_history_packet));
+            if (maybe_state_history_packet) {
+                HistoryPacket<StateHistory> state_history_packet = std::move(maybe_state_history_packet.value());
+                record_state(std::move(state_history_packet));
+            }
+
+            std::optional<HistoryPacket<CutoffHistory>>
+                maybe_cutoff_history_packet = cutoff_history_queue.get_history();
+
+            if (maybe_cutoff_history_packet) {
+                HistoryPacket<CutoffHistory> cutoff_history_packet = std::move(maybe_cutoff_history_packet.value());
+                record_cutoff(std::move(cutoff_history_packet));
+            }
         }
 
-        std::optional<HistoryPacket<CutoffHistory>>
-            maybe_cutoff_history_packet = cutoff_history_queue.get_history();
-
-        if (maybe_cutoff_history_packet) {
-            HistoryPacket<CutoffHistory> cutoff_history_packet = std::move(maybe_cutoff_history_packet.value());
-            record_cutoff(std::move(cutoff_history_packet));
-        }
     }
 
     for (int i = 0; i < number_of_threads; i++) threads[i].join();

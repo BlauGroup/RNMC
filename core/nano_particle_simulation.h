@@ -2,6 +2,7 @@
 #define RNMC_NANO_PARTICLE_SIMULATION_H
 
 #include <vector>
+#include "assert.h"
 
 #include "simulation.h"
 #include "RNMC_types.h"

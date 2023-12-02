@@ -93,24 +93,27 @@ public:
             // Make a vector of CutoffHistories for the current time and step
             std::vector<CutoffHistory> cutoff_packet;
 
-            model.store_checkpoint(state_packet, simulation.state, seed, 
-                                 simulation.step, simulation.time, cutoff_packet);
+            if(model.isCheckpoint){
+                model.store_checkpoint(state_packet, simulation.state, seed, 
+                        simulation.step, simulation.time, cutoff_packet);
+            
 
-            // Construct a history packet from the history elements and add it to the queue
-            state_history_queue.insert_history(
-                std::move(
-                    HistoryPacket<StateHistory> {
-                        .seed = seed,
-                        .history = state_packet
-                    }));
+                // Construct a history packet from the history elements and add it to the queue
+                state_history_queue.insert_history(
+                    std::move(
+                        HistoryPacket<StateHistory> {
+                            .seed = seed,
+                            .history = state_packet
+                        }));
 
-            // Construct a history packet from the history elements and add it to the queue
-            cutoff_history_queue.insert_history(
-                std::move(
-                    HistoryPacket<CutoffHistory> {
-                        .seed = seed,
-                        .history = cutoff_packet
-                    }));
+                // Construct a history packet from the history elements and add it to the queue
+                cutoff_history_queue.insert_history(
+                    std::move(
+                        HistoryPacket<CutoffHistory> {
+                            .seed = seed,
+                            .history = cutoff_packet
+                        }));
+            }
 
             // Move the remainder of the history into the queue to be saved
             history_queue.insert_history(

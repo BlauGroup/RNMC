@@ -8,7 +8,7 @@
             "program": "${workspaceFolder}/GMC/GMC_debug",
             "args": ["--reaction_database=../examples/GMC/rn.sqlite",
             "--initial_state_database=../examples/GMC/initial_state.sqlite", "--number_of_simulations=1000", 
-            "--base_seed=1000", "--thread_count=8", "--step_cutoff=200"],
+            "--base_seed=1000", "--thread_count=8", "--step_cutoff=200", "--checkpoint=1"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/GMC",
             "environment": [],
