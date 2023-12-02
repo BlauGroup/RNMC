@@ -227,7 +227,7 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,
             record_simulation_history(std::move(history_packet));
         }
 
-        if(model.isCheckpoint){
+        if(true){
             std::optional<HistoryPacket<StateHistory>>
                 maybe_state_history_packet = state_history_queue.get_history();
 

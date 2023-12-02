@@ -93,7 +93,7 @@ public:
             // Make a vector of CutoffHistories for the current time and step
             std::vector<CutoffHistory> cutoff_packet;
 
-            if(model.isCheckpoint){
+            if(true){
                 model.store_checkpoint(state_packet, simulation.state, seed, 
                         simulation.step, simulation.time, cutoff_packet);
             
