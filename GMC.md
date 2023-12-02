@@ -9,7 +9,7 @@ As a starting point, a simple example of using `GMC` for homogeneous catalysis i
 Sqlite is used for input, output, and checkpointing. Before running `GMC`, two necessary .sqlite files must be generated - The Reaction Network Database and State Database. An example of Python code used to generate these files is available in the <a href="{{ site.github.repository_url }}"> examples directory </a>. Below is an outline of each .sqlite file and its necessary tables. **Each .sqlite file must follow this format exactly**. 
 
 ### The Reaction Network Database 
-There are two tables in the lattice reaction network database both of which **must be created and filled in by the user**:
+There are two tables in the reaction network database both of which **must be created and filled in by the user**:
 - <span style="color:#0066CC"> metadata </span> : this table consists of one line for the total number of species and reactions in the simulation.
 <br>
 <br>
