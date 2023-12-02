@@ -4,7 +4,7 @@ Reaction Network Monte Carlo (`RNMC`) is a collection of programs for kinetic Mo
 
 ## Three Modules
 - `GMC` - [Gillespie Monte Carlo](https://lzichi.github.io/RNMC/GMC.html): Implementation of Gillespie's next reaction simulator. `GMC` is able to run simulations of reaction networks with hundreds of millions of reactions.
-- `NPMC` - [Nano Particle Monte Carlo](https://lzichi.github.io/RNMC/NPMC.html): A three dimensional statistical field theory simulator which supports one- and two-site interactions. Useful for simulating nano particles.
+- `NPMC` - [Nano Particle Monte Carlo](https://lzichi.github.io/RNMC/NPMC.html): A three dimensional statistical field theory simulator which supports one- and two-site interactions. `NPMC` is useful for simulating nano particles.
 - `LGMC` - [Lattice Gillespie Monte Carlo](https://lzichi.github.io/RNMC/LGMC.html): A kMC implementation coupling a homogeneous (Gillespie-like) region with a lattice, enabling simulations with reactions occurring in multiple phases and capable of electrochemical reactions.
 
 See [this](https://doi.org/10.26434/chemrxiv-2021-c2gp3) paper for an example of the kind of work being done with RNMC.
@@ -91,7 +91,7 @@ $ make GMC
 When running `GMC` ensure that your input file paths are correct considering the executable is inside the `GMC` folder. Below is an example of how `GMC` can be run using the input files inside the <a href="{{ site.github.repository_url }}"> examples directory </a> (here `step_cutoff` is specified):
 
 ```
-./GMC --reaction_database=../examples/GMC/rn.sqlite --initial_state_database=../examples/GMC/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200
+./GMC --reaction_database=../examples/GMC/rn.sqlite --initial_state_database=../examples/GMC/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --energy_budget=0
 ```
 
 `GMC` requires six input arguments (either `step_cutoff` or `time_cutoff` must be specified): 
@@ -103,6 +103,7 @@ When running `GMC` ensure that your input file paths are correct considering the
 - <span style="color:#0066CC"> thread_count </span>: how many threads to use.
 - <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation.
 - <span style="color:#0066CC"> time_cutoff </span>: how much time in each simulation [s].
+- <span style="color:#0066CC"> energy_budget </span>: allowed energy to be added into the system.
 
 ### The Reaction Network Database 
 There are two tables in the reaction network database both of which **must be created and filled in by the user**:
