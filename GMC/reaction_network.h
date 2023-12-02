@@ -16,11 +16,6 @@
 
 #include <vector>
 
-// parameters passed to the ReactionNetwork constructor
-// by the dispatcher which are model specific
-struct ReactionNetworkParameters {
-};
-
 template <typename Reaction>
 class ReactionNetwork {
 public:
@@ -33,6 +28,8 @@ public:
     // maps species to the reactions which involve that species
     std::vector<std::vector<int>> dependents;
     std::vector<Reaction> reactions;
+
+    bool isCheckpoint; // write state, cutoff, trajectories while running or if error
 
     ReactionNetwork();
 

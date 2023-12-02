@@ -3,6 +3,12 @@
 
 #include "reaction_network.h"
 
+// parameters passed to the ReactionNetwork constructor
+// by the dispatcher which are model specific
+struct ReactionNetworkParameters {
+    bool isCheckpoint;
+};
+
 struct GillespieReaction {
     // we assume that each reaction has zero, one or two reactants
     uint8_t number_of_reactants;
@@ -32,8 +38,10 @@ public:
 GillespieReactionNetwork::GillespieReactionNetwork(
      SqlConnection &reaction_network_database,
      SqlConnection &initial_state_database,
-     ReactionNetworkParameters)
+     ReactionNetworkParameters parameters)
     {
+
+    isCheckpoint = parameters.isCheckpoint;
 
     // collecting reaction network metadata
     SqlStatement<MetadataSql> metadata_statement (reaction_network_database);

@@ -12,7 +12,8 @@ void print_usage() {
               << "--base_seed\n"
               << "--thread_count\n"
               << "--step_cutoff|time_cutoff\n"
-              << "--energy_budget\n";
+              << "--energy_budget\n"
+              << "--checkpoint\n";
 } // print_usage()
 
 /*---------------------------------------------------------------------------*/
@@ -21,7 +22,7 @@ int main(int argc, char **argv) {
     // Here we just check if there are 7 or 8 args.
     // This is a lazy way to let energy budget be optional.
     // This could potentially break if both step and time cutoff are specified while energy budget is not
-    if (argc < 7 || argc > 8) {
+    if (argc < 8 || argc > 9) {
         print_usage();
         exit(EXIT_FAILURE);
     }
@@ -35,6 +36,7 @@ int main(int argc, char **argv) {
         {"step_cutoff", optional_argument, NULL, 6},
         {"time_cutoff", optional_argument, NULL, 7},
         {"energy_budget", optional_argument, 0, 8},
+        {"checkpoint", required_argument, 0, 9},
         {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };
@@ -48,6 +50,7 @@ int main(int argc, char **argv) {
     int base_seed = 0;
     int thread_count = 0;
     double energy_budget = 0;
+    bool isCheckpoint = false;
     
     Cutoff cutoff = {
         .bound =  { .step =  0 },
@@ -95,6 +98,10 @@ int main(int argc, char **argv) {
             energy_budget = atof(optarg);
             break;
 
+        case 9:
+            isCheckpoint = atof(optarg);
+            break;
+
         default:
             // if an unexpected argument is passed, exit
             print_usage();
@@ -104,7 +111,9 @@ int main(int argc, char **argv) {
     }
 
     if(energy_budget == 0) {
-        ReactionNetworkParameters parameters;
+        ReactionNetworkParameters parameters {
+            .isCheckpoint = isCheckpoint
+        };
 
         Dispatcher<
             TreeSolver,
