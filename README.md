@@ -4,8 +4,8 @@ Reaction Network Monte Carlo (`RNMC`) is a collection of programs for kinetic Mo
 
 ## Three Modules
 - `GMC` - [Gillespie Monte Carlo](https://lzichi.github.io/RNMC/GMC.html): Implementation of Gillespie's next reaction simulator. `GMC` is able to run simulations of reaction networks with hundreds of millions of reactions.
-- `NPMC` - [Nano Particle Monte Carlo](./NPMC.md): A three dimensional statistical field theory simulator which supports one- and two-site interactions. Useful for simulating nano particles.
-- `LGMC` - [Lattice Gillespie Monte Carlo](./NPMC.md): A kMC implementation coupling a homogeneous (Gillespie-like) region with a lattice, enabling simulations with reactions occurring in multiple phases and capable of electrochemical reactions.
+- `NPMC` - [Nano Particle Monte Carlo](https://lzichi.github.io/RNMC/NPMC.html): A three dimensional statistical field theory simulator which supports one- and two-site interactions. Useful for simulating nano particles.
+- `LGMC` - [Lattice Gillespie Monte Carlo](https://lzichi.github.io/RNMC/LGMC.html): A kMC implementation coupling a homogeneous (Gillespie-like) region with a lattice, enabling simulations with reactions occurring in multiple phases and capable of electrochemical reactions.
 
 See [this](https://doi.org/10.26434/chemrxiv-2021-c2gp3) paper for an example of the kind of work being done with RNMC.
 
