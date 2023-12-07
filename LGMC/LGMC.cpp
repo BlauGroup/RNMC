@@ -109,6 +109,10 @@ int main(int argc, char **argv) {
         case 8:
             LGMC_params_file = optarg;
             break;
+        
+        case 9:
+            isCheckpoint = atof(optarg);
+            break;
 
         default:
             // if an unexpected argument is passed, exit
@@ -166,7 +170,8 @@ int main(int argc, char **argv) {
                             .boxzhi = boxzhi, 
                             .temperature = temperature, 
                             .g_e = g_e, .is_add_sites = is_add_site,
-                            .charge_transfer_style = charge_transfer_style};                               
+                            .charge_transfer_style = charge_transfer_style,
+                            .isCheckpoint = isCheckpointß};                               
 
     Dispatcher<LatticeSolver,
     LatticeReactionNetwork,

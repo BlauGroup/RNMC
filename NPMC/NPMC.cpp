@@ -11,14 +11,15 @@ void print_usage() {
               << "--number_of_simulations\n"
               << "--base_seed\n"
               << "--thread_count\n"
-              << "--step_cutoff|time_cutoff\n";
+              << "--step_cutoff|time_cutoff\n"
+              << "--checkpoint\n";
 
 } // print_usage()
 
 /* ---------------------------------------------------------------------- */
 
 int main(int argc, char **argv) {
-    if (argc != 7) {
+    if (argc != 8) {
         print_usage();
         exit(EXIT_FAILURE);
     }
@@ -31,6 +32,7 @@ int main(int argc, char **argv) {
         {"thread_count", required_argument, NULL, 5},
         {"step_cutoff", optional_argument, NULL, 6},
         {"time_cutoff", optional_argument, NULL, 7},
+        {"checkpoint", required_argument, 0, 8},
         {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };
@@ -43,6 +45,7 @@ int main(int argc, char **argv) {
     int number_of_simulations = 0;
     int base_seed = 0;
     int thread_count = 0;
+    bool isCheckpoint = false;
     
     Cutoff cutoff = {
         .bound =  { .step =  0 },
@@ -86,6 +89,10 @@ int main(int argc, char **argv) {
             cutoff.type_of_cutoff = time_termination;
             break;
 
+        case 8:
+            isCheckpoint = atof(optarg);
+            break;
+
         default:
             // if an unexpected argument is passed, exit
             print_usage();
@@ -96,7 +103,9 @@ int main(int argc, char **argv) {
 
     }
 
-    NanoParticleParameters parameters;
+    NanoParticleParameters parameters {
+        .isCheckpoint = isCheckpoint
+    };
     
     Dispatcher<
     NanoSolver,

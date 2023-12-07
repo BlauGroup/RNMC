@@ -35,8 +35,8 @@ int main(int argc, char **argv) {
         {"thread_count", required_argument, NULL, 5},
         {"step_cutoff", optional_argument, NULL, 6},
         {"time_cutoff", optional_argument, NULL, 7},
-        {"energy_budget", optional_argument, 0, 8},
-        {"checkpoint", required_argument, 0, 9},
+        {"energy_budget", optional_argument, NULL, 8},
+        {"checkpoint", required_argument, NULL, 9},
         {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };
@@ -100,6 +100,7 @@ int main(int argc, char **argv) {
 
         case 9:
             isCheckpoint = atof(optarg);
+            std::cout << isCheckpoint << std::endl;
             break;
 
         default:
@@ -146,7 +147,8 @@ int main(int argc, char **argv) {
     }
     else {
         EnergyReactionNetworkParameters parameters{
-            .energy_budget = energy_budget
+            .energy_budget = energy_budget,
+            .isCheckpoint = isCheckpoint
         };
 
         Dispatcher<

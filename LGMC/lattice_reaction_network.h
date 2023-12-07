@@ -225,6 +225,7 @@ public:
 
     std::vector<LatticeReaction> reactions;
     std::vector<std::vector<int>> dependents;
+    bool isCheckpoint;
     
 private:                                                          
 

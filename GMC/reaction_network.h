@@ -149,7 +149,9 @@ double ReactionNetwork<Reaction>::compute_propensity(
                 * state[reaction.reactants[1]]
                 * reaction.rate;
     }
-
+    if(p < 0){
+        assert(false);
+    }
     return p;
 } //compute_propensity()
 
@@ -256,7 +258,7 @@ void ReactionNetwork<Reaction>::checkpoint(SqlReader<ReactionNetworkReadStateSql
         temp_seed_state_map[state_row.seed][state_row.species_id] = state_row.count;
     }
 
-    if(!read_interrupt_states) {
+    if(!read_interrupt_states && isCheckpoint) {
         while (std::optional<ReactionNetworkReadTrajectoriesSql> maybe_trajectory_row = trajectory_reader.next()) {
 
             ReactionNetworkReadTrajectoriesSql trajectory_row = maybe_trajectory_row.value();

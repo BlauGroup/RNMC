@@ -8,7 +8,7 @@
             "program": "${workspaceFolder}/GMC/GMC_debug",
             "args": ["--reaction_database=../examples/GMC/energy_budget/rn.sqlite",
             "--initial_state_database=../examples/GMC/energy_budget/initial_state.sqlite", "--number_of_simulations=1", 
-            "--base_seed=1000", "--thread_count=1", "--step_cutoff=200", "--checkpoint=1", "--energy_budget=92"],
+            "--base_seed=0", "--thread_count=1", "--step_cutoff=200", "--checkpoint=0", "--energy_budget=92"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/GMC",
             "environment": [],

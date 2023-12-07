@@ -6,7 +6,8 @@ LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection
                         &reaction_network_database, SqlConnection 
                         &initial_state_database, LatticeParameters 
                         parameters) : sampler (Sampler(0)) {
-
+    
+    isCheckpoint = parameters.isCheckpoint;
     // create lattice
     initial_lattice = new Lattice(parameters.latconst,
                                 parameters.boxxhi, 

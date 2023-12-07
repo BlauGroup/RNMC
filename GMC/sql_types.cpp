@@ -52,7 +52,7 @@ void ReactionNetworkWriteTrajectoriesSql::action (ReactionNetworkWriteTrajectori
 /* ------------ Read Trajectory ------------*/
 
 std::string ReactionNetworkReadTrajectoriesSql::sql_statement =
-    "SELECT seed, step, time, reaction_id FROM trajectories;";
+    "SELECT seed, step, reaction_id, time FROM trajectories;";
 
 void ReactionNetworkReadTrajectoriesSql::action(ReactionNetworkReadTrajectoriesSql &r, sqlite3_stmt *stmt) {
     r.seed = sqlite3_column_int(stmt, 0);

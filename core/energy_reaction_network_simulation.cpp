@@ -52,8 +52,6 @@ bool EnergyReactionNetworkSimulation<Solver>::execute_step() {
         // update state
         energy_reaction_network.update_state(std::ref(state), next_reaction);
 
-        std::cout << energy_budget << std::endl;
-
         // update propensities
         energy_reaction_network.update_energy_budget(std::ref(energy_budget), next_reaction);
             

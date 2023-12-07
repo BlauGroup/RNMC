@@ -57,6 +57,8 @@ struct NanoParticle {
     double two_site_interaction_factor;
     double interaction_radius_bound;
 
+    bool isCheckpoint;
+
     std::function<double(double)> distance_factor_function;
 
     NanoParticle (); // default constructor

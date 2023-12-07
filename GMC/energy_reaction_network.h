@@ -19,11 +19,13 @@ struct EnergyReaction {
 // by the dispatcher which are model specific
 struct EnergyReactionNetworkParameters {
     double energy_budget;
+    bool isCheckpoint;
 };
 
 class EnergyReactionNetwork : public ReactionNetwork<EnergyReaction> {
 public:
     double energy_budget; // The total energy available (for Delta G > 0 reactions)
+    bool isCheckpoint; 
 
     EnergyReactionNetwork(
         SqlConnection &reaction_network_database,
@@ -54,7 +56,7 @@ EnergyReactionNetwork::EnergyReactionNetwork(
      EnergyReactionNetworkParameters parameters)
 
     {
-    
+    isCheckpoint = parameters.isCheckpoint;
     // call base class constructor 
     //ReactionNetwork<EnergyReaction>(reaction_network_database,
                     //initial_state_database);
