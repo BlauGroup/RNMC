@@ -13,6 +13,7 @@ void print_usage() {
               << "--base_seed\n"
               << "--thread_count\n"
               << "--step_cutoff|time_cutoff\n"
+              << "--checkpoint"
               << "--parameters\n";
     
 } // print_usage()
@@ -49,7 +50,8 @@ int main(int argc, char **argv) {
         {"thread_count", required_argument, NULL, 5},
         {"step_cutoff", optional_argument, NULL, 6},
         {"time_cutoff", optional_argument, NULL, 7},
-        {"parameters", required_argument, NULL, 8},
+        {"checkpoint", required_argument, NULL, 8},
+        {"parameters", required_argument, NULL, 9},
         {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };
