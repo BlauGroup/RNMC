@@ -3,6 +3,7 @@
 #define RNMC_NPMC_TYPES_H
 
 struct NanoParticleParameters {
+    bool isCheckpoint;
 };
 
 struct Interaction {

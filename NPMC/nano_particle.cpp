@@ -1,15 +1,14 @@
 #include "nano_particle.h"
 
 NanoParticle::NanoParticle() {
-    bool isCheckpoint
 };
 
 NanoParticle::NanoParticle(
     SqlConnection &nano_particle_database,
     SqlConnection &initial_state_database,
-    NanoParticleParameters) {
+    NanoParticleParameters parameters) {
 
-    isCkeckpoint = NanoParticleParameters.isCheckpoint;
+    isCheckpoint = parameters.isCheckpoint;
 
     // sql statements
     SqlStatement<SpeciesSql> species_statement(nano_particle_database);

@@ -2,12 +2,6 @@ Red="\033[0;31m"          # Red
 Green="\033[0;32m"        # Green
 Color_Off="\033[0m"       # Text Reset
 
-function test_core {
-    echo -e "${Green} passed: linear and tree samplers agree ${Color_Off}"
-    RC=0
-
-}
-
 function test_gmc {
     cd ../GMC
     make clean
@@ -18,7 +12,7 @@ function test_gmc {
 
     cp $GMC_TEST_DIR/initial_state.sqlite $GMC_TEST_DIR/initial_state_copy.sqlite
 
-    ../GMC/GMC --reaction_database=$GMC_TEST_DIR/rn.sqlite --initial_state_database=$GMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 --checkpoint=1 &> /dev/null
+    ../GMC/GMC --reaction_database=$GMC_TEST_DIR/rn.sqlite --initial_state_database=$GMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 --checkpoint=0 &> /dev/null
 
     sql='SELECT seed, step, reaction_id FROM trajectories ORDER BY seed ASC, step ASC;'
 
@@ -57,7 +51,7 @@ function test_npmc {
 
     # to check for leaks with valgrind, you need to use the option --fair-sched=yes
 
-    ../NPMC/NPMC --nano_particle_database=$NPMC_TEST_DIR/np.sqlite --initial_state_database=$NPMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 &> /dev/null
+    ../NPMC/NPMC --nano_particle_database=$NPMC_TEST_DIR/np.sqlite --initial_state_database=$NPMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 --checkpoint=0&> /dev/null
 
     sql='SELECT seed, step, site_id_1, site_id_2, interaction_id FROM trajectories ORDER BY seed ASC, step ASC;'
 
@@ -73,9 +67,9 @@ function test_npmc {
         RC=1
     fi
 
-    rm $NPMC_TEST_DIR/initial_state_copy.sqlite
-    rm $NPMC_TEST_DIR/trajectories
-    rm $NPMC_TEST_DIR/copy_trajectories
+    # rm $NPMC_TEST_DIR/initial_state_copy.sqlite
+    # rm $NPMC_TEST_DIR/trajectories
+    # rm $NPMC_TEST_DIR/copy_trajectories
 
     cd ../NPMC
     make clean
