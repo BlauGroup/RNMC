@@ -67,9 +67,9 @@ function test_npmc {
         RC=1
     fi
 
-    # rm $NPMC_TEST_DIR/initial_state_copy.sqlite
-    # rm $NPMC_TEST_DIR/trajectories
-    # rm $NPMC_TEST_DIR/copy_trajectories
+    rm $NPMC_TEST_DIR/initial_state_copy.sqlite
+    rm $NPMC_TEST_DIR/trajectories
+    rm $NPMC_TEST_DIR/copy_trajectories
 
     cd ../NPMC
     make clean
@@ -83,8 +83,6 @@ function check_result {
     fi
 }
 
-
-test_core
 check_result
 test_gmc
 check_result
