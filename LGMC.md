@@ -167,6 +167,7 @@ LGMC requires seven input arguments (either `step_cutoff` or `time_cutoff` must 
 - <span style="color:#0066CC"> thread_count </span>: how many threads to use.
 - <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation.
 - <span style="color:#0066CC"> time_cutoff </span>: how much time in each simulation [s].
+- <span style="color:#0066CC"> checkpoint </span>: whether checkpointing should occur.
 - <span style="color:#0066CC"> parameters </span>: name of .txt file containing additional parameters
     - <span style="color:#006633"> lattice_constant </span>
     - <span style="color:#006633"> box x upper boundary </span>

@@ -21,7 +21,7 @@ We apply the `GMC` module to study the solid-electrolyte interphase formation an
 
 ## GMC - <span style="color: #0066CC"> EUV Lithography </span>
 
-We also apply the `GMC` module to study EUV Lithography, a system where some amount of energy is pumped into the system. In this example a 92 eV photon is abosrbed which enables 92 eV work of dG > 0 reactions. The principal molecules for the real full system are shown below. 
+We also apply the `GMC` module to study EUV Lithography, a system where some amount of energy is pumped into the system. In this example a 92 eV photon is absorbed which enables 92 eV work of dG > 0 reactions. The principal molecules for the real full system are shown below. 
 
 <figure>
     <img src="EUV.png"

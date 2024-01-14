@@ -129,6 +129,8 @@ $ make help
 - <span style="color:#0066CC"> step_cutoff </span>: how many steps in each simulation.
 - <span style="color:#0066CC"> time_cutoff </span>: how much time in each simulation [s].
 - <span style="color:#0066CC"> energy_budget </span>: allowed energy to be added into the system.
+- <span style="color:#0066CC"> checkpoint </span>: whether checkpointing should occur.
+
 
 When running `GMC` ensure that your input file paths are correct considering the executable is inside the `GMC` folder. Below is an example of how `GMC` can be run using the input files inside the <a href="{{ site.github.repository_url }}"> examples directory </a> (here `step_cutoff` is specified):
 
