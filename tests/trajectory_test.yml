@@ -8,4 +8,4 @@ jobs:
   tests:
     runs-on: ubuntu-latest
     steps:
-    - run: ../../tests/test.sh
+    - run: ./test.sh
