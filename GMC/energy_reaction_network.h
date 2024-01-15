@@ -22,10 +22,16 @@ struct EnergyReactionNetworkParameters {
     bool isCheckpoint;
 };
 
+struct EnergyState {
+    std::vector<int> state;
+    std::double energy_budget;
+};
+
 class EnergyReactionNetwork : public ReactionNetwork<EnergyReaction> {
 public:
     double energy_budget; // The total energy available (for Delta G > 0 reactions)
     bool isCheckpoint; 
+    EnergyState energyState;
 
     EnergyReactionNetwork(
         SqlConnection &reaction_network_database,
@@ -46,6 +52,26 @@ public:
     void update_energy_budget(
         double &energy_budget,
         int next_reaction);
+    
+
+    void checkpoint(SqlReader<ReactionNetworkReadStateSql> state_reader, 
+        SqlReader<EnergyNetworkReadCutoffSql> cutoff_reader, 
+        SqlReader<ReactionNetworkReadTrajectoriesSql> trajectory_reader, 
+        std::map<int, EnergyState> &temp_seed_state_map, 
+        std::map<int, int> &temp_seed_step_map, 
+        SeedQueue &temp_seed_queue, 
+        std::map<int, double> &temp_seed_time_map, 
+        ReactionNetwork &model);
+
+    void store_checkpoint(std::vector<ReactionNetworkStateHistoryElement> 
+        &state_packet, std::vector<int> &state,
+        unsigned long int &seed, int step, double time, 
+        std::vector<EnergyNetworkCutoffHistoryElement> &cutoff_packet);
+
+    EnergyReactionWriteCutoffSql cutoff_history_element_to_sql(
+        int seed,
+        EnergyReactionCutoffHistoryElement cutoff_history_element);
+
 };
 
 /*---------------------------------------------------------------------------*/
@@ -237,5 +263,104 @@ void EnergyReactionNetwork::update_energy_budget(
             energy_budget = energy_budget - reaction.dG;
         }
 }
+
+/*---------------------------------------------------------------------------*/
+
+template <typename Reaction>
+void GillespieReactionNetwork::checkpoint(SqlReader<ReactionNetworkReadStateSql> state_reader, 
+                                    SqlReader<EnergyNetworkReadCutoffSql> cutoff_reader, 
+                                    SqlReader<ReactionNetworkReadTrajectoriesSql> trajectory_reader, 
+                                    std::map<int, EnergyState> &temp_seed_state_map, 
+                                    std::map<int, int> &temp_seed_step_map, 
+                                    SeedQueue &temp_seed_queue, 
+                                    std::map<int, double> &temp_seed_time_map, 
+                                    ReactionNetwork<Reaction> &model) {
+    
+    bool read_interrupt_states = false;
+    std::vector<int> default_state = model.initial_state;
+
+    while (std::optional<unsigned long int> maybe_seed =
+               temp_seed_queue.get_seed()){
+                unsigned long int seed = maybe_seed.value();
+                temp_seed_state_map.insert(std::make_pair(seed, default_state));
+    }
+
+    while (std::optional<ReadCutoffSql> maybe_cutoff_row = cutoff_reader.next()){
+            ReadCutoffSql cutoff_row = maybe_cutoff_row.value();
+
+            temp_seed_step_map[cutoff_row.seed] = cutoff_row.step;
+            temp_seed_time_map[cutoff_row.seed] = cutoff_row.time;
+    }
+
+    while (std::optional<ReactionNetworkReadStateSql> maybe_state_row = state_reader.next()){
+        read_interrupt_states = true;
+
+        ReactionNetworkReadStateSql state_row = maybe_state_row.value();
+        temp_seed_state_map[state_row.seed][state_row.species_id] = state_row.count;
+    }
+
+    if(!read_interrupt_states && isCheckpoint) {
+        while (std::optional<ReactionNetworkReadTrajectoriesSql> maybe_trajectory_row = trajectory_reader.next()) {
+
+            ReactionNetworkReadTrajectoriesSql trajectory_row = maybe_trajectory_row.value();
+            
+            Reaction reaction = model.reactions[trajectory_row.reaction_id];
+            // update reactants
+            for (int i = 0; i < reaction.number_of_reactants; i++) {
+                temp_seed_state_map[trajectory_row.seed][reaction.reactants[i]] = 
+                temp_seed_state_map[trajectory_row.seed][reaction.reactants[i]] - 1;
+            }
+            // update products
+            for (int i = 0; i < reaction.number_of_products; i++) {
+                temp_seed_state_map[trajectory_row.seed][reaction.products[i]] = 
+                temp_seed_state_map[trajectory_row.seed][reaction.products[i]] + 1;
+            }
+
+            if (trajectory_row.step > temp_seed_step_map[trajectory_row.seed]) {
+                temp_seed_step_map[trajectory_row.seed] = trajectory_row.step;
+                temp_seed_time_map[trajectory_row.seed] = trajectory_row.time;
+            }
+        }
+    }
+}
+
+/*---------------------------------------------------------------------------*/
+
+template <typename Reaction>
+void EnergyReactionNetwork::store_checkpoint(std::vector<ReactionNetworkStateHistoryElement> 
+    &state_packet, std::vector<int> &state,
+    unsigned long int &seed, int step, double time, 
+    std::vector<EnergyReactionCutoffHistoryElement> &cutoff_packet) {
+    
+    // state information
+    for (unsigned int i = 0; i < state.size(); i++) {
+        state_packet.push_back(ReactionNetworkStateHistoryElement{
+            .seed = seed,
+            .species_id = static_cast<int>(i),
+            .count = state[i]
+        });
+    }
+
+    // cutoff information
+    cutoff_packet.push_back(CutoffHistoryElement {
+        .seed = seed,
+        .step = step,
+        .time = time, 
+        .energy_budget = energy_budget
+    });
+} // store_state_history()
+
+/*---------------------------------------------------------------------------*/
+
+template <typename Reaction>
+EnergyReactionWriteCutoffSql EnergyReactionNetwork::cutoff_history_element_to_sql(
+    int seed, EnergyReactionCutoffHistoryElement cutoff_history_element) {
+        return WriteCutoffSql {
+            .seed = seed,
+            .step = cutoff_history_element.step,
+            .time = cutoff_history_element.time, 
+            .energy_budget = cutoff_history_element.energy_budget
+        };
+} // cutoff_history_element_to_sql()
 
 #endif

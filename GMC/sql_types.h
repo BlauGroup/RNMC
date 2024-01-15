@@ -84,4 +84,31 @@ struct ReactionNetworkTrajectoryHistoryElement {
     int step;
 };
 
+struct EnergyNetworkCutoffHistoryElement{
+    unsigned long int seed;
+    int step;
+    double time;
+    double energy_budget;
+};
+
+class EnergyNetworkReadCutoffSql {
+public:
+    int seed;
+    int step;
+    double time;
+    double energy_budget;
+    static std::string sql_statement;
+    static void action(EnergyNetworkReadCutoffSql &r, sqlite3_stmt *stmt);
+};
+
+class EnergyNetworkWriteCutoffSql {
+public:
+    int seed;
+    int step;
+    double time;
+    double energy_budget;
+    static std::string sql_statement;
+    static void action(EnergyNetworkWriteCutoffSql &r, sqlite3_stmt *stmt);
+};
+
 #endif

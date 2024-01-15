@@ -159,13 +159,13 @@ int main(int argc, char **argv) {
             ReactionNetworkReadTrajectoriesSql,
             ReactionNetworkWriteStateSql,
             ReactionNetworkReadStateSql,
-            WriteCutoffSql,
-            ReadCutoffSql, 
+            EnergyNetworkWriteCutoffSql,
+            EnergyNetworkReadCutoffSql, 
             ReactionNetworkStateHistoryElement, 
             ReactionNetworkTrajectoryHistoryElement, 
-            CutoffHistoryElement, 
+            EnergyNetworkCutoffHistoryElement, 
             EnergyReactionNetworkSimulation<TreeSolver>, 
-            std::vector<int>>
+            EnergyState>
 
         dispatcher (
         reaction_database,

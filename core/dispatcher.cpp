@@ -84,9 +84,6 @@ Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,
         seed_state_map = temp_seed_state_map;
         seed_step_map = temp_seed_step_map;
         seed_time_map = temp_seed_time_map;
-
-
-
 } // Dispatcher()
 
 /* ---------------------------------------------------------------------- */

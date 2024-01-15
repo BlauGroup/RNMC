@@ -59,23 +59,6 @@ public:
         int seed, 
         ReactionNetworkStateHistoryElement history_element);
 
-    WriteCutoffSql cutoff_history_element_to_sql(
-        int seed,
-        CutoffHistoryElement cutoff_history_element);
-    
-    void checkpoint(SqlReader<ReactionNetworkReadStateSql> state_reader, 
-        SqlReader<ReadCutoffSql> cutoff_reader, 
-        SqlReader<ReactionNetworkReadTrajectoriesSql> trajectory_reader, 
-        std::map<int, std::vector<int>> &temp_seed_state_map, 
-        std::map<int, int> &temp_seed_step_map, 
-        SeedQueue &temp_seed_queue, 
-        std::map<int, double> &temp_seed_time_map, 
-        ReactionNetwork &model);
-
-    void store_checkpoint(std::vector<ReactionNetworkStateHistoryElement> 
-        &state_packet, std::vector<int> &state,
-        unsigned long int &seed, int step, double time, 
-        std::vector<CutoffHistoryElement> &cutoff_packet);
 };
 
 template <typename Reaction>
@@ -210,18 +193,6 @@ ReactionNetworkWriteStateSql ReactionNetwork<Reaction>::state_history_element_to
             .count = history_element.count
         };
 } // state_history_element_to_sql()
-
-/*---------------------------------------------------------------------------*/
-
-template <typename Reaction>
-WriteCutoffSql ReactionNetwork<Reaction>::cutoff_history_element_to_sql(
-    int seed, CutoffHistoryElement cutoff_history_element) {
-        return WriteCutoffSql {
-            .seed = seed,
-            .step = cutoff_history_element.step,
-            .time = cutoff_history_element.time
-        };
-} // cutoff_history_element_to_sql()
 
 /*---------------------------------------------------------------------------*/
 
