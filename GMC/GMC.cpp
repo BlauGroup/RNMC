@@ -1,5 +1,6 @@
 #include <getopt.h>
 
+#include "sql_types.h"
 #include "../core/dispatcher.h"
 #include "../core/reaction_network_simulation.h"
 #include "../core/energy_reaction_network_simulation.h"

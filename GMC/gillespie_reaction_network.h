@@ -22,7 +22,7 @@ struct GillespieReaction {
 
 class GillespieReactionNetwork : public ReactionNetwork<GillespieReaction> {
 public:
-    uint8_t energy_budget = 0;
+    std::vector<int> initial_state; // initial state for all the simulations
 
     GillespieReactionNetwork(
         SqlConnection &reaction_network_database,
@@ -41,7 +41,7 @@ public:
         std::map<int, int> &temp_seed_step_map, 
         SeedQueue &temp_seed_queue, 
         std::map<int, double> &temp_seed_time_map, 
-        ReactionNetwork &model);
+        GillespieReactionNetwork &model);
 
     void store_checkpoint(std::vector<ReactionNetworkStateHistoryElement> 
         &state_packet, std::vector<int> &state,
@@ -136,6 +136,8 @@ GillespieReactionNetwork::GillespieReactionNetwork(
     }
      
     std::cerr << time::time_stamp() << "computing dependency graph...\n";
+    dependents.resize(initial_state.size());
+    
     compute_dependents();
     std::cerr << time::time_stamp() << "finished computing dependency graph\n";
 
@@ -179,7 +181,6 @@ void GillespieReactionNetwork::update_propensities(
 
 /*---------------------------------------------------------------------------*/
 
-template <typename Reaction>
 void GillespieReactionNetwork::checkpoint(SqlReader<ReactionNetworkReadStateSql> state_reader, 
                                     SqlReader<ReadCutoffSql> cutoff_reader, 
                                     SqlReader<ReactionNetworkReadTrajectoriesSql> trajectory_reader, 
@@ -187,7 +188,7 @@ void GillespieReactionNetwork::checkpoint(SqlReader<ReactionNetworkReadStateSql>
                                     std::map<int, int> &temp_seed_step_map, 
                                     SeedQueue &temp_seed_queue, 
                                     std::map<int, double> &temp_seed_time_map, 
-                                    ReactionNetwork<Reaction> &model) {
+                                    GillespieReactionNetwork &model) {
     
     bool read_interrupt_states = false;
     std::vector<int> default_state = model.initial_state;
@@ -217,7 +218,7 @@ void GillespieReactionNetwork::checkpoint(SqlReader<ReactionNetworkReadStateSql>
 
             ReactionNetworkReadTrajectoriesSql trajectory_row = maybe_trajectory_row.value();
             
-            Reaction reaction = model.reactions[trajectory_row.reaction_id];
+            GillespieReaction reaction = model.reactions[trajectory_row.reaction_id];
             // update reactants
             for (int i = 0; i < reaction.number_of_reactants; i++) {
                 temp_seed_state_map[trajectory_row.seed][reaction.reactants[i]] = 
@@ -239,7 +240,6 @@ void GillespieReactionNetwork::checkpoint(SqlReader<ReactionNetworkReadStateSql>
 
 /*---------------------------------------------------------------------------*/
 
-template <typename Reaction>
 void GillespieReactionNetwork::store_checkpoint(std::vector<ReactionNetworkStateHistoryElement> 
     &state_packet, std::vector<int> &state,
     unsigned long int &seed, int step, double time, 
@@ -264,8 +264,7 @@ void GillespieReactionNetwork::store_checkpoint(std::vector<ReactionNetworkState
 
 /*---------------------------------------------------------------------------*/
 
-template <typename Reaction>
-WriteCutoffSql ReactionNetwork<Reaction>::cutoff_history_element_to_sql(
+WriteCutoffSql GillespieReactionNetwork::cutoff_history_element_to_sql(
     int seed, CutoffHistoryElement cutoff_history_element) {
         return WriteCutoffSql {
             .seed = seed,

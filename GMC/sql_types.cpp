@@ -88,3 +88,23 @@ void ReactionNetworkWriteStateSql::action(ReactionNetworkWriteStateSql &r, sqlit
 /* --------- State and Trajectory History Elements ---------*/
 // Each Element will be stored in a History Packet which will be stored 
 // in a history queue to be dumped to SQL database in batches
+
+std::string EnergyNetworkReadCutoffSql::sql_statement =
+    "SELECT seed, step, time, energy_budget FROM interrupt_cutoff;";
+
+void EnergyNetworkReadCutoffSql::action(EnergyNetworkReadCutoffSql &r, sqlite3_stmt *stmt) {
+    r.seed = sqlite3_column_int(stmt, 0);
+    r.step = sqlite3_column_int(stmt, 1);
+    r.time = sqlite3_column_double(stmt, 2);
+    r.energy_budget = sqlite3_column_double(stmt, 3);
+}
+
+std::string EnergyNetworkWriteCutoffSql::sql_statement =
+    "INSERT INTO interrupt_cutoff VALUES (?1,?2,?3, ?4);";
+
+void EnergyNetworkWriteCutoffSql::action(EnergyNetworkWriteCutoffSql &r, sqlite3_stmt *stmt) {
+    sqlite3_bind_int(stmt, 1, r.seed);
+    sqlite3_bind_int(stmt, 2, r.step);
+    sqlite3_bind_double(stmt, 3, r.time);
+    sqlite3_bind_double(stmt, 4, r.energy_budget);
+}
