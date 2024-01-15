@@ -135,5 +135,5 @@ $ make help
 When running `GMC` ensure that your input file paths are correct considering the executable is inside the `GMC` folder. Below is an example of how `GMC` can be run using the input files inside the <a href="{{ site.github.repository_url }}"> examples directory </a> (here `step_cutoff` is specified):
 
 ```
-./GMC --reaction_database=../examples/GMC/rn.sqlite --initial_state_database=../examples/GMC/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --energy_budget=0
+./GMC --reaction_database=../examples/GMC/rn.sqlite --initial_state_database=../examples/GMC/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --energy_budget=0 --checkpoint=1
 ```
