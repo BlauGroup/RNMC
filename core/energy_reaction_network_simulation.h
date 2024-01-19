@@ -10,16 +10,15 @@ private:
     Solver solver;
 public:
     EnergyReactionNetwork &energy_reaction_network;
-    EnergyState energy_state;
+    EnergyState state;
     std::vector<ReactionNetworkTrajectoryHistoryElement> history;
     HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue; 
-    double energy_budget;
 
     EnergyReactionNetworkSimulation(EnergyReactionNetwork &reaction_network, 
             unsigned long int seed,
             int step,
             double time,
-            EnergyState energy_state,
+            EnergyState state,
             int history_chunk_size,
             HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue
         ) : 
@@ -30,7 +29,6 @@ public:
         history_queue(history_queue)
         { 
             history.reserve(this->history_chunk_size);
-            energy_budget = state.energy_budget;
         };
 
     void init();

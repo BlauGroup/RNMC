@@ -2,10 +2,10 @@
 
 template <typename Solver>
 void EnergyReactionNetworkSimulation<Solver>::init() {
-    energy_reaction_network.compute_initial_propensities(energy_state.state);
+    energy_reaction_network.compute_initial_propensities(state.homogeneous);
     solver = Solver(this->seed, std::ref(energy_reaction_network.initial_propensities));
     this->update_function = [&] (Update update) {solver.update(update);};
-    energy_budget = energy_reaction_network.energy_budget;
+    state = energy_reaction_network.initial_state;
 } // init()
 
 /* ---------------------------------------------------------------------- */
@@ -50,17 +50,17 @@ bool EnergyReactionNetworkSimulation<Solver>::execute_step() {
         this->step++;
 
         // update state
-        energy_reaction_network.update_state(std::ref(energy_state.state), next_reaction);
+        energy_reaction_network.update_state(std::ref(state.homogeneous), next_reaction);
 
         // update propensities
-        energy_reaction_network.update_energy_budget(std::ref(energy_budget), next_reaction);
+        energy_reaction_network.update_energy_budget(std::ref(state.energy_budget), next_reaction);
             
         // update propensities
         energy_reaction_network.update_propensities(
             this->update_function,
-            std::ref(energy_state.state),
+            std::ref(state.homogeneous),
             next_reaction,
-            energy_budget);
+            state.energy_budget);
 
         return true;
     }
