@@ -1,5 +1,4 @@
 # NPMC
-helloo
 An example of applications of `NPMC` to simulating doped nanoparticle is provided below.
 
 ## GMC - <span style="color: #0066CC"> Doped Nanoparticle </span>
