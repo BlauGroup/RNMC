@@ -3,7 +3,7 @@ For each module of `RNMC` an simple example of its use in an appropriate applica
 
 - `GMC` 
     - [Homogeneous Catalysis](./GMC_exp.md): We apply the `GMC` module to simulating [cobalt-catalyzed hydroformylation](https://pubs.rsc.org/en/content/articlehtml/2017/sc/c7sc03628k).
-    - [Solid-Electrolyte Interphase](./GMC_exp.md): We apply the `GMC` module to simulate the [solid-electrolyte interphase in a lithium-ion battery](https://chemrxiv.org/engage/chemrxiv/article-details/61c509e6f52bc461dacb7766).
+    - [Solid-Electrolyte Interphase](./GMC_exp.md): We apply the `GMC` module to simulate the[solid-electrolyte interphase in a lithium-ion battery](https://chemrxiv.org/engage/chemrxiv/article-details/61c509e6f52bc461dacb7766).
     - [EUV Lithography](./GMC_exp.md): We apply the `GMC` module to simple example of EUV lithography.
 
 - `NPMC`
