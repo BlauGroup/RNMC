@@ -6,6 +6,9 @@ For each module of `RNMC` an simple example of its use in an appropriate applica
     - [Solid-Electrolyte Interphase](./GMC_exp.md): We apply the `GMC` module to simulate the [solid-electrolyte interphase in a lithium-ion battery](https://chemrxiv.org/engage/chemrxiv/article-details/61c509e6f52bc461dacb7766).
     - [EUV Lithography](./GMC_exp.md): We apply the `GMC` module to simple example of EUV lithography.
 
+- `NPMC`
+    - [Doped Nanoparticle](./NPMC.md): We apply the `NPMC` module to simulating a nanoparticle fromed with a NaYF<sub>4</sub> host, with Yb and Er doped on the Y sites.
+
 - `LGMC` 
     - [CO Oxidation on Cu](./LGMC_exp.md): We apply the `LGMC` module to simulate [CO oxidation on Cu](https://pubs.aip.org/aip/jcp/article/155/16/164701/199778/Effects-of-surface-diffusion-in-electrocatalytic) with a static lattice.
     - [Solid-Electrolyte Interphase](./LGMC_exp.md): We apply the `LGMC` module to simulate the formation and evolution of the solid-electrolyte interphase in a lithium-ion battery with a dynamic lattice.
