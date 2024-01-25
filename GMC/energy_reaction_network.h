@@ -309,13 +309,13 @@ void EnergyReactionNetwork::checkpoint(SqlReader<ReactionNetworkReadStateSql> st
             EnergyReaction reaction = model.reactions[trajectory_row.reaction_id];
             // update reactants
             for (int i = 0; i < reaction.number_of_reactants; i++) {
-                temp_seed_state_map[trajectory_row.seed][reaction.reactants[i]] = 
-                temp_seed_state_map[trajectory_row.seed][reaction.reactants[i]] - 1;
+                temp_seed_state_map[trajectory_row.seed].homogeneous[reaction.reactants[i]] = 
+                temp_seed_state_map[trajectory_row.seed].homogeneous[reaction.reactants[i]] - 1;
             }
             // update products
             for (int i = 0; i < reaction.number_of_products; i++) {
-                temp_seed_state_map[trajectory_row.seed][reaction.products[i]] = 
-                temp_seed_state_map[trajectory_row.seed][reaction.products[i]] + 1;
+                temp_seed_state_map[trajectory_row.seed].homogeneous[reaction.products[i]] = 
+                temp_seed_state_map[trajectory_row.seed].homogeneous[reaction.products[i]] + 1;
             }
 
             if (trajectory_row.step > temp_seed_step_map[trajectory_row.seed]) {
