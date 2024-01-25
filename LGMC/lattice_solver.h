@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <string>
 #include <numeric>
+#include <cmath>
 #include <assert.h>
 
 struct LatticeUpdate {

@@ -65,6 +65,7 @@ int main(int argc, char **argv) {
     int base_seed = 0;
     int thread_count = 0;
     char *LGMC_params_file = nullptr;
+    bool isCheckpoint;
 
     Cutoff cutoff = {
         .bound =  { .step =  0 },
