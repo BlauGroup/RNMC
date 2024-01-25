@@ -173,7 +173,7 @@ int main(int argc, char **argv) {
                             .temperature = temperature, 
                             .g_e = g_e, .is_add_sites = is_add_site,
                             .charge_transfer_style = charge_transfer_style,
-                            .isCheckpoint = isCheckpointß};                               
+                            .isCheckpoint = isCheckpoint};                               
 
     Dispatcher<LatticeSolver,
     LatticeReactionNetwork,

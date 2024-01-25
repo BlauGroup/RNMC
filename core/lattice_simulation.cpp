@@ -105,9 +105,9 @@ bool LatticeSimulation::execute_step() {
         // record what happened
         history.push_back(LatticeTrajectoryHistoryElement {
             .seed = this->seed,
-            .reaction_id = next_reaction,
-            .time = this->time,
             .step = this->step,
+            .time = this->time,
+            .reaction_id = next_reaction,
             .site_1_mapping = site_1_mapping,
             .site_2_mapping = site_2_mapping
             });
