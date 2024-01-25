@@ -301,7 +301,7 @@ void EnergyReactionNetwork::checkpoint(SqlReader<ReactionNetworkReadStateSql> st
         temp_seed_state_map[state_row.seed].homogeneous[state_row.species_id] = state_row.count;
     }
 
-    /*if(!read_interrupt_states && isCheckpoint) {
+    if(!read_interrupt_states && isCheckpoint) {
         while (std::optional<ReactionNetworkReadTrajectoriesSql> maybe_trajectory_row = trajectory_reader.next()) {
 
             ReactionNetworkReadTrajectoriesSql trajectory_row = maybe_trajectory_row.value();
@@ -323,7 +323,7 @@ void EnergyReactionNetwork::checkpoint(SqlReader<ReactionNetworkReadStateSql> st
                 temp_seed_time_map[trajectory_row.seed] = trajectory_row.time;
             }
         }
-    } */
+    }
 }
 
 /*---------------------------------------------------------------------------*/
