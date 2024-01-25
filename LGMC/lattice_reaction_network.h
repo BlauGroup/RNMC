@@ -15,6 +15,7 @@
 #include <string>
 #include <assert.h>
 #include <fstream>
+#include <functional>
 
 const int SITE_SELF_REACTION = -3;
 const int SITE_HOMOGENEOUS = -2;
@@ -39,6 +40,7 @@ struct LatticeParameters {
     float g_e;
     bool is_add_sites;
     ChargeTransferStyle charge_transfer_style;
+    bool isCheckpoint;
 };
 
 struct LatticeReaction {

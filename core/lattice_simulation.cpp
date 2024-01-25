@@ -115,8 +115,8 @@ bool LatticeSimulation::execute_step() {
         if (history.size() == this->history_chunk_size ) {
             history_queue.insert_history(
                 HistoryPacket<LatticeTrajectoryHistoryElement> {
-                    .history = std::move(this->history),
-                    .seed = this->seed
+                    .seed = this->seed,
+                    .history = std::move(this->history)
                     });
 
             history = std::vector<LatticeTrajectoryHistoryElement> ();
