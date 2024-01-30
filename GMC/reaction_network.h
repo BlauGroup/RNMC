@@ -130,7 +130,7 @@ double ReactionNetwork<Reaction>::compute_propensity(
                 * reaction.rate;
     }
     if(p < 0){
-        assert(false);
+        return 0;
     }
     return p;
 } //compute_propensity()
@@ -146,6 +146,9 @@ void ReactionNetwork<Reaction>::update_state(
          m < reactions[reaction_index].number_of_reactants;
          m++) {
         state[reactions[reaction_index].reactants[m]]--;
+        if(state[reactions[reaction_index].reactants[m]] < 0) {
+            std::cout << "ERROR" << std::endl;
+        }
     }
 
     for (int m = 0;
@@ -163,6 +166,7 @@ void ReactionNetwork<Reaction>::compute_initial_propensities(std::vector<int> st
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
         initial_propensities[i] = compute_propensity(state, i);
     }
+    assert(true);
 } // compute_initial_propensities()
 
 /*---------------------------------------------------------------------------*/

@@ -15,6 +15,13 @@ template <typename Solver>
 bool ReactionNetworkSimulation<Solver>::execute_step() {
     std::optional<Event> maybe_event = solver.event();
 
+    for(int i = 0; i < state.size(); i++){
+        if(state[i] < 0) {
+            std::cout << "ERROR" << std::endl;
+            assert(false);
+        }
+    }
+
     if (! maybe_event) {
 
         return false;

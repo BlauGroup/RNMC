@@ -1,6 +1,7 @@
 #include <getopt.h>
 
 #include "sql_types.h"
+#include "linear_solver.h"
 #include "../core/dispatcher.h"
 #include "../core/reaction_network_simulation.h"
 #include "../core/energy_reaction_network_simulation.h"
@@ -118,7 +119,7 @@ int main(int argc, char **argv) {
         };
 
         Dispatcher<
-            TreeSolver,
+            LinearSolver,
             GillespieReactionNetwork,
             ReactionNetworkParameters,
             ReactionNetworkWriteTrajectoriesSql,
@@ -130,7 +131,7 @@ int main(int argc, char **argv) {
             ReactionNetworkStateHistoryElement, 
             ReactionNetworkTrajectoryHistoryElement, 
             CutoffHistoryElement, 
-            ReactionNetworkSimulation<TreeSolver>, 
+            ReactionNetworkSimulation<LinearSolver>, 
             std::vector<int>>
 
         dispatcher (
@@ -153,7 +154,7 @@ int main(int argc, char **argv) {
         };
 
         Dispatcher<
-            TreeSolver,
+            LinearSolver,
             EnergyReactionNetwork,
             EnergyReactionNetworkParameters,
             ReactionNetworkWriteTrajectoriesSql,

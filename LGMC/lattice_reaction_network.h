@@ -16,6 +16,7 @@
 #include <assert.h>
 #include <fstream>
 #include <functional>
+#include <memory>
 
 const int SITE_SELF_REACTION = -3;
 const int SITE_HOMOGENEOUS = -2;
@@ -28,9 +29,15 @@ enum Type {ADSORPTION, DESORPTION, HOMOGENEOUS_SOLUTION,
            HOMOGENEOUS_LATTICE, DIFFUSION, OXIDATION, REDUCTION};
 enum ChargeTransferStyle {MARCUS, BUTLER_VOLMER};
 
-struct LatticeState {
+class LatticeState {
+
+public:
     std::vector<int> homogeneous;
-    Lattice *lattice;
+    std::unique_ptr<Lattice> lattice;
+    
+    LatticeState(); // default constructor
+    LatticeState(std::vector<int> homogeneous_in, std::unique_ptr<Lattice> lattice_in);
+    LatticeState(const LatticeState & lattice_in);
 };
 
 struct LatticeParameters {
@@ -79,28 +86,28 @@ public:
                         SqlConnection &initial_state_database, 
                         LatticeParameters parameters);
     
-    ~LatticeReactionNetwork();
+   // ~LatticeReactionNetwork();
 
     /* -------------------------------- Updates Global ----------------------------- */
 
-    void update_state(Lattice *lattice, std::unordered_map<std::string,                     
+    void update_state(std::unique_ptr<Lattice> &lattice, std::unordered_map<std::string,                     
                     std::vector< std::pair<double, int> > > &props,
                     std::vector<int> &state, int next_reaction, 
                     std::optional<int> site_one, std::optional<int> site_two, 
                     long double &prop_sum, int &active_indices, bool &flip_sites);
 
-    void update_propensities(Lattice *lattice, std::vector<int> &state, 
+    void update_propensities(std::unique_ptr<Lattice> &lattice, std::vector<int> &state, 
                             std::function<void(Update update)> update_function, 
                             std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,
                             std::vector< std::pair<double, int> > > &props)> lattice_update_function, 
                             int next_reaction, std::optional<int> site_one, std::optional<int> site_two, 
                             std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props);
 
-    void update_adsorp_state(Lattice *lattice, std::unordered_map<std::string, 
+    void update_adsorp_state(std::unique_ptr<Lattice> &lattice, std::unordered_map<std::string, 
                             std::vector< std::pair<double, int> > > &props,
                             long double &prop_sum, int &active_indices); 
 
-    void update_adsorp_props(Lattice *lattice, std::function<void(LatticeUpdate lattice_update, 
+    void update_adsorp_props(std::unique_ptr<Lattice> &lattice, std::function<void(LatticeUpdate lattice_update, 
                             std::unordered_map<std::string,                     
                             std::vector< std::pair<double, int> > > &props)> lattice_update_function, 
                             std::vector<int> &state, 
@@ -108,12 +115,12 @@ public:
 
     /* -------------------------------- Updates Lattice ----------------------------- */
 
-    bool update_state_lattice(Lattice *lattice, std::unordered_map<std::string,                     
+    bool update_state_lattice(std::unique_ptr<Lattice> &lattice, std::unordered_map<std::string,                     
                             std::vector< std::pair<double, int> > > &props, 
                             int next_reaction, int site_one, int site_two, 
                             long double &prop_sum, int &active_indices, bool &flip_sites);
 
-    void clear_site(Lattice *lattice, std::unordered_map<std::string,                     
+    void clear_site(std::unique_ptr<Lattice> &lattice, std::unordered_map<std::string,                     
                     std::vector< std::pair<double, int> > > &props,
                     int site, std::optional<int> ignore_neighbor, 
                     long double &prop_sum, int &active_indices);
@@ -123,15 +130,15 @@ public:
                         int site_one, int site_two, long double &prop_sum, 
                         int &active_indices);
 
-    void relevant_react(Lattice *lattice, std::function<void(LatticeUpdate lattice_update, 
+    void relevant_react(std::unique_ptr<Lattice> &lattice, std::function<void(LatticeUpdate lattice_update, 
                     std::unordered_map<std::string,                     
                     std::vector< std::pair<double, int> > > &props)> update_function,
                     int site, std::optional<int> ignore_neighbor,
                     std::unordered_map<std::string, std::vector< std::pair<double, int> > > &props);
 
-    double compute_propensity(int num_one, int num_two, int react_id, Lattice *lattice, int site_id = 0);
+    double compute_propensity(int num_one, int num_two, int react_id, std::unique_ptr<Lattice> &lattice, int site_id = 0);
 
-    bool update_propensities(Lattice *lattice, 
+    bool update_propensities(std::unique_ptr<Lattice> &lattice, 
                         std::function<void(LatticeUpdate lattice_update, 
                         std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props)> 
@@ -144,7 +151,7 @@ public:
     double sum_row(std::string hash, std::unordered_map<std::string,                     
                     std::vector< std::pair<double, int> > > &props);
     
-    void update_all_propensities(Lattice *lattice, std::unordered_map<std::string,                     
+    void update_all_propensities(std::unique_ptr<Lattice> &lattice, std::unordered_map<std::string,                     
                             std::vector< std::pair<double, int> > > &props, 
                             long double &prop_sum, int &active_indices,
                             std::function<void(LatticeUpdate lattice_update, 
@@ -155,20 +162,21 @@ public:
     /* -------------------------- Updates Reaction Network ----------------------------- */
 
     void init_reaction_network(SqlConnection &reaction_network_database,
-    SqlConnection &initial_state_database);
+    SqlConnection &initial_state_database,
+    LatticeParameters parameters);
 
     void fill_reactions(SqlConnection &reaction_network_database);
 
     void compute_dependents();
 
-    double compute_propensity(std::vector<int> &state, int reaction_index, Lattice *lattice);
+    double compute_propensity(std::vector<int> &state, int reaction_index, std::unique_ptr<Lattice> &lattice );
 
     void update_propensities(std::function<void(Update update)> update_function,
-                            std::vector<int> &state, int next_reaction, Lattice *lattice);
+                            std::vector<int> &state, int next_reaction, std::unique_ptr<Lattice> &lattice);
     
     void update_state_solution(std::vector<int> &state, int reaction_index);
 
-    void compute_initial_propensities(std::vector<int> state, Lattice *lattice);
+    void compute_initial_propensities(std::vector<int> state, std::unique_ptr<Lattice> &lattice);
 
     /* -------------------------------------------------------------------------------- */                       
 
@@ -222,8 +230,7 @@ public:
         szudzik_mapping(int i_max, int j_max, int k_max);
 
     std::vector<double> initial_propensities;
-    std::vector<int> initial_state;
-    Lattice *initial_lattice;   
+    LatticeState initial_state; 
 
     std::vector<LatticeReaction> reactions;
     std::vector<std::vector<int>> dependents;

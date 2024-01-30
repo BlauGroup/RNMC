@@ -80,7 +80,9 @@ Lattice::Lattice(const Lattice& other) {
     zhi = other.zhi;                
     is_xperiodic = other.is_xperiodic;
     is_yperiodic = other.is_yperiodic;
-    is_zperiodic = other.is_zperiodic;         
+    is_zperiodic = other.is_zperiodic;    
+    maxz = other.maxz;     
+    loc_map = other.loc_map;
     
     for(auto it = other.sites.begin(); it != other.sites.end(); it++) {
         sites[it->first] = it->second;

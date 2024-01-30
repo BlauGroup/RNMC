@@ -81,7 +81,7 @@ Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,
             temp_seed_state_map, temp_seed_step_map, 
             temp_seed_queue, temp_seed_time_map, model);
 
-        seed_state_map = temp_seed_state_map;
+        seed_state_map = std::move(temp_seed_state_map);
         seed_step_map = temp_seed_step_map;
         seed_time_map = temp_seed_time_map;
 } // Dispatcher()
@@ -289,12 +289,12 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,
 
     initial_state_database.exec("COMMIT;");
 
-    std::cerr << time::time_stamp()
-              << "wrote "
-              << history_packet.history.size()
-              << " events from trajectory "
-              << history_packet.seed
-              << " to database\n";
+    // std::cerr << time::time_stamp()
+    //           << "wrote "
+    //           << history_packet.history.size()
+    //           << " events from trajectory "
+    //           << history_packet.seed
+    //           << " to database\n";
 
 } //record_simulation_history()
 
@@ -337,12 +337,12 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,
     }
     initial_state_database.exec("COMMIT;");
 
-    std::cerr << time::time_stamp()
-              << "wrote "
-              << state_history_packet.history.size()
-              << " states for trajectory "
-              << state_history_packet.seed
-              << " to database\n";
+    // std::cerr << time::time_stamp()
+    //           << "wrote "
+    //           << state_history_packet.history.size()
+    //           << " states for trajectory "
+    //           << state_history_packet.seed
+    //           << " to database\n";
 
 } //record_state()
 
@@ -385,10 +385,10 @@ void Dispatcher<Solver, Model, Parameters, WriteTrajectoriesSql,
     }
     initial_state_database.exec("COMMIT;");
 
-    std::cerr << time::time_stamp()
-              << "wrote cutoff for trajectory "
-              << cutoff_history_packet.seed
-              << " to database\n";
+    // std::cerr << time::time_stamp()
+    //           << "wrote cutoff for trajectory "
+    //           << cutoff_history_packet.seed
+    //           << " to database\n";
 
 } //record_cutoff()
 

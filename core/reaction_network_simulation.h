@@ -14,7 +14,7 @@ public:
     std::vector<ReactionNetworkTrajectoryHistoryElement> history;
     HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue; 
 
-    ReactionNetworkSimulation(GillespieReactionNetwork &reaction_network, 
+    ReactionNetworkSimulation(GillespieReactionNetwork reaction_network, 
             unsigned long int seed,
             int step,
             double time,

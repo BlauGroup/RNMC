@@ -5,7 +5,6 @@ void EnergyReactionNetworkSimulation<Solver>::init() {
     energy_reaction_network.compute_initial_propensities(state.homogeneous);
     solver = Solver(this->seed, std::ref(energy_reaction_network.initial_propensities));
     this->update_function = [&] (Update update) {solver.update(update);};
-    state = energy_reaction_network.initial_state;
 } // init()
 
 /* ---------------------------------------------------------------------- */

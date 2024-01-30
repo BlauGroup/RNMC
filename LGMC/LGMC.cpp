@@ -13,7 +13,7 @@ void print_usage() {
               << "--base_seed\n"
               << "--thread_count\n"
               << "--step_cutoff|time_cutoff\n"
-              << "--checkpoint"
+              << "--checkpoint\n"
               << "--parameters\n";
     
 } // print_usage()
@@ -37,7 +37,7 @@ void print_usage_LGMC_parameters() {
 
 int main(int argc, char **argv) {
 
-    if (argc != 8) {
+    if (argc != 9) {
         print_usage();
         exit(EXIT_FAILURE);
     }
@@ -110,13 +110,13 @@ int main(int argc, char **argv) {
             break;
 
         case 8:
-            LGMC_params_file = optarg;
-            break;
-        
-        case 9:
             isCheckpoint = atof(optarg);
             break;
 
+        case 9:
+            LGMC_params_file = optarg;
+            break;
+        
         default:
             // if an unexpected argument is passed, exit
             print_usage();

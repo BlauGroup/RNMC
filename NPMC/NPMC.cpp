@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
         {"thread_count", required_argument, NULL, 5},
         {"step_cutoff", optional_argument, NULL, 6},
         {"time_cutoff", optional_argument, NULL, 7},
-        {"checkpoint", required_argument, 0, 8},
+        {"checkpoint", required_argument, NULL, 8},
         {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };

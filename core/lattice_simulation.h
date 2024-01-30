@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <memory>
 
 #include "dispatcher.h"
 #include "simulation.h"
@@ -13,7 +14,7 @@ class LatticeSimulation : public Simulation<LatticeSolver> {
     public:
     std::unordered_map<std::string, std::vector< std::pair<double, int> > > props;
     LatticeSolver latSolver;
-    LatticeReactionNetwork &lattice_network;
+    LatticeReactionNetwork lattice_network;
     LatticeState state;
     std::function<void(LatticeUpdate, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &)> 
@@ -33,15 +34,14 @@ class LatticeSimulation : public Simulation<LatticeSolver> {
         history_queue(history_queue)
         { 
             state.homogeneous = state_in.homogeneous;
-            state.lattice = state_in.lattice;
-            state_in.lattice = NULL;
+            state.lattice = std::move(state_in.lattice);
             history.reserve(this->history_chunk_size);
         };
     
     void init(); 
     bool execute_step();
     void print_output();
-    ~LatticeSimulation() { delete state.lattice;};
+    // ~LatticeSimulation() { delete state.lattice;};
 };
 
 #include "lattice_simulation.cpp"

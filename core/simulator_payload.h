@@ -70,9 +70,8 @@ public:
             unsigned long int seed = maybe_seed.value();
             int step = seed_step_map[seed];
             double time = seed_time_map[seed];
-            State state = seed_state_map[seed];
-
-            Sim simulation(model, seed, step, time, state, 
+            // std::cout << seed << std::endl;
+            Sim simulation(model, seed, step, time, seed_state_map[seed], 
                            history_chunk_size, history_queue);
             simulation.init();
 
