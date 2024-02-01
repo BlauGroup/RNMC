@@ -9,7 +9,7 @@ class EnergyReactionNetworkSimulation : public Simulation<Solver> {
 private: 
     Solver solver;
 public:
-    EnergyReactionNetwork &energy_reaction_network;
+    EnergyReactionNetwork energy_reaction_network;
     EnergyState state;
     std::vector<ReactionNetworkTrajectoryHistoryElement> history;
     HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue; 

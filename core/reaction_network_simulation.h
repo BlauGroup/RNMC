@@ -9,7 +9,7 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
 private: 
     Solver solver;
 public:
-    GillespieReactionNetwork &reaction_network;
+    GillespieReactionNetwork reaction_network;
     std::vector<int> state;
     std::vector<ReactionNetworkTrajectoryHistoryElement> history;
     HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue; 
