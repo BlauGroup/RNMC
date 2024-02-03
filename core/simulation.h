@@ -6,6 +6,7 @@
 #include <set>
 #include <atomic>
 #include <unistd.h>
+#include <string>
 #include <cstring>
 
 #include "../GMC/tree_solver.h"
