@@ -37,7 +37,7 @@ public:
     
     LatticeState(); // default constructor
     LatticeState(std::vector<int> homogeneous_in, std::unique_ptr<Lattice> lattice_in);
-    LatticeState(const LatticeState & lattice_in);
+    LatticeState(const LatticeState & lattice_in); // copy constructor
 };
 
 struct LatticeParameters {
@@ -86,7 +86,7 @@ public:
                         SqlConnection &initial_state_database, 
                         LatticeParameters parameters);
     
-   // ~LatticeReactionNetwork();
+    LatticeReactionNetwork(LatticeReactionNetwork const &lattice_reaction_network_in); // copy constructor
 
     /* -------------------------------- Updates Global ----------------------------- */
 
@@ -239,7 +239,6 @@ public:
 private:                                                          
 
     Sampler sampler;
-    std::unordered_map<int,int> species_size;           // key: species ID, value: size of the species
 
     double factor_two; // rate modifier for reactions with two reactants
     double factor_duplicate; // rate modifier for reactions of form A + A -> ...

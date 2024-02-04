@@ -33,11 +33,21 @@ LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection
 
 /* ---------------------------------------------------------------------- */
 
-// LatticeReactionNetwork::~LatticeReactionNetwork()
-// {
-//     delete initial_lattice;
-
-// } // ~LatticeReactionNetwork()
+LatticeReactionNetwork::LatticeReactionNetwork(const LatticeReactionNetwork &other): 
+    initial_state(other.initial_state), sampler(Sampler(0)) {
+    
+    initial_propensities = other.initial_propensities;
+    reactions = other.reactions;
+    dependents = other.dependents;
+    isCheckpoint = other.isCheckpoint;
+    
+    factor_two = other.factor_two;
+    factor_duplicate = other.factor_duplicate;
+    charge_transfer_style = other.charge_transfer_style;
+    is_add_sites = other.is_add_sites;
+    temperature = other.temperature;
+    g_e = other.g_e;
+} // copy constructor
 
 /* ---------------------------------------------------------------------- */
 
