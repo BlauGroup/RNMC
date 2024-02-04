@@ -10,6 +10,7 @@
 #include <numeric>
 #include <cmath>
 #include <assert.h>
+#include <optional>
 
 struct LatticeUpdate {
     unsigned long int index;

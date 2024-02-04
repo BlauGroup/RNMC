@@ -24,7 +24,7 @@ class LatticeSimulation : public Simulation<LatticeSolver> {
     std::vector<LatticeTrajectoryHistoryElement> history;
     HistoryQueue<HistoryPacket<LatticeTrajectoryHistoryElement>> &history_queue; 
 
-    LatticeSimulation(LatticeReactionNetwork &lattice_network, unsigned long int seed, 
+    LatticeSimulation(LatticeReactionNetwork lattice_network, unsigned long int seed, 
                       int step, double time, LatticeState state_in, int history_chunk_size,
                       HistoryQueue<HistoryPacket<LatticeTrajectoryHistoryElement>> &history_queue
         ) :
