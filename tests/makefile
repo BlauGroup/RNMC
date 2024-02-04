@@ -101,7 +101,10 @@ reaction_network_test : reaction_network_test.o $(GMC_DIR)/reaction_network.o $(
 nano_particle_test : nano_particle_test.o $(NPMC_DIR)/nano_particle.o $(NPMC_DIR)/sql_types.o \
                                 $(core_DIR)/sql_types.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
+<<<<<<< Updated upstream
 
 GMC_solvers : GMC_solvers.o $(GMC_DIR)/tree_solver.o $(GMC_DIR)/sparse_solver.o \
                                 $(GMC_DIR)/linear_solver.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
+=======
+>>>>>>> Stashed changes
