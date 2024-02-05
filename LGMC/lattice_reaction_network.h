@@ -36,7 +36,7 @@ public:
     std::unique_ptr<Lattice> lattice;
     
     LatticeState(); // default constructor
-    LatticeState(std::vector<int> homogeneous_in, std::unique_ptr<Lattice> lattice_in);
+    LatticeState(std::vector<int> homogeneous_in, int lattice_const_in);
     LatticeState(const LatticeState & lattice_in); // copy constructor
 };
 
