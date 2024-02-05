@@ -1136,7 +1136,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
     else {
         // static lattice or dynamic and not reading from state
         int initial_latconst = model.initial_state.lattice->latconst;
-        std::cout << (initial_latconst);
+
         // create a default lattice for each simulation
         while (std::optional<unsigned long int> maybe_seed =
             temp_seed_queue.get_seed()) {
@@ -1305,33 +1305,6 @@ double LatticeReactionNetwork::get_marcus_rate_coefficient(double base_dg, doubl
         return kappa * prefactor * std::exp(-1 * dg_barrier / (KB * temperature));
     }
 }
-
-/* ---------------------------------------------------------------------- */
-
-void LatticeReactionNetwork::print_state_propensities(long double propensity_sum,
-                            std::vector<double> &propensities,
-                            std::vector<int> &state, std::string filename) {
-
-    std::ofstream myfile;
-    myfile.open (filename);
-
-    myfile << "Begin Print Homogeneous Propensities" << std::endl;
-    
-    for(int i = 0; i < int(propensities.size()); i++) {
-        myfile << "Reaction: " << i << "propensity: " << propensities[i] << std::endl;
-    }
-
-    myfile << "Begin Print Homogeneous State" << std::endl;
-    
-    for(int i = 0; i < int(state.size()); i++) {
-        myfile << "Species: " << i << "quantity: " << state[i] << std::endl;
-    }
-
-    myfile << "total propensity_sum" << propensity_sum;
-
-    myfile.close();
-
-} // print_state_propensities()
 
 /* ---------------------------------------------------------------------- */
 

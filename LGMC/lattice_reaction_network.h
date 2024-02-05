@@ -218,10 +218,6 @@ public:
                                     double e_free, double distance,
                                     double temperature, bool reduction);
 
-    void print_state_propensities(long double propensity_sum,
-                                std::vector<double> &propensities,
-                                std::vector<int> &state, std::string filename);
-
     int szudzik(int a, int b);
 
     int combine(int i, int j, int k);
