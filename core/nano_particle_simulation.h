@@ -36,7 +36,6 @@ public:
 
     void init();
     bool execute_step();
-    void print_output() {assert(true);};
 };
 
 #include "nano_particle_simulation.cpp"

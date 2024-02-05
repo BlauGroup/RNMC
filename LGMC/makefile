@@ -16,7 +16,7 @@ OBJECTS     = $(SOURCES:%.cpp=%.o)
 # name of the perf data file, only used by the clean target
 PERF_FILE = perf.data*
 
-CXXFLAGS = -fno-rtti -fno-exceptions -std=c++17 -Wall -Wextra $(shell gsl-config --cflags) $(shell gsl-config --libs) -lsqlite3 -lpthread
+CXXFLAGS = -fno-rtti -fno-exceptions -std=c++17 -Wall -Wextra $(shell gsl-config --cflags) $(shell gsl-config --libs) -lsqlite3 -lpthread -fsanitize=address
 # CXXFLAGS = -fno-rtti -fno-exceptions -std=c++20 -Wall -Wextra $(shell pkg-config gsl --cflags) $(shell pkg-config gsl --libs) -lsqlite3 -lpthread
 
 # make debug - will compile sources with $(CXXFLAGS) and the -g3 flag

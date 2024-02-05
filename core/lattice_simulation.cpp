@@ -136,12 +136,3 @@ bool LatticeSimulation::execute_step() {
     }
  
 } //execute_step()
-
-
-/*---------------------------------------------------------------------------*/
-
-void LatticeSimulation::print_output() {
-    lattice_network.print_state_propensities(latSolver.propensity_sum, 
-                                             latSolver.propensities, 
-                                             state.homogeneous, "final_state.txt");
-} // print_output()

@@ -70,7 +70,7 @@ public:
             unsigned long int seed = maybe_seed.value();
             int step = seed_step_map[seed];
             double time = seed_time_map[seed];
-            // std::cout << seed << std::endl;
+
             Sim simulation(model, seed, step, time, seed_state_map[seed], 
                            history_chunk_size, history_queue);
             simulation.init();
@@ -83,8 +83,6 @@ public:
                 simulation.execute_time(cutoff.bound.time);
                 break;
             }
-
-            simulation.print_output();
             
             // Make a vector of StateHistoryElements for the current state
             std::vector<StateHistory> state_packet;

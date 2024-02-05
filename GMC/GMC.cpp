@@ -102,7 +102,6 @@ int main(int argc, char **argv) {
 
         case 9:
             isCheckpoint = atof(optarg);
-            std::cout << isCheckpoint << std::endl;
             break;
 
         default:

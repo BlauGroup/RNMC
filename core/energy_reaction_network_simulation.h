@@ -33,7 +33,6 @@ public:
 
     void init();
     bool execute_step();
-    void print_output() {assert(true);};
 };
 
 #include "energy_reaction_network_simulation.cpp"

@@ -8,13 +8,11 @@ TreeSolver::TreeSolver(
     sampler (Sampler(seed)),
     number_of_active_indices (0) {
         
-    int m = 0; // tree depth
     int pow2 = 1; // power of 2 >= numberOfReactions
     number_of_indices = initial_propensities.size();
 
     while (pow2 < number_of_indices) {
         pow2 *= 2;
-        m++;
     };
 
     int number_of_tree_nodes = 2 * pow2 - 1;

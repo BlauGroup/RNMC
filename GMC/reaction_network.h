@@ -66,18 +66,6 @@ ReactionNetwork<Reaction>::ReactionNetwork() {} // ReactionNetwork()
 /*---------------------------------------------------------------------------*/
 
 template <typename Reaction>
-ReactionNetwork<Reaction>::ReactionNetwork(
-     SqlConnection &reaction_network_database,
-     SqlConnection &initial_state_database)
-    {
-
-    assert(true);
-
-} // ReactionNetwork()
-
-/*---------------------------------------------------------------------------*/
-
-template <typename Reaction>
 void ReactionNetwork<Reaction>::compute_dependents() {
 
     for ( unsigned int reaction_id = 0; reaction_id <  reactions.size(); reaction_id++ ) {
@@ -146,9 +134,6 @@ void ReactionNetwork<Reaction>::update_state(
          m < reactions[reaction_index].number_of_reactants;
          m++) {
         state[reactions[reaction_index].reactants[m]]--;
-        if(state[reactions[reaction_index].reactants[m]] < 0) {
-            std::cout << "ERROR" << std::endl;
-        }
     }
 
     for (int m = 0;

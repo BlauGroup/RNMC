@@ -98,7 +98,6 @@ std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std:
             }
         }
         propensity_sum = sum;
-        std::cout << "ERROR" << std::endl;
 
         if(!(propensity_sum > 0)) {
                 return std::optional<LatticeEvent> ();
@@ -180,7 +179,6 @@ std::optional<LatticeEvent> LatticeSolver::event_lattice(std::unordered_map<std:
                 }
             }
             propensity_sum = sum;
-            std::cout << "ERROR" << std::endl;
 
             if(!(propensity_sum > 0)) {
                 return std::optional<LatticeEvent> ();
