@@ -22,10 +22,7 @@ void LatticeSimulation::init() {
         lattice_network.update_all_propensities(state.lattice, props, 
                                                 latSolver.propensity_sum, 
                                                 latSolver.number_of_active_indices, 
-                                                lattice_update_function);
-        lattice_network.print_state_propensities(latSolver.propensity_sum, 
-                                                 latSolver.propensities, 
-                                                 state.homogeneous, "checkpoint.txt");     
+                                                lattice_update_function); 
     }
 } //init()
 
