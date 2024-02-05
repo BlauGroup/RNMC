@@ -1,15 +1,16 @@
 #include "lattice_reaction_network.h"
 
 LatticeState::LatticeState(const LatticeState & lattice_in) : homogeneous(lattice_in.homogeneous),
-lattice(lattice_in.lattice ? new Lattice(*lattice_in.lattice) : nullptr)
+lattice((new Lattice(0)))
 {}
 
 LatticeState::LatticeState() {
     lattice = nullptr;
 } // default constructor
 
-LatticeState::LatticeState(std::vector<int> homogeneous_in, int lattice_const_in) : lattice((new Lattice(lattice_const_in))){
+LatticeState::LatticeState(std::vector<int> homogeneous_in, std::unique_ptr<Lattice> lattice_in) {
     homogeneous = homogeneous_in;
+    lattice = std::move(lattice_in);
 }
 
 
@@ -1094,8 +1095,9 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
             unsigned long int seed = maybe_seed.value();
 
             // Each LatticeState must have its own lattice to point to
+            std::unique_ptr<Lattice> default_lattice (new Lattice(initial_latconst));
 
-            LatticeState default_state = {model.initial_state.homogeneous, initial_latconst};
+            LatticeState default_state = {model.initial_state.homogeneous, std::move(default_lattice)};
             temp_seed_state_map.insert(std::make_pair(seed, std::move(default_state)));
         }
 
@@ -1146,9 +1148,8 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
                 model.initial_state.lattice->xhi/initial_latconst, 
                 model.initial_state.lattice->yhi/initial_latconst, 
                 model.initial_state.lattice->zhi/initial_latconst));
-            
-            LatticeState default_state = {model.initial_state.homogeneous, initial_latconst};
-            //LatticeState default_state = {model.initial_state.homogeneous, std::move(default_lattice)};
+
+            LatticeState default_state = {model.initial_state.homogeneous, std::move(default_lattice)};
 
             temp_seed_state_map.insert(std::make_pair(seed, std::move(default_state)));
         }

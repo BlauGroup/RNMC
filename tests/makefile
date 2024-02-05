@@ -87,7 +87,7 @@ gtest_main.a : gtest-all.o gtest_main.o
 # build each test
 
 lattice_test : lattice_test.o $(LGMC_DIR)/lattice.o 
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread -I$(GTEST_DIR) $^ -o $@
 
 lattice_reaction_network_test : lattice_reaction_network_test.o $(LGMC_DIR)/lattice_reaction_network.o \
                                 $(LGMC_DIR)/lattice_solver.o $(LGMC_DIR)/lattice.o \
