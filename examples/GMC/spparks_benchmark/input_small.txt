@@ -1,0 +1,24 @@
+# SPPARKS chemistry application 
+# RNMC example 
+seed 1234 
+app_style chemistry
+solve_style tree 
+volume 1.9098395e-11
+add_species AA
+add_species AB
+add_species AC
+add_species AD
+add_species AE
+add_reaction 0 AA AB 1000000.0 AB
+add_reaction 1 AA AE 1000.0 AE
+add_reaction 2 AE 1000.0 AA AE
+add_reaction 3 AE 0.0 AD
+add_reaction 4 AD 0.0 AE
+add_reaction 5 AB AD 0.0 AC AA
+add_reaction 6 AC 100000.0 AA AC
+add_reaction 7 AA AB 1.0 AA AB
+add_reaction 8 AA AE 1.0 AA AE
+count AB 2500
+count AE 15000
+
+run 1000
