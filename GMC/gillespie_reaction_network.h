@@ -23,7 +23,7 @@ struct GillespieReaction {
 class GillespieReactionNetwork : public ReactionNetwork<GillespieReaction> {
 public:
     std::vector<int> initial_state; // initial state for all the simulations
-
+    GillespieReactionNetwork(){}; // default constructor
     GillespieReactionNetwork(
         SqlConnection &reaction_network_database,
         SqlConnection &initial_state_database,

@@ -58,25 +58,25 @@ TEST(lattice_reaction_network_test, Initialization) {
                                           parameters);
    
    // check static lattice
-   EXPECT_EQ(static_LGMC_.initial_state[0], 0);
-   EXPECT_EQ(static_LGMC_.initial_state[1], 2500);
-   EXPECT_EQ(static_LGMC_.initial_state[2], 0);
-   EXPECT_EQ(static_LGMC_.initial_state[3], 0);
-   EXPECT_EQ(static_LGMC_.initial_state[4], 15000);
+   EXPECT_EQ(static_LGMC_.initial_state.homogeneous[0], 0);
+   EXPECT_EQ(static_LGMC_.initial_state.homogeneous[1], 2500);
+   EXPECT_EQ(static_LGMC_.initial_state.homogeneous[2], 0);
+   EXPECT_EQ(static_LGMC_.initial_state.homogeneous[3], 0);
+   EXPECT_EQ(static_LGMC_.initial_state.homogeneous[4], 15000);
 
    // check dynamic lattice
-   for(int i = 0; i < static_cast<int>(dynamic_LGMC_.initial_state.size()); i++) {
+   for(int i = 0; i < static_cast<int>(dynamic_LGMC_.initial_state.homogeneous.size()); i++) {
       if(i == 3) {
-         EXPECT_EQ(dynamic_LGMC_.initial_state[3], 10000);
+         EXPECT_EQ(dynamic_LGMC_.initial_state.homogeneous[3], 10000);
       }
       else {
-         EXPECT_EQ(dynamic_LGMC_.initial_state[i], 0);
+         EXPECT_EQ(dynamic_LGMC_.initial_state.homogeneous[i], 0);
       }
    }
 
    // check basic member variables
    EXPECT_EQ(int(static_LGMC_.reactions.size()), 9);
-   EXPECT_EQ(int(static_LGMC_.initial_state.size()), 5);
+   EXPECT_EQ(int(static_LGMC_.initial_state.homogeneous.size()), 5);
    EXPECT_EQ(int(static_LGMC_.initial_propensities.size()), 9);
 
 }

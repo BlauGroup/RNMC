@@ -8,7 +8,7 @@
 #include <string>
 
 #include "../core/sql.h"
-#include "../GMC/reaction_network.h"
+#include "../GMC/gillespie_reaction_network.h"
 #include "../GMC/tree_solver.h"
 #include "gtest/gtest.h"
 
@@ -25,14 +25,14 @@ class ReactionNetworkTest : public ::testing::Test {
 
       ReactionNetworkParameters parameters;
 
-      reaction_network_ = ReactionNetwork(model_database,
+      reaction_network_ = GillespieReactionNetwork(model_database,
                                           initial_state_database,
                                           parameters);
 
       reaction_network_.compute_initial_propensities(reaction_network_.initial_state);
    }
 
-   ReactionNetwork reaction_network_;
+   GillespieReactionNetwork reaction_network_;
 
 };
 
