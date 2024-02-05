@@ -31,9 +31,10 @@ class LatticeSimulation : public Simulation<LatticeSolver> {
         // call base class constructor
         Simulation<LatticeSolver>(seed, history_chunk_size, step, time),
         lattice_network(lattice_network),
-        state(state_in),
         history_queue(history_queue)
         { 
+            state.homogeneous = state_in.homogeneous;
+            state.lattice = std::move(state_in.lattice);
             history.reserve(this->history_chunk_size);
         };
     
