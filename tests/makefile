@@ -17,7 +17,7 @@
 # GTEST_DIR = ..
 # GTEST_DIR = /usr/local/gtest
 # TODO: change for your file
-#GTEST_DIR = $(home)
+# GTEST_DIR = $(home)
 GTEST_DIR = /Users/laurazichi/googletest/googletest
 
 # Where to find user code
