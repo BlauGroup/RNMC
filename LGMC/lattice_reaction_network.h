@@ -201,7 +201,7 @@ public:
                     LatticeReactionNetwork &model);
 
     void store_checkpoint(std::vector<LatticeStateHistoryElement> &state_packet,
-                        LatticeState &state, unsigned long int &seed, 
+                        LatticeState state, unsigned long int &seed, 
                         int step, double time, 
                         std::vector<LatticeCutoffHistoryElement> &cutoff_packet);
 

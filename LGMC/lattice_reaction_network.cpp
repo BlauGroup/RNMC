@@ -1198,7 +1198,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 /* ---------------------------------------------------------------------- */
 
  void LatticeReactionNetwork::store_checkpoint(std::vector<LatticeStateHistoryElement> &state_packet,
-                              LatticeState &state, unsigned long int &seed, int step, double time, 
+                              LatticeState state, unsigned long int &seed, int step, double time, 
                               std::vector<LatticeCutoffHistoryElement> &cutoff_packet) {
     // Lattice site
     for (auto site : state.lattice->sites) {
