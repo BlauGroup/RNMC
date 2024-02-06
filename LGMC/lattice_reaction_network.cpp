@@ -1,8 +1,8 @@
 #include "lattice_reaction_network.h"
 
-LatticeState::LatticeState(const LatticeState & lattice_in) : homogeneous(lattice_in.homogeneous),
-lattice(lattice_in.lattice ? (new Lattice(*lattice_in.lattice)) : (new Lattice(0)))
-{}
+// LatticeState::LatticeState(const LatticeState & lattice_in) : homogeneous(lattice_in.homogeneous),
+// lattice(lattice_in.lattice ? (new Lattice(*lattice_in.lattice)) : (new Lattice(0)))
+// {}
 
 /* ---------------------------------------------------------------------- */
 
@@ -12,7 +12,7 @@ LatticeState::LatticeState() {
 
 /* ---------------------------------------------------------------------- */
 
-LatticeState::LatticeState(std::vector<int> homogeneous_in, std::unique_ptr<Lattice> lattice_in) {
+LatticeState::LatticeState(std::vector<int> homogeneous_in, std::shared_ptr<Lattice> lattice_in) {
     homogeneous = homogeneous_in;
     lattice = std::move(lattice_in);
 }
@@ -59,7 +59,7 @@ LatticeReactionNetwork::LatticeReactionNetwork(const LatticeReactionNetwork &oth
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::update_state(std::unique_ptr<Lattice> &lattice,
+void LatticeReactionNetwork::update_state(std::shared_ptr<Lattice> &lattice,
                             std::unordered_map< std::string, 
                             std::vector< std::pair< double, int > > > &props,
                             std::vector<int> &state, int next_reaction, 
@@ -88,7 +88,7 @@ void LatticeReactionNetwork::update_state(std::unique_ptr<Lattice> &lattice,
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::update_propensities(std::unique_ptr<Lattice> &lattice, 
+void LatticeReactionNetwork::update_propensities(std::shared_ptr<Lattice> &lattice, 
                             std::vector<int> &state, 
                             std::function<void(Update update)> update_function, 
                             std::function<void(LatticeUpdate lattice_update, 
@@ -121,7 +121,7 @@ void LatticeReactionNetwork::update_propensities(std::unique_ptr<Lattice> &latti
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::update_adsorp_state(std::unique_ptr<Lattice> &lattice, 
+void LatticeReactionNetwork::update_adsorp_state(std::shared_ptr<Lattice> &lattice, 
                             std::unordered_map<std::string, 
                             std::vector< std::pair<double, int> > > &props,
                             long double &prop_sum, int &active_indices) {
@@ -138,7 +138,7 @@ void LatticeReactionNetwork::update_adsorp_state(std::unique_ptr<Lattice> &latti
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::update_adsorp_props(std::unique_ptr<Lattice> &lattice, 
+void LatticeReactionNetwork::update_adsorp_props(std::shared_ptr<Lattice> &lattice, 
                             std::function<void(LatticeUpdate lattice_update, 
                             std::unordered_map<std::string, 
                             std::vector< std::pair<double, int>>> &props)> 
@@ -184,7 +184,7 @@ void LatticeReactionNetwork::update_adsorp_props(std::unique_ptr<Lattice> &latti
 /* ---------------------------------------------------------------------- */
 
 double LatticeReactionNetwork::compute_propensity(int num_one, int num_two, 
-                                int react_id, std::unique_ptr<Lattice> &lattice, int site_id) {   
+                                int react_id, std::shared_ptr<Lattice> &lattice, int site_id) {   
 
     LatticeReaction reaction = reactions[react_id]; 
 
@@ -232,7 +232,7 @@ double LatticeReactionNetwork::compute_propensity(int num_one, int num_two,
 
 /* ---------------------------------------------------------------------- */
 
-bool LatticeReactionNetwork::update_state_lattice(std::unique_ptr<Lattice> &lattice, 
+bool LatticeReactionNetwork::update_state_lattice(std::shared_ptr<Lattice> &lattice, 
                             std::unordered_map<std::string, 
                             std::vector< std::pair<double, int>>> &props, 
                             int next_reaction, int site_one, int site_two, 
@@ -456,7 +456,7 @@ bool LatticeReactionNetwork::update_state_lattice(std::unique_ptr<Lattice> &latt
 
 /* ---------------------------------------------------------------------- */
 
-bool LatticeReactionNetwork::update_propensities(std::unique_ptr<Lattice> &lattice,
+bool LatticeReactionNetwork::update_propensities(std::shared_ptr<Lattice> &lattice,
                             std::function<void(LatticeUpdate lattice_update, 
                             std::unordered_map<std::string,                     
                             std::vector< std::pair<double, int> > > &props)> 
@@ -545,7 +545,7 @@ bool LatticeReactionNetwork::update_propensities(std::unique_ptr<Lattice> &latti
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::clear_site(std::unique_ptr<Lattice> &lattice, std::unordered_map<std::string,                     
+void LatticeReactionNetwork::clear_site(std::shared_ptr<Lattice> &lattice, std::unordered_map<std::string,                     
                             std::vector< std::pair<double, int> > > &props, 
                             int site, std::optional<int> ignore_neighbor, 
                             long double &prop_sum, int &active_indices) {
@@ -594,7 +594,7 @@ void LatticeReactionNetwork::clear_site_helper(std::unordered_map<std::string,
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::relevant_react(std::unique_ptr<Lattice> &lattice, 
+void LatticeReactionNetwork::relevant_react(std::shared_ptr<Lattice> &lattice, 
                             std::function<void(LatticeUpdate lattice_update, std::unordered_map<std::string,
                             std::vector< std::pair<double, int> > > &props)> update_function,
                             int site, std::optional<int> ignore_neighbor, 
@@ -745,7 +745,7 @@ void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_netwo
     factor_duplicate = factors_row.factor_duplicate;
 
     std::vector<int> temp;
-    std::unique_ptr<Lattice> lattice_temp (new Lattice(parameters.latconst,
+    std::shared_ptr<Lattice> lattice_temp (new Lattice(parameters.latconst,
                                 parameters.boxxhi, 
                                 parameters.boxyhi,
                                 parameters.boxzhi));
@@ -922,7 +922,7 @@ void LatticeReactionNetwork::update_state_solution(std::vector<int> &state,
 /* ---------------------------------------------------------------------- */
 
 void LatticeReactionNetwork::update_propensities(std::function<void(Update update)> update_function,
-                            std::vector<int> &state, int next_reaction, std::unique_ptr<Lattice> &lattice) {
+                            std::vector<int> &state, int next_reaction, std::shared_ptr<Lattice> &lattice) {
 
     LatticeReaction reaction = reactions[next_reaction]; 
 
@@ -960,7 +960,7 @@ void LatticeReactionNetwork::update_propensities(std::function<void(Update updat
 /* ---------------------------------------------------------------------- */
 
 double LatticeReactionNetwork::compute_propensity(std::vector<int> &state, int 
-                               reaction_index, std::unique_ptr<Lattice> &lattice) {
+                               reaction_index, std::shared_ptr<Lattice> &lattice) {
     LatticeReaction reaction = reactions[reaction_index];
 
     double p, k;
@@ -1102,7 +1102,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
             unsigned long int seed = maybe_seed.value();
 
             // Each LatticeState must have its own lattice to point to
-            std::unique_ptr<Lattice> default_lattice (new Lattice(initial_latconst));
+            std::shared_ptr<Lattice> default_lattice (new Lattice(initial_latconst));
 
             LatticeState default_state = {model.initial_state.homogeneous, std::move(default_lattice)};
             temp_seed_state_map.insert(std::make_pair(seed, std::move(default_state)));
@@ -1151,7 +1151,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
             unsigned long int seed = maybe_seed.value();
 
             // Each LatticeState must have its own lattice to point to
-            std::unique_ptr<Lattice> default_lattice (new Lattice(initial_latconst, 
+            std::shared_ptr<Lattice> default_lattice (new Lattice(initial_latconst, 
                 model.initial_state.lattice->xhi/initial_latconst, 
                 model.initial_state.lattice->yhi/initial_latconst, 
                 model.initial_state.lattice->zhi/initial_latconst));
@@ -1239,7 +1239,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::compute_initial_propensities(std::vector<int> state, std::unique_ptr<Lattice> &lattice) {
+void LatticeReactionNetwork::compute_initial_propensities(std::vector<int> state, std::shared_ptr<Lattice> &lattice) {
 
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
         initial_propensities[i] = compute_propensity(state, i, lattice);
@@ -1248,7 +1248,7 @@ void LatticeReactionNetwork::compute_initial_propensities(std::vector<int> state
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::update_all_propensities(std::unique_ptr<Lattice> &lattice, 
+void LatticeReactionNetwork::update_all_propensities(std::shared_ptr<Lattice> &lattice, 
                         std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &props, 
                         long double &prop_sum, int &active_indices,
