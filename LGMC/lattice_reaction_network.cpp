@@ -14,7 +14,7 @@ LatticeState::LatticeState() {
 
 LatticeState::LatticeState(std::vector<int> homogeneous_in, std::shared_ptr<Lattice> lattice_in) {
     homogeneous = homogeneous_in;
-    lattice = std::move(lattice_in);
+    lattice = lattice_in;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -751,7 +751,6 @@ void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_netwo
                                 parameters.boxzhi));
     // create lattice
     initial_state.lattice = lattice_temp;
-    lattice_temp = nullptr;
 
     // loading intial state
     initial_state.homogeneous.resize(metadata_row.number_of_species);
@@ -1105,8 +1104,8 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
             // Each LatticeState must have its own lattice to point to
             std::shared_ptr<Lattice> default_lattice (new Lattice(initial_latconst));
 
-            LatticeState default_state = {model.initial_state.homogeneous, std::move(default_lattice)};
-            temp_seed_state_map.insert(std::make_pair(seed, std::move(default_state)));
+            LatticeState default_state = {model.initial_state.homogeneous, default_lattice};
+            temp_seed_state_map.insert(std::make_pair(seed, default_state));
         }
 
         // go through interrupt_state and add each site one by one or update homogeneous region
@@ -1157,9 +1156,9 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
                 model.initial_state.lattice->yhi/initial_latconst, 
                 model.initial_state.lattice->zhi/initial_latconst));
 
-            LatticeState default_state = {model.initial_state.homogeneous, std::move(default_lattice)};
+            LatticeState default_state = {model.initial_state.homogeneous, default_lattice};
 
-            temp_seed_state_map.insert(std::make_pair(seed, std::move(default_state)));
+            temp_seed_state_map.insert(std::make_pair(seed, default_state));
         }
 
         while (std::optional<LatticeReadStateSql> maybe_state_row = state_reader.next()){
