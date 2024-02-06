@@ -750,7 +750,8 @@ void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_netwo
                                 parameters.boxyhi,
                                 parameters.boxzhi));
     // create lattice
-    initial_state.lattice = std::move(lattice_temp);
+    initial_state.lattice = lattice_temp;
+    lattice_temp = nullptr;
 
     // loading intial state
     initial_state.homogeneous.resize(metadata_row.number_of_species);
