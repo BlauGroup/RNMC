@@ -1,20 +1,27 @@
 #include "lattice_reaction_network.h"
 
 LatticeState::LatticeState(const LatticeState & lattice_in) : homogeneous(lattice_in.homogeneous),
-lattice((new Lattice(0)))
+lattice(lattice_in.lattice ? (new Lattice(*(lattice_in.lattice)) : (new Lattice(0))))
 {}
+
+/* ---------------------------------------------------------------------- */
 
 LatticeState::LatticeState() {
     lattice = nullptr;
 } // default constructor
+
+/* ---------------------------------------------------------------------- */
 
 LatticeState::LatticeState(std::vector<int> homogeneous_in, std::unique_ptr<Lattice> lattice_in) {
     homogeneous = homogeneous_in;
     lattice = std::move(lattice_in);
 }
 
+/* ---------------------------------------------------------------------- */
 
 LatticeReactionNetwork::LatticeReactionNetwork() : sampler (Sampler(0)) {}
+
+/* ---------------------------------------------------------------------- */
 
 LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection 
                         &reaction_network_database, SqlConnection 
