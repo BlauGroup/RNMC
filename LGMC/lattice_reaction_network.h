@@ -81,8 +81,6 @@ struct LatticeReaction {
 class LatticeReactionNetwork {
 public: 
     LatticeReactionNetwork(); // default constructor
-
-    LatticeReactionNetwork() {delete initial_state.lattice;};
     
     LatticeReactionNetwork(SqlConnection &reaction_network_database, 
                         SqlConnection &initial_state_database, 
