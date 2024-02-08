@@ -1,8 +1,11 @@
 #include "lattice_reaction_network.h"
 
-LatticeState::LatticeState(const LatticeState & lattice_in) : homogeneous(lattice_in.homogeneous),
-lattice(lattice_in.lattice ? (new Lattice(*lattice_in.lattice)) : (new Lattice(0)))
-{}
+LatticeState::LatticeState(const LatticeState & other) : homogeneous(other.homogeneous)
+{
+    if (other.lattice) {
+            lattice = std::make_unique<Lattice>(*other.lattice);
+        }
+}
 
 /* ---------------------------------------------------------------------- */
 
