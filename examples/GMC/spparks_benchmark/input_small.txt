@@ -112,12 +112,12 @@ add_reaction 89 AA AN 10000.0 AN
 add_reaction 90 AA AO 10000.0 AO
 add_reaction 91 AH 10.0 AA AH
 add_reaction 92 AM 10000.0 AA AM
-add_reaction 93 AD 0.0 AE
-add_reaction 94 AD 0.0 AE
-add_reaction 95 AF 0.0 AG
-add_reaction 96 AF 0.0 AG
-add_reaction 97 AN 0.0 AO
-add_reaction 98 AN 0.0 AO
+add_reaction 93 AD 10.0 AE
+add_reaction 94 AD 10.0 AE
+add_reaction 95 AF 10.0 AG
+add_reaction 96 AF 10.0 AG
+add_reaction 97 AN 10.0 AO
+add_reaction 98 AN 10.0 AO
 count AD 10000
 
 run 10
