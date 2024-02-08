@@ -40,7 +40,7 @@ class LatticeSimulation : public Simulation<LatticeSolver> {
     
     void init(); 
     bool execute_step();
-    // ~LatticeSimulation() { delete state.lattice;};
+    ~LatticeSimulation() {state.lattice.reset();};
 };
 
 #include "lattice_simulation.cpp"

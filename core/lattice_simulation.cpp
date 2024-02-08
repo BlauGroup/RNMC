@@ -18,7 +18,7 @@ void LatticeSimulation::init() {
                                         state.homogeneous, std::ref(props));
 
     // only call if checkpointing 
-    if(state.lattice.isCheckpoint) {
+    if(state.lattice->isCheckpoint) {
         lattice_network.update_all_propensities(state.lattice, props, 
                                                 latSolver.propensity_sum, 
                                                 latSolver.number_of_active_indices, 
@@ -51,10 +51,10 @@ bool LatticeSimulation::execute_step() {
                     event.site_one, event.site_two, latSolver.propensity_sum, 
                     latSolver.number_of_active_indices, flip_sites);
 
-        if(state.lattice.sites.size() != state.lattice.idneigh.size()) {
+        if(state.lattice->sites.size() != state.lattice->idneigh.size()) {
             assert(false);
         }
-        if(state.lattice.loc_map.size() != state.lattice.idneigh.size()) {
+        if(state.lattice->loc_map.size() != state.lattice->idneigh.size()) {
             assert(false);
         }
         // update time
@@ -72,10 +72,10 @@ bool LatticeSimulation::execute_step() {
                 site_1_mapping = -3;
             }
             else {
-                assert(state.lattice.sites.find(site_1) != state.lattice.sites.end());
-                site_1_mapping = lattice_network.combine(state.lattice.sites[site_1].i, 
-                                                         state.lattice.sites[site_1].j, 
-                                                         state.lattice.sites[site_1].k);
+                assert(state.lattice->sites.find(site_1) != state.lattice->sites.end());
+                site_1_mapping = lattice_network.combine(state.lattice->sites[site_1].i, 
+                                                         state.lattice->sites[site_1].j, 
+                                                         state.lattice->sites[site_1].k);
             }
         }
         if(event.site_two) {
@@ -88,10 +88,10 @@ bool LatticeSimulation::execute_step() {
                 site_2_mapping = -3;
             }
             else {
-                assert(state.lattice.sites.find(site_2) != state.lattice.sites.end());
-                site_2_mapping = lattice_network.combine(state.lattice.sites[site_2].i, 
-                                                         state.lattice.sites[site_2].j, 
-                                                         state.lattice.sites[site_2].k);
+                assert(state.lattice->sites.find(site_2) != state.lattice->sites.end());
+                site_2_mapping = lattice_network.combine(state.lattice->sites[site_2].i, 
+                                                         state.lattice->sites[site_2].j, 
+                                                         state.lattice->sites[site_2].k);
             }
         }
         if(flip_sites) {
