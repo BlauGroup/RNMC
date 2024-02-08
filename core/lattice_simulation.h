@@ -34,7 +34,7 @@ class LatticeSimulation : public Simulation<LatticeSolver> {
         history_queue(history_queue)
         { 
             state.homogeneous = state_in.homogeneous;
-            state.lattice = state_in.lattice;
+            state.lattice = std::move(state_in.lattice);
             history.reserve(this->history_chunk_size);
         };
     
