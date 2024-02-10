@@ -86,7 +86,7 @@ public:
                         SqlConnection &initial_state_database, 
                         LatticeParameters parameters);
     
-    LatticeReactionNetwork(LatticeReactionNetwork const &lattice_reaction_network_in); // copy constructor
+    //LatticeReactionNetwork(LatticeReactionNetwork const &lattice_reaction_network_in); // copy constructor
 
     ~LatticeReactionNetwork() {initial_state.lattice.reset();}
     /* -------------------------------- Updates Global ----------------------------- */
@@ -202,7 +202,7 @@ public:
                     LatticeReactionNetwork &model);
 
     void store_checkpoint(std::vector<LatticeStateHistoryElement> &state_packet,
-                        LatticeState state, unsigned long int &seed, 
+                        LatticeState &state, unsigned long int &seed, 
                         int step, double time, 
                         std::vector<LatticeCutoffHistoryElement> &cutoff_packet);
 

@@ -14,7 +14,7 @@ class LatticeSimulation : public Simulation<LatticeSolver> {
     public:
     std::unordered_map<std::string, std::vector< std::pair<double, int> > > props;
     LatticeSolver latSolver;
-    LatticeReactionNetwork lattice_network;
+    LatticeReactionNetwork &lattice_network;
     LatticeState state;
     std::function<void(LatticeUpdate, std::unordered_map<std::string,                     
                         std::vector< std::pair<double, int> > > &)> 
@@ -24,7 +24,7 @@ class LatticeSimulation : public Simulation<LatticeSolver> {
     std::vector<LatticeTrajectoryHistoryElement> history;
     HistoryQueue<HistoryPacket<LatticeTrajectoryHistoryElement>> &history_queue; 
 
-    LatticeSimulation(LatticeReactionNetwork lattice_network, unsigned long int seed, 
+    LatticeSimulation(LatticeReactionNetwork &lattice_network, unsigned long int seed, 
                       int step, double time, LatticeState state_in, int history_chunk_size,
                       HistoryQueue<HistoryPacket<LatticeTrajectoryHistoryElement>> &history_queue
         ) :

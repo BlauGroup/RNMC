@@ -12,7 +12,7 @@
 
 class NanoParticleSimulation : public Simulation<NanoSolver> {
 public:
-    NanoParticle nano_particle;
+    NanoParticle &nano_particle;
     std::vector<int> state;
     NanoSolver nanoSolver;
     std::vector<std::set<int>> site_reaction_dependency;

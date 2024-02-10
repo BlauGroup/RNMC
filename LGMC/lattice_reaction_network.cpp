@@ -41,21 +41,21 @@ LatticeReactionNetwork::LatticeReactionNetwork(SqlConnection
 
 /* ---------------------------------------------------------------------- */
 
-LatticeReactionNetwork::LatticeReactionNetwork(const LatticeReactionNetwork &other): 
-    initial_state(other.initial_state), sampler(Sampler(0)) {
+// LatticeReactionNetwork::LatticeReactionNetwork(const LatticeReactionNetwork &other): 
+//     initial_state(other.initial_state), sampler(Sampler(0)) {
     
-    initial_propensities = other.initial_propensities;
-    reactions = other.reactions;
-    dependents = other.dependents;
-    isCheckpoint = other.isCheckpoint;
+//     initial_propensities = other.initial_propensities;
+//     reactions = other.reactions;
+//     dependents = other.dependents;
+//     isCheckpoint = other.isCheckpoint;
     
-    factor_two = other.factor_two;
-    factor_duplicate = other.factor_duplicate;
-    charge_transfer_style = other.charge_transfer_style;
-    is_add_sites = other.is_add_sites;
-    temperature = other.temperature;
-    g_e = other.g_e;
-} // copy constructor
+//     factor_two = other.factor_two;
+//     factor_duplicate = other.factor_duplicate;
+//     charge_transfer_style = other.charge_transfer_style;
+//     is_add_sites = other.is_add_sites;
+//     temperature = other.temperature;
+//     g_e = other.g_e;
+// } // copy constructor
 
 /* ---------------------------------------------------------------------- */
 
@@ -1198,7 +1198,7 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 /* ---------------------------------------------------------------------- */
 
  void LatticeReactionNetwork::store_checkpoint(std::vector<LatticeStateHistoryElement> &state_packet,
-                              LatticeState state, unsigned long int &seed, int step, double time, 
+                              LatticeState &state, unsigned long int &seed, int step, double time, 
                               std::vector<LatticeCutoffHistoryElement> &cutoff_packet) {
     // Lattice site
     for (auto site : state.lattice->sites) {

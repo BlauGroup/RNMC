@@ -9,12 +9,12 @@ class ReactionNetworkSimulation : public Simulation<Solver> {
 private: 
     Solver solver;
 public:
-    GillespieReactionNetwork reaction_network;
+    GillespieReactionNetwork &reaction_network;
     std::vector<int> state;
     std::vector<ReactionNetworkTrajectoryHistoryElement> history;
     HistoryQueue<HistoryPacket<ReactionNetworkTrajectoryHistoryElement>> &history_queue; 
 
-    ReactionNetworkSimulation(GillespieReactionNetwork reaction_network, 
+    ReactionNetworkSimulation(GillespieReactionNetwork &reaction_network, 
             unsigned long int seed,
             int step,
             double time,
