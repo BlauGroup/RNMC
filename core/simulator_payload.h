@@ -34,7 +34,7 @@ public:
     SeedQueue &seed_queue;
     Cutoff cutoff;
     std::vector<bool>::iterator running;
-    std::map<int, State> seed_state_map;
+    std::map<int, State> &seed_state_map;
     std::map<int, int> seed_step_map;
     std::map<int, double> seed_time_map;
 
@@ -46,7 +46,7 @@ public:
         SeedQueue &seed_queue,
         Cutoff cutoff,
         std::vector<bool>::iterator running, 
-        std::map<int, State> seed_state_map,
+        std::map<int, State> &seed_state_map,
         std::map<int, int> seed_step_map,
         std::map<int, double> seed_time_map
         ):
@@ -71,7 +71,7 @@ public:
             int step = seed_step_map[seed];
             double time = seed_time_map[seed];
 
-            Sim simulation(model, seed, step, time, seed_state_map[seed], 
+            Sim simulation(model, seed, step, time, std::move(seed_state_map[seed]), 
                            history_chunk_size, history_queue);
             simulation.init();
 
