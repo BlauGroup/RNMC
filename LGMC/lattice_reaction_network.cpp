@@ -1,9 +1,13 @@
 #include "lattice_reaction_network.h"
 
-// LatticeState::LatticeState(const LatticeState & lattice_in) : homogeneous(lattice_in.homogeneous),
-// //lattice(lattice_in.lattice ? (new Lattice(*lattice_in.lattice)) : (new Lattice(0)))
-// lattice(new Lattice(0))
-// {}
+
+LatticeState::LatticeState(LatticeState && state_in) : homogeneous(std::move(state_in.homogeneous)),
+lattice(std::move(state_in.lattice))
+{} // move constructor
+
+LatticeState::LatticeState(const LatticeState & lattice_in) : homogeneous(lattice_in.homogeneous),
+lattice(lattice_in.lattice ? (new Lattice(*lattice_in.lattice)) : (new Lattice(0)))
+{} // copy constructor
 
 /* ---------------------------------------------------------------------- */
 
@@ -20,7 +24,7 @@ LatticeState::LatticeState(std::vector<int> homogeneous_in, std::unique_ptr<Latt
 
 /* ---------------------------------------------------------------------- */
 
-LatticeReactionNetwork::LatticeReactionNetwork() : sampler (Sampler(0)) {}
+//LatticeReactionNetwork::LatticeReactionNetwork() : sampler (Sampler(0)) {}
 
 /* ---------------------------------------------------------------------- */
 
