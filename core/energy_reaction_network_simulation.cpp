@@ -2,8 +2,10 @@
 
 template <typename Solver>
 void EnergyReactionNetworkSimulation<Solver>::init() {
-    energy_reaction_network.compute_initial_propensities(state.homogeneous);
-    solver = Solver(this->seed, std::ref(energy_reaction_network.initial_propensities));
+    std::vector<double> initial_propensities_temp;
+
+    energy_reaction_network.compute_initial_propensities(state.homogeneous, initial_propensities_temp);
+    solver = Solver(this->seed, std::ref(initial_propensities_temp));
     this->update_function = [&] (Update update) {solver.update(update);};
 } // init()
 

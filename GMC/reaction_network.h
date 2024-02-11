@@ -19,7 +19,6 @@
 template <typename Reaction>
 class ReactionNetwork {
 public:
-    std::vector<double> initial_propensities; // initial propensities for all the reactions
     double factor_zero; // rate modifer for reactions with zero reactants
     double factor_two; // rate modifier for reactions with two reactants
     double factor_duplicate; // rate modifier for reactions of form A + A -> ...
@@ -46,7 +45,7 @@ public:
         std::vector<int> &state,
         int reaction_index);
 
-    void compute_initial_propensities(std::vector<int> state);
+    void compute_initial_propensities(std::vector<int> state, std::vector<double> & compute_initial_propensities);
 
     // convert a history element as found a simulation to history
     // to a SQL type.
@@ -117,9 +116,7 @@ double ReactionNetwork<Reaction>::compute_propensity(
                 * state[reaction.reactants[1]]
                 * reaction.rate;
     }
-    if(p < 0){
-        return 0;
-    }
+    assert(p >= 0);
     return p;
 } //compute_propensity()
 
@@ -146,12 +143,15 @@ void ReactionNetwork<Reaction>::update_state(
 /*---------------------------------------------------------------------------*/
 
 template <typename Reaction>
-void ReactionNetwork<Reaction>::compute_initial_propensities(std::vector<int> state) {
+void ReactionNetwork<Reaction>::compute_initial_propensities(std::vector<int> state, std::vector<double> &initial_propensities) {
+    // resize to correct shape
+    initial_propensities.resize(reactions.size());
+
     // computing initial propensities
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
         initial_propensities[i] = compute_propensity(state, i);
     }
-    assert(true);
+
 } // compute_initial_propensities()
 
 /*---------------------------------------------------------------------------*/

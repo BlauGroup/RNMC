@@ -107,7 +107,6 @@ GillespieReactionNetwork::GillespieReactionNetwork(
     // it is "cleaner" to resize the default vector than to
     // drop it and reinitialize a new vector.
     reactions.resize(metadata_row.number_of_reactions);
-    initial_propensities.resize(metadata_row.number_of_reactions);
 
     SqlStatement<ReactionSql> reaction_statement (reaction_network_database);
     SqlReader<ReactionSql> reaction_reader (reaction_statement);

@@ -3,8 +3,9 @@
 
 template <typename Solver>
 void ReactionNetworkSimulation<Solver>::init() {
-    reaction_network.compute_initial_propensities(state);
-    solver = Solver(this->seed, std::ref(reaction_network.initial_propensities));
+    std::vector<double> initial_propensities_temp;
+    reaction_network.compute_initial_propensities(state, initial_propensities_temp);
+    solver = Solver(this->seed, std::ref(initial_propensities_temp));
     this->update_function = [&] (Update update) {solver.update(update);};
 
 } // init()

@@ -89,7 +89,6 @@ public:
     
     //LatticeReactionNetwork(LatticeReactionNetwork const &lattice_reaction_network_in); // copy constructor
 
-    ~LatticeReactionNetwork() {initial_state.lattice.reset();}
     /* -------------------------------- Updates Global ----------------------------- */
 
     void update_state(std::unique_ptr<Lattice> &lattice, std::unordered_map<std::string,                     
@@ -171,7 +170,7 @@ public:
 
     void compute_dependents();
 
-    double compute_propensity(std::vector<int> &state, int reaction_index, std::unique_ptr<Lattice> &lattice );
+    double compute_propensity(std::vector<int> &state, int reaction_index, std::unique_ptr<Lattice> &lattice);
 
     void update_propensities(std::function<void(Update update)> update_function,
                             std::vector<int> &state, int next_reaction, std::unique_ptr<Lattice> &lattice);
