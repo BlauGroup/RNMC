@@ -177,7 +177,7 @@ public:
     
     void update_state_solution(std::vector<int> &state, int reaction_index);
 
-    void compute_initial_propensities(std::vector<int> state, std::unique_ptr<Lattice> &lattice);
+    void compute_initial_propensities(std::vector<int> state, std::unique_ptr<Lattice> &lattice, std::vector<double> & initial_propensities);
 
     /* -------------------------------------------------------------------------------- */                       
 
@@ -226,7 +226,6 @@ public:
     std::unordered_map<int, std::tuple<uint32_t,uint32_t,uint32_t>>
         szudzik_mapping(int i_max, int j_max, int k_max);
 
-    std::vector<double> initial_propensities;
     LatticeState initial_state; 
 
     std::vector<LatticeReaction> reactions;

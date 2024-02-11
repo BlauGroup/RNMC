@@ -772,7 +772,6 @@ void LatticeReactionNetwork::init_reaction_network(SqlConnection &reaction_netwo
         initial_state.homogeneous[species_id] = initial_state_row.count;
     }
     reactions.reserve(metadata_row.number_of_reactions);
-    initial_propensities.resize(metadata_row.number_of_reactions);
 
     // loading reactions
     // vectors are default initialized to empty.
@@ -1244,7 +1243,10 @@ void LatticeReactionNetwork::checkpoint(SqlReader<LatticeReadStateSql> state_rea
 
 /* ---------------------------------------------------------------------- */
 
-void LatticeReactionNetwork::compute_initial_propensities(std::vector<int> state, std::unique_ptr<Lattice> &lattice) {
+void LatticeReactionNetwork::compute_initial_propensities(std::vector<int> state, std::unique_ptr<Lattice> &lattice,
+    std::vector<double> & initial_propensities) {
+    
+    initial_propensities.resize(reactions.size());
 
     for (unsigned long int i = 0; i < initial_propensities.size(); i++) {
         initial_propensities[i] = compute_propensity(state, i, lattice);

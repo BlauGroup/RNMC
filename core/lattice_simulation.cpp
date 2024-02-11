@@ -2,9 +2,11 @@
 
 void LatticeSimulation::init() {
 
-    lattice_network.compute_initial_propensities(state.homogeneous, state.lattice);
+    std::vector<double> temp_initial_props;
 
-    latSolver = LatticeSolver(seed, std::ref(lattice_network.initial_propensities));
+    lattice_network.compute_initial_propensities(state.homogeneous, state.lattice, temp_initial_props);
+
+    latSolver = LatticeSolver(seed, std::ref(temp_initial_props));
     this->update_function = [&] (Update update) {latSolver.update(update);};
     lattice_update_function = [&] (LatticeUpdate lattice_update, 
                                     std::unordered_map<std::string,
