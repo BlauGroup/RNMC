@@ -7,9 +7,9 @@ lattice(std::move(state_in.lattice))
 
 LatticeState::LatticeState(const LatticeState & lattice_in) : homogeneous(lattice_in.homogeneous),
 lattice(lattice_in.lattice ? (new Lattice(lattice_in.lattice->latconst,
-                lattice_in.lattice->xhi/initial_latconst, 
-                lattice_in.lattice->yhi/initial_latconst, 
-                lattice_in.lattice->zhi/initial_latconst)): (new Lattice(0)))
+                lattice_in.lattice->xhi/lattice_in.lattice->latconst, 
+                lattice_in.lattice->yhi/lattice_in.lattice->latconst, 
+                lattice_in.lattice->zhi/lattice_in.lattice->latconst)): (new Lattice(0)))
 {} // copy constructor
 
 /* ---------------------------------------------------------------------- */
