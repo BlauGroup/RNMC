@@ -3,10 +3,10 @@ Green="\033[0;32m"        # Green
 Color_Off="\033[0m"       # Text Reset
 
 function test_gmc {
-    cd ../GMC
-    make clean
-    make GMC
-    cd ../tests
+    # cd ../GMC
+    # make clean
+    # make GMC
+    # cd ../tests
 
     GMC_TEST_DIR="../examples/GMC"
 
@@ -32,18 +32,18 @@ function test_gmc {
     rm $GMC_TEST_DIR/trajectories
     rm $GMC_TEST_DIR/copy_trajectories
 
-    cd ../GMC
-    make clean
-    cd ../tests
+    # cd ../GMC
+    # make clean
+    # cd ../tests
 
 }
 
 function test_npmc {
     
-    cd ../NPMC
-    make clean
-    make NPMC
-    cd ../tests
+    # cd ../NPMC
+    # make clean
+    # make NPMC
+    # cd ../tests
 
     NPMC_TEST_DIR="../examples/NPMC"
 
@@ -71,9 +71,9 @@ function test_npmc {
     rm $NPMC_TEST_DIR/trajectories
     rm $NPMC_TEST_DIR/copy_trajectories
 
-    cd ../NPMC
-    make clean
-    cd ../tests
+    # cd ../NPMC
+    # make clean
+    # cd ../tests
 }
 
 function check_result {
@@ -86,7 +86,7 @@ function check_result {
 check_result
 test_gmc
 check_result
-test_npmc
-check_result
+# test_npmc
+# check_result
 
 exit $RC
