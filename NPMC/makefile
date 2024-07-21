@@ -26,30 +26,30 @@ CXXFLAGS = -fno-rtti -fno-exceptions -std=c++17 -Wall -Wextra $(shell gsl-config
 #              also defines DEBUG, so "#ifdef DEBUG /*...*/ #endif" works
 debug: CXXFLAGS += -g3 -DDEBUG
 debug:
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)$(EXECUTABLE)_debug 
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)/$(EXECUTABLE)_debug 
 
 # make profile - will compile "all" with $(CXXFLAGS) and the -g3 and -O3 flags
 profile: CXXFLAGS += -g3 -O3
 profile:
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)$(EXECUTABLE)_profile 
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)/$(EXECUTABLE)_profile 
 # make gprof - will compile "all" with $(CXXFLAGS) and the -pg (for gprof)
 gprof: CXXFLAGS += -pg
 gprof:
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)$(EXECUTABLE)_profile 
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)/$(EXECUTABLE)_profile 
 
 # Build all executables
 all: debug profile gprof
 
 $(EXECUTABLE): 
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)$(EXECUTABLE)
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)/$(EXECUTABLE)
 
 # rule for creating objects
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $(BUILD_DIR)$(dir $@)$(notdir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $(BUILD_DIR)/$(dir $@)$(notdir $@)
 
 # make clean - remove .o files, executables, tarball
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE) $(EXECUTABLE)_debug $(EXECUTABLE)_profile 
+	rm -f $(BUILD_DIR)/$(OBJECTS) $(BUILD_DIR)/$(EXECUTABLE) $(BUILD_DIR)/$(EXECUTABLE)_debug $(BUILD_DIR)/$(EXECUTABLE)_profile 
 	rm -Rf *.dSYM
 
 define MAKEFILE_HELP

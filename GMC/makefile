@@ -28,8 +28,7 @@ CXXFLAGS = -fno-rtti -fno-exceptions -std=c++17 -Wall -Wextra -lsqlite3 -lpthrea
 #              also defines DEBUG, so "#ifdef DEBUG /*...*/ #endif" works
 debug: CXXFLAGS += -g3 -DDEBUG
 debug:
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $
-	(EXECUTABLE)_debug 
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)$(EXECUTABLE)_debug 
 
 # make profile - will compile "all" with $(CXXFLAGS) and the -g3 and -O3 flags
 profile: CXXFLAGS += -g3 -O3
