@@ -8,8 +8,9 @@ cd GMC
 make clean
 make GMC
 cd ..
+pwd
 
-echo "building RNMC"
+echo "building NPMC"
 cd NPMC
 make clean
 make NPMC
