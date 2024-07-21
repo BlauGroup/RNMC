@@ -8,7 +8,7 @@ function test_gmc {
     # make GMC
     # cd ../tests
 
-    GMC_TEST_DIR="../examples/GMC"
+    GMC_TEST_DIR="examples/GMC"
 
     cp $GMC_TEST_DIR/initial_state.sqlite $GMC_TEST_DIR/initial_state_copy.sqlite
 
@@ -45,7 +45,7 @@ function test_npmc {
     # make NPMC
     # cd ../tests
 
-    NPMC_TEST_DIR="../examples/NPMC"
+    NPMC_TEST_DIR="examples/NPMC"
 
     cp $NPMC_TEST_DIR/initial_state.sqlite $NPMC_TEST_DIR/initial_state_copy.sqlite
 
