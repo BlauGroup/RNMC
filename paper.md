@@ -72,7 +72,7 @@ Three are many existing kMC implementations, including several open source examp
 First, because `RNMC` uses the widely supported SQLite database engine for simulation inputs and outputs, it is facile to automate simulations using `RNMC`.
 Second, `RNMC` has a focus on modularity; it is designed such that users can quickly develop new types of kMC simulations using a common core library.
  
-Finally, the simulation modules already implemented in `RNMC` provide unique capabilities that are not widely available in other open source codes.
+The simulation modules already implemented in `RNMC` provide unique capabilities that are not widely available in other open source codes.
 `NPMC` is specially designed for 3D simulations of interactions in nanocrystals.
 For instance, it can be used to simulate the upconversion of infrared to ultraviolet light *via* interactions between spatially distributed dopants in nanoparticles.[@Gnach_2012]
 `LGMC` is also somewhat unique in that it can simulate multi-phase systems and electrochemical processes.
