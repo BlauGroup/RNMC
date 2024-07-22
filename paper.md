@@ -2,7 +2,6 @@
 title: >-
     RNMC: kinetic Monte Carlo implementations for complex reaction networks
 tags:
-  - Python
   - C++
   - chemical dynamics
   - kinetic Monte Carlo
@@ -46,36 +45,41 @@ affiliations:
    index: 4
  - name: Molecular Foundry, Lawrence Berkeley National Laboratory, Berkeley, CA, USA 94720
    index: 5
-date: 2023-06-30
+date: 2024-07-22
 bibliography: paper.bib
 ---
 
 # Summary
-
 Macroscopic chemical and physical phenomena are driven by microscopic interactions at the atomic and molecular scales.
 In order to capture complex processes with high fidelity, simulation methods that bridge disparate time and length scales are needed.
-While techniques like molecular dynamics and ab initio simulations capture dynamics and reactivity at high resolution, they cannot be used beyond relatively short time scales (picoseconds to nanoseconds).
-The kinetic Monte Carlo (kMC) algorithm bridges length and time scales across several orders of magnitude, while retaining relevant microscopic resoluton, rendering it a powerful and flexible tool.
+While techniques like molecular dynamics and *ab initio* simulations capture dynamics and reactivity at high resolution, they cannot be used beyond relatively small length (hundreds to thousands of atoms) and time scales (picoseconds to microseconds).
+Kinetic Monte Carlo (kMC) approaches overcome these limitations to bridge length and time scales across several orders of magnitude while retaining relevant microscopic resolution, making it a powerful and flexible tool.
 
-`RNMC` is an easy-to-use, high-performance kMC simulation framework that enables modeling of complex systems that are inaccessible with current methods.
-It consists of a core module defining the common features of kMC algorithms including an implementation of the Gillespie algorithm [@gillespie1977exact], input/output operations based on SQLite databases, threading logic for parallel execution, and dependency graphs for efficient propensity updates.
-In addition, there are currently three modules defining kMC implementations for different domains.
+
+Here, we present `RNMC`, an easy-to-use, modular, high-performance kMC simulation framework that enables modeling of complex systems.
+`RNMC` consists of a core module defining the common features of kMC algorithms, including an implementation of the Gillespie algorithm [@gillespie1977exact], input/output operations leveraging SQLite databases, threading logic for parallel execution, and dependency graphs for efficient event propensity updates.
+In addition, there are currently three modules defining kMC implementations for different types of applications.
 The `GMC` (Gillespie Monte Carlo) module enables simulations of reaction networks in a homogeneous (well-mixed) environment.
-The `NPMC` (Nano Particle Monte Carlo) module enables simulation of dynamics in nanoparticles with 3D statistical field theory and supports one- and two-site interactions.
+`GMC` is a basic tool that is appropriate for general simulations of solution-phase chemistry.
+The `NPMC` (NanoParticle Monte Carlo) module enables simulation of dynamics in nanoparticles with 3D statistical field theory and supports one- and two-site interactions.
 Finally, the `LGMC` (Lattice Gillespie Monte Carlo) module is designed for simulations of multi-phase systems (especially at solid-fluid interfaces) where chemical and electrochemical reactions can occur between a lattice region and a homogeneous region.
 We have designed `RNMC` to be easily extensible, enabling users to add additional kMC modules for other diverse chemical and physical systems.
 
-
 # Statement of need
 
-`RNMC` was designed to address several critical gaps in available open-source kMC simulations (e.g. the Stochastic Parallel PARticle Kinetic Simulator or `SPPARKS`[@garcia2009crossing] and `kmos`).[@hoffmann2014kmos]
-In particular, previously developed kMC codes are not well designed for large reaction networks and typically aim to simulate a small set of relatively simple systems (e.g. well-mixed fluids, crystal lattices, or static two-dimensional surfaces).
-The module `GMC` can easily scale to hundreds of millions of reactions, as we have demonstrated in prior works on Li-ion and Mg-ion batteries.[@spotte2022toward; @barter2023predictive; @spotte2023chemical].
-`NPMC` provides a 3D kMC simulation on a lattice that is specifically designed to model complex interactions in nanocrystals.
-Finally, most available kMC implementations cannot easily simulate multi-phase systems or electrochemical processes.
-The `LGMC` module overcomes these restrictions and can simulate both coupled reactions between homogeneous and lattice regions with electrochemical reactions based on Marcus[@marcus1965theory] or Butler-Volmer kinetics.[@newman2021electrochemical]
-`RNMC` offers a high-performance kMC implementation and specifically enables exciting opportunities for dynamical modeling of previously inaccessible domains.
+Three are many existing kMC implementations, including several open source examples (e.g. the Stochastic Parallel PARticle Kinetic Simulator or `SPPARKS`[@garcia2009crossing] and `kmos`).[@hoffmann2014kmos]
+`RNMC` began as a fork of SPPARKS but differs in several important ways.
+First, because `RNMC` uses the widely supported SQLite database engine for simulation inputs and outputs, it is facile to automate simulations using `RNMC`.
+Second, `RNMC` has a focus on modularity; it is designed such that users can quickly develop new types of kMC simulations using a common core library.
+ 
+Finally, the simulation modules already implemented in `RNMC` provide unique capabilities that are not widely available in other open source codes.
+`NPMC` is specially designed for 3D simulations of interactions in nanocrystals.
+For instance, it can be used to simulate the upconversion of infrared to ultraviolet light *via* interactions between spatially distributed dopants in nanoparticles.[@Gnach_2012]
+`LGMC` is also somewhat unique in that it can simulate multi-phase systems and electrochemical processes.
+Simulations using `LGMC` can include a lattice region and a homogeneous solution region which can interact *via* interfacial reactions.
+Electrochemcial reactions can be treated using Marcus theory[@marcus1965theory] or Butler-Volmer kinetics.[@newman2021electrochemical]
 
+We have already used the `GMC` module in a number of prior works in applications related to Li-ion and Mg-ion batteries.[@spotte2022toward; @barter2023predictive; @spotte2023chemical] We note that these simulations included tens of millions of reactions, demonstrating that `RNMC` is able to scale to large and complex reaction networks.
 
 # Acknowledgements
 
@@ -85,3 +89,4 @@ Additional support came from the Joint Center for Energy Storage Research (JCESR
 This code was developed and tested using computational resources provided by the National Energy Research Scientific Computing Center (NERSC), a U.S. Department of Energy Office of Science User Facility under Contract No. DE-AC02-05CH11231, the Eagle and Swift HPC systems at the National Renewable Energy Laboratory (NREL), and the Lawrencium HPC cluster at Lawrence Berkeley National Laboratory.
 
 # References
+
