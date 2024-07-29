@@ -1,3 +1,10 @@
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://lzichi.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
 #include <getopt.h>
 #include <fstream>
 
@@ -5,7 +12,8 @@
 #include "../core/lattice_simulation.h"
 #include "lattice_reaction_network.h"
 
-void print_usage() {
+void print_usage()
+{
     std::cout << "Usage: specify the following options\n"
               << "--lattice_reaction_database\n"
               << "--initial_state_database\n"
@@ -15,14 +23,15 @@ void print_usage() {
               << "--step_cutoff|time_cutoff\n"
               << "--checkpoint\n"
               << "--parameters\n";
-    
+
 } // print_usage()
 
 /* ---------------------------------------------------------------------- */
 
-void print_usage_LGMC_parameters() {
- 
-     std::cout << "Usage: specify the following in the input file\n"
+void print_usage_LGMC_parameters()
+{
+
+    std::cout << "Usage: specify the following in the input file\n"
               << "lattice constant\n"
               << "box x upper boundary\n"
               << "box y upper boundary\n"
@@ -35,9 +44,11 @@ void print_usage_LGMC_parameters() {
 
 /* ---------------------------------------------------------------------- */
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
-    if (argc != 9) {
+    if (argc != 9)
+    {
         print_usage();
         exit(EXIT_FAILURE);
     }
@@ -68,16 +79,17 @@ int main(int argc, char **argv) {
     bool isCheckpoint;
 
     Cutoff cutoff = {
-        .bound =  { .step =  0 },
-        .type_of_cutoff = step_termination
-    };
+        .bound = {.step = 0},
+        .type_of_cutoff = step_termination};
 
     while ((c = getopt_long_only(
                 argc, argv, "",
                 long_options,
-                &option_index)) != -1) {
+                &option_index)) != -1)
+    {
 
-        switch (c) {
+        switch (c)
+        {
 
         case 1:
             lattice_reaction_database = optarg;
@@ -116,27 +128,28 @@ int main(int argc, char **argv) {
         case 9:
             LGMC_params_file = optarg;
             break;
-        
+
         default:
             // if an unexpected argument is passed, exit
             print_usage();
             exit(EXIT_FAILURE);
             break;
         }
-    }                    
+    }
 
     // read in LGMC parameters from file
     std::string LGMC_params_str(LGMC_params_file);
     std::ifstream fin;
     fin.open(LGMC_params_str);
 
-    if(!fin.is_open()) {
+    if (!fin.is_open())
+    {
         std::cout << "Failed to open file: " << LGMC_params_file << "\n";
         exit(EXIT_FAILURE);
     }
 
-    float latconst;                              
-    float boxxhi, boxyhi, boxzhi;                       
+    float latconst;
+    float boxxhi, boxyhi, boxzhi;
     float temperature;
     float g_e;
     bool is_add_site;
@@ -144,62 +157,69 @@ int main(int argc, char **argv) {
     ChargeTransferStyle charge_transfer_style;
     char ct_style;
 
-    fin >> latconst >> boxxhi >> boxyhi >> boxzhi
-    >> temperature >> g_e >> add_site >> ct_style;
+    fin >> latconst >> boxxhi >> boxyhi >> boxzhi >> temperature >> g_e >> add_site >> ct_style;
 
-    if(add_site == 'T') {
+    if (add_site == 'T')
+    {
         is_add_site = true;
     }
-    else if (add_site == 'F') {
+    else if (add_site == 'F')
+    {
         is_add_site = false;
-    } else {
+    }
+    else
+    {
         std::cout << "Incorrect parameter file argument for add site.\n";
         exit(EXIT_FAILURE);
     }
 
-    if(ct_style == 'M') {
+    if (ct_style == 'M')
+    {
         charge_transfer_style = ChargeTransferStyle::MARCUS;
     }
-    else if (ct_style == 'B') {
+    else if (ct_style == 'B')
+    {
         charge_transfer_style = ChargeTransferStyle::BUTLER_VOLMER;
-    } else {
+    }
+    else
+    {
         std::cout << "Incorrect parameter file argument for charge transfer style.\n";
         exit(EXIT_FAILURE);
     }
 
-    LatticeParameters parameters{.latconst = latconst, 
-                            .boxxhi = boxxhi, 
-                            .boxyhi = boxyhi,
-                            .boxzhi = boxzhi, 
-                            .temperature = temperature, 
-                            .g_e = g_e, .is_add_sites = is_add_site,
-                            .charge_transfer_style = charge_transfer_style,
-                            .isCheckpoint = isCheckpoint};                               
+    LatticeParameters parameters{.latconst = latconst,
+                                 .boxxhi = boxxhi,
+                                 .boxyhi = boxyhi,
+                                 .boxzhi = boxzhi,
+                                 .temperature = temperature,
+                                 .g_e = g_e,
+                                 .is_add_sites = is_add_site,
+                                 .charge_transfer_style = charge_transfer_style,
+                                 .isCheckpoint = isCheckpoint};
 
     Dispatcher<LatticeSolver,
-    LatticeReactionNetwork,
-    LatticeParameters,
-    LatticeWriteTrajectoriesSql,
-    LatticeReadTrajectoriesSql,
-    LatticeWriteStateSql,
-    LatticeReadStateSql,
-    LatticeWriteCutoffSql,
-    LatticeReadCutoffSql, 
-    LatticeStateHistoryElement, 
-    LatticeTrajectoryHistoryElement, 
-    LatticeCutoffHistoryElement, 
-    LatticeSimulation, 
-    LatticeState>
+               LatticeReactionNetwork,
+               LatticeParameters,
+               LatticeWriteTrajectoriesSql,
+               LatticeReadTrajectoriesSql,
+               LatticeWriteStateSql,
+               LatticeReadStateSql,
+               LatticeWriteCutoffSql,
+               LatticeReadCutoffSql,
+               LatticeStateHistoryElement,
+               LatticeTrajectoryHistoryElement,
+               LatticeCutoffHistoryElement,
+               LatticeSimulation,
+               LatticeState>
 
-    dispatcher (
-    lattice_reaction_database,
-    initial_state_database,
-    number_of_simulations,
-    base_seed,
-    thread_count,
-    cutoff,
-    parameters
-    );
+        dispatcher(
+            lattice_reaction_database,
+            initial_state_database,
+            number_of_simulations,
+            base_seed,
+            thread_count,
+            cutoff,
+            parameters);
 
     dispatcher.run_dispatcher();
     exit(EXIT_SUCCESS);

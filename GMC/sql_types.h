@@ -1,10 +1,18 @@
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://lzichi.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
 #ifndef RNMC_GMC_SQL_TYPES_H
 #define RNMC_GMC_SQL_TYPES_H
 
 #include <sqlite3.h>
 #include <string>
 
-class ReactionSql {
+class ReactionSql
+{
 public:
     unsigned long int reaction_id;
     int number_of_reactants;
@@ -18,7 +26,8 @@ public:
     static void action(ReactionSql &r, sqlite3_stmt *stmt);
 };
 
-class EnergyReactionSql {
+class EnergyReactionSql
+{
 public:
     unsigned long int reaction_id;
     int number_of_reactants;
@@ -33,7 +42,10 @@ public:
     static void action(EnergyReactionSql &r, sqlite3_stmt *stmt);
 };
 
-class ReactionNetworkWriteTrajectoriesSql {
+/* --------- I/O Trajectories SQL ---------*/
+
+class ReactionNetworkWriteTrajectoriesSql
+{
 public:
     int seed;
     int step;
@@ -43,7 +55,8 @@ public:
     static void action(ReactionNetworkWriteTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
-class ReactionNetworkReadTrajectoriesSql {
+class ReactionNetworkReadTrajectoriesSql
+{
 public:
     int seed;
     int step;
@@ -53,7 +66,10 @@ public:
     static void action(ReactionNetworkReadTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
-class ReactionNetworkReadStateSql {
+/* --------- I/O State SQL ---------*/
+
+class ReactionNetworkReadStateSql
+{
 public:
     int seed;
     int species_id;
@@ -62,7 +78,8 @@ public:
     static void action(ReactionNetworkReadStateSql &r, sqlite3_stmt *stmt);
 };
 
-class ReactionNetworkWriteStateSql {
+class ReactionNetworkWriteStateSql
+{
 public:
     int seed;
     int species_id;
@@ -71,27 +88,10 @@ public:
     static void action(ReactionNetworkWriteStateSql &r, sqlite3_stmt *stmt);
 };
 
-struct ReactionNetworkStateHistoryElement{
-    unsigned long int seed; //seed
-    int species_id;
-    int count;
-};
+/* --------- I/O Cutoff SQL ---------*/
 
-struct ReactionNetworkTrajectoryHistoryElement {
-    unsigned long int seed; // seed
-    int reaction_id; // reaction which fired
-    double time;  // time after reaction has occoured.
-    int step;
-};
-
-struct EnergyNetworkCutoffHistoryElement{
-    unsigned long int seed;
-    int step;
-    double time;
-    double energy_budget;
-};
-
-class EnergyNetworkReadCutoffSql {
+class EnergyNetworkReadCutoffSql
+{
 public:
     int seed;
     int step;
@@ -101,7 +101,8 @@ public:
     static void action(EnergyNetworkReadCutoffSql &r, sqlite3_stmt *stmt);
 };
 
-class EnergyNetworkWriteCutoffSql {
+class EnergyNetworkWriteCutoffSql
+{
 public:
     int seed;
     int step;
@@ -109,6 +110,31 @@ public:
     double energy_budget;
     static std::string sql_statement;
     static void action(EnergyNetworkWriteCutoffSql &r, sqlite3_stmt *stmt);
+};
+
+/* --------- State, Trajectory, and Cutoff History Elements ---------*/
+
+struct ReactionNetworkStateHistoryElement
+{
+    unsigned long int seed; 
+    int species_id;
+    int count;
+};
+
+struct ReactionNetworkTrajectoryHistoryElement
+{
+    unsigned long int seed; 
+    int reaction_id;        // reaction which fired
+    double time;            // time after reaction has occoured.
+    int step;
+};
+
+struct EnergyNetworkCutoffHistoryElement
+{
+    unsigned long int seed;
+    int step;
+    double time;
+    double energy_budget;
 };
 
 #endif

@@ -1,3 +1,10 @@
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://lzichi.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
 #ifndef RNMC_SPARSE_SOLVER_H
 #define RNMC_SPARSE_SOLVER_H
 
@@ -9,7 +16,8 @@
 #include "../core/sampler.h"
 #include "../core/RNMC_types.h"
 
-class SparseSolver {
+class SparseSolver
+{
 private:
     Sampler sampler;
     std::map<unsigned long int, double> propensities;
@@ -17,7 +25,7 @@ private:
 
 public:
     SparseSolver(unsigned long int seed, std::vector<double> &initial_propensities);
-    SparseSolver(): sampler(Sampler(0)) {}; // defualt constructor
+    SparseSolver() : sampler(Sampler(0)){};
     void update(Update update);
     void update(std::vector<Update> updates);
     std::optional<Event> event();

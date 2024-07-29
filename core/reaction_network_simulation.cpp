@@ -1,26 +1,38 @@
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://lzichi.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
 #include "reaction_network_simulation.h"
 #include "../GMC/reaction_network.h"
 
 template <typename Solver>
-void ReactionNetworkSimulation<Solver>::init() {
+void ReactionNetworkSimulation<Solver>::init()
+{
     std::vector<double> initial_propensities_temp;
     reaction_network.compute_initial_propensities(state, initial_propensities_temp);
     solver = Solver(this->seed, std::ref(initial_propensities_temp));
-    this->update_function = [&] (Update update) {solver.update(update);};
+    this->update_function = [&](Update update)
+    { solver.update(update); };
 
 } // init()
 
-/* ---------------------------------------------------------------------- */
+/* ------------------------------------------------------------------- */
 
 template <typename Solver>
-bool ReactionNetworkSimulation<Solver>::execute_step() {
+bool ReactionNetworkSimulation<Solver>::execute_step()
+{
     std::optional<Event> maybe_event = solver.event();
 
-    if (! maybe_event) {
+    if (!maybe_event)
+    {
 
         return false;
-
-    } else {
+    }
+    else
+    {
         // an event happens
         Event event = maybe_event.value();
         int next_reaction = event.index;
@@ -29,22 +41,21 @@ bool ReactionNetworkSimulation<Solver>::execute_step() {
         this->time += event.dt;
 
         // record what happened
-        history.push_back(ReactionNetworkTrajectoryHistoryElement {
+        history.push_back(ReactionNetworkTrajectoryHistoryElement{
             .seed = this->seed,
             .reaction_id = next_reaction,
             .time = this->time,
-            .step = this->step
-            });
+            .step = this->step});
 
-        if (history.size() == this->history_chunk_size ) {
+        if (history.size() == this->history_chunk_size)
+        {
             history_queue.insert_history(
                 std::move(
-                    HistoryPacket<ReactionNetworkTrajectoryHistoryElement> {
+                    HistoryPacket<ReactionNetworkTrajectoryHistoryElement>{
                         .seed = this->seed,
-                        .history = std::move(this->history)
-                    }));
+                        .history = std::move(this->history)}));
 
-            history = std::vector<ReactionNetworkTrajectoryHistoryElement> ();
+            history = std::vector<ReactionNetworkTrajectoryHistoryElement>();
             history.reserve(this->history_chunk_size);
         }
 

@@ -1,3 +1,10 @@
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://lzichi.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
 #ifndef RNMC_NPMC_SQL_TYPES_H
 #define RNMC_NPMC_SQL_TYPES_H
 
@@ -6,8 +13,10 @@
 
 #include "NPMC_types.h"
 
-/* --------- Species SQL ---------*/
-class SpeciesSql {
+/* --------------------------- Species SQL --------------------------- */
+
+class SpeciesSql
+{
 public:
     int species_id;
     int degrees_of_freedom;
@@ -15,9 +24,10 @@ public:
     static void action(SpeciesSql &r, sqlite3_stmt *stmt);
 };
 
-/* --------- Site SQL ---------*/
+/* --------------------------- Site SQL ------------------------------ */
 
-class SiteSql {
+class SiteSql
+{
 public:
     int site_id;
     double x;
@@ -28,9 +38,10 @@ public:
     static void action(SiteSql &r, sqlite3_stmt *stmt);
 };
 
-/* --------- Interaction SQL ---------*/
+/* ----------------------- Interaction SQL --------------------------- */
 
-class InteractionSql {
+class InteractionSql
+{
 public:
     int interaction_id;
     int number_of_sites;
@@ -45,9 +56,10 @@ public:
     static void action(InteractionSql &r, sqlite3_stmt *stmt);
 };
 
-/* --------- Metadata SQL ---------*/
+/* ---------------------------- Metadata SQL ------------------------- */
 
-class NanoMetadataSql {
+class NanoMetadataSql
+{
 public:
     int number_of_species;
     int number_of_sites;
@@ -56,9 +68,10 @@ public:
     static void action(NanoMetadataSql &r, sqlite3_stmt *stmt);
 };
 
-/* --------- Factors SQL ---------*/
+/* ----------------------------- Factors SQL ------------------------- */
 
-class NanoFactorsSql {
+class NanoFactorsSql
+{
 public:
     double one_site_interaction_factor;
     double two_site_interaction_factor;
@@ -68,7 +81,11 @@ public:
     static void action(NanoFactorsSql &r, sqlite3_stmt *stmt);
 };
 
-class NanoInitialStateSql {
+/* ------------------------- Initial state SQL ----------------------- */
+
+
+class NanoInitialStateSql
+{
 public:
     int site_id;
     int degree_of_freedom;
@@ -76,7 +93,10 @@ public:
     static void action(NanoInitialStateSql &r, sqlite3_stmt *stmt);
 };
 
-class NanoReadTrajectoriesSql {
+/* ------------------------ I/O Trajectories SQL --------------------- */
+
+class NanoReadTrajectoriesSql
+{
 public:
     int seed;
     int step;
@@ -88,7 +108,8 @@ public:
     static void action(NanoReadTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
-class NanoWriteTrajectoriesSql {
+class NanoWriteTrajectoriesSql
+{
 public:
     int seed;
     int step;
@@ -100,7 +121,10 @@ public:
     static void action(NanoWriteTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
-class NanoReadStateSql {
+/* ----------------------------- I/O state SQL ----------------------- */
+
+class NanoReadStateSql
+{
 public:
     int seed;
     int site_id;
@@ -109,7 +133,8 @@ public:
     static void action(NanoReadStateSql &r, sqlite3_stmt *stmt);
 };
 
-class NanoWriteStateSql {
+class NanoWriteStateSql
+{
 public:
     int seed;
     int site_id;
@@ -118,16 +143,20 @@ public:
     static void action(NanoWriteStateSql &r, sqlite3_stmt *stmt);
 };
 
-struct NanoStateHistoryElement{
-    unsigned long int seed; //seed
-    int site_id; 
-    int degree_of_freedom; //energy level the site is at
+/* ----------------- State and Trajectory History Elements ----------- */
+
+struct NanoStateHistoryElement
+{
+    unsigned long int seed; // seed
+    int site_id;
+    int degree_of_freedom; // energy level the site is at
 };
 
-struct NanoTrajectoryHistoryElement {
+struct NanoTrajectoryHistoryElement
+{
     unsigned long int seed; // seed
-    NanoReaction reaction; // reaction which fired
-    double time;  // time after reaction has occoured.
+    NanoReaction reaction;  // reaction which fired
+    double time;            // time after reaction has occoured.
     int step;
 };
 
