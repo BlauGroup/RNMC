@@ -23,7 +23,7 @@
             buildPhase = "CC=clang++ ./build.sh";
             installPhase = "mkdir -p $out/bin; mv ./build/* $out/bin";
             doCheck = true;
-            checkPhase = "./test.sh";
+            checkPhase = "tests/test.sh";
 
           };
       in {

@@ -1,9 +1,15 @@
 /* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://lzichi.github.io/RNMC/
 
-    the solver is the algorithmic backbone of a monte carlo simulation
-    it decides what will occour next. For now, we have the linear
-    solver and a tree solver ported from spparks:
-    https://spparks.sandia.gov/
+See the README file in the top-level RNMC directory.
+
+-------------------------------------------------------------------------
+
+The solver is the algorithmic backbone of a monte carlo simulation
+it decides what will occour next. For now, we have the linear
+solver and a tree solver ported from spparks:
+https://spparks.sandia.gov/
 
 ------------------------------------------------------------------------- */
 
@@ -18,7 +24,8 @@
 #include <cmath>
 #include <map>
 
-class LinearSolver {
+class LinearSolver
+{
 private:
     Sampler sampler;
     std::vector<double> propensities;
@@ -32,7 +39,7 @@ public:
     // we also implement initialization by copying from a reference
     LinearSolver(unsigned long int seed, std::vector<double> &&initial_propensities);
     LinearSolver(unsigned long int seed, std::vector<double> &initial_propensities);
-    LinearSolver(): sampler(Sampler(0)) {}; // defualt constructor
+    LinearSolver() : sampler(Sampler(0)){}; 
     void update(Update update);
     void update(std::vector<Update> updates);
     std::optional<Event> event();

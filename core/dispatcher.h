@@ -1,3 +1,10 @@
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://lzichi.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
 #ifndef RNMC_DISPATCHER_H
 #define RNMC_DISPATCHER_H
 
@@ -24,14 +31,15 @@ template <
     typename WriteStateSql,
     typename ReadStateSql,
     typename WriteCutoffSql,
-    typename ReadCutoffSql, 
-    typename StateHistory, 
-    typename TrajHistory, 
-    typename CutoffHistory, 
-    typename Sim, 
+    typename ReadCutoffSql,
+    typename StateHistory,
+    typename TrajHistory,
+    typename CutoffHistory,
+    typename Sim,
     typename State>
 
-class Dispatcher {
+class Dispatcher
+{
 
 public:
     SqlConnection model_database;
@@ -39,10 +47,10 @@ public:
     Model model;
     SqlStatement<WriteTrajectoriesSql> trajectories_stmt;
     SqlWriter<WriteTrajectoriesSql> trajectories_writer;
-    
+
     SqlStatement<WriteStateSql> state_stmt;
     SqlWriter<WriteStateSql> state_writer;
-    
+
     SqlStatement<WriteCutoffSql> cutoff_stmt;
     SqlWriter<WriteCutoffSql> cutoff_writer;
 
@@ -61,8 +69,7 @@ public:
     std::map<int, State> seed_state_map;
     std::map<int, int> seed_step_map;
     std::map<int, double> seed_time_map;
-    
-    
+
     Dispatcher(
         std::string model_database_file,
         std::string initial_state_database_file,
@@ -78,9 +85,8 @@ public:
     void record_state(HistoryPacket<StateHistory> state_history_packet);
     void record_cutoff(HistoryPacket<CutoffHistory> cutoff_history_packet);
     void static write_error_message(std::string s);
-    
 };
 
 #include "dispatcher.cpp"
 
-#endif 
+#endif

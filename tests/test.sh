@@ -3,16 +3,11 @@ Green="\033[0;32m"        # Green
 Color_Off="\033[0m"       # Text Reset
 
 function test_gmc {
-    cd ../GMC
-    make clean
-    make GMC
-    cd ../tests
 
-    GMC_TEST_DIR="../examples/GMC"
-
+    GMC_TEST_DIR="examples/GMC"
     cp $GMC_TEST_DIR/initial_state.sqlite $GMC_TEST_DIR/initial_state_copy.sqlite
 
-    time ../GMC/GMC --reaction_database=$GMC_TEST_DIR/rn.sqlite --initial_state_database=$GMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 --checkpoint=0 &> /dev/null
+    build/GMC --reaction_database=$GMC_TEST_DIR/rn.sqlite --initial_state_database=$GMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 --checkpoint=0 &> /dev/null
 
     sql='SELECT seed, step, reaction_id FROM trajectories ORDER BY seed ASC, step ASC;'
 
@@ -31,27 +26,17 @@ function test_gmc {
     rm $GMC_TEST_DIR/initial_state_copy.sqlite
     rm $GMC_TEST_DIR/trajectories
     rm $GMC_TEST_DIR/copy_trajectories
-
-    cd ../GMC
-    make clean
-    cd ../tests
-
 }
 
 function test_npmc {
-    
-    cd ../NPMC
-    make clean
-    make NPMC
-    cd ../tests
 
-    NPMC_TEST_DIR="../examples/NPMC"
+    NPMC_TEST_DIR="examples/NPMC"
 
     cp $NPMC_TEST_DIR/initial_state.sqlite $NPMC_TEST_DIR/initial_state_copy.sqlite
 
     # to check for leaks with valgrind, you need to use the option --fair-sched=yes
 
-    time ../NPMC/NPMC --nano_particle_database=$NPMC_TEST_DIR/np.sqlite --initial_state_database=$NPMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 --checkpoint=0&> /dev/null
+    build/NPMC --nano_particle_database=$NPMC_TEST_DIR/np.sqlite --initial_state_database=$NPMC_TEST_DIR/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=2 --step_cutoff=200 --checkpoint=0&> /dev/null
 
     sql='SELECT seed, step, site_id_1, site_id_2, interaction_id FROM trajectories ORDER BY seed ASC, step ASC;'
 
@@ -70,10 +55,6 @@ function test_npmc {
     rm $NPMC_TEST_DIR/initial_state_copy.sqlite
     rm $NPMC_TEST_DIR/trajectories
     rm $NPMC_TEST_DIR/copy_trajectories
-
-    cd ../NPMC
-    make clean
-    cd ../tests
 }
 
 function check_result {

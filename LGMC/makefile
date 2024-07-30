@@ -4,6 +4,9 @@ EXECUTABLE  = LGMC
 
 core_DIR = ../core
 
+# store executable in ./build directory
+BUILD_DIR = ../build
+
 # designate which compiler to use
 CXX         = g++
 
@@ -17,37 +20,36 @@ OBJECTS     = $(SOURCES:%.cpp=%.o)
 PERF_FILE = perf.data*
 
 CXXFLAGS = -fno-rtti -fno-exceptions -std=c++17 -Wall -Wextra $(shell gsl-config --cflags) $(shell gsl-config --libs) -lsqlite3 -lpthread
-# CXXFLAGS = -fno-rtti -fno-exceptions -std=c++20 -Wall -Wextra $(shell pkg-config gsl --cflags) $(shell pkg-config gsl --libs) -lsqlite3 -lpthread
 
 # make debug - will compile sources with $(CXXFLAGS) and the -g3 flag
 #              also defines DEBUG, so "#ifdef DEBUG /*...*/ #endif" works
 debug: CXXFLAGS += -g3 -DDEBUG
 debug:
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)_debug 
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)/$(EXECUTABLE)_debug 
 
 # make profile - will compile "all" with $(CXXFLAGS) and the -g3 and -O3 flags
 profile: CXXFLAGS += -g3 -O3
 profile:
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)_profile 
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)/$(EXECUTABLE)_profile 
 # make gprof - will compile "all" with $(CXXFLAGS) and the -pg (for gprof)
 gprof: CXXFLAGS += -pg
 gprof:
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)_profile 
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)/$(EXECUTABLE)_profile 
 
 # Build all executables
 all: debug profile gprof
 
 $(EXECUTABLE):
-	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(EXECUTABLE)
+	$(CXX) $(CXXFLAGS) $(SOURCES) -o $(BUILD_DIR)/$(EXECUTABLE)
 
 
 # rule for creating objects
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $(dir $@)$(notdir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $(BUILD_DIR)/$(dir $@)$(notdir $@)
 
 # make clean - remove .o files, executables, tarball
 clean:
-	rm -f $(OBJECTS) $(EXECUTABLE) $(EXECUTABLE)_debug $(EXECUTABLE)_profile 
+	rm -f $(BUILD_DIR)/$(OBJECTS) $(BUILD_DIR)/$(EXECUTABLE) $(BUILD_DIR)/$(EXECUTABLE)_debug $(BUILD_DIR)/$(EXECUTABLE)_profile 
 	rm -Rf *.dSYM
 
 define MAKEFILE_HELP

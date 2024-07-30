@@ -1,3 +1,10 @@
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://lzichi.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
 #ifndef RNMC_NANO_SOLVER_H
 #define RNMC_NANO_SOLVER_H
 
@@ -12,13 +19,14 @@
 #include "../core/RNMC_types.h"
 #include "NPMC_types.h"
 
-struct NanoUpdate {
+struct NanoUpdate
+{
     unsigned long int index;
-    // double propensity;
-    NanoReaction reaction;
+    NanoReaction reaction; 
 };
 
-class NanoSolver {
+class NanoSolver
+{
 private:
     Sampler sampler;
     std::vector<double> cumulative_propensities;
@@ -36,9 +44,7 @@ public:
     std::optional<Event> event();
     double get_propensity(int index);
     double get_propensity_sum();
-    NanoSolver() : sampler(Sampler(0)) {}; // defualt constructor
+    NanoSolver() : sampler(Sampler(0)){}; 
 };
-
-
 
 #endif

@@ -1,12 +1,20 @@
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://lzichi.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
 
 #ifndef RNMC_NPMC_TYPES_H
 #define RNMC_NPMC_TYPES_H
 
-struct NanoParticleParameters {
+struct NanoParticleParameters
+{
     bool isCheckpoint;
 };
 
-struct Interaction {
+struct Interaction
+{
     // either 1 site or two site interaction
     int interaction_id;
     int number_of_sites;
@@ -19,7 +27,8 @@ struct Interaction {
     double rate;
 };
 
-struct NanoSite {
+struct NanoSite
+{
     double x;
     double y;
     double z;
@@ -30,7 +39,8 @@ struct NanoSite {
 // of upto two sites and the interaction id.
 // if it is an internal interaction, site_id_2 will be -1
 // In a reaction, the sites must be within the interaction radius bound.
-struct NanoReaction {
+struct NanoReaction
+{
     int site_id[2];
     Interaction interaction;
 

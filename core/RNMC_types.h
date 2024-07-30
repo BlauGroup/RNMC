@@ -1,27 +1,46 @@
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://lzichi.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
 #ifndef RNMC_RNMC_TYPES_H
 #define RNMC_RNMC_TYPES_H
 
 #include <vector>
 
-enum TypeOfCutoff {step_termination, time_termination };
+enum TypeOfCutoff
+{
+    step_termination,
+    time_termination
+};
 
-struct Cutoff {
-    union  { int step; double time; } bound;
+struct Cutoff
+{
+    union
+    {
+        int step;
+        double time;
+    } bound;
     TypeOfCutoff type_of_cutoff;
 };
 
 template <typename T>
-struct HistoryPacket {
+struct HistoryPacket
+{
     unsigned long int seed;
     std::vector<T> history;
 };
 
-struct Update {
+struct Update
+{
     unsigned long int index;
     double propensity;
 };
 
-struct Event {
+struct Event
+{
     unsigned long int index;
     double dt;
 };

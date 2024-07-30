@@ -1,10 +1,18 @@
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://lzichi.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
 #include <getopt.h>
 
 #include "../core/nano_particle_simulation.h"
 #include "../core/dispatcher.h"
 #include "nano_particle.h"
 
-void print_usage() {
+void print_usage()
+{
     std::cout << "Usage: specify the following options\n"
               << "--nano_particle_database\n"
               << "--initial_state_database\n"
@@ -18,8 +26,10 @@ void print_usage() {
 
 /* ---------------------------------------------------------------------- */
 
-int main(int argc, char **argv) {
-    if (argc != 8) {
+int main(int argc, char **argv)
+{
+    if (argc != 8)
+    {
         print_usage();
         exit(EXIT_FAILURE);
     }
@@ -46,18 +56,19 @@ int main(int argc, char **argv) {
     int base_seed = 0;
     int thread_count = 0;
     bool isCheckpoint = false;
-    
+
     Cutoff cutoff = {
-        .bound =  { .step =  0 },
-        .type_of_cutoff = step_termination
-    };
+        .bound = {.step = 0},
+        .type_of_cutoff = step_termination};
 
     while ((c = getopt_long_only(
                 argc, argv, "",
                 long_options,
-                &option_index)) != -1) {
+                &option_index)) != -1)
+    {
 
-        switch (c) {
+        switch (c)
+        {
 
         case 1:
             nano_particle_database = optarg;
@@ -98,42 +109,37 @@ int main(int argc, char **argv) {
             print_usage();
             exit(EXIT_FAILURE);
             break;
-
         }
-
     }
 
-    NanoParticleParameters parameters {
-        .isCheckpoint = isCheckpoint
-    };
-    
-    Dispatcher<
-    NanoSolver,
-    NanoParticle,
-    NanoParticleParameters,
-    NanoWriteTrajectoriesSql,
-    NanoReadTrajectoriesSql,
-    NanoWriteStateSql,
-    NanoReadStateSql,
-    WriteCutoffSql,
-    ReadCutoffSql, 
-    NanoStateHistoryElement, 
-    NanoTrajectoryHistoryElement, 
-    CutoffHistoryElement,
-    NanoParticleSimulation, 
-    std::vector<int>>
+    NanoParticleParameters parameters{
+        .isCheckpoint = isCheckpoint};
 
-        dispatcher (
+    Dispatcher<
+        NanoSolver,
+        NanoParticle,
+        NanoParticleParameters,
+        NanoWriteTrajectoriesSql,
+        NanoReadTrajectoriesSql,
+        NanoWriteStateSql,
+        NanoReadStateSql,
+        WriteCutoffSql,
+        ReadCutoffSql,
+        NanoStateHistoryElement,
+        NanoTrajectoryHistoryElement,
+        CutoffHistoryElement,
+        NanoParticleSimulation,
+        std::vector<int>>
+
+        dispatcher(
             nano_particle_database,
             initial_state_database,
             number_of_simulations,
             base_seed,
             thread_count,
-            cutoff, 
-            parameters
-            );
+            cutoff,
+            parameters);
 
     dispatcher.run_dispatcher();
     exit(EXIT_SUCCESS);
-
 }
