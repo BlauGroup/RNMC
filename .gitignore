@@ -1,3 +1,4 @@
 *_debug
 *.o
 .vscode/
+build/
