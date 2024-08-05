@@ -28,11 +28,12 @@ protected:
       reaction_network_ = GillespieReactionNetwork(model_database,
                                                    initial_state_database,
                                                    parameters);
-
-      reaction_network_.compute_initial_propensities(reaction_network_.initial_state);
+      
+      reaction_network_.compute_initial_propensities(reaction_network_.initial_state, initial_props);
    }
 
    GillespieReactionNetwork reaction_network_;
+   std::vector<double> initial_props;
 };
 
 TEST_F(ReactionNetworkTest, InitializeMembers)
@@ -41,7 +42,6 @@ TEST_F(ReactionNetworkTest, InitializeMembers)
    // check basic member variables
    EXPECT_EQ(int(reaction_network_.reactions.size()), 7);
    EXPECT_EQ(int(reaction_network_.initial_state.size()), 7);
-   EXPECT_EQ(int(reaction_network_.initial_propensities.size()), 7);
    EXPECT_EQ(reaction_network_.factor_zero, 1);
    EXPECT_EQ(reaction_network_.factor_two, 1);
    EXPECT_EQ(reaction_network_.factor_duplicate, 0.5);
@@ -131,7 +131,7 @@ TEST_F(ReactionNetworkTest, InitializePropensities)
    std::vector<double> expected_propensities = {0, 0, 50000, 6e6, 6e4, 0, 760};
    for (int i = 0; i < 7; i++)
    {
-      EXPECT_EQ(reaction_network_.initial_propensities[i], expected_propensities[i]);
+      EXPECT_EQ(initial_props[i], expected_propensities[i]);
    }
 }
 
@@ -223,7 +223,7 @@ TEST_F(ReactionNetworkTest, UpdateState)
 
 TEST_F(ReactionNetworkTest, UpdatePropensities)
 {
-   TreeSolver tree_solver = TreeSolver(1, reaction_network_.initial_propensities);
+   TreeSolver tree_solver = TreeSolver(1, initial_props);
 
    std::vector<int> state = {0, 10000, 200, 20, 500, 200, 100};
 

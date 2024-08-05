@@ -94,7 +94,7 @@ lattice_reaction_network_test : lattice_reaction_network_test.o $(LGMC_DIR)/latt
                                 $(LGMC_DIR)/sql_types.o $(core_DIR)/sql_types.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
 
-reaction_network_test : reaction_network_test.o $(GMC_DIR)/reaction_network.o $(GMC_DIR)/sql_types.o \
+reaction_network_test : reaction_network_test.o $(GMC_DIR)/sql_types.o \
                                 $(GMC_DIR)/tree_solver.o $(core_DIR)/sql_types.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -lgtest_main -lgtest -lpthread $^ -o $@
 

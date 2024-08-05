@@ -79,7 +79,6 @@ TEST(lattice_reaction_network_test, Initialization)
    // check basic member variables
    EXPECT_EQ(int(static_LGMC_.reactions.size()), 9);
    EXPECT_EQ(int(static_LGMC_.initial_state.homogeneous.size()), 5);
-   EXPECT_EQ(int(static_LGMC_.initial_propensities.size()), 9);
 }
 
 TEST(lattice_reaction_network_test, dependents)
