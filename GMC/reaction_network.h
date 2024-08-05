@@ -53,7 +53,7 @@ public:
         std::vector<int> &state,
         int reaction_index);
 
-    void compute_initial_propensities(std::vector<int> state, std::vector<double> &compute_initial_propensities);
+    void compute_initial_propensities(std::vector<int> state, std::vector<double> &initial_propensities);
 
     // convert a history element as found a simulation to history
     // to a SQL type.
