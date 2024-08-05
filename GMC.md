@@ -89,7 +89,7 @@ CREATE TABLE interrupt_state (
 );
 ```
 
-- <span style="color:#0066CC"> interrupt_cutoff </span>: during checkpointing, the simulation will fill in this table.
+- <span style="color:#0066CC"> interrupt_cutoff </span>: during checkpointing, the simulation will fill in this table. This cutoff table is for simulations with a zero energy budget.
 <br>
 <br>
 ```
@@ -97,6 +97,18 @@ CREATE TABLE interrupt_cutoff (
         seed                    INTEGER NOT NULL,
         step                    INTEGER NOT NULL,
         time                    REAL NOT NULL       
+);
+```
+
+- <span style="color:#0066CC"> interrupt_cutoff </span>: during checkpointing, the simulation will fill in this table. This cutoff table is for simulations with a non-zero energy budget.
+<br>
+<br>
+```
+CREATE TABLE interrupt_cutoff (
+        seed                    INTEGER NOT NULL,
+        step                    INTEGER NOT NULL,
+        time                    REAL NOT NULL,
+        energy_budget           REAL NOT NULL     
 );
 ```
 
