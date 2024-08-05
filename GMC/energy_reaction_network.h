@@ -310,6 +310,7 @@ void EnergyReactionNetwork::checkpoint(SqlReader<ReactionNetworkReadStateSql> st
 
         temp_seed_step_map[cutoff_row.seed] = cutoff_row.step;
         temp_seed_time_map[cutoff_row.seed] = cutoff_row.time;
+        temp_seed_state_map[cutoff_row.seed].energy_budget = cutoff_row.energy_budget;
     }
 
     while (std::optional<ReactionNetworkReadStateSql> maybe_state_row = state_reader.next())
