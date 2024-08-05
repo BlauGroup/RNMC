@@ -62,8 +62,8 @@ CREATE TABLE initial_state (
 CREATE TABLE trajectories (
         seed                INTEGER NOT NULL,
         step                INTEGER NOT NULL,
-        time                REAL NOT NULL,
-        reaction_id         INTEGER NOT NULL
+        reaction_id         INTEGER NOT NULL,
+        time                REAL NOT NULL
 );
 ```
 

@@ -134,7 +134,7 @@ CREATE TABLE factors (
 CREATE TABLE interrupt_cutoff (
         seed                    INTEGER NOT NULL,
         step                    INTEGER NOT NULL,
-        time                    INTEGER NOT NULL,
+        time                    REAL NOT NULL,
         maxk                    INTEGER NOT NULL
 );
 ```

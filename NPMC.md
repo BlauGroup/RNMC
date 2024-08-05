@@ -132,7 +132,7 @@ CREATE TABLE interrupt_state (
 CREATE TABLE interrupt_cutoff (
         seed                    INTEGER NOT NULL,
         step                    INTEGER NOT NULL,
-        time                    INTEGER NOT NULL   
+        time                    REAL NOT NULL   
 );
 ```
 
