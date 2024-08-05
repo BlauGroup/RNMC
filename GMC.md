@@ -119,7 +119,7 @@ To access the makefile, enter the `GMC` folder:
 $ cd GMC
 ```
 
-Next create an executable with the makefile. The executable will be located in the `GMC` folder.
+Next create an executable with the makefile. The executable will be located in the `build` folder.
 
 ```
 $ make GMC
@@ -143,8 +143,7 @@ $ make help
 - <span style="color:#0066CC"> energy_budget </span>: allowed energy to be added into the system.
 - <span style="color:#0066CC"> checkpoint </span>: whether checkpointing should occur.
 
-
-When running `GMC` ensure that your input file paths are correct considering the executable is inside the build folder. Below is an example of how `GMC` can be run using the input files inside the <a href="{{ site.github.repository_url }}"> examples directory </a> (here `step_cutoff` is specified):
+When running `GMC` ensure that your input file paths are correct considering the executable is inside the `build` folder. Below is an example of how `GMC` can be run using the input files inside the <a href="{{ site.github.repository_url }}"> examples directory </a> (here `step_cutoff` is specified):
 
 ```
 build/GMC --reaction_database=examples/GMC/end-to-end-test/rn.sqlite --initial_state_database=examples/GMC/end-to-end-test/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --energy_budget=0 --checkpoint=1

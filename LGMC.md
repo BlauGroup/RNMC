@@ -146,7 +146,7 @@ To access the makefile, enter the LGMC folder:
 $ cd LGMC
 ```
 
-Next create an executable with the makefile. The executable will be located in the LGMC folder.
+Next create an executable with the makefile. The executable will be located in the `build` folder.
 
 ```
 $ make LGMC
@@ -178,8 +178,8 @@ LGMC requires seven input arguments (either `step_cutoff` or `time_cutoff` must 
     - <span style="color:#006633"> Is add site (T\|F) </span>
     - <span style="color:#006633"> Charge transfer style (M\|B) </span>
 
-When running LGMC ensure that your input file paths are correct considering the executable is inside the LGMC folder. Below is an example of how LGMC can be run using the input files inside the <a href="{{ site.github.repository_url }}"> examples directory </a> (here `step_cutoff` is specified):
+When running LGMC ensure that your input file paths are correct considering the executable is inside the `build` folder. Below is an example of how LGMC can be run using the input files inside the <a href="{{ site.github.repository_url }}"> examples directory </a> (here `step_cutoff` is specified):
 
 ```
-./LGMC --lattice_reaction_database=../examples/LGMC/CO_oxidation/rn.sqlite --initial_state_database=../examples/LGMC/CO_oxidation/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --checkpoint=1 --parameters=../examples/LGMC/CO_oxidation/LGMC_params.txt
+build/LGMC --lattice_reaction_database=examples/LGMC/CO_oxidation/rn.sqlite --initial_state_database=examples/LGMC/CO_oxidation/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --checkpoint=1 --parameters=examples/LGMC/CO_oxidation/LGMC_params.txt
 ```

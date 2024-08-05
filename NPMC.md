@@ -143,7 +143,7 @@ To access the makefile, enter the `NPMC` folder:
 $ cd NPMC
 ```
 
-Next create an executable with the makefile. The executable will be located in the `NPMC` folder.
+Next create an executable with the makefile. The executable will be located in the `build` folder.
 
 ```
 $ make NPMC
@@ -166,8 +166,8 @@ $ make help
 - <span style="color:#0066CC"> time_cutoff </span>: how much time in each simulation [s].
 - <span style="color:#0066CC"> checkpoint </span>: whether checkpointing should occur.
 
-When running `NPMC` ensure that your input file paths are correct considering the executable is inside the `NPMC` folder. Below is an example of how `NPMC` can be run using the input files inside the <a href="{{ site.github.repository_url }}"> examples directory </a> (here `step_cutoff` is specified):
+When running `NPMC` ensure that your input file paths are correct considering the executable is inside the `build` folder. Below is an example of how `NPMC` can be run using the input files inside the <a href="{{ site.github.repository_url }}"> examples directory </a> (here `step_cutoff` is specified):
 
 ```
-./NPMC --nano_particle_database=../examples/NPMC/np.sqlite --initial_state_database=../examples/NPMC/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --checkpoint=1
+build/NPMC --nano_particle_database=examples/NPMC/np.sqlite --initial_state_database=examples/NPMC/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --checkpoint=1
 ```
