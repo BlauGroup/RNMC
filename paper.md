@@ -28,6 +28,9 @@ authors:
   - name: Rohith Srinivaas Mohanakrishnan
     corresponding: false  
     affiliation: "1, 4"
+  - name: Emory Chan
+    corresponding: false
+    affiliation: 5
   - name: Kristin Aslaug Persson
     corresponding: true  
     affiliation: "4, 5"
@@ -45,7 +48,7 @@ affiliations:
    index: 4
  - name: Molecular Foundry, Lawrence Berkeley National Laboratory, Berkeley, CA, USA 94720
    index: 5
-date: 2024-07-22
+date: 2024-08-14
 bibliography: paper.bib
 ---
 
@@ -79,7 +82,7 @@ For instance, it can be used to simulate the upconversion of infrared to ultravi
 Simulations using `LGMC` can include a lattice region and a homogeneous solution region which can interact *via* interfacial reactions.
 Electrochemcial reactions can be treated using Marcus theory[@marcus1965theory] or Butler-Volmer kinetics.[@newman2021electrochemical]
 
-We have already used the `GMC` module in a number of prior works in applications related to Li-ion and Mg-ion batteries.[@spotte2022toward; @barter2023predictive; @spotte2023chemical] We note that these simulations included tens of millions of reactions, demonstrating that `RNMC` is able to scale to large and complex reaction networks.
+We have already used the `GMC` module in a number of prior works in applications related to Li-ion and Mg-ion batteries.[@spotte2022toward; @barter2023predictive; @spotte2023chemical] We note that these simulations included tens of millions of reactions, demonstrating that `RNMC` is able to scale to large and complex reaction networks. In addition, we have used `NPMC` to perform Bayesian optimization of upconverting nanoparticles.[@xia2023accelerating]
 
 # Acknowledgements
 
