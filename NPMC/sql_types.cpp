@@ -1,6 +1,6 @@
 /* ----------------------------------------------------------------------
 RNMC - Reaction Network Monte Carlo
-https://lzichi.github.io/RNMC/
+https://blaugroup.github.io/RNMC/
 
 See the README file in the top-level RNMC directory.
 ---------------------------------------------------------------------- */
