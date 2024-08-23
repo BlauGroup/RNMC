@@ -1,4 +1,9 @@
-*_debug
 *.o
 .vscode/
-build/
+*_debug
+build
+result
+.envrc
+.cache
+compile_commands.json
+jats/
