@@ -30,7 +30,7 @@
 
             buildPhase = "./build.sh";
             # installPhase = "mkdir -p $out/bin; mv ./build/* $out/bin";
-            installPhase = "";
+            installPhase = "mkdir -p $out/bin; cp ./build/* $out/bin";
             doCheck = true;
             checkPhase = "tests/test.sh";
           };
