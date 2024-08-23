@@ -28,9 +28,9 @@
               sqlite
             ];
 
-
             buildPhase = "./build.sh";
-            installPhase = "mkdir -p $out/bin; mv ./build/* $out/bin";
+            # installPhase = "mkdir -p $out/bin; mv ./build/* $out/bin";
+            installPhase = "";
             doCheck = true;
             checkPhase = "tests/test.sh";
           };
