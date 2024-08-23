@@ -48,6 +48,7 @@
               sqlitebrowser
               gdb
               valgrind
+              glibc.static
             ];
           };
 
