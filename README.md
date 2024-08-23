@@ -12,7 +12,7 @@ Examples of research projects using `RNMC`:
 - Spotte-Smith et al., *J. Am. Chem. Soc.* **145**(2), 12181–12192 (2023). [DOI: 10.1021/jacs.3c02222](https://doi.org/10.1021/jacs.3c02222)
 - Xia et al., *Nano Lett.* **23**(23), 11129–11136 (2023). [DOI: 10.1021/acs.nanolett.3c03568](https://doi.org/10.1021/acs.nanolett.3c03568)
 
-Complete documentaiton, including a guide to installing `RNMC` can be found [here](https://blaugroup.github.io/RNMC/).
+Complete documentation, including a guide to installing `RNMC` can be found [here](https://blaugroup.github.io/RNMC/).
 
 ### Dependencies
 
