@@ -2,64 +2,23 @@
   "@context": "https://raw.githubusercontent.com/codemeta/codemeta/master/codemeta.jsonld",
   "@type": "Code",
   "author": [
-    {
-      "@id": "https://orcid.org/0000-0003-3897-3097",
-      "@type": "Person",
-      "email": "laura.r.zichi@gmail.com",
-      "name": "Laura Zichi",
-      "affiliation": "University of Michigan - Ann Arbor; Lawrence Berkeley National Laboratory"
-    },
-    {
-      "@id": "https://orcid.org/0000-0002-6408-1255",
-      "@type": "Person",
-      "email": "danielbarter@gmail.com",
-      "name": "Daniel Barter",
-      "affiliation": "Lawrence Berkeley National Laboratory"
-    },
-    {
-      "@id": "https://orcid.org/0000-0002-6408-1255",
-      "@type": "Person",
-      "email": "esivonxay@lbl.gov",
-      "name": "Eric Sivonxay",
-      "affiliation": "Lawrence Berkeley National Laboratory"
-    },
-    {
-      "@id": "https://orcid.org/0000-0003-1554-197X",
-      "@type": "Person",
-      "email": "espottesmith@gmail.com",
-      "name": "Evan Walter Clark Spotte-Smith",
-      "affiliation": "Lawrence Berkeley National Laboratory; Univeristy of California - Berkeley"
-    },
-    {
-      "@id": "",
-      "@type": "Person",
-      "email": "rmohanakrishnan@lbl.gov",
-      "name": "Rohith Srinivaas Mohanakrishnan",
-      "affiliation": "Lawrence Berkeley National Laboratory; Univeristy of California - Berkeley"
-    },
-    {
-      "@id": "https://orcid.org/0000-0003-2495-5509",
-      "@type": "Person",
-      "email": "kapersson@lbl.gov",
-      "name": "Kristin Aslaug Persson",
-      "affiliation": "Lawrence Berkeley National Laboratory; Univeristy of California - Berkeley"
-    },
-    {
-      "@id": "https://orcid.org/0000-0003-3132-3032",
-      "@type": "Person",
-      "email": "smblau@lbl.gov",
-      "name": "Samuel M. Blau",
-      "affiliation": "Lawrence Berkeley National Laboratory"
-    }
+      "Laura Zichi",
+      "Daniel Barter",
+      "Eric Sivonxay",
+      "Evan Walter Clark Spotte-Smith",
+      "Rohith Srinivaas Mohanakrishnan",
+      "Emory Chan",
+      "Kristin Aslaug Persson",
+      "Samuel M. Blau"
   ],
   "identifier": "",
-  "codeRepository": "https://github.com/blauGroup/rnmc",
-  "datePublished": "2023-06-25",
-  "dateModified": "2023-06-25",
-  "dateCreated": "2023-06-25",
-  "description": "A core high-performance kinetic Monte Carlo (kMC) implementation designed for large reaction networks, with submodules for simulations of various types of physical and chemical systems.",
-  "keywords": "Python, C++, chemical dynamics, kinetic Monte Carlo",
-  "license": "UC Regents / LBNL",
+  "codeRepository": "https://github.com/BlauGroup/RNMC",
+  "datePublished": "2024-08-23",
+  "dateModified": "2024-08-23",
+  "dateCreated": "2024-08-23",
+  "description": "Reaction Network Monte Carlo (RNMC) is a collection of programs for Monte Carlo simulation of statistical mechanical systems",
+  "keywords": "C++, chemical dynamics, kinetic Monte Carlo, nanoparticle, electrochemistry, Gillespie",
+  "license": "BSD-3-Clause-LBNL",
   "title": "RNMC",
   "version": "v1.0.0"
 }

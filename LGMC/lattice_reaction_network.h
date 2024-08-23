@@ -24,6 +24,7 @@ See the README file in the top-level RNMC directory.
 #include <fstream>
 #include <functional>
 #include <memory>
+#include <algorithm>
 
 const int SITE_SELF_REACTION = -3;
 const int SITE_HOMOGENEOUS = -2;

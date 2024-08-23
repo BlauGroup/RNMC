@@ -38,8 +38,8 @@
       in {
         devShell.x86_64-linux =
           with import nixpkgs { system = "x86_64-linux"; };
-          # (mkShell.override { stdenv = (callPackage mini-compile-commands {}).wrap clang13Stdenv; }) {
-          (mkShell.override { stdenv = clang13Stdenv; }) {
+          # (mkShell.override { stdenv = (callPackage mini-compile-commands {}).wrap clangStdenv; }) {
+          (mkShell.override { stdenv = clangStdenv; }) {
             buildInputs = [
               gcc
               clang

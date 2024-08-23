@@ -23,6 +23,7 @@ Lattice from https://spparks.sandia.gov/
 #include "stdlib.h"
 #include <string>
 #include "math.h"
+#include "stdint.h"
 
 #define SPECIES_EMPTY 0
 #define DELTALOCAL 10000

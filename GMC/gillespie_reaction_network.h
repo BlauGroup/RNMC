@@ -8,6 +8,8 @@ See the README file in the top-level RNMC directory.
 #ifndef RNMC_GILLESPIE_REACTION_NETWORK_H
 #define RNMC_GILLESPIE_REACTION_NETWORK_H
 
+#include <functional>
+
 #include "reaction_network.h"
 
 // parameters passed to the ReactionNetwork constructor
