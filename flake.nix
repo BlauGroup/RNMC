@@ -19,7 +19,7 @@
     # all platforms.
     let genericDefaultPackage = systemString:
           with import nixpkgs { system = systemString; };
-          clang13Stdenv.mkDerivation {
+          gccStdenv.mkDerivation {
             name = "RNMC";
             src = self;
 
@@ -39,16 +39,16 @@
         devShell.x86_64-linux =
           with import nixpkgs { system = "x86_64-linux"; };
           # (mkShell.override { stdenv = (callPackage mini-compile-commands {}).wrap clangStdenv; }) {
-          (mkShell.override { stdenv = clangStdenv; }) {
+          (mkShell.override { stdenv = gccStdenv; }) {
             buildInputs = [
               gcc
-              clang
+              gnumake
+              glibc
               gsl
               (sqlite.override { interactive = true; })
               sqlitebrowser
               gdb
               valgrind
-              glibc.static
             ];
           };
 
