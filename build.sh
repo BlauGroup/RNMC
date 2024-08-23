@@ -1,10 +1,23 @@
+
 mkdir -p build
 
-flags="-fno-rtti -fno-exceptions -std=c++17 -Wall -Wextra -g $(gsl-config --cflags) $(gsl-config --libs) -lsqlite3 -lpthread"
-
-echo "building test_core"
-$CXX $flags ./core/test.cpp -o ./build/test_core
+## Compile each module of RNMC
+pwd
 echo "building GMC"
-$CXX $flags ./GMC/GMC.cpp -o ./build/GMC
+cd GMC
+make clean
+make GMC
+cd ..
+pwd
+
 echo "building NPMC"
-$CXX $flags ./NPMC/NPMC.cpp -o ./build/NPMC
+cd NPMC
+make clean
+make NPMC
+cd ..
+
+echo "building LGMC"
+cd LGMC
+make clean
+make LGMC
+cd ..

@@ -5,6 +5,9 @@ tags:
   - C++
   - chemical dynamics
   - kinetic Monte Carlo
+  - nanoparticle
+  - electrochemistry
+  - Gillespie
 authors:
   - name: Laura Zichi
     orcid: 0000-0003-3897-3097

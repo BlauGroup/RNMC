@@ -1,24 +1,34 @@
-#pragma once
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://blaugroup.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
+#ifndef RNMC_NPMC_SQL_TYPES_H
+#define RNMC_NPMC_SQL_TYPES_H
+
 #include <sqlite3.h>
 #include <string>
 
-struct SpeciesSql {
+#include "NPMC_types.h"
+
+/* --------------------------- Species SQL --------------------------- */
+
+class SpeciesSql
+{
+public:
     int species_id;
     int degrees_of_freedom;
     static std::string sql_statement;
     static void action(SpeciesSql &r, sqlite3_stmt *stmt);
 };
 
-std::string SpeciesSql::sql_statement =
-    "SELECT species_id, degrees_of_freedom FROM species;";
+/* --------------------------- Site SQL ------------------------------ */
 
-void SpeciesSql::action(SpeciesSql &r, sqlite3_stmt *stmt) {
-    r.species_id = sqlite3_column_int(stmt, 0);
-    r.degrees_of_freedom = sqlite3_column_int(stmt, 1);
-};
-
-
-struct SiteSql {
+class SiteSql
+{
+public:
     int site_id;
     double x;
     double y;
@@ -28,20 +38,11 @@ struct SiteSql {
     static void action(SiteSql &r, sqlite3_stmt *stmt);
 };
 
-std::string SiteSql::sql_statement =
-    "SELECT site_id, x, y, z, species_id FROM sites;";
+/* ----------------------- Interaction SQL --------------------------- */
 
-
-void SiteSql::action(SiteSql &r, sqlite3_stmt *stmt) {
-    r.site_id = sqlite3_column_int(stmt, 0);
-    r.x = sqlite3_column_double(stmt, 1);
-    r.y = sqlite3_column_double(stmt, 2);
-    r.z = sqlite3_column_double(stmt, 3);
-    r.species_id = sqlite3_column_int(stmt, 4);
-}
-
-
-struct InteractionSql {
+class InteractionSql
+{
+public:
     int interaction_id;
     int number_of_sites;
     int species_id_1;
@@ -55,89 +56,48 @@ struct InteractionSql {
     static void action(InteractionSql &r, sqlite3_stmt *stmt);
 };
 
-std::string InteractionSql::sql_statement =
-    "SELECT interaction_id, number_of_sites, species_id_1, species_id_2, "
-    "left_state_1, left_state_2, right_state_1, right_state_2, "
-    "rate FROM interactions;";
+/* ---------------------------- Metadata SQL ------------------------- */
 
-void InteractionSql::action(InteractionSql &r, sqlite3_stmt *stmt) {
-    r.interaction_id = sqlite3_column_int(stmt, 0);
-    r.number_of_sites = sqlite3_column_int(stmt, 1);
-    r.species_id_1 = sqlite3_column_int(stmt, 2);
-    r.species_id_2 = sqlite3_column_int(stmt, 3);
-    r.left_state_1 = sqlite3_column_int(stmt, 4);
-    r.left_state_2 = sqlite3_column_int(stmt, 5);
-    r.right_state_1 = sqlite3_column_int(stmt, 6);
-    r.right_state_2 = sqlite3_column_int(stmt, 7);
-    r.rate = sqlite3_column_double(stmt, 8);
-}
-
-
-struct MetadataSql {
+class NanoMetadataSql
+{
+public:
     int number_of_species;
     int number_of_sites;
     int number_of_interactions;
     static std::string sql_statement;
-    static void action(MetadataSql &r, sqlite3_stmt *stmt);
+    static void action(NanoMetadataSql &r, sqlite3_stmt *stmt);
 };
 
-std::string MetadataSql::sql_statement =
-    "SELECT number_of_species, number_of_sites, "
-    "number_of_interactions FROM metadata;";
+/* ----------------------------- Factors SQL ------------------------- */
 
-void MetadataSql::action(MetadataSql &r, sqlite3_stmt *stmt) {
-    r.number_of_species = sqlite3_column_int(stmt, 0);
-    r.number_of_sites = sqlite3_column_int(stmt, 1);
-    r.number_of_interactions = sqlite3_column_int(stmt, 2);
-};
-
-
-struct FactorsSql {
+class NanoFactorsSql
+{
+public:
     double one_site_interaction_factor;
     double two_site_interaction_factor;
     double interaction_radius_bound;
     std::string distance_factor_type;
     static std::string sql_statement;
-    static void action(FactorsSql &r, sqlite3_stmt *stmt);
+    static void action(NanoFactorsSql &r, sqlite3_stmt *stmt);
 };
 
-std::string FactorsSql::sql_statement =
-    "SELECT one_site_interaction_factor, two_site_interaction_factor, "
-    "interaction_radius_bound, distance_factor_type FROM factors;";
-
-void FactorsSql::action(FactorsSql &r, sqlite3_stmt *stmt) {
-    r.one_site_interaction_factor = sqlite3_column_double(stmt, 0);
-    r.two_site_interaction_factor = sqlite3_column_double(stmt, 1);
-    r.interaction_radius_bound = sqlite3_column_double(stmt, 2);
-
-    // generally, casting from raw bytes to char is bad, but downstream,
-    // we directly check the resulting string against a finite list of
-    // accepted strings, so if garbage gets put in, the program will abort.
-    const char *distance_factor_type_raw = (char *) sqlite3_column_text(stmt, 3);
-    std::string distance_factor_type ( distance_factor_type_raw );
-    r.distance_factor_type = std::move(distance_factor_type);
+/* ------------------------- Initial state SQL ----------------------- */
 
 
-}
-
-struct InitialStateSql {
+class NanoInitialStateSql
+{
+public:
     int site_id;
     int degree_of_freedom;
     static std::string sql_statement;
-    static void action(InitialStateSql &r, sqlite3_stmt *stmt);
+    static void action(NanoInitialStateSql &r, sqlite3_stmt *stmt);
 };
 
-std::string InitialStateSql::sql_statement =
-    "SELECT site_id, degree_of_freedom FROM initial_state;";
+/* ------------------------ I/O Trajectories SQL --------------------- */
 
-
-void InitialStateSql::action(InitialStateSql &r, sqlite3_stmt *stmt) {
-    r.site_id = sqlite3_column_int(stmt, 0);
-    r.degree_of_freedom = sqlite3_column_int(stmt, 1);
-}
-
-
-struct TrajectoriesSql {
+class NanoReadTrajectoriesSql
+{
+public:
     int seed;
     int step;
     double time;
@@ -145,17 +105,59 @@ struct TrajectoriesSql {
     int site_id_2;
     int interaction_id;
     static std::string sql_statement;
-    static void action(TrajectoriesSql &r, sqlite3_stmt *stmt);
+    static void action(NanoReadTrajectoriesSql &r, sqlite3_stmt *stmt);
 };
 
-std::string TrajectoriesSql::sql_statement =
-    "INSERT INTO trajectories VALUES (?1,?2,?3,?4,?5,?6);";
+class NanoWriteTrajectoriesSql
+{
+public:
+    int seed;
+    int step;
+    double time;
+    int site_id_1;
+    int site_id_2;
+    int interaction_id;
+    static std::string sql_statement;
+    static void action(NanoWriteTrajectoriesSql &r, sqlite3_stmt *stmt);
+};
 
-void TrajectoriesSql::action(TrajectoriesSql &r, sqlite3_stmt *stmt) {
-    sqlite3_bind_int(stmt, 1, r.seed);
-    sqlite3_bind_int(stmt, 2, r.step);
-    sqlite3_bind_double(stmt, 3, r.time);
-    sqlite3_bind_int(stmt, 4, r.site_id_1);
-    sqlite3_bind_int(stmt, 5, r.site_id_2);
-    sqlite3_bind_int(stmt, 6, r.interaction_id);
-}
+/* ----------------------------- I/O state SQL ----------------------- */
+
+class NanoReadStateSql
+{
+public:
+    int seed;
+    int site_id;
+    int degree_of_freedom;
+    static std::string sql_statement;
+    static void action(NanoReadStateSql &r, sqlite3_stmt *stmt);
+};
+
+class NanoWriteStateSql
+{
+public:
+    int seed;
+    int site_id;
+    int degree_of_freedom;
+    static std::string sql_statement;
+    static void action(NanoWriteStateSql &r, sqlite3_stmt *stmt);
+};
+
+/* ----------------- State and Trajectory History Elements ----------- */
+
+struct NanoStateHistoryElement
+{
+    unsigned long int seed; // seed
+    int site_id;
+    int degree_of_freedom; // energy level the site is at
+};
+
+struct NanoTrajectoryHistoryElement
+{
+    unsigned long int seed; // seed
+    NanoReaction reaction;  // reaction which fired
+    double time;            // time after reaction has occoured.
+    int step;
+};
+
+#endif

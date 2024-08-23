@@ -1,99 +1,63 @@
-#pragma once
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://blaugroup.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
+#ifndef RNMC_DISPATCHER_H
+#define RNMC_DISPATCHER_H
+
 #include <mutex>
 #include <thread>
-#include "sql.h"
-#include "simulation.h"
-#include "queues.h"
 #include <csignal>
+#include <iostream>
+#include <string>
+#include <map>
+#include <vector>
 
-
-
-enum TypeOfCutoff { step_termination, time_termination };
-
-struct Cutoff {
-    union  { int step; double time; } bound;
-    TypeOfCutoff type_of_cutoff;
-};
-
-
-// size of history chunks which we write to the DB.
-// if you make this too small, it will force the dispatcher to
-// perform lots of really small DB transactions which is bad.
-// 20000 is a good value. Only change this if you fully understand the
-// performance implications
-
-constexpr int history_chunk_size = 20000;
-
-template <typename Solver, typename Model>
-struct SimulatorPayload {
-    Model &model;
-    HistoryQueue<HistoryPacket> &history_queue;
-    SeedQueue &seed_queue;
-    Cutoff cutoff;
-    std::vector<bool>::iterator running;
-
-    SimulatorPayload(
-        Model &model,
-        HistoryQueue<HistoryPacket> &history_queue,
-        SeedQueue &seed_queue,
-        Cutoff cutoff,
-        std::vector<bool>::iterator running
-        ) :
-
-            model (model),
-            history_queue (history_queue),
-            seed_queue (seed_queue),
-            cutoff (cutoff),
-            running (running)
-        {};
-
-    void run_simulator() {
-
-        while (std::optional<unsigned long int> maybe_seed =
-               seed_queue.get_seed()) {
-
-            unsigned long int seed = maybe_seed.value();
-
-
-            Simulation<Solver, Model> simulation (model, seed, history_chunk_size, history_queue);
-
-
-            switch(cutoff.type_of_cutoff) {
-            case step_termination :
-                simulation.execute_steps(cutoff.bound.step);
-                break;
-            case time_termination :
-                simulation.execute_time(cutoff.bound.time);
-                break;
-            }
-
-            history_queue.insert_history(
-                    HistoryPacket {
-                        .history = std::move(simulation.history),
-                        .seed = seed
-                        });
-
-        }
-
-        *running = false;
-    }
-};
-
-
+#include "sql.h"
+#include "queues.h"
+#include "RNMC_types.h"
+#include "simulation.h"
+#include "simulator_payload.h"
 
 template <
     typename Solver,
     typename Model,
     typename Parameters,
-    typename TrajectoriesSql>
+    typename WriteTrajectoriesSql,
+    typename ReadTrajectoriesSql,
+    typename WriteStateSql,
+    typename ReadStateSql,
+    typename WriteCutoffSql,
+    typename ReadCutoffSql,
+    typename StateHistory,
+    typename TrajHistory,
+    typename CutoffHistory,
+    typename Sim,
+    typename State>
 
-struct Dispatcher {
+class Dispatcher
+{
+
+public:
     SqlConnection model_database;
     SqlConnection initial_state_database;
     Model model;
-    SqlStatement<TrajectoriesSql> trajectories_stmt;
-    SqlWriter<TrajectoriesSql> trajectories_writer;
-    HistoryQueue<HistoryPacket> history_queue;
+    SqlStatement<WriteTrajectoriesSql> trajectories_stmt;
+    SqlWriter<WriteTrajectoriesSql> trajectories_writer;
+
+    SqlStatement<WriteStateSql> state_stmt;
+    SqlWriter<WriteStateSql> state_writer;
+
+    SqlStatement<WriteCutoffSql> cutoff_stmt;
+    SqlWriter<WriteCutoffSql> cutoff_writer;
+
+    HistoryQueue<HistoryPacket<TrajHistory>> history_queue;
+    HistoryQueue<HistoryPacket<StateHistory>> state_history_queue;
+    HistoryQueue<HistoryPacket<CutoffHistory>> cutoff_history_queue;
+
     SeedQueue seed_queue;
     std::vector<std::thread> threads;
     std::vector<bool> running;
@@ -101,6 +65,10 @@ struct Dispatcher {
     TypeOfCutoff type_of_cutoff;
     int number_of_simulations;
     int number_of_threads;
+    struct sigaction action;
+    std::map<int, State> seed_state_map;
+    std::map<int, int> seed_step_map;
+    std::map<int, double> seed_time_map;
 
     Dispatcher(
         std::string model_database_file,
@@ -109,125 +77,16 @@ struct Dispatcher {
         unsigned long int base_seed,
         int number_of_threads,
         Cutoff cutoff,
-        Parameters parameters) :
-        model_database (
-            model_database_file,
-            SQLITE_OPEN_READWRITE),
-        initial_state_database (
-            initial_state_database_file,
-            SQLITE_OPEN_READWRITE),
-        model (
-            model_database,
-            initial_state_database,
-            parameters),
-        trajectories_stmt (initial_state_database),
-        trajectories_writer (trajectories_stmt),
-        history_queue (),
-        seed_queue (number_of_simulations, base_seed),
+        Parameters parameters);
 
-        // don't want to start threads in the constructor.
-        threads (),
-        running (number_of_threads, false),
-        cutoff (cutoff),
-        number_of_simulations (number_of_simulations),
-        number_of_threads (number_of_threads)
-        {
-        };
-
+    void static signalHandler(int signum);
     void run_dispatcher();
-    void record_simulation_history(HistoryPacket history_packet);
+    void record_simulation_history(HistoryPacket<TrajHistory> traj_history_packet);
+    void record_state(HistoryPacket<StateHistory> state_history_packet);
+    void record_cutoff(HistoryPacket<CutoffHistory> cutoff_history_packet);
+    void static write_error_message(std::string s);
 };
 
+#include "dispatcher.cpp"
 
-
-template <
-    typename Solver,
-    typename Model,
-    typename Parameters,
-    typename TrajectoriesSql>
-
-void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::run_dispatcher() {
-
-    threads.resize(number_of_threads);
-    for (int i = 0; i < number_of_threads; i++) {
-        running[i] = true;
-        threads[i] = std::thread (
-            [](SimulatorPayload<Solver, Model> payload) {payload.run_simulator();},
-            SimulatorPayload<Solver, Model> (
-                model,
-                history_queue,
-                seed_queue,
-                cutoff,
-                running.begin() + i
-                )
-            );
-
-    }
-
-    bool finished = false;
-    while (! finished) {
-
-        if ( history_queue.empty() ) {
-
-            bool all_simulations_finished = true;
-
-            for ( bool flag : running ) {
-                if ( flag ) {
-                    all_simulations_finished = false;
-                    break;
-                }
-            }
-
-            if ( all_simulations_finished )
-                finished = true;
-        }
-
-
-        std::optional<HistoryPacket>
-            maybe_history_packet = history_queue.get_history();
-
-        if (maybe_history_packet) {
-            HistoryPacket history_packet = std::move(maybe_history_packet.value());
-            record_simulation_history(std::move(history_packet));
-        };
-    }
-
-    for (int i = 0; i < number_of_threads; i++) threads[i].join();
-
-    initial_state_database.exec(
-        "DELETE FROM trajectories WHERE rowid NOT IN"
-        "(SELECT MIN(rowid) FROM trajectories GROUP BY seed, step);");
-
-
-    std::cerr << time_stamp()
-              << "removing duplicate trajectories...\n";
-
-
-};
-
-template <
-    typename Solver,
-    typename Model,
-    typename Parameters,
-    typename TrajectoriesSql
-    >
-void Dispatcher<Solver, Model, Parameters, TrajectoriesSql>::record_simulation_history(HistoryPacket history_packet) {
-    initial_state_database.exec("BEGIN");
-
-    for (unsigned long int i = 0; i < history_packet.history.size(); i++) {
-        trajectories_writer.insert(
-            model.history_element_to_sql(
-                (int) history_packet.seed,
-                history_packet.history[i]));
-
-
-    }
-    initial_state_database.exec("COMMIT;");
-
-    std::cerr << time_stamp()
-              << "wrote "
-              << history_packet.history.size()
-              << " events from trajectory "
-              << history_packet.seed
-              << " to database\n";
-};
+#endif

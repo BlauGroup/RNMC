@@ -12,8 +12,10 @@ Examples of research projects using `RNMC`:
 - Spotte-Smith et al., *J. Am. Chem. Soc.* **145**(2), 12181–12192 (2023). [DOI: 10.1021/jacs.3c02222](https://doi.org/10.1021/jacs.3c02222)
 - Xia et al., *Nano Lett.* **23**(23), 11129–11136 (2023). [DOI: 10.1021/acs.nanolett.3c03568](https://doi.org/10.1021/acs.nanolett.3c03568)
 
-Complete documentation, including a guide to installing `RNMC` can be found [here](https://blaugroup.github.io/RNMC/).
+## Documentation
 
-### Dependencies
+The complete documentation for `RNMC` can be found [here](https://blaugroup.github.io/RNMC/). This includes a guide to installation, setting up simulations, testing, and more.
 
-Note that `RNMC` depends on [GSL](https://www.gnu.org/software/gsl/) for pseudo random number generation and [sqlite](https://www.sqlite.org/index.html) for the database interfaces.
+## Dependencies
+
+RNMC depends on [GSL](https://www.gnu.org/software/gsl/) for pseudo random number generation and [sqlite](https://www.sqlite.org/index.html) for the database interfaces.

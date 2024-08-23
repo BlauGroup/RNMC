@@ -1,25 +1,38 @@
-#include <getopt.h>
-#include "../core/dispatcher.h"
-#include "sql_types.h"
-#include "nano_particle.h"
-#include <csignal>
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://blaugroup.github.io/RNMC/
 
-void print_usage() {
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
+#include <getopt.h>
+
+#include "../core/nano_particle_simulation.h"
+#include "../core/dispatcher.h"
+#include "nano_particle.h"
+
+void print_usage()
+{
     std::cout << "Usage: specify the following options\n"
               << "--nano_particle_database\n"
               << "--initial_state_database\n"
               << "--number_of_simulations\n"
               << "--base_seed\n"
               << "--thread_count\n"
-              << "--step_cutoff|time_cutoff\n";
-}
+              << "--step_cutoff|time_cutoff\n"
+              << "--checkpoint\n";
 
-int main(int argc, char **argv) {
-    if (argc != 7) {
+} // print_usage()
+
+/* ---------------------------------------------------------------------- */
+
+int main(int argc, char **argv)
+{
+    if (argc != 8)
+    {
         print_usage();
         exit(EXIT_FAILURE);
     }
-
 
     struct option long_options[] = {
         {"nano_particle_database", required_argument, NULL, 1},
@@ -29,6 +42,7 @@ int main(int argc, char **argv) {
         {"thread_count", required_argument, NULL, 5},
         {"step_cutoff", optional_argument, NULL, 6},
         {"time_cutoff", optional_argument, NULL, 7},
+        {"checkpoint", required_argument, NULL, 8},
         {NULL, 0, NULL, 0}
         // last element of options array needs to be filled with zeros
     };
@@ -41,20 +55,20 @@ int main(int argc, char **argv) {
     int number_of_simulations = 0;
     int base_seed = 0;
     int thread_count = 0;
+    bool isCheckpoint = false;
+
     Cutoff cutoff = {
-        .bound =  { .step =  0 },
-        .type_of_cutoff = step_termination
-    };
-
-
-
+        .bound = {.step = 0},
+        .type_of_cutoff = step_termination};
 
     while ((c = getopt_long_only(
                 argc, argv, "",
                 long_options,
-                &option_index)) != -1) {
+                &option_index)) != -1)
+    {
 
-        switch (c) {
+        switch (c)
+        {
 
         case 1:
             nano_particle_database = optarg;
@@ -86,36 +100,46 @@ int main(int argc, char **argv) {
             cutoff.type_of_cutoff = time_termination;
             break;
 
+        case 8:
+            isCheckpoint = atof(optarg);
+            break;
+
         default:
             // if an unexpected argument is passed, exit
             print_usage();
             exit(EXIT_FAILURE);
             break;
-
         }
-
     }
 
-    NanoParticleParameters parameters = {};
+    NanoParticleParameters parameters{
+        .isCheckpoint = isCheckpoint};
 
     Dispatcher<
-        LinearSolver,
+        NanoSolver,
         NanoParticle,
         NanoParticleParameters,
-        TrajectoriesSql
-        >
+        NanoWriteTrajectoriesSql,
+        NanoReadTrajectoriesSql,
+        NanoWriteStateSql,
+        NanoReadStateSql,
+        WriteCutoffSql,
+        ReadCutoffSql,
+        NanoStateHistoryElement,
+        NanoTrajectoryHistoryElement,
+        CutoffHistoryElement,
+        NanoParticleSimulation,
+        std::vector<int>>
 
-        dispatcher (
+        dispatcher(
             nano_particle_database,
             initial_state_database,
             number_of_simulations,
             base_seed,
             thread_count,
             cutoff,
-            parameters
-            );
+            parameters);
 
     dispatcher.run_dispatcher();
     exit(EXIT_SUCCESS);
-
 }

@@ -1,24 +1,41 @@
-#include <getopt.h>
-#include "../core/dispatcher.h"
-#include "sql_types.h"
-#include "reaction_network.h"
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://blaugroup.github.io/RNMC/
 
-void print_usage() {
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
+#include <getopt.h>
+
+#include "sql_types.h"
+#include "linear_solver.h"
+#include "../core/dispatcher.h"
+#include "../core/reaction_network_simulation.h"
+#include "../core/energy_reaction_network_simulation.h"
+
+void print_usage()
+{
     std::cout << "Usage: specify the following options\n"
               << "--reaction_database\n"
               << "--initial_state_database\n"
               << "--number_of_simulations\n"
               << "--base_seed\n"
               << "--thread_count\n"
-              << "--step_cutoff|time_cutoff\n";
-}
+              << "--step_cutoff|time_cutoff\n"
+              << "--energy_budget\n"
+              << "--checkpoint\n";
+} // print_usage()
 
-int main(int argc, char **argv) {
-    if (argc != 7) {
+/* ---------------------------------------------------------------------- */
+
+int main(int argc, char **argv)
+{
+    // Print options if incorrect number of args are supplied
+    if (argc < 8 || argc > 9)
+    {
         print_usage();
         exit(EXIT_FAILURE);
     }
-
 
     struct option long_options[] = {
         {"reaction_database", required_argument, NULL, 1},
@@ -28,9 +45,9 @@ int main(int argc, char **argv) {
         {"thread_count", required_argument, NULL, 5},
         {"step_cutoff", optional_argument, NULL, 6},
         {"time_cutoff", optional_argument, NULL, 7},
-        {NULL, 0, NULL, 0}
-        // last element of options array needs to be filled with zeros
-    };
+        {"energy_budget", optional_argument, NULL, 8},
+        {"checkpoint", required_argument, NULL, 9},
+        {NULL, 0, NULL, 0}};
 
     int c;
     int option_index = 0;
@@ -40,18 +57,21 @@ int main(int argc, char **argv) {
     int number_of_simulations = 0;
     int base_seed = 0;
     int thread_count = 0;
-    Cutoff cutoff = {
-        .bound =  { .step =  0 },
-        .type_of_cutoff = step_termination
-    };
+    double energy_budget = 0;
+    bool isCheckpoint = false;
 
+    Cutoff cutoff = {
+        .bound = {.step = 0},
+        .type_of_cutoff = step_termination};
 
     while ((c = getopt_long_only(
                 argc, argv, "",
                 long_options,
-                &option_index)) != -1) {
+                &option_index)) != -1)
+    {
 
-        switch (c) {
+        switch (c)
+        {
 
         case 1:
             reaction_database = optarg;
@@ -83,38 +103,90 @@ int main(int argc, char **argv) {
             cutoff.type_of_cutoff = time_termination;
             break;
 
+        case 8:
+            energy_budget = atof(optarg);
+            break;
+
+        case 9:
+            isCheckpoint = atof(optarg);
+            break;
 
         default:
             // if an unexpected argument is passed, exit
             print_usage();
             exit(EXIT_FAILURE);
             break;
-
         }
-
     }
 
-    ReactionNetworkParameters parameters;
+    // Normal GMC if no energy budget is specified
+    if (energy_budget == 0)
+    {
+        ReactionNetworkParameters parameters{
+            .isCheckpoint = isCheckpoint};
 
-    Dispatcher<
-        TreeSolver,
-        ReactionNetwork,
-        ReactionNetworkParameters,
-        TrajectoriesSql
-        >
+        Dispatcher<
+            LinearSolver,
+            GillespieReactionNetwork,
+            ReactionNetworkParameters,
+            ReactionNetworkWriteTrajectoriesSql,
+            ReactionNetworkReadTrajectoriesSql,
+            ReactionNetworkWriteStateSql,
+            ReactionNetworkReadStateSql,
+            WriteCutoffSql,
+            ReadCutoffSql,
+            ReactionNetworkStateHistoryElement,
+            ReactionNetworkTrajectoryHistoryElement,
+            CutoffHistoryElement,
+            ReactionNetworkSimulation<LinearSolver>,
+            std::vector<int>>
 
-        dispatcher (
-        reaction_database,
-        initial_state_database,
-        number_of_simulations,
-        base_seed,
-        thread_count,
-        cutoff,
-        parameters
-        );
+            dispatcher(
+                reaction_database,
+                initial_state_database,
+                number_of_simulations,
+                base_seed,
+                thread_count,
+                cutoff,
+                parameters);
 
-    dispatcher.run_dispatcher();
+        dispatcher.run_dispatcher();
+    }
+    else
+    {
+        // Include energy budget in MC
+        EnergyReactionNetworkParameters parameters{
+            .energy_budget = energy_budget,
+            .isCheckpoint = isCheckpoint};
+
+        Dispatcher<
+            LinearSolver,
+            EnergyReactionNetwork,
+            EnergyReactionNetworkParameters,
+            ReactionNetworkWriteTrajectoriesSql,
+            ReactionNetworkReadTrajectoriesSql,
+            ReactionNetworkWriteStateSql,
+            ReactionNetworkReadStateSql,
+            EnergyNetworkWriteCutoffSql,
+            EnergyNetworkReadCutoffSql,
+            ReactionNetworkStateHistoryElement,
+            ReactionNetworkTrajectoryHistoryElement,
+            EnergyNetworkCutoffHistoryElement,
+            EnergyReactionNetworkSimulation<TreeSolver>,
+            EnergyState>
+
+            dispatcher(
+                reaction_database,
+                initial_state_database,
+                number_of_simulations,
+                base_seed,
+                thread_count,
+                cutoff,
+                parameters);
+
+        // run the simulation
+        dispatcher.run_dispatcher();
+    }
+
     exit(EXIT_SUCCESS);
-
-
 }

@@ -1,127 +1,59 @@
-#pragma once
-#include "solvers.h"
-#include "queues.h"
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://blaugroup.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
+#ifndef RNMC_SIMULATION_H
+#define RNMC_SIMULATION_H
+
 #include <functional>
 #include <csignal>
+#include <set>
+#include <atomic>
+#include <unistd.h>
+#include <string>
+#include <cstring>
 
-struct HistoryElement {
+#include "../GMC/tree_solver.h"
 
-    unsigned long int seed; // seed
-    int reaction_id; // reaction which fired
-    double time;  // time after reaction has occoured.
-    int step;
-};
+// In the GNUC Library, sig_atomic_t is a typedef for int,
+// which is atomic on all systems that are supported by the
+// GNUC Library
+volatile sig_atomic_t do_shutdown = 0;
 
-struct HistoryPacket {
-    std::vector<HistoryElement> history;
+// std::atomic is safe, as long as it is lock-free
+std::atomic<bool> shutdown_requested = false;
+static_assert(std::atomic<bool>::is_always_lock_free);
+// or, at runtime: assert( shutdown_requested.is_lock_free() );
+
+/* ------------------------------------------------------------------- */
+
+template <typename Solver>
+class Simulation
+{
+public:
     unsigned long int seed;
-};
-
-template <typename Solver, typename Model>
-struct Simulation {
-    Model &model;
-    unsigned long int seed;
-    std::vector<int> state;
     double time;
     int step; // number of reactions which have occoured
-    Solver solver;
     unsigned long int history_chunk_size;
-    std::vector<HistoryElement> history;
-    HistoryQueue<HistoryPacket> &history_queue;
     std::function<void(Update)> update_function;
 
-
-    Simulation(Model &model,
-               unsigned long int seed,
+    Simulation(unsigned long int seed,
                int history_chunk_size,
-               HistoryQueue<HistoryPacket> &history_queue
-        ) :
-        model (model),
-        seed (seed),
-        state (model.initial_state),
-        time (0.0),
-        step (0),
-        solver (seed, std::ref(model.initial_propensities)),
-        history_chunk_size (history_chunk_size),
-        history_queue(history_queue),
-        update_function ([&] (Update update) {solver.update(update);})
-        {
-            history.reserve(history_chunk_size);
-        };
+               int step,
+               double time) : seed(seed),
+                              time(time),
+                              step(step),
+                              history_chunk_size(history_chunk_size) {};
 
-
-    bool execute_step();
     void execute_steps(int step_cutoff);
     void execute_time(double time_cutoff);
-
+    virtual bool execute_step();
+    void write_error_message(std::string s);
 };
 
+#include "simulation.cpp"
 
-template <typename Solver, typename Model>
-bool Simulation<Solver, Model>::execute_step() {
-    std::optional<Event> maybe_event = solver.event();
-
-    if (! maybe_event) {
-
-        return false;
-
-    } else {
-        // an event happens
-        Event event = maybe_event.value();
-        int next_reaction = event.index;
-
-        // update time
-        time += event.dt;
-
-        // record what happened
-        history.push_back(HistoryElement {
-            .seed = seed,
-            .reaction_id = next_reaction,
-            .time = time,
-            .step = step
-            });
-
-        if ( history.size() == history_chunk_size ) {
-            history_queue.insert_history(
-                    HistoryPacket {
-                        .history = std::move(history),
-                        .seed = seed
-                        });
-
-            history = std::vector<HistoryElement> ();
-            history.reserve(history_chunk_size);
-        }
-
-
-        // increment step
-        step++;
-
-        // update state
-        model.update_state(std::ref(state), next_reaction);
-
-
-        // update propensities
-        model.update_propensities(
-            update_function,
-            std::ref(state),
-            next_reaction);
-
-        return true;
-    }
-};
-
-template <typename Solver, typename Model>
-void Simulation<Solver, Model>::execute_steps(int step_cutoff) {
-    while(execute_step()) {
-        if (step > step_cutoff)
-            break;
-    }
-};
-
-template <typename Solver, typename Model>
-void Simulation<Solver, Model>::execute_time(double time_cutoff) {
-    while(execute_step()) {
-        if (time > time_cutoff)
-            break;
-    }
-};
+#endif

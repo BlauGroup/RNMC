@@ -1,3 +1,6 @@
+*.o
+.vscode/
+*_debug
 build
 result
 .envrc

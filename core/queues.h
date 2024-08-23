@@ -1,40 +1,54 @@
-#pragma once
+/* ----------------------------------------------------------------------
+RNMC - Reaction Network Monte Carlo
+https://blaugroup.github.io/RNMC/
+
+See the README file in the top-level RNMC directory.
+---------------------------------------------------------------------- */
+
+#ifndef RNMC_QUEUES_H
+#define RNMC_QUEUES_H
+
 #include <queue>
 #include <mutex>
 #include <optional>
 
-
-
-
-struct SeedQueue {
+struct SeedQueue
+{
     std::queue<unsigned long int> seeds;
     std::mutex mutex;
 
-    SeedQueue(unsigned long int number_of_seeds, unsigned long int base_seed) {
+    SeedQueue(unsigned long int number_of_seeds, unsigned long int base_seed)
+    {
         for (unsigned long int i = base_seed;
              i < number_of_seeds + base_seed;
-             i++) {
+             i++)
+        {
             seeds.push(i);
         }
     }
 
-    std::optional<unsigned long int> get_seed() {
-        std::lock_guard<std::mutex> lock (mutex);
+    std::optional<unsigned long int> get_seed()
+    {
+        std::lock_guard<std::mutex> lock(mutex);
 
-        if (seeds.empty()) {
-            return std::optional<unsigned long int> ();
-        } else {
+        if (seeds.empty())
+        {
+            return std::optional<unsigned long int>();
+        }
+        else
+        {
             unsigned long int result = seeds.front();
             seeds.pop();
-            return std::optional<unsigned long int> (result);
+            return std::optional<unsigned long int>(result);
         }
     }
 };
 
-
+/* ------------------------------------------------------------------- */
 
 template <typename T>
-struct HistoryQueue {
+struct HistoryQueue
+{
     // the flow of trajectory histories from the simulator threads to
     // the dispatcher is subtle and important. The vector of histories
     // is allocated by the simulator. Once the simulation is finished,
@@ -53,27 +67,32 @@ struct HistoryQueue {
     std::queue<T> history_packets;
     std::mutex mutex;
 
-    bool empty() {
-        std::lock_guard<std::mutex> lock (mutex);
+    bool empty()
+    {
+        std::lock_guard<std::mutex> lock(mutex);
         return history_packets.empty();
     }
 
-    void insert_history(T history_packet) {
-        std::lock_guard<std::mutex> lock (mutex);
+    void insert_history(T history_packet)
+    {
+        std::lock_guard<std::mutex> lock(mutex);
         history_packets.push(std::move(history_packet));
     }
 
-    std::optional<T> get_history() {
-        std::lock_guard<std::mutex> lock (mutex);
-        if (history_packets.empty()) {
-            return std::optional<T> ();
-        } else {
+    std::optional<T> get_history()
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        if (history_packets.empty())
+        {
+            return std::optional<T>();
+        }
+        else
+        {
             T result = std::move(history_packets.front());
             history_packets.pop();
-            return std::optional<T> (std::move(result));
-
+            return std::optional<T>(std::move(result));
         }
     };
-
 };
 
+#endif
