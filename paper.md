@@ -51,7 +51,7 @@ affiliations:
    index: 4
  - name: Molecular Foundry, Lawrence Berkeley National Laboratory, Berkeley, CA, USA 94720
    index: 5
-date: 2024-08-14
+date: 14 August 2024
 bibliography: paper.bib
 ---
 
