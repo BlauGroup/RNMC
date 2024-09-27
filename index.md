@@ -9,4 +9,4 @@ Reaction Network Monte Carlo (`RNMC`) is a collection of programs for kinetic Mo
 ## Contributing
 RNMC is hosted on [GitHub](https://github.com/BlauGroup/RNMC). Users are encouraged to fork the repository and submit features via pull request. You can also suggest features and document bugs through the [issues page](https://github.com/BlauGroup/RNMC/issues).
 
-Additional details for contributors are provided on our [guide to contributors](./Contributors.md).
+Additional details for contributors are provided on our [guide for contributors](./Contributors.md).
