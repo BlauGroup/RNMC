@@ -26,6 +26,6 @@ We welcome community contributions to RNMC! Please submit code contributions as 
 
 If you don't know where to start, you can check out the open [issues](https://github.com/BlauGroup/RNMC/issues) or reach out to [Sam Blau](mailto:smblau@lbl.gov) and describe what ideas you may have in mind.
 
-Have a problem installing or running RNMC, or have an idea for how the code could be better? Please open a new issue, and label the issue (with *e.g.*, “bug”, “enhancement”, or “question”) so that we can triage appropriately.
+Have a problem installing or running RNMC, or have an idea for how the code could be better? Need support in using RNMC? Please open a new issue, and label the issue (with *e.g.*, “bug”, “enhancement”, or “question”) so that we can triage appropriately. Issues are preferred over e-mails or other private communications because multiple users might encounter the same problem.
 
 A more complete guide to contributing can be found in our [online documentation](https://blaugroup.github.io/RNMC/Contributors.html).
