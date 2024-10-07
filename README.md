@@ -19,3 +19,13 @@ The complete documentation for `RNMC` can be found [here](https://blaugroup.gith
 ## Dependencies
 
 RNMC depends on [GSL](https://www.gnu.org/software/gsl/) for pseudo random number generation and [sqlite](https://www.sqlite.org/index.html) for the database interfaces.
+
+## Contributing
+
+We welcome community contributions to RNMC! Please submit code contributions as [pull requests (PRs)](https://github.com/BlauGroup/RNMC/pulls). Work-in-progress PRs are encouraged; just include "\[WIP\]" in the title of your PR.
+
+If you don't know where to start, you can check out the open [issues](https://github.com/BlauGroup/RNMC/issues) or reach out to [Sam Blau](mailto:smblau@lbl.gov) and describe what ideas you may have in mind.
+
+Have a problem installing or running RNMC, or have an idea for how the code could be better? Please open a new issue, and label the issue (with *e.g.*, “bug”, “enhancement”, or “question”) so that we can triage appropriately.
+
+A more complete guide to contributing can be found in our [online documentation](https://blaugroup.github.io/RNMC/Contributors.html).
