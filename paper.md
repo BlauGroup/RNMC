@@ -63,7 +63,7 @@ Kinetic Monte Carlo (kMC) approaches overcome these limitations to bridge length
 
 
 Here, we present `RNMC`, an easy-to-use, modular, high-performance kMC simulation framework that enables modeling of complex systems.
-`RNMC` consists of a core module defining the common features of kMC algorithms, including an implementation of the Gillespie algorithm [@gillespie1977exact], input/output operations leveraging SQLite databases, threading logic for parallel execution, and dependency graphs for efficient event propensity updates.
+`RNMC` consists of a core module defining the common features of kMC algorithms, including an implementation of the Gillespie algorithm [@gillespie1977exact], input/output operations leveraging SQLite databases, random number sampling, threading logic for parallel execution, and dependency graphs for efficient event propensity updates.
 In addition, there are currently three modules defining kMC implementations for different types of applications.
 The `GMC` (Gillespie Monte Carlo) module enables simulations of reaction networks in a homogeneous (well-mixed) environment.
 `GMC` is a basic tool that is appropriate for general simulations of solution-phase chemistry.
@@ -76,11 +76,14 @@ We have designed `RNMC` to be easily extensible, enabling users to add additiona
 Three are many existing kMC implementations, including several open source examples (e.g. the Stochastic Parallel PARticle Kinetic Simulator or `SPPARKS` [@garcia2009crossing] and `kmos` [@hoffmann2014kmos]).
 `RNMC` began as a fork of SPPARKS but differs in several important ways.
 First, because `RNMC` uses the widely supported SQLite database engine for simulation inputs and outputs, it facilitates the automation of simulations.
-Second, `RNMC` has a focus on modularity; it is designed such that users can quickly develop new types of kMC simulations using a common core library.
- 
+Second, `RNMC` has a focus on modularity.
+All simulators leverage the small core library, which serves as a common interface through the use of templating.
+As long as they can operate through this shared core, different simulation implementations are totally independent.
+This means that new developers need only read and understand the core library to be able to add new capabilities to `RNMC`, lowering the barrier to entry, and further reduces the likelihood that new additions will adversely affect pre-existing code.
+
 The simulation modules already implemented in `RNMC` provide unique capabilities that are not widely available in other open source codes.
 `NPMC` is specifically designed for 3D simulations of the complex photophysical interaction networks in nanocrystals [@teitelboim2019energy], particularly multi-domain heterostructures whose optical properties cannot be calculated deterministically [@skripka2023NL].
-`NPMC` can be used to simulate energy transfer interactions between dopants in nanoparticles, their radiative transitions, and nonlinear processes such as upconversion [@chan2015combinatorial] and photon avalanching [@skripka2023NL].  
+`NPMC` can be used to simulate energy transfer interactions between dopants in nanoparticles, their radiative transitions, and nonlinear processes such as upconversion [@chan2015combinatorial] and photon avalanching [@skripka2023NL].
 `LGMC` is also somewhat unique in that it can simulate multi-phase systems and electrochemical processes.
 Simulations using `LGMC` can include a lattice region and a homogeneous solution region which can interact *via* interfacial reactions.
 Electrochemcial reactions can be treated using Marcus theory [@marcus1965theory] or Butler-Volmer kinetics [@newman2021electrochemical].
