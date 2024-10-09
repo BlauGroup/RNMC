@@ -2,7 +2,10 @@
 
 ## End-to-end Testing for GMC and NPMC
 
-There are end-to-end testing examples for GMC and NPMC but not for LGMC as its trajectories are not deterministic. These tests can be run using `test.sh` **from the main `RNMC` directory**.
+There are end-to-end testing examples for GMC and NPMC but not for LGMC as its trajectories are not deterministic. These tests can be run as follows **from the main `RNMC` directory**:
+```
+tests/test.sh
+```
 
 ## Unit Testing
 The `tests` folder also contains unit tests using [GoogleTest](https://google.github.io/googletest/primer.html). Unit tests are available for the following classes: `reaction_network`, `nano_particle`, `lattice_reaction_network`, and `lattice`. The unit tests can be used to help determine if changes to the open-source code introduce bugs but are not completely comprehensive.
