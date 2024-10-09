@@ -51,7 +51,7 @@ affiliations:
    index: 4
  - name: Molecular Foundry, Lawrence Berkeley National Laboratory, Berkeley, CA, USA 94720
    index: 5
-date: 2024-08-14
+date: 14 August 2024
 bibliography: paper.bib
 ---
 
@@ -73,20 +73,20 @@ We have designed `RNMC` to be easily extensible, enabling users to add additiona
 
 # Statement of need
 
-Three are many existing kMC implementations, including several open source examples (e.g. the Stochastic Parallel PARticle Kinetic Simulator or `SPPARKS`[@garcia2009crossing] and `kmos`).[@hoffmann2014kmos]
+Three are many existing kMC implementations, including several open source examples (e.g. the Stochastic Parallel PARticle Kinetic Simulator or `SPPARKS` [@garcia2009crossing] and `kmos` [@hoffmann2014kmos]).
 `RNMC` began as a fork of SPPARKS but differs in several important ways.
 First, because `RNMC` uses the widely supported SQLite database engine for simulation inputs and outputs, it facilitates the automation of simulations.
 Second, `RNMC` has a focus on modularity; it is designed such that users can quickly develop new types of kMC simulations using a common core library.
  
 The simulation modules already implemented in `RNMC` provide unique capabilities that are not widely available in other open source codes.
-`NPMC` is specifically designed for 3D simulations of the complex photophysical interaction networks in nanocrystals,[@teitelboim2019energy] particularly multi-domain heterostructures whose optical properties cannot be calculated deterministically.[@skripka2023NL]
-`NPMC` can be used to simulate energy transfer interactions between dopants in nanoparticles, their radiative transitions, and nonlinear processes such as upconversion [@chan2015combinatorial] and photon avalanching.[@skripka2023NL]  
+`NPMC` is specifically designed for 3D simulations of the complex photophysical interaction networks in nanocrystals [@teitelboim2019energy], particularly multi-domain heterostructures whose optical properties cannot be calculated deterministically [@skripka2023NL].
+`NPMC` can be used to simulate energy transfer interactions between dopants in nanoparticles, their radiative transitions, and nonlinear processes such as upconversion [@chan2015combinatorial] and photon avalanching [@skripka2023NL].  
 `LGMC` is also somewhat unique in that it can simulate multi-phase systems and electrochemical processes.
 Simulations using `LGMC` can include a lattice region and a homogeneous solution region which can interact *via* interfacial reactions.
-Electrochemcial reactions can be treated using Marcus theory[@marcus1965theory] or Butler-Volmer kinetics.[@newman2021electrochemical]
+Electrochemcial reactions can be treated using Marcus theory [@marcus1965theory] or Butler-Volmer kinetics [@newman2021electrochemical].
 Because it allows for a dynamic lattice region, `LGMC` is also appropriate for simulations of nucleation and growth, dissolution, precipitation, and related phenomena.
 
-We have already used the `GMC` module in a number of prior works in applications related to Li-ion and Mg-ion batteries.[@spotte2022toward; @barter2023predictive; @spotte2023chemical] We note that these simulations included tens of millions of reactions, demonstrating that `RNMC` is able to scale to large and complex reaction networks. In addition, we have used `NPMC` to perform Bayesian optimization of upconverting nanoparticles.[@xia2023accelerating]
+We have already used the `GMC` module in a number of prior works in applications related to Li-ion and Mg-ion batteries [@spotte2022toward; @barter2023predictive; @spotte2023chemical]. We note that these simulations included tens of millions of reactions, demonstrating that `RNMC` is able to scale to large and complex reaction networks. In addition, we have used `NPMC` to perform Bayesian optimization of upconverting nanoparticles [@xia2023accelerating].
 
 # Acknowledgements
 
