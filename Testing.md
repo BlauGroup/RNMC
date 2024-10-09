@@ -4,7 +4,7 @@
 
 There are end-to-end testing examples for GMC and NPMC but not for LGMC as its trajectories are not deterministic. These tests can be run as follows **from the main `RNMC` directory**:
 ```
-tests/test.sh
+$ tests/test.sh
 ```
 
 ## Unit Testing
