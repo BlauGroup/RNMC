@@ -61,8 +61,7 @@ In order to capture complex processes with high fidelity, simulation methods tha
 While techniques like molecular dynamics and *ab initio* simulations capture dynamics and reactivity at high resolution, they cannot be used beyond relatively small length (hundreds to thousands of atoms) and time scales (picoseconds to microseconds).
 Kinetic Monte Carlo (kMC) approaches overcome these limitations to bridge length and time scales across several orders of magnitude while retaining relevant microscopic resolution, making it a powerful and flexible tool.
 
-
-Here, we present `RNMC`, an easy-to-use, modular, high-performance kMC simulation framework that enables modeling of complex systems.
+Here, we present Reaction Network Monte Carlo (`RNMC`), an easy-to-use, modular, high-performance kMC simulation framework that enables modeling of complex systems.
 `RNMC` consists of a core module defining the common features of kMC algorithms, including an implementation of the Gillespie algorithm [@gillespie1977exact], input/output operations leveraging SQLite databases, random number sampling, threading logic for parallel execution, and dependency graphs for efficient event propensity updates.
 In addition, there are currently three modules defining kMC implementations for different types of applications.
 The `GMC` (Gillespie Monte Carlo) module enables simulations of reaction networks in a homogeneous (well-mixed) environment.

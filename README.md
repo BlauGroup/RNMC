@@ -29,3 +29,9 @@ If you don't know where to start, you can check out the open [issues](https://gi
 Have a problem installing or running RNMC, or have an idea for how the code could be better? Need support in using RNMC? Please open a new issue, and label the issue (with *e.g.*, “bug”, “enhancement”, or “question”) so that we can triage appropriately. Issues are preferred over e-mails or other private communications because multiple users might encounter the same problem.
 
 A more complete guide to contributing can be found in our [online documentation](https://blaugroup.github.io/RNMC/Contributors.html).
+
+## Limitations
+
+In its current form, `RNMC` only allows reactions with up to two reactants and up to two products. Ternary and other n-ary reactions cannot be included in `RNMC` simulations, though this would be possible with modest modifications to the code.
+
+Reaction selection in kinetic Monte Carlo simulations can in principle be performed in $O(1)$ time (see Slepoy et al., *J. Chem. Phys.* **128**(205101) (2008). [DOI: 10.1063/1.2919546](https://doi.org/10.1063/1.2919546)). However, we have not yet implemented this algorithm, and simulations with `RNMC` are limited to at least $O(log(R))$ scaling, where $R$ is the number of reactions in the network.
