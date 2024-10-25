@@ -171,3 +171,5 @@ When running `NPMC` ensure that your input file paths are correct considering th
 ```
 build/NPMC --nano_particle_database=examples/NPMC/np.sqlite --initial_state_database=examples/NPMC/initial_state.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --checkpoint=1
 ```
+
+Running this command does not generate any new files or directories but will populate the `initial_state_database` with trajectory data.

@@ -148,3 +148,5 @@ When running `GMC` ensure that your input file paths are correct considering the
 ```
 build/GMC --reaction_database=examples/GMC/end-to-end-test/rn.sqlite --initial_state_database=examples/GMC/end-to-end-test/initial_state_copy.sqlite --number_of_simulations=1000 --base_seed=1000 --thread_count=8 --step_cutoff=200 --energy_budget=0 --checkpoint=1
 ```
+
+Running this command does not generate any new files or directories but will populate the `initial_state_database` with trajectory data.
